@@ -20,6 +20,18 @@
 * [پیوست: برنامه ۳۶۵ روزه استقرار](#پیوست-برنامه-۳۶۵-روزه-برای-استقرار-دولت-موقت)
 
 ---
+---
+### 🛠 Technical Implementation & Development
+**Attention Developers:** While this Constitution defines the legal and social framework, the technical specifications for coding (Smart Contracts, Oracle Logic, and Blockchain Architecture) are detailed in the **Whitepaper**.
+
+Please refer to the `WHITEPAPER.md` (or your whitepaper link) for:
+- Core Protocol Architecture
+- Smart Contract Specifications
+- Asset-Backed Currency Algorithms
+- Sovereign Chain Consensus Mechanism
+
+> **Note:** The Constitution is the Roadmap; the Whitepaper is the Technical Blueprint for implementation.
+---
 
 
 # منشور رفاه و عدالت (پیمان ملی مشروطه سکولار)
