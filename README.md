@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🦁 ایران اواس (IranOS) 
+#  ایران اواس (IranOS) 
 ### زیرساخت دیجیتال حاکمیت نوین ایران بر پایه بلاک‌چین
 
 [![Status: Concept](https://img.shields.io/badge/Status-Draft-orange.svg)]()
