@@ -18,7 +18,7 @@
 
 |فایل                                            |محتوا                                 |
 |------------------------------------------------|--------------------------------------|
-|[`https://github.com/fafa33/Iran-OS/blob/main/whitepaper/whitepaper-fa.md`](./https://github.com/fafa33/Iran-OS/blob/main/whitepaper/whitepaper-fa.md)|سپیدنامه کامل فنی (۱۳ فرگرد + پیوست‌ها)|
+|[`whitepaper/whitepaper-fa.md`](./whitepaper/whitepaper-fa.md.md)|سپیدنامه کامل فنی (۱۳ فرگرد + پیوست‌ها)|
 
 -----
 
