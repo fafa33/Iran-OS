@@ -18,7 +18,7 @@
 
 |فایل                                            |محتوا                                 |
 |------------------------------------------------|--------------------------------------|
-|[`whitepaper/whitepaper-fa.md`](./whitepaper/whitepaper-fa.md.md)|سپیدنامه کامل فنی (۱۳ فرگرد + پیوست‌ها)|
+|[`whitepaper/whitepaper-fa.md`](./whitepaper/whitepaper-fa.md)|سپیدنامه کامل فنی (۱۳ فرگرد + پیوست‌ها)|
 
 -----
 
