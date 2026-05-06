@@ -58,7 +58,7 @@
 
 <span style="font-family: Georgia; font-size: 15px;">تهران پایتخت رسمی کشور است؛ اما دولت باید با تمرکززدایی اداری و اقتصادی، ثروت ملی را بصورت عادلانه در تمام استان‌ها و سرزمین‌های ایران پخش کند.</span>
 
-<span style="font-family: Georgia; font-size: 15px;"> </span>
+<span style="font-family: Georgia; font-size: 15px;"><a id="فرگرد-یک"></a></span>
 
 <span style="font-family: Georgia; font-size: 15px;">**🏛️ فرگرد دوم: حقوق بنیادین ملت (منشور آزادی)**</span>
 
