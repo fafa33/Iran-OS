@@ -35,13 +35,15 @@ Iran-OS تلاشی برای ساخت یک زیرساخت حکمرانی نسل �
 
 ```text
 
-| بخش | توضیح |
-|------|------|
-| [constitution](./constitution) | منشور حکمرانی |
-| [whitepaper](./whitepaper) | سپیدنامه اقتصادی |
-| [protocols](./protocols) | معماری فنی و پروتکل‌ها |
-| [contracts](./contracts) | قراردادهای هوشمند |
-| [docs](./docs) | مستندات تکمیلی |
+# ساختار پروژه
+
+- [constitution](./constitution) → منشور حکمرانی
+- [whitepaper](./whitepaper) → سپیدنامه اقتصادی
+- [protocols](./protocols) → معماری فنی و پروتکل‌ها
+- [contracts](./contracts) → قراردادهای هوشمند
+- [docs](./docs) → مستندات تکمیلی
+
+---
 
 ---
 
