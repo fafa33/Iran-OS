@@ -32,14 +32,14 @@ Iran-OS تلاشی برای ساخت یک زیرساخت حکمرانی نسل �
 ---
 
 
-## ساختار پروژه<h2>ساختار پروژه</h2>
+## ساختار پروژه<h2>ساختار پروژه</h2><h2>ساختار پروژه</h2>
 
 <ul>
-  <li><a href="constitution/">منشور حکمرانی</a></li>
-  <li><a href="whitepaper/">سپیدنامه اقتصادی</a></li>
-  <li><a href="protocols/">پروتکل‌ها و معماری فنی</a></li>
-  <li><a href="contracts/">قراردادهای هوشمند</a></li>
-  <li><a href="docs/">مستندات تکمیلی</a></li>
+  <li><a href="./constitution/README.md">منشور حکمرانی</a></li>
+  <li><a href="./whitepaper/README.md">سپیدنامه اقتصادی</a></li>
+  <li><a href="./protocols/README.md">پروتکل‌ها و معماری فنی</a></li>
+  <li><a href="./contracts/README.md">قراردادهای هوشمند</a></li>
+  <li><a href="./docs/README.md">مستندات تکمیلی</a></li>
 </ul>
 
 <hr>
