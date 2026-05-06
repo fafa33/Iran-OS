@@ -115,6 +115,7 @@
 <span style="font-family: Georgia; font-size: 15px;"> </span>
 
 <span style="font-family: Georgia; font-size: 15px;"> </span>
+<a id="فرگرد-سه"></a>
 
 <span style="font-family: Georgia; font-size: 15px;">**فرگرد سوم: نهاد پادشاهی (نگهبان ثبات و رفاه و هویت تمدنی)**</span>
 
