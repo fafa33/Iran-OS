@@ -1,3 +1,4 @@
+<div dir="rtl">
 ### <a name="_d3mjzgc69prl"></a>**Iran Operating System whitepaper** -----
 ### <a name="_brp57wy499bm"></a>**سپیدنامه - ایران‌اواس (IranOS)**
 ### <a name="_jwh8tdvlehjn"></a>پیش‌آگاهی: ارکان فنی حاکمیت نوین ایران
@@ -835,3 +836,4 @@ Intelligence (اطلاعات): داده‌های جاسوسی، راداری و 
 ### <a name="_mccp0trq4plc"></a>۳. شفافیت و امنیت:
 ### <a name="_jlqa2naxeet9"></a>کدهای پروژه به صورت Open Source منتشر می‌شود تا توسط هزاران چشم بازبینی (Audit) شده و هرگونه احتمال وجود «درِ پشتی» (Backdoor) یا خطای سیستمی به صفر برسد.
 
+</div>
