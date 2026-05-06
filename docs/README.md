@@ -30,20 +30,19 @@ Iran-OS تلاشی برای ساخت یک زیرساخت حکمرانی نسل �
 - و قدرت سیاسی تحت نظارت دائمی پروتکل‌های شفاف قرار گیرد
 
 ---
-
 ## ساختار پروژه
 
-- [منشور حکمرانی](constitution/README.md)
+- [منشور حکمرانی](/fafa33/Iran-OS/blob/main/constitution/README.md)
 
-- [سپیدنامه اقتصادی](whitepaper/README.md)
+- [سپیدنامه اقتصادی](/fafa33/Iran-OS/blob/main/whitepaper/README.md)
 
-- [پروتکل‌ها و معماری فنی](protocols/README.md)
+- [پروتکل‌ها و معماری فنی](/fafa33/Iran-OS/blob/main/protocols/README.md)
 
-- [قراردادهای هوشمند](contracts/README.md)
+- [قراردادهای هوشمند](/fafa33/Iran-OS/blob/main/contracts/README.md)
 
-- [مستندات تکمیلی](docs/README.md)
+- [مستندات تکمیلی](/fafa33/Iran-OS/blob/main/docs/README.md)
 
-- [مدل اقتصادی](docs/economy/README.md)
+- [مدل اقتصادی](/fafa33/Iran-OS/blob/main/docs/economy/README.md)
 
 ---
 
