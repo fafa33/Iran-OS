@@ -18,7 +18,7 @@
 
 |پوشه                                                                                 |محتوا                                        |
 |-------------------------------------------------------------------------------------|---------------------------------------------|
-|[constitution](https://github.com/fafa33/Iran-OS/tree/main/constitution)             |منشور رفاه و عدالت — پیمان ملی مشروطه سکولار |
+|[constitution](https://github.com/fafa33/Iran-OS/tree/main/constitution/constitution-fa.md)             |منشور رفاه و عدالت — پیمان ملی مشروطه سکولار |
 |[whitepaper](https://github.com/fafa33/Iran-OS/blob/main/whitepaper/whitepaper-fa.md)|سپیدنامه فنی — معماری اجرایی سیستم (۱۳ فرگرد)|
 |[protocols](https://github.com/fafa33/Iran-OS/tree/main/protocols)                   |پروتکل‌های اجرایی — جزییات فنی هر لایه        |
 |[contracts](https://github.com/fafa33/Iran-OS/tree/main/contracts)                   |قراردادهای هوشمند — کدهای اجرایی سیستم       |
