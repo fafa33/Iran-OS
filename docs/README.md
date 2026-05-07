@@ -16,13 +16,13 @@
 
 ## ساختار مخزن
 
-|پوشه                                          |محتوا                                        |
-|----------------------------------------------|---------------------------------------------|
-|[`/constitution`](./constitution/)            |منشور رفاه و عدالت — پیمان ملی مشروطه سکولار |
-|[`/whitepaper`](./whitepaper/whitepaper-fa.md)|سپیدنامه فنی — معماری اجرایی سیستم (۱۳ فرگرد)|
-|[`/protocols`](./protocols/)                  |پروتکل‌های اجرایی — جزییات فنی هر لایه        |
-|[`/contracts`](./contracts/)                  |قراردادهای هوشمند — کدهای اجرایی سیستم       |
-|[`/docs`](./docs/)                            |مستندات تکمیلی — واژه‌نامه، FAQ، نقشه راه     |
+|پوشه                                                                                 |محتوا                                        |
+|-------------------------------------------------------------------------------------|---------------------------------------------|
+|[constitution](https://github.com/fafa33/Iran-OS/tree/main/constitution)             |منشور رفاه و عدالت — پیمان ملی مشروطه سکولار |
+|[whitepaper](https://github.com/fafa33/Iran-OS/blob/main/whitepaper/whitepaper-fa.md)|سپیدنامه فنی — معماری اجرایی سیستم (۱۳ فرگرد)|
+|[protocols](https://github.com/fafa33/Iran-OS/tree/main/protocols)                   |پروتکل‌های اجرایی — جزییات فنی هر لایه        |
+|[contracts](https://github.com/fafa33/Iran-OS/tree/main/contracts)                   |قراردادهای هوشمند — کدهای اجرایی سیستم       |
+|[docs](https://github.com/fafa33/Iran-OS/tree/main/docs)                             |مستندات تکمیلی — واژه‌نامه، FAQ، نقشه راه     |
 
 -----
 
@@ -45,14 +45,14 @@
 
 ## پروتکل‌های اجرایی
 
-|پروتکل                                                              |توضیح                          |
-|--------------------------------------------------------------------|-------------------------------|
-|[`trigger-protocol-fa.md`](./protocols/trigger-protocol-fa.md)      |مکانیسم ماشه — ستون فقرات سیستم|
-|[`monetary-protocol-fa.md`](./protocols/monetary-protocol-fa.md)    |انضباط پولی و واحد پهلوی       |
-|[`justice-protocol-fa.md`](./protocols/justice-protocol-fa.md)      |دادگستری دیجیتال               |
-|[`reclaim-protocol-fa.md`](./protocols/reclaim-protocol-fa.md)      |بازپس‌گیری دارایی‌های ملی        |
-|[`defense-protocol-fa.md`](./protocols/defense-protocol-fa.md)      |آرتش ملی و پدافند              |
-|[`governance-protocol-fa.md`](./protocols/governance-protocol-fa.md)|حاکمیت غیرمتمرکز استانی        |
+|پروتکل                                                                                                      |توضیح                          |
+|------------------------------------------------------------------------------------------------------------|-------------------------------|
+|[trigger-protocol-fa.md](https://github.com/fafa33/Iran-OS/blob/main/protocols/trigger-protocol-fa.md)      |مکانیسم ماشه — ستون فقرات سیستم|
+|[monetary-protocol-fa.md](https://github.com/fafa33/Iran-OS/blob/main/protocols/monetary-protocol-fa.md)    |انضباط پولی و واحد پهلوی       |
+|[justice-protocol-fa.md](https://github.com/fafa33/Iran-OS/blob/main/protocols/justice-protocol-fa.md)      |دادگستری دیجیتال               |
+|[reclaim-protocol-fa.md](https://github.com/fafa33/Iran-OS/blob/main/protocols/reclaim-protocol-fa.md)      |بازپس‌گیری دارایی‌های ملی        |
+|[defense-protocol-fa.md](https://github.com/fafa33/Iran-OS/blob/main/protocols/defense-protocol-fa.md)      |آرتش ملی و پدافند              |
+|[governance-protocol-fa.md](https://github.com/fafa33/Iran-OS/blob/main/protocols/governance-protocol-fa.md)|حاکمیت غیرمتمرکز استانی        |
 
 -----
 
@@ -96,12 +96,12 @@
 
 ## مستندات مرتبط
 
-- [منشور رفاه و عدالت](./constitution/) — سند حقوقی و سیاسی پایه
-- [سپیدنامه فنی کامل](./whitepaper/whitepaper-fa.md) — معماری اجرایی سیستم
-- [واژه‌نامه فنی](./docs/glossary-fa.md) — تعریف اصطلاحات
-- [سوالات متداول](./docs/faq-fa.md) — پاسخ به منتقدان
-- [نقشه راه](./docs/roadmap-fa.md) — برنامه اجرایی
-- [راهنمای مشارکت](./docs/contributing-fa.md) — نحوه مشارکت
+- [منشور رفاه و عدالت](https://github.com/fafa33/Iran-OS/tree/main/constitution) — سند حقوقی و سیاسی پایه
+- [سپیدنامه فنی کامل](https://github.com/fafa33/Iran-OS/blob/main/whitepaper/whitepaper-fa.md) — معماری اجرایی سیستم
+- [واژه‌نامه فنی](https://github.com/fafa33/Iran-OS/blob/main/docs/glossary-fa.md) — تعریف اصطلاحات
+- [سوالات متداول](https://github.com/fafa33/Iran-OS/blob/main/docs/faq-fa.md) — پاسخ به منتقدان
+- [نقشه راه](https://github.com/fafa33/Iran-OS/blob/main/docs/roadmap-fa.md) — برنامه اجرایی
+- [راهنمای مشارکت](https://github.com/fafa33/Iran-OS/blob/main/docs/contributing-fa.md) — نحوه مشارکت
 
 -----
 
