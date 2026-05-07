@@ -1,101 +1,133 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
- * @title PahlaviToken
- * @dev واحد پول ملی ایران — پهلوی
- * سقف عرضه: ۹۰۰ میلیارد واحد (قفل سخت‌افزاری)
+ * @title SovereignWealthFund
+ * @dev صندوق ثروت ملی ایران — مدیریت سه لایه دارایی
+ * L1: ۳۰۰ میلیارد دلار نقد | L2: ۳۰۰ میلیارد مولد | L3: ۲ تریلیون گرو
  * نسخه ۱.۰ — فروردین ۲۵۸۵ شاهنشاهی
  */
-contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
+contract SovereignWealthFund is AccessControl, ReentrancyGuard {
 
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
-    bytes32 public constant KERNEL_ROLE = keccak256("KERNEL_ROLE");
+    bytes32 public constant SOVEREIGN_ROLE = keccak256("SOVEREIGN_ROLE");
+    bytes32 public constant COUNCIL_ROLE   = keccak256("COUNCIL_ROLE");
+    bytes32 public constant KERNEL_ROLE    = keccak256("KERNEL_ROLE");
 
-    uint256 public constant MAX_SUPPLY = 900_000_000_000 * 1e18;
-    uint256 public constant MIN_RESERVE_RATIO = 333;
-    uint256 public constant SAREH_PER_PAHLAVI = 1000;
+    uint256 public constant L1_TARGET    = 300_000_000_000 * 1e18;
+    uint256 public constant L2_TARGET    = 300_000_000_000 * 1e18;
+    uint256 public constant L3_TARGET    = 2_000_000_000_000 * 1e18;
+    uint256 public constant ANNUAL_YIELD = 150;
+    uint256 public constant MULTISIG_REQUIRED = 3;
 
-    address public sovereignWealthFund;
-    address public centralBank;
-    address public kernel;
-    uint256 public totalReserves;
-    bool    public emergencyMode;
-
-    event PahlaviMinted(address indexed to, uint256 amount, uint256 newSupply);
-    event PahlaviBurned(address indexed from, uint256 amount, uint256 newSupply);
-    event ReservesUpdated(uint256 oldReserves, uint256 newReserves, uint256 reserveRatio);
-    event EmergencyModeActivated(uint256 timestamp);
-    event EmergencyModeDeactivated(uint256 timestamp);
-
-    modifier notInEmergency() {
-        require(!emergencyMode, "PahlaviToken: system in emergency mode");
-        _;
+    struct AssetLayer {
+        uint256 balance;
+        uint256 target;
+        uint256 lastUpdated;
+        uint256 totalDeposited;
+        uint256 totalWithdrawn;
     }
 
-    modifier onlyKernel() {
-        require(hasRole(KERNEL_ROLE, msg.sender), "PahlaviToken: caller is not Kernel");
-        _;
+    struct Transaction {
+        address initiator;
+        uint8   layer;
+        uint256 amount;
+        string  purpose;
+        uint256 timestamp;
+        uint8   signaturesCount;
+        bool    executed;
     }
 
-    modifier reserveCompliant(uint256 mintAmount) {
-        uint256 newSupply = totalSupply() + mintAmount;
-        require(newSupply <= MAX_SUPPLY, "PahlaviToken: exceeds max supply cap");
-        if (newSupply > 0) {
-            uint256 ratio = (totalReserves * 1000) / newSupply;
-            require(ratio >= MIN_RESERVE_RATIO, "PahlaviToken: insufficient reserve ratio");
-        }
-        _;
-    }
+    AssetLayer public layerL1;
+    AssetLayer public layerL2;
+    AssetLayer public layerL3;
 
-    constructor(address _swf, address _centralBank, address _kernel) ERC20("Pahlavi", "PAH") {
-        require(_swf != address(0), "PahlaviToken: invalid SWF");
-        require(_centralBank != address(0), "PahlaviToken: invalid central bank");
-        require(_kernel != address(0), "PahlaviToken: invalid kernel");
-        sovereignWealthFund = _swf;
-        centralBank = _centralBank;
-        kernel = _kernel;
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
-        _grantRole(MINTER_ROLE, _swf);
-        _grantRole(BURNER_ROLE, _centralBank);
+    mapping(uint256 => Transaction) public transactions;
+    mapping(uint256 => mapping(address => bool)) public txSignatures;
+    uint256 public txCount;
+
+    address public nationalTreasury;
+
+    event DepositToL1(uint256 amount, string source, uint256 newBalance);
+    event DepositToL2(uint256 amount, string asset, uint256 newBalance);
+    event DepositToL3(uint256 amount, string asset, uint256 newBalance);
+    event WithdrawalProposed(uint256 indexed txId, uint8 layer, uint256 amount, string purpose);
+    event WithdrawalSigned(uint256 indexed txId, address signer, uint8 sigCount);
+    event WithdrawalExecuted(uint256 indexed txId, uint8 layer, uint256 amount);
+    event AnnualYieldDistributed(uint256 yieldAmount, uint256 timestamp);
+
+    constructor(address _sovereign, address _kernel) {
+        require(_sovereign != address(0), "SWF: invalid sovereign");
+        require(_kernel    != address(0), "SWF: invalid kernel");
+        _grantRole(DEFAULT_ADMIN_ROLE, _sovereign);
+        _grantRole(SOVEREIGN_ROLE, _sovereign);
         _grantRole(KERNEL_ROLE, _kernel);
+        layerL1 = AssetLayer(0, L1_TARGET, block.timestamp, 0, 0);
+        layerL2 = AssetLayer(0, L2_TARGET, block.timestamp, 0, 0);
+        layerL3 = AssetLayer(0, L3_TARGET, block.timestamp, 0, 0);
     }
 
-    function mint(address to, uint256 amount) external nonReentrant notInEmergency reserveCompliant(amount) {
-        require(hasRole(MINTER_ROLE, msg.sender), "PahlaviToken: caller is not minter");
-        require(to != address(0), "PahlaviToken: mint to zero address");
-        require(amount > 0, "PahlaviToken: zero amount");
-        _mint(to, amount);
-        emit PahlaviMinted(to, amount, totalSupply());
+    function depositToL1(uint256 amount, string calldata source) external onlyRole(COUNCIL_ROLE) nonReentrant {
+        require(amount > 0, "SWF: zero amount");
+        layerL1.balance += amount; layerL1.totalDeposited += amount; layerL1.lastUpdated = block.timestamp;
+        emit DepositToL1(amount, source, layerL1.balance);
     }
 
-    function burn(address from, uint256 amount) external nonReentrant {
-        require(hasRole(BURNER_ROLE, msg.sender), "PahlaviToken: caller is not burner");
-        require(from != address(0), "PahlaviToken: burn from zero address");
-        require(amount > 0, "PahlaviToken: zero amount");
-        require(balanceOf(from) >= amount, "PahlaviToken: insufficient balance");
-        _burn(from, amount);
-        emit PahlaviBurned(from, amount, totalSupply());
+    function depositToL2(uint256 amount, string calldata asset) external onlyRole(COUNCIL_ROLE) nonReentrant {
+        require(amount > 0, "SWF: zero amount");
+        layerL2.balance += amount; layerL2.totalDeposited += amount; layerL2.lastUpdated = block.timestamp;
+        emit DepositToL2(amount, asset, layerL2.balance);
     }
 
-    function updateReserves(uint256 newReserves) external nonReentrant {
-        require(msg.sender == sovereignWealthFund, "PahlaviToken: caller is not SWF");
-        uint256 oldReserves = totalReserves;
-        totalReserves = newReserves;
-        uint256 ratio = totalSupply() > 0 ? (newReserves * 1000) / totalSupply() : 1000;
-        emit ReservesUpdated(oldReserves, newReserves, ratio);
+    function depositToL3(uint256 amount, string calldata asset) external onlyRole(COUNCIL_ROLE) nonReentrant {
+        require(amount > 0, "SWF: zero amount");
+        layerL3.balance += amount; layerL3.totalDeposited += amount; layerL3.lastUpdated = block.timestamp;
+        emit DepositToL3(amount, asset, layerL3.balance);
     }
 
-    function activateEmergency() external onlyKernel { emergencyMode = true; emit EmergencyModeActivated(block.timestamp); }
-    function deactivateEmergency() external onlyKernel { emergencyMode = false; emit EmergencyModeDeactivated(block.timestamp); }
-    function currentReserveRatio() external view returns (uint256) { if (totalSupply() == 0) return 1000; return (totalReserves * 1000) / totalSupply(); }
-    function remainingMintCapacity() external view returns (uint256) { return MAX_SUPPLY - totalSupply(); }
-    function pahlaviToSareh(uint256 pahlavi) external pure returns (uint256) { return pahlavi * SAREH_PER_PAHLAVI; }
-    function sarehToPahlavi(uint256 sareh) external pure returns (uint256) { return sareh / SAREH_PER_PAHLAVI; }
-    function decimals() public pure override returns (uint8) { return 18; }
+    function proposeWithdrawal(uint8 layer, uint256 amount, string calldata purpose) external onlyRole(COUNCIL_ROLE) nonReentrant returns (uint256 txId) {
+        require(layer >= 1 && layer <= 3, "SWF: invalid layer");
+        require(amount > 0, "SWF: zero amount");
+        txCount++; txId = txCount;
+        transactions[txId] = Transaction({ initiator: msg.sender, layer: layer, amount: amount, purpose: purpose, timestamp: block.timestamp, signaturesCount: 1, executed: false });
+        txSignatures[txId][msg.sender] = true;
+        emit WithdrawalProposed(txId, layer, amount, purpose);
+        return txId;
+    }
+
+    function signWithdrawal(uint256 txId) external onlyRole(COUNCIL_ROLE) nonReentrant {
+        Transaction storage tx_ = transactions[txId];
+        require(tx_.timestamp > 0, "SWF: tx not found");
+        require(!tx_.executed, "SWF: already executed");
+        require(!txSignatures[txId][msg.sender], "SWF: already signed");
+        txSignatures[txId][msg.sender] = true;
+        tx_.signaturesCount++;
+        emit WithdrawalSigned(txId, msg.sender, tx_.signaturesCount);
+        if (tx_.signaturesCount >= MULTISIG_REQUIRED) {
+            tx_.executed = true;
+            if (tx_.layer == 1) { require(layerL1.balance >= tx_.amount, "SWF: insufficient L1"); layerL1.balance -= tx_.amount; layerL1.totalWithdrawn += tx_.amount; }
+            else if (tx_.layer == 2) { require(layerL2.balance >= tx_.amount, "SWF: insufficient L2"); layerL2.balance -= tx_.amount; layerL2.totalWithdrawn += tx_.amount; }
+            else { require(layerL3.balance >= tx_.amount, "SWF: insufficient L3"); layerL3.balance -= tx_.amount; layerL3.totalWithdrawn += tx_.amount; }
+            emit WithdrawalExecuted(txId, tx_.layer, tx_.amount);
+        }
+    }
+
+    function distributeAnnualYield() external onlyRole(COUNCIL_ROLE) nonReentrant {
+        uint256 yield = (layerL2.balance * ANNUAL_YIELD) / 1000;
+        require(yield > 0, "SWF: no yield");
+        require(layerL2.balance >= yield, "SWF: insufficient L2");
+        layerL2.balance -= yield; layerL1.balance += yield; layerL1.totalDeposited += yield;
+        emit AnnualYieldDistributed(yield, block.timestamp);
+    }
+
+    function totalAssets() external view returns (uint256) { return layerL1.balance + layerL2.balance + layerL3.balance; }
+    function projectedAnnualYield() external view returns (uint256) { return (layerL2.balance * ANNUAL_YIELD) / 1000; }
+    function layerFillRatio(uint8 layer) external view returns (uint256) {
+        if (layer == 1) return layerL1.target > 0 ? (layerL1.balance * 1000) / layerL1.target : 0;
+        if (layer == 2) return layerL2.target > 0 ? (layerL2.balance * 1000) / layerL2.target : 0;
+        if (layer == 3) return layerL3.target > 0 ? (layerL3.balance * 1000) / layerL3.target : 0;
+        return 0;
+    }
 }
