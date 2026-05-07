@@ -1,0 +1,83 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+/**
+ * @title PahlaviToken
+ * @dev واحد پول ملی ایران — پهلوی
+ * سقف عرضه: ۹۰۰ میلیارد واحد (قفل سخت‌افزاری)
+ * نسخه ۱.۰ — فروردین ۲۵۸۵ شاهنشاهی
+ */
+contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
+
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+    bytes32 public constant KERNEL_ROLE = keccak256("KERNEL_ROLE");
+
+    uint256 public constant MAX_SUPPLY = 900_000_000_000 * 1e18;
+    uint256 public constant MIN_RESERVE_RATIO = 333;
+    uint256 public constant SAREH_PER_PAHLAVI = 1000;
+
+    address public sovereignWealthFund;
+    address public centralBank;
+    address public kernel;
+    uint256 public totalReserves;
+    bool    public emergencyMode;
+
+    event PahlaviMinted(address indexed to, uint256 amount, uint256 newSupply);
+    event PahlaviBurned(address indexed from, uint256 amount, uint256 newSupply);
+    event ReservesUpdated(uint256 oldReserves, uint256 newReserves, uint256 reserveRatio);
+    event EmergencyModeActivated(uint256 timestamp);
+    event EmergencyModeDeactivated(uint256 timestamp);
+
+    modifier notInEmergency() {
+        require(!emergencyMode, "PahlaviToken: system in emergency mode");
+        _;
+    }
+
+    modifier onlyKernel() {
+        require(hasRole(KERNEL_ROLE, msg.sender), "PahlaviToken: caller is not Kernel");
+        _;
+    }
+
+    modifier reserveCompliant(uint256 mintAmount) {
+        uint256 newSupply = totalSupply() + mintAmount;
+        require(newSupply <= MAX_SUPPLY, "PahlaviToken: exceeds max supply cap");
+        if (newSupply > 0) {
+            uint256 ratio = (totalReserves * 1000) / newSupply;
+            require(ratio >= MIN_RESERVE_RATIO, "PahlaviToken: insufficient reserve ratio");
+        }
+        _;
+    }
+
+    constructor(address _swf, address _centralBank, address _kernel) ERC20("Pahlavi", "PAH") {
+        require(_swf != address(0), "PahlaviToken: invalid SWF");
+        require(_centralBank != address(0), "PahlaviToken: invalid central bank");
+        require(_kernel != address(0), "PahlaviToken: invalid kernel");
+        sovereignWealthFund = _swf;
+        centralBank = _centralBank;
+        kernel = _kernel;
+        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(MINTER_ROLE, _swf);
+        _grantRole(BURNER_ROLE, _centralBank);
+        _grantRole(KERNEL_ROLE, _kernel);
+    }
+
+    function mint(address to, uint256 amount) external nonReentrant notInEmergency reserveCompliant(amount) {
+        require(hasRole(MINTER_ROLE, msg.sender), "PahlaviToken: caller is not minter");
+        require(to != address(0), "PahlaviToken: mint to zero address");
+        require(amount > 0, "PahlaviToken: zero amount");
+        _mint(to, amount);
+        emit PahlaviMinted(to, amount, totalSupply());
+    }
+
+    function burn(address from, uint256 amount) external nonReentrant {
+        require(hasRole(BURNER_ROLE, msg.sender), "PahlaviToken: caller is not burner");
+        require(from != address(0), "PahlaviToken: burn from zero address");
+        require(amount > 0, "PahlaviToken: zero amount");
+        require(balanceOf(from) >= amount, "PahlaviToken: insufficient balance");
+        _burn(from, amount);
+        emit Pahlav​​​​​​​​​​​​​​​​
