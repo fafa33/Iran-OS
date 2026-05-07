@@ -11,7 +11,7 @@
 |فایل                                                                                     |محتوا                                   |
 |-----------------------------------------------------------------------------------------|----------------------------------------|
 |[glossary-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/glossary-fa.md)        |واژه‌نامه فنی — تعریف تمام اصطلاحات تخصصی|
-|[docs/fag-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/faq-fa.md)                  |سوالات متداول — پاسخ به منتقدان         |
+|[fag-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/faq-fa.md)                  |سوالات متداول — پاسخ به منتقدان         |
 |[roadmap-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/roadmap-fa.md)          |نقشه راه — مراحل و زمان‌بندی استقرار     |
 |[contributing-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/contributing-fa.md)|راهنمای مشارکت — نحوه مشارکت فنی        |
 
