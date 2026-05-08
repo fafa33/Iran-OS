@@ -51,10 +51,14 @@
 
 ---
 
-## شروع مشارکت
+## شروع مشارکت## شروع مشارکت
 
-۱. [`constitution/constitution-fa.md`](constitution/constitution-fa.md) را بخوانید  
-۲. [`docs/contributing-fa.md`](docs/contributing-fa.md) — راهنمای مشارکت  
-۳. یک branch بسازید و PR ارسال کنید
+۱. متن منشور را بخوانید:  
+[constitution/constitution-fa.md](https://github.com/fafa33/Iran-OS/blob/main/constitution/constitution-fa.md)
+
+۲. راهنمای مشارکت را بخوانید:  
+[docs/contributing-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/contributing-fa.md)
+
+۳. یک branch بسازید و Pull Request ارسال کنید.
 
 </div>
