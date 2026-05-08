@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "ایران‌اواس",
+    "slug": "iran-os",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0D1117"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "ir.iranos.citizen"
+    },
+    "android": {
+      "package": "ir.iranos.citizen",
+      "adaptiveIcon": {
+        "backgroundColor": "#0D1117"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
