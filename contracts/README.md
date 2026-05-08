@@ -88,7 +88,7 @@ contracts/
 
 ## هسته (Core)
 
-### [IranOS_Kernel.sol](https://github.com/fafa33/Iran-OS/blob/main/contracts/Kernel.sol)
+### [Kernel.sol](https://github.com/fafa33/Iran-OS/blob/main/contracts/Kernel.sol)
 
 قلب سیستم. شش اصل غیرقابل تغییر را در لایه صفر قفل می‌کند (TR-01 تا TR-06): پادشاهی مشروطه سکولار، سکولاریسم ساختاری، یکپارچگی سرزمینی، حقوق بنیادین ملت، استقلال صندوق ثروت ملی، سقف نقدینگی ۹۰۰ میلیارد پهلوی. سازوکار Multi-Sig با آستانه ۷ از ۹ امضا.
 
