@@ -16,15 +16,21 @@
 
 ---
 
-## ساختار پروژه
+## ساختار پروژه## ساختار پروژه
 
-- [constitution/](https://github.com/fafa33/Iran-OS/tree/main/constitution) — پیمان ملی مشروطه سکولار
-- [whitepaper/](https://github.com/fafa33/Iran-OS/tree/main/whitepaper) — سپیدنامه فنی
-- [protocols/](https://github.com/fafa33/Iran-OS/tree/main/protocols) — پروتکل‌های حکمرانی
-- [contracts/](https://github.com/fafa33/Iran-OS/tree/main/contracts) — قراردادهای هوشمند Solidity
-- [docs/](https://github.com/fafa33/Iran-OS/tree/main/docs) — مستندات و اپلیکیشن وب
-- [test/](https://github.com/fafa33/Iran-OS/tree/main/test) — تست‌های فنی
-- [app/](https://github.com/fafa33/Iran-OS/tree/main/app) — رابط کاربری شهروندی|
+- [`/constitution`](https://github.com/fafa33/Iran-OS/tree/main/constitution) — پیمان ملی مشروطه سکولار
+
+- [`/whitepaper`](https://github.com/fafa33/Iran-OS/tree/main/whitepaper) — سپیدنامه فنی و اقتصادی
+
+- [`/protocols`](https://github.com/fafa33/Iran-OS/tree/main/protocols) — پروتکل‌های حکمرانی و معماری شبکه
+
+- [`/contracts`](https://github.com/fafa33/Iran-OS/tree/main/contracts) — قراردادهای هوشمند Solidity
+
+- [`/docs`](https://github.com/fafa33/Iran-OS/tree/main/docs) — مستندات، راهنماها و اپلیکیشن وب
+
+- [`/test`](https://github.com/fafa33/Iran-OS/tree/main/test) — تست‌های فنی و امنیتی
+
+- [`/app`](https://github.com/fafa33/Iran-OS/tree/main/app) — رابط کاربری شهروندی و داشبورد حکمرانی
 
 ---
 
@@ -38,16 +44,16 @@
 
 ---
 
-## فناوری
 
-| لایه | ابزار |
-|------|-------|
-| قرارداد هوشمند | Solidity ^0.8.20 + OpenZeppelin |
-| اوراکل | API3 / Airnode |
-| اثبات صفر | Circom / SnarkJS / Noir |
-| تراکنش ملی | ZK-Rollups (zkSync/StarkNet) |
-| توسعه/تست | Hardhat / Foundry |
-| ممیزی امنیتی | Slither / Mythril / Echidna |
+
+| لایه | ابزار |## فناوری
+
+- قرارداد هوشمند: Solidity ^0.8.20 + OpenZeppelin
+- اوراکل: API3 / Airnode
+- اثبات صفر: Circom / SnarkJS / Noir
+- تراکنش ملی: ZK-Rollups
+- توسعه و تست: Hardhat / Foundry
+- ممیزی امنیتی: Slither / Mythril / Echidna| ممیزی امنیتی | Slither / Mythril / Echidna |
 
 ---
 
