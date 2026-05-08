@@ -48,7 +48,7 @@ body {
   z-index: 999;
   transition: opacity .5s;
 }
-#splash .flag-bar { position: absolute; top:0; left:0; right:0; height:18px; display:flex; }
+#splash .flag-bar { position: absolute; top:0; left:0; right:0; height:18px; display:flex; direction:ltr; }
 #splash .flag-bar div { flex:1; }
 .splash-logo { animation: popIn .8s cubic-bezier(.34,1.56,.64,1) forwards; opacity:0; display:block; filter: drop-shadow(0 4px 16px rgba(201,168,76,0.5)); }
 @keyframes popIn { to { opacity:1; transform:scale(1); } from { opacity:0; transform:scale(.8); } }
@@ -149,7 +149,7 @@ body {
   border:1px solid var(--gold-dim); border-radius:20px;
   padding:20px; margin-bottom:20px; position:relative; overflow:hidden;
 }
-.card-flag { position:absolute; top:0; left:0; right:0; height:5px; display:flex; }
+.card-flag { position:absolute; top:0; left:0; right:0; height:18px; display:flex; direction:ltr; }
 .card-flag div { flex:1; }
 .card-header { display:flex; align-items:center; gap:12px; margin-top:8px; margin-bottom:16px; }
 .card-header-text { flex:1; text-align:right; }
@@ -321,6 +321,59 @@ body {
 </head>
 <body>
 
+<!-- ══════════════ LION & SUN SVG SYMBOL ══════════════ -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="lion-sun" viewBox="0 0 500 370">
+      <!-- پرتوهای خورشید (۲۴ پرتو متناوب) -->
+      <polygon fill="#C9A84C" points="314.1,105.2 321.9,105.2 318.0,-3.0"/>
+      <polygon fill="#C9A84C" points="327.1,105.8 334.7,107.9 347.0,46.8"/>
+      <polygon fill="#C9A84C" points="339.5,109.9 346.3,113.8 397.0,18.2"/>
+      <polygon fill="#C9A84C" points="350.5,117.0 356.0,122.5 397.2,75.8"/>
+      <polygon fill="#C9A84C" points="359.2,126.7 363.1,133.5 454.8,76.0"/>
+      <polygon fill="#C9A84C" points="365.1,138.3 367.2,145.9 426.2,126.0"/>
+      <polygon fill="#C9A84C" points="367.8,151.1 367.8,158.9 476.0,155.0"/>
+      <polygon fill="#C9A84C" points="367.2,164.1 365.1,171.7 426.2,184.0"/>
+      <polygon fill="#C9A84C" points="363.1,176.5 359.2,183.3 454.8,234.0"/>
+      <polygon fill="#C9A84C" points="356.0,187.5 350.5,193.0 397.2,234.2"/>
+      <polygon fill="#C9A84C" points="346.3,196.2 339.5,200.1 397.0,291.8"/>
+      <polygon fill="#C9A84C" points="334.7,202.1 327.1,204.2 347.0,263.2"/>
+      <polygon fill="#C9A84C" points="321.9,204.8 314.1,204.8 318.0,313.0"/>
+      <polygon fill="#C9A84C" points="308.9,204.2 301.3,202.1 289.0,263.2"/>
+      <polygon fill="#C9A84C" points="296.5,200.1 289.7,196.2 239.0,291.8"/>
+      <polygon fill="#C9A84C" points="285.5,193.0 280.0,187.5 238.8,234.2"/>
+      <polygon fill="#C9A84C" points="276.8,183.3 272.9,176.5 181.2,234.0"/>
+      <polygon fill="#C9A84C" points="270.9,171.7 268.8,164.1 209.8,184.0"/>
+      <polygon fill="#C9A84C" points="268.2,158.9 268.2,151.1 160.0,155.0"/>
+      <polygon fill="#C9A84C" points="268.8,145.9 270.9,138.3 209.8,126.0"/>
+      <polygon fill="#C9A84C" points="272.9,133.5 276.8,126.7 181.2,76.0"/>
+      <polygon fill="#C9A84C" points="280.0,122.5 285.5,117.0 238.8,75.8"/>
+      <polygon fill="#C9A84C" points="289.7,113.8 296.5,109.9 239.0,18.2"/>
+      <polygon fill="#C9A84C" points="301.3,107.9 308.9,105.8 289.0,46.8"/>
+      <!-- قرص خورشید -->
+      <circle fill="#C9A84C" cx="318" cy="155" r="44"/>
+      <!-- یال شیر (ستاره ۱۲-پر) -->
+      <polygon fill="#C9A84C" points="143.0,162.0 149.0,185.8 166.0,168.2 159.3,191.7 182.8,185.0 165.2,202.0 189.0,208.0 165.2,214.0 182.8,231.0 159.3,224.3 166.0,247.8 149.0,230.2 143.0,254.0 137.0,230.2 120.0,247.8 126.7,224.3 103.2,231.0 120.8,214.0 97.0,208.0 120.8,202.0 103.2,185.0 126.7,191.7 120.0,168.2 137.0,185.8"/>
+      <circle fill="#C9A84C" cx="143" cy="208" r="23"/>
+      <!-- بدن شیر -->
+      <path fill="#C9A84C" d="M 120 250 Q 107 228 115 207 Q 122 191 143 185 Q 168 178 188 200 Q 236 212 280 214 Q 350 216 375 242 Q 398 260 382 290 Q 368 310 335 312 L 335 350 L 310 350 L 310 312 Q 288 316 268 310 L 268 350 L 243 350 L 243 310 Q 215 306 185 297 L 175 350 L 150 350 L 150 297 Q 132 288 120 268 Z"/>
+      <!-- پای جلو (بالا بردن شمشیر) -->
+      <path fill="#C9A84C" d="M 120 250 Q 105 262 93 290 Q 80 315 83 335 Q 88 346 102 342 Q 115 337 107 320 Q 112 298 127 272 Z"/>
+      <!-- دُم (منحنی رو به بالا) -->
+      <path fill="none" stroke="#C9A84C" stroke-width="15" stroke-linecap="round" d="M 378 248 Q 418 218 434 172 Q 447 126 428 85 Q 418 62 404 68"/>
+      <ellipse fill="#C9A84C" cx="402" cy="62" rx="16" ry="26" transform="rotate(-40 402 62)"/>
+      <!-- شمشیر -->
+      <path fill="#C9A84C" d="M 78 326 L 68 302 L 107 188 L 116 210 Z"/>
+      <rect fill="#C9A84C" x="55" y="238" width="62" height="13" rx="6.5" transform="rotate(-20 86 244)"/>
+      <rect fill="#C9A84C" x="70" y="286" width="16" height="32" rx="8" transform="rotate(-20 78 302)"/>
+      <ellipse fill="#C9A84C" cx="66" cy="318" rx="14" ry="11" transform="rotate(-20 66 318)"/>
+      <!-- چشم و چانه -->
+      <ellipse fill="#8B6914" cx="131" cy="204" rx="5" ry="4.5"/>
+      <ellipse fill="#C9A84C" cx="150" cy="228" rx="14" ry="10"/>
+    </symbol>
+  </defs>
+</svg>
+
 <!-- ══════════════ SPLASH ══════════════ -->
 <div id="splash">
   <div class="flag-bar">
@@ -329,10 +382,9 @@ body {
     <div style="background:#B91C1C"></div>
   </div>
 
-  <img class="splash-logo"
-       src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Lion_and_Sun.svg"
-       width="230" height="175"
-       alt="شیر و خورشید — نشان ملی ایران">
+  <svg class="splash-logo" width="230" height="175" aria-label="شیر و خورشید — نشان ملی ایران">
+    <use href="#lion-sun"/>
+  </svg>
 
   <div class="splash-title">ایران‌اواس</div>
   <div class="splash-sub">سیستم‌عامل حاکمیتی ایران</div>
@@ -344,10 +396,10 @@ body {
 <!-- ══════════════ APP SHELL ══════════════ -->
 <div id="app">
   <div class="top-bar">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Lion_and_Sun.svg"
-         width="38" height="38"
-         alt="شیر و خورشید"
-         style="border-radius:50%;border:1.5px solid var(--gold-dim);padding:2px;background:#fff1d6">
+    <svg width="38" height="38" aria-label="شیر و خورشید"
+         style="border-radius:50%;border:1.5px solid var(--gold-dim);padding:2px;background:#fff1d6;flex-shrink:0">
+      <use href="#lion-sun"/>
+    </svg>
     <div class="top-bar-title" id="top-title">ایران‌اواس</div>
     <div class="kernel-badge" onclick="showTab('kernel')">
       <div class="dot"></div>
@@ -435,9 +487,10 @@ body {
         <div style="background:#B91C1C"></div>
       </div>
       <div class="card-header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Lion_and_Sun.svg"
-             width="52" height="52" alt="شیر و خورشید"
-             style="background:#fff1d6;border-radius:6px;padding:2px">
+        <svg width="52" height="52" aria-label="شیر و خورشید"
+             style="background:#fff1d6;border-radius:6px;padding:2px;flex-shrink:0">
+          <use href="#lion-sun"/>
+        </svg>
         <div class="card-header-text">
           <div class="card-hdr-title">پادشاهی مشروطه سکولار ایران</div>
           <div class="card-hdr-sub">کارت شهروندی دیجیتال</div>
@@ -567,9 +620,10 @@ body {
   <!-- ════ SCREEN: KERNEL ════ -->
   <div class="screen" id="screen-kernel">
     <div class="kernel-header">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Lion_and_Sun.svg"
-           width="80" height="60" alt="شیر و خورشید — نشان ملی ایران"
+      <svg width="80" height="60" aria-label="شیر و خورشید — نشان ملی ایران"
            style="filter:drop-shadow(0 2px 8px rgba(201,168,76,0.5))">
+        <use href="#lion-sun"/>
+      </svg>
       <div class="kernel-status-title">سیستم ایران‌اواس فعال</div>
       <div class="kernel-block">Block #18,420,001</div>
       <div class="kernel-sig">امضاهای تحریم: ۰ از ۷</div>
