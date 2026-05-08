@@ -11,19 +11,20 @@ describe("IranOS_Kernel", function () {
   beforeEach(async function () {
     [sovereign, court, oracle, guardian, stranger, swf] = await ethers.getSigners();
 
-    // استقرار TriggerProtocol ابتدا (به آدرس خزانه و SWF ساده نیاز دارد)
-    const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
-    triggerProtocol = await TriggerProtocol.deploy(
-      ethers.ZeroAddress, // kernel — بعداً تنظیم می‌شود
-      stranger.address,   // treasury (مثال)
-      swf.address
-    );
-
+    // ابتدا Kernel مستقر می‌شود
     const Kernel = await ethers.getContractFactory("IranOS_Kernel");
     kernel = await Kernel.deploy(
       sovereign.address,
       court.address,
       oracle.address,
+      swf.address
+    );
+
+    // سپس TriggerProtocol با آدرس واقعی Kernel مستقر می‌شود
+    const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
+    triggerProtocol = await TriggerProtocol.deploy(
+      await kernel.getAddress(), // kernel — آدرس واقعی
+      stranger.address,          // treasury (مثال)
       swf.address
     );
 

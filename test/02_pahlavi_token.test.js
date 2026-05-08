@@ -209,7 +209,7 @@ describe("PahlaviToken", function () {
     it("transferFrom بدون مجوز رد می‌شود", async function () {
       await expect(
         token.connect(user2).transferFrom(user1.address, stranger.address, 100n)
-      ).to.be.revertedWith("PAH: insufficient allowance");
+      ).to.be.revertedWith("ERC20: insufficient allowance");
     });
   });
 });
