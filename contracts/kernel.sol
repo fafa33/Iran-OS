@@ -48,7 +48,7 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
     uint8 public constant TR_LIQUIDITY_CAP           = 6; // سقف نقدینگی ۹۰۰ میلیارد پهلوی
 
     // ─────────────────────────────────────────
-    // ثوابت سیستمی (Constants)
+    // ثابت‌های سیستمی (Constants)
     // ─────────────────────────────────────────
 
     uint256 public constant LIQUIDITY_CAP = 900_000_000_000 * 1e18; // سقف ۹۰۰ میلیارد پهلوی
