@@ -18,6 +18,14 @@
 
 ## ساختار پروژه
 
+- [منشور حکمرانی](https://github.com/fafa33/Iran-OS/tree/main/constitution)
+- [سپیدنامه فنی](https://github.com/fafa33/Iran-OS/tree/main/whitepaper)
+- [پروتکل‌های حکمرانی](https://github.com/fafa33/Iran-OS/tree/main/protocols)
+- [قراردادهای هوشمند](https://github.com/fafa33/Iran-OS/tree/main/contracts)
+- [مستندات](https://github.com/fafa33/Iran-OS/tree/main/docs)
+- [تست‌ها](https://github.com/fafa33/Iran-OS/tree/main/test)
+- [اپلیکیشن](https://github.com/fafa33/Iran-OS/tree/main/app)
+
 | پوشه | محتوا |
 |------|-------|
 | `constitution/` | پیمان ملی مشروطه سکولار |
