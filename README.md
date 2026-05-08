@@ -51,7 +51,7 @@
 
 ---
 
-## شروع مشارکت## شروع مشارکت
+## شروع مشارکت
 
 ۱. متن منشور را بخوانید:  
 [constitution/constitution-fa.md](https://github.com/fafa33/Iran-OS/blob/main/constitution/constitution-fa.md)
