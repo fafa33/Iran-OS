@@ -4,6 +4,15 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+interface ITriggerProtocol {
+    function executeTrigger(
+        uint256 violationId,
+        address offender,
+        uint8   violationCode,
+        address replacement
+    ) external returns (uint256 executionId);
+}
+
 /**
  * @title IranOS_Kernel
  * @dev هسته سیستم‌عامل حاکمیتی ایران — لایه صفر
@@ -302,6 +311,8 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
     /**
      * @notice فعال‌سازی ماشه و سلب دسترسی مقام خاطی
      * @dev لایه سوم پروتکل ماشه — اجرا (خودکار)
+     *      پس از سلب دسترسی داخلی، قرارداد TriggerProtocol را برای
+     *      مسدودسازی خزانه و اطلاع‌رسانی عمومی فراخوانی می‌کند.
      * @param violationId شناسه تخلف
      */
     function _activateTrigger(uint256 violationId) internal {
@@ -311,8 +322,19 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
         record.triggered = true;
         triggerActivationCount++;
 
-        // سلب دسترسی مقام خاطی
+        // لایه اول اجرا: سلب دسترسی حاکمیتی داخلی
         _revokeOfficialAccess(record.offender, record.reason);
+
+        // لایه دوم اجرا: فراخوانی TriggerProtocol برای مسدودسازی خزانه
+        // و اطلاع‌رسانی عمومی (اگر آدرس قرارداد تنظیم شده باشد)
+        if (triggerProtocol != address(0)) {
+            ITriggerProtocol(triggerProtocol).executeTrigger(
+                violationId,
+                record.offender,
+                record.violationCode,
+                address(0)
+            );
+        }
 
         emit TriggerActivated(
             violationId,

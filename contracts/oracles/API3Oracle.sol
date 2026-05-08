@@ -95,4 +95,24 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
         emit ViolationConfirmed(flagId, flag.offender);
     }
 
-    function getData(bytes32 key) external view returns (int256 value, uint256 timestamp, bool isValid)
+    function getData(bytes32 key) external view returns (int256 value, uint256 timestamp, bool isValid) {
+        DataPoint storage dp = dataPoints[key];
+        return (dp.value, dp.timestamp, dp.isValid);
+    }
+
+    function getDataWithConfidence(bytes32 key) external view returns (
+        int256  value,
+        uint256 timestamp,
+        bool    isValid,
+        uint256 confidence,
+        address feeder
+    ) {
+        DataPoint storage dp = dataPoints[key];
+        return (dp.value, dp.timestamp, dp.isValid, dp.confidence, dp.feeder);
+    }
+
+    function getViolationFlag(uint256 flagId) external view returns (ViolationFlag memory) {
+        require(violationFlags[flagId].timestamp > 0, "API3Oracle: flag not found");
+        return violationFlags[flagId];
+    }
+}
