@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ایران‌اواس — اپلیکیشن ملی شهروندی</title>
+<style>
+:root {
+  --bg:       #0D1117;
+  --surface:  #161B22;
+  --elevated: #1C2128;
+  --border:   #30363D;
+  --gold:     #C9A84C;
+  --gold-dim: #8A6B28;
+  --gold-lt:  #E8C96A;
+  --green:    #1B7340;
+  --green-lt: #238636;
+  --red:      #B91C1C;
+  --white:    #FFFFFF;
+  --text:     #E6EDF3;
+  --text2:    #7D8590;
+  --text3:    #484F58;
+  --ok:       #238636;
+  --warn:     #D29922;
+  --alert:    #C0392B;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', Tahoma, 'Vazir', Arial, sans-serif;
+  font-size: 15px;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ────── SPLASH ────── */
+#splash {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 999;
+  transition: opacity .5s;
+}
+#splash .flag-bar { position: absolute; top:0; left:0; right:0; height:6px; display:flex; }
+#splash .flag-bar div { flex:1; }
+.splash-logo { animation: popIn .8s cubic-bezier(.34,1.56,.64,1) forwards; opacity:0; }
+@keyframes popIn { to { opacity:1; transform:scale(1); } from { opacity:0; transform:scale(.8); } }
+.splash-title { font-size:38px; font-weight:700; color:var(--gold); margin-top:20px; letter-spacing:1px; }
+.splash-sub   { font-size:15px; color:var(--text2); margin-top:8px; }
+.splash-divider { width:60px; height:1px; background:var(--gold-dim); margin:24px auto; }
+.splash-motto { font-size:13px; color:var(--text3); text-align:center; line-height:24px; font-style:italic; padding:0 32px; }
+.splash-ver { position:absolute; bottom:36px; font-size:11px; color:var(--text3); }
+
+/* ────── SHELL ────── */
+#app { display:none; flex-direction:column; min-height:100dvh; }
+#app.visible { display:flex; }
+
+.top-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px 10px;
+  display: flex; align-items: center; gap:10px;
+  position: sticky; top:0; z-index:10;
+}
+.top-bar-title { flex:1; font-size:17px; font-weight:600; text-align:right; }
+.kernel-badge {
+  display:flex; align-items:center; gap:6px;
+  background:var(--surface); border:1px solid var(--ok);
+  border-radius:20px; padding:5px 12px;
+  font-size:12px; color:var(--text2); cursor:pointer;
+}
+.kernel-badge .dot { width:8px; height:8px; border-radius:50%; background:var(--ok); }
+
+/* ────── SCREENS ────── */
+.screen { display:none; flex:1; overflow-y:auto; padding:16px 16px 100px; }
+.screen.active { display:block; }
+
+/* ────── TAB BAR ────── */
+.tab-bar {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:430px;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  display:flex; z-index:10;
+}
+.tab {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  padding:10px 4px 14px; cursor:pointer; gap:4px;
+  font-size:10px; color:var(--text3); border:none; background:none;
+  transition: color .2s;
+}
+.tab.active { color:var(--gold); }
+.tab svg { width:22px; height:22px; }
+
+/* ────── CARDS ────── */
+.card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:20px; margin-bottom:16px;
+}
+.card-gold { border-color:var(--gold-dim); }
+
+.section-title { font-size:14px; font-weight:600; color:var(--text2); margin-bottom:12px; }
+
+/* ────── BALANCE ────── */
+.balance-label { font-size:13px; color:var(--text2); margin-bottom:10px; text-align:center; }
+.balance-amount { font-size:52px; font-weight:700; color:var(--gold); text-align:center; display:flex; align-items:flex-end; justify-content:center; gap:6px; }
+.balance-symbol { font-size:30px; margin-bottom:8px; }
+.balance-sare { font-size:16px; color:var(--text2); margin-bottom:10px; }
+
+.action-row { display:flex; gap:8px; margin-top:20px; }
+.action-btn {
+  flex:1; background:var(--elevated); border:none; border-radius:12px;
+  padding:12px 4px; display:flex; flex-direction:column; align-items:center;
+  gap:6px; cursor:pointer; color:var(--text2); font-size:11px;
+}
+.action-btn svg { color:var(--gold); }
+
+/* ────── WELFARE TILES ────── */
+.welfare-row { display:flex; gap:10px; }
+.welfare-tile {
+  flex:1; background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:14px; display:flex; flex-direction:column;
+  align-items:center; gap:6px;
+}
+.welfare-value { font-size:16px; font-weight:700; }
+.welfare-lbl   { font-size:10px; color:var(--text2); text-align:center; }
+
+/* ────── TRANSACTIONS ────── */
+.tx-row {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 0; border-bottom:1px solid var(--border);
+}
+.tx-icon { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.tx-info { flex:1; text-align:right; }
+.tx-label { font-size:14px; }
+.tx-date  { font-size:11px; color:var(--text2); margin-top:2px; }
+.tx-amount { font-size:15px; font-weight:700; }
+
+/* ────── CITIZEN CARD ────── */
+.citizen-card {
+  background: linear-gradient(135deg, #1C2A1C, #0D1117 50%, #2A1C0D);
+  border:1px solid var(--gold-dim); border-radius:20px;
+  padding:20px; margin-bottom:20px; position:relative; overflow:hidden;
+}
+.card-flag { position:absolute; top:0; left:0; right:0; height:5px; display:flex; }
+.card-flag div { flex:1; }
+.card-header { display:flex; align-items:center; gap:12px; margin-top:8px; margin-bottom:16px; }
+.card-header-text { flex:1; text-align:right; }
+.card-hdr-title { font-size:11px; color:var(--text2); }
+.card-hdr-sub   { font-size:14px; font-weight:700; color:var(--gold); }
+.card-divider { height:1px; background:var(--border); margin-bottom:16px; }
+.card-name    { font-size:24px; font-weight:700; text-align:right; }
+.card-id      { font-size:13px; color:var(--text2); text-align:right; margin-top:4px; }
+.card-prov    { font-size:12px; color:var(--text3); text-align:right; margin-top:2px; }
+.status-row { display:flex; gap:8px; margin-top:14px; justify-content:flex-end; }
+.chip {
+  display:flex; align-items:center; gap:5px;
+  border:1px solid; border-radius:12px; padding:5px 10px;
+  font-size:12px;
+}
+.card-wallet { display:flex; align-items:center; gap:6px; justify-content:flex-end; margin-top:14px; }
+.card-wallet-addr { font-size:11px; color:var(--text3); font-family:monospace; direction:ltr; }
+.card-footer { font-size:9px; color:var(--text3); text-align:center; margin-top:14px; letter-spacing:.5px; }
+
+.benefit-row { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }
+.benefit-lbl  { flex:1; text-align:right; }
+.benefit-val  { font-size:13px; font-weight:600; }
+
+/* ────── WALLET ────── */
+.tabs { display:flex; gap:8px; margin-bottom:16px; }
+.tab-btn {
+  flex:1; padding:10px; border-radius:8px; border:none;
+  background:var(--surface); color:var(--text2); cursor:pointer;
+  font-size:14px; font-family:inherit;
+}
+.tab-btn.active { background:var(--gold); color:var(--bg); font-weight:700; }
+
+.send-form { display:flex; flex-direction:column; gap:8px; }
+.form-label { font-size:13px; color:var(--text2); margin-top:12px; }
+.form-input {
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:14px; color:var(--text); font-size:15px; font-family:inherit;
+  width:100%; direction:ltr;
+}
+.form-input:focus { outline:none; border-color:var(--gold); }
+.fee-note { font-size:12px; color:var(--ok); text-align:right; margin-top:4px; }
+.send-btn {
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  background:var(--gold); border:none; border-radius:14px;
+  padding:16px; margin-top:24px; cursor:pointer;
+  color:var(--bg); font-size:16px; font-weight:700; font-family:inherit; width:100%;
+}
+
+/* ────── BILLS ────── */
+.bill-summary {
+  display:flex; justify-content:space-between; align-items:center;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:20px; margin-bottom:20px;
+}
+.due-label  { font-size:12px; color:var(--text2); }
+.due-amount { font-size:28px; font-weight:700; color:var(--gold); margin-top:4px; }
+.pay-all-btn {
+  background:var(--gold); border:none; border-radius:12px;
+  padding:10px 18px; color:var(--bg); font-size:14px;
+  font-weight:700; cursor:pointer; font-family:inherit;
+}
+.bill-card {
+  display:flex; align-items:center; gap:12px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:16px; margin-bottom:10px;
+}
+.bill-card.paid { opacity:.6; }
+.bill-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.bill-body { flex:1; text-align:right; }
+.bill-name  { font-size:15px; }
+.bill-due   { font-size:11px; color:var(--text2); margin-top:3px; }
+.bill-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+.bill-amount { font-size:17px; font-weight:700; }
+.pay-btn {
+  background:var(--gold); border:none; border-radius:8px;
+  padding:6px 14px; color:var(--bg); font-size:13px;
+  font-weight:700; cursor:pointer; font-family:inherit;
+}
+.paid-badge { display:flex; align-items:center; gap:4px; font-size:12px; color:var(--ok); }
+
+/* ────── STAKING ────── */
+.apy-card {
+  background:linear-gradient(135deg, #1A1500, #0D1117 50%, #001A0D);
+  border:1px solid var(--gold-dim); border-radius:20px;
+  padding:28px; text-align:center; margin-bottom:16px;
+}
+.apy-title { font-size:13px; color:var(--text2); }
+.apy-rate  { font-size:56px; font-weight:700; color:var(--gold); margin:8px 0; }
+.apy-label { font-size:16px; font-weight:600; }
+.apy-note  { font-size:11px; color:var(--text3); margin-top:8px; line-height:20px; }
+
+.stats-row { display:flex; gap:10px; margin-bottom:16px; }
+.stat-card {
+  flex:1; background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:14px; display:flex; flex-direction:column;
+  align-items:center; gap:6px; text-align:center;
+}
+.stat-value { font-size:17px; font-weight:700; }
+.stat-label { font-size:10px; color:var(--text2); }
+
+.progress-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px; }
+.progress-hdr { display:flex; justify-content:space-between; margin-bottom:10px; }
+.progress-bar-bg { height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+.progress-bar-fill { height:100%; background:var(--gold); border-radius:4px; }
+.progress-note { font-size:11px; color:var(--text3); text-align:right; margin-top:8px; }
+
+.layer-row {
+  display:flex; align-items:center; gap:12px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:14px; margin-bottom:8px;
+}
+.layer-row.active { border-color:var(--gold-dim); }
+.layer-badge { width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; border:1px solid; font-size:13px; font-weight:700; flex-shrink:0; }
+.layer-body { flex:1; text-align:right; }
+.layer-lbl  { font-size:14px; }
+.layer-target { font-size:11px; color:var(--text2); margin-top:2px; }
+
+.btn-row { display:flex; gap:12px; margin-top:24px; }
+.btn-primary { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:var(--gold); border:none; border-radius:14px; padding:16px; color:var(--bg); font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
+.btn-secondary { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:var(--surface); border:1px solid var(--gold-dim); border-radius:14px; padding:16px; color:var(--gold); font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; }
+
+/* ────── KERNEL ────── */
+.kernel-header {
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  background:var(--surface); border:2px solid var(--ok);
+  border-radius:20px; padding:28px; margin-bottom:20px; text-align:center;
+}
+.kernel-status-title { font-size:20px; font-weight:700; color:var(--ok); }
+.kernel-block { font-size:12px; color:var(--text3); font-family:monospace; }
+.kernel-sig   { font-size:13px; color:var(--text2); }
+
+.red-line-row {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 0; border-bottom:1px solid var(--border);
+}
+.code-chip { padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; font-family:monospace; }
+.red-line-lbl { flex:1; text-align:right; }
+
+.monetary-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px; }
+.mon-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+.mon-lbl { font-size:13px; color:var(--text2); }
+.mon-val { font-size:13px; font-weight:600; }
+
+.trigger-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; }
+.sig-bar { display:flex; gap:8px; justify-content:center; margin-bottom:12px; }
+.sig-dot { width:26px; height:26px; border-radius:50%; background:var(--border); }
+.sig-info  { font-size:13px; color:var(--text2); text-align:center; margin-bottom:10px; }
+.trigger-note { font-size:12px; color:var(--text3); text-align:center; line-height:20px; }
+
+/* ────── MODAL ────── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:100; align-items:flex-end; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border-radius:20px 20px 0 0; width:100%; max-width:430px; padding:24px; border-top:1px solid var(--border); }
+.modal-title { font-size:18px; font-weight:700; text-align:center; margin-bottom:8px; }
+.modal-msg   { font-size:14px; color:var(--text2); text-align:center; line-height:22px; margin-bottom:20px; }
+.modal-btns  { display:flex; gap:10px; }
+.modal-cancel { flex:1; padding:14px; border-radius:12px; border:1px solid var(--border); background:var(--elevated); color:var(--text); cursor:pointer; font-size:15px; font-family:inherit; }
+.modal-ok     { flex:1; padding:14px; border-radius:12px; border:none; background:var(--gold); color:var(--bg); font-weight:700; cursor:pointer; font-size:15px; font-family:inherit; }
+
+/* ────── TOAST ────── */
+.toast {
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+  background:var(--ok); color:#fff; padding:12px 24px; border-radius:24px;
+  font-size:14px; font-weight:600; z-index:200;
+  opacity:0; transition:opacity .3s; pointer-events:none;
+}
+.toast.show { opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SPLASH ══════════════ -->
+<div id="splash">
+  <div class="flag-bar">
+    <div style="background:#1B7340"></div>
+    <div style="background:#FFFFFF"></div>
+    <div style="background:#B91C1C"></div>
+  </div>
+
+  <svg class="splash-logo" width="200" height="148" viewBox="0 0 300 220">
+    <!-- پرتوهای خورشید -->
+    <polygon points="210,15 207.1,62.1 212.9,62.1" fill="#C9A84C"/>
+    <polygon points="232.2,41.4 219.9,63.5 225.2,65.7" fill="#C9A84C"/>
+    <polygon points="266.6,38.4 231.2,69.7 235.3,73.8" fill="#C9A84C"/>
+    <polygon points="263.6,72.8 239.3,79.8 241.5,85.1" fill="#C9A84C"/>
+    <polygon points="290,95 242.9,92.1 242.9,97.9" fill="#C9A84C"/>
+    <polygon points="263.6,117.2 241.5,104.9 239.3,110.2" fill="#C9A84C"/>
+    <polygon points="266.6,151.6 235.3,116.2 231.2,120.3" fill="#C9A84C"/>
+    <polygon points="232.2,148.6 225.2,124.3 219.9,126.5" fill="#C9A84C"/>
+    <polygon points="210,175 212.9,127.9 207.1,127.9" fill="#C9A84C"/>
+    <polygon points="187.8,148.6 200.1,126.5 194.8,124.3" fill="#C9A84C"/>
+    <polygon points="153.4,151.6 188.8,120.3 184.7,116.2" fill="#C9A84C"/>
+    <polygon points="156.4,117.2 180.7,110.2 178.5,104.9" fill="#C9A84C"/>
+    <polygon points="130,95 177.1,97.9 177.1,92.1" fill="#C9A84C"/>
+    <polygon points="156.4,72.8 178.5,85.1 180.7,79.8" fill="#C9A84C"/>
+    <polygon points="153.4,38.4 184.7,73.8 188.8,69.7" fill="#C9A84C"/>
+    <polygon points="187.8,41.4 194.8,65.7 200.1,63.5" fill="#C9A84C"/>
+    <!-- قرص خورشید -->
+    <circle cx="210" cy="95" r="33" fill="#C9A84C"/>
+    <!-- دُم -->
+    <path d="M228 148 Q262 100 248 62 Q242 50 232 56" stroke="#C9A84C" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <ellipse cx="230" cy="54" rx="11" ry="16" transform="rotate(-25 230 54)" fill="#C9A84C"/>
+    <!-- بدن -->
+    <ellipse cx="155" cy="158" rx="84" ry="30" fill="#C9A84C"/>
+    <ellipse cx="218" cy="147" rx="24" ry="20" fill="#C9A84C"/>
+    <!-- یال -->
+    <polygon points="72,68 79.8,91 98,75 93.2,98.8 117,94 101,112.2 124,120 101,127.8 117,146 93.2,141.2 98,165 79.8,149 72,172 64.2,149 46,165 50.8,141.2 27,146 43,127.8 20,120 43,112.2 27,94 50.8,98.8 46,75 64.2,91" fill="#C9A84C" opacity=".75"/>
+    <!-- سر -->
+    <circle cx="72" cy="120" r="30" fill="#C9A84C"/>
+    <ellipse cx="112" cy="143" rx="26" ry="22" fill="#C9A84C"/>
+    <!-- پاها -->
+    <rect x="195" y="182" width="19" height="34" rx="9" fill="#C9A84C"/>
+    <rect x="218" y="180" width="19" height="36" rx="9" fill="#C9A84C"/>
+    <rect x="93"  y="184" width="18" height="32" rx="9" fill="#C9A84C"/>
+    <rect x="115" y="184" width="18" height="34" rx="9" fill="#C9A84C"/>
+    <!-- پنجه -->
+    <ellipse cx="40" cy="154" rx="19" ry="12" transform="rotate(-20 40 154)" fill="#C9A84C"/>
+    <!-- شمشیر -->
+    <path d="M18 195 L46 112" stroke="#C9A84C" stroke-width="5" stroke-linecap="round"/>
+    <polygon points="46,112 40,121 52,121" fill="#C9A84C"/>
+    <rect x="10" y="182" width="12" height="20" rx="6" transform="rotate(-62 16 192)" fill="#C9A84C"/>
+    <rect x="18" y="162" width="30" height="6" rx="3" transform="rotate(-62 33 165)" fill="#C9A84C"/>
+    <!-- چشم و صورت -->
+    <circle cx="57" cy="115" r="4.5" fill="#0D1117"/>
+    <circle cx="58" cy="114" r="1.8" fill="#C9A84C"/>
+    <ellipse cx="67" cy="124" rx="5" ry="3.5" fill="#0D1117"/>
+    <path d="M62 128 Q67 133 72 128" stroke="#0D1117" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  </svg>
+
+  <div class="splash-title">ایران‌اواس</div>
+  <div class="splash-sub">سیستم‌عامل حاکمیتی ایران</div>
+  <div class="splash-divider"></div>
+  <div class="splash-motto">قانون اساسی، کد است.<br>کد، قانون اساسی است.</div>
+  <div class="splash-ver">نسخه ۱.۰ — فروردین ۱۴۰۵</div>
+</div>
+
+<!-- ══════════════ APP SHELL ══════════════ -->
+<div id="app">
+  <div class="top-bar">
+    <svg width="32" height="24" viewBox="0 0 300 220">
+      <polygon points="210,15 207.1,62.1 212.9,62.1" fill="#C9A84C"/>
+      <polygon points="266.6,38.4 231.2,69.7 235.3,73.8" fill="#C9A84C"/>
+      <polygon points="290,95 242.9,92.1 242.9,97.9" fill="#C9A84C"/>
+      <polygon points="266.6,151.6 235.3,116.2 231.2,120.3" fill="#C9A84C"/>
+      <polygon points="153.4,151.6 188.8,120.3 184.7,116.2" fill="#C9A84C"/>
+      <polygon points="130,95 177.1,97.9 177.1,92.1" fill="#C9A84C"/>
+      <polygon points="153.4,38.4 184.7,73.8 188.8,69.7" fill="#C9A84C"/>
+      <circle cx="210" cy="95" r="33" fill="#C9A84C"/>
+      <ellipse cx="155" cy="158" rx="84" ry="30" fill="#C9A84C"/>
+      <polygon points="72,68 79.8,91 98,75 93.2,98.8 117,94 101,112.2 124,120 101,127.8 117,146 93.2,141.2 98,165 79.8,149 72,172 64.2,149 46,165 50.8,141.2 27,146 43,127.8 20,120 43,112.2 27,94 50.8,98.8 46,75 64.2,91" fill="#C9A84C" opacity=".75"/>
+      <circle cx="72" cy="120" r="30" fill="#C9A84C"/>
+      <ellipse cx="112" cy="143" rx="26" ry="22" fill="#C9A84C"/>
+    </svg>
+    <div class="top-bar-title" id="top-title">ایران‌اواس</div>
+    <div class="kernel-badge" onclick="showTab('kernel')">
+      <div class="dot"></div>
+      <span>سیستم عادی</span>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: DASHBOARD ════ -->
+  <div class="screen active" id="screen-home">
+    <div class="card" style="text-align:center;">
+      <div class="balance-label">موجودی کیف‌پول</div>
+      <div class="balance-amount">
+        <span class="balance-symbol" style="color:var(--gold)">₱</span>
+        <span>۱٬۲۵۰</span>
+        <span class="balance-sare">.۴۷ سره</span>
+      </div>
+      <div class="action-row">
+        <button class="action-btn" onclick="showTab('wallet')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 5 5 12"/></svg>
+          ارسال
+        </button>
+        <button class="action-btn" onclick="showTab('wallet')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 19 19 12"/></svg>
+          دریافت
+        </button>
+        <button class="action-btn" onclick="showTab('bills')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          قبوض
+        </button>
+        <button class="action-btn" onclick="showTab('staking')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          استیک
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div class="section-title">مزایای رفاهی</div>
+      <div class="welfare-row">
+        <div class="welfare-tile">
+          <span style="font-size:20px">❤️</span>
+          <div class="welfare-value" style="color:var(--green-lt)">₱ ۵۰۰</div>
+          <div class="welfare-lbl">اعتبار سلامت</div>
+        </div>
+        <div class="welfare-tile">
+          <span style="font-size:20px">💊</span>
+          <div class="welfare-value" style="color:var(--gold)">سره ۱۰۰</div>
+          <div class="welfare-lbl">سهمیه دارو</div>
+        </div>
+        <div class="welfare-tile">
+          <span style="font-size:20px">🔒</span>
+          <div class="welfare-value" style="color:var(--warn)">₱ ۵۰۰</div>
+          <div class="welfare-lbl">استیک فعال</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">تراکنش‌های اخیر</div>
+      <div class="tx-row">
+        <div class="tx-icon" style="background:#23863622">⬇️</div>
+        <div class="tx-info"><div class="tx-label">حقوق — فروردین ۱۴۰۵</div><div class="tx-date">۱ فروردین ۱۴۰۵</div></div>
+        <div class="tx-amount" style="color:var(--green-lt)">+₱۱۰۰۰</div>
+      </div>
+      <div class="tx-row">
+        <div class="tx-icon" style="background:#D2992222">🧾</div>
+        <div class="tx-info"><div class="tx-label">قبض برق — اسفند</div><div class="tx-date">۲۸ اسفند ۱۴۰۴</div></div>
+        <div class="tx-amount">−₱۴۵</div>
+      </div>
+      <div class="tx-row">
+        <div class="tx-icon" style="background:#23863622">❤️</div>
+        <div class="tx-info"><div class="tx-label">اعتبار سلامت سالانه</div><div class="tx-date">۱ فروردین ۱۴۰۵</div></div>
+        <div class="tx-amount" style="color:var(--green-lt)">+₱۵۰۰</div>
+      </div>
+      <div class="tx-row">
+        <div class="tx-icon" style="background:#C9A84C22">🔒</div>
+        <div class="tx-info"><div class="tx-label">قفل در صندوق L2</div><div class="tx-date">۱۵ اسفند ۱۴۰۴</div></div>
+        <div class="tx-amount">−₱۵۰۰</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: CITIZEN CARD ════ -->
+  <div class="screen" id="screen-card">
+    <div class="citizen-card">
+      <div class="card-flag">
+        <div style="background:#1B7340"></div>
+        <div style="background:#FFFFFF"></div>
+        <div style="background:#B91C1C"></div>
+      </div>
+      <div class="card-header">
+        <svg width="48" height="36" viewBox="0 0 300 220">
+          <polygon points="210,15 207.1,62.1 212.9,62.1" fill="#C9A84C"/>
+          <polygon points="266.6,38.4 231.2,69.7 235.3,73.8" fill="#C9A84C"/>
+          <polygon points="290,95 242.9,92.1 242.9,97.9" fill="#C9A84C"/>
+          <polygon points="266.6,151.6 235.3,116.2 231.2,120.3" fill="#C9A84C"/>
+          <polygon points="153.4,151.6 188.8,120.3 184.7,116.2" fill="#C9A84C"/>
+          <polygon points="130,95 177.1,97.9 177.1,92.1" fill="#C9A84C"/>
+          <polygon points="153.4,38.4 184.7,73.8 188.8,69.7" fill="#C9A84C"/>
+          <circle cx="210" cy="95" r="33" fill="#C9A84C"/>
+          <ellipse cx="155" cy="158" rx="84" ry="30" fill="#C9A84C"/>
+          <polygon points="72,68 79.8,91 98,75 93.2,98.8 117,94 101,112.2 124,120 101,127.8 117,146 93.2,141.2 98,165 79.8,149 72,172 64.2,149 46,165 50.8,141.2 27,146 43,127.8 20,120 43,112.2 27,94 50.8,98.8 46,75 64.2,91" fill="#C9A84C" opacity=".75"/>
+          <circle cx="72" cy="120" r="30" fill="#C9A84C"/>
+          <ellipse cx="112" cy="143" rx="26" ry="22" fill="#C9A84C"/>
+        </svg>
+        <div class="card-header-text">
+          <div class="card-hdr-title">پادشاهی مشروطه سکولار ایران</div>
+          <div class="card-hdr-sub">کارت شهروندی دیجیتال</div>
+        </div>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-name">علی رضایی</div>
+      <div class="card-id">کد ملی: ****۵۶۷۸</div>
+      <div class="card-prov">تهران</div>
+      <div class="status-row">
+        <div class="chip" style="border-color:var(--ok);color:var(--ok)">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--ok)"></div>
+          شاغل
+        </div>
+        <div class="chip" style="border-color:var(--gold-dim);color:var(--gold)">
+          ☝ تایید بیومتریک
+        </div>
+      </div>
+      <div class="card-wallet">
+        <span style="font-size:12px;color:var(--text3)">💼</span>
+        <span class="card-wallet-addr">0x7f3A...c4B2</span>
+      </div>
+      <div class="card-footer">IranOS · Kernel v1.0 · ZKP Verified · Block #18,420,001</div>
+    </div>
+
+    <div class="section-title">مزایای فعال</div>
+    <div class="benefit-row"><span style="font-size:18px">❤️</span><div class="benefit-lbl">اعتبار سلامت سالانه</div><div class="benefit-val" style="color:var(--green-lt)">₱ ۵۰۰</div></div>
+    <div class="benefit-row"><span style="font-size:18px">💊</span><div class="benefit-lbl">سهمیه ماهانه دارو</div><div class="benefit-val" style="color:var(--gold)">سره ۱۰۰</div></div>
+    <div class="benefit-row"><span style="font-size:18px">💼</span><div class="benefit-lbl">حداقل حقوق (اجباری کارفرما)</div><div class="benefit-val" style="color:var(--warn)">₱ ۱٬۰۰۰/ماه</div></div>
+    <div class="benefit-row"><span style="font-size:18px">🛡️</span><div class="benefit-lbl">بیمه بیکاری</div><div class="benefit-val" style="color:var(--text2)">۷۰٪ · ۱۸ ماه</div></div>
+    <div class="benefit-row"><span style="font-size:18px">⏰</span><div class="benefit-lbl">سن بازنشستگی</div><div class="benefit-val" style="color:var(--text2)">۶۵ سال</div></div>
+  </div>
+
+  <!-- ════ SCREEN: WALLET ════ -->
+  <div class="screen" id="screen-wallet">
+    <div style="text-align:center;padding:28px 0;border-bottom:1px solid var(--border);margin-bottom:16px">
+      <div class="balance-label">موجودی</div>
+      <div class="balance-amount" style="justify-content:center">
+        <span class="balance-symbol" style="color:var(--gold)">₱</span>
+        <span>۱٬۲۵۰</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3);font-family:monospace;margin-top:8px">0x7f3A...c4B2</div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" id="wt-history" onclick="walletTab('history')">تاریخچه</button>
+      <button class="tab-btn" id="wt-send" onclick="walletTab('send')">ارسال</button>
+    </div>
+    <div id="wallet-history">
+      <div class="tx-row"><div class="tx-icon" style="background:#23863622">⬇️</div><div class="tx-info"><div class="tx-label">حقوق — فروردین ۱۴۰۵</div><div class="tx-date">0xabc...001</div></div><div class="tx-amount" style="color:var(--green-lt)">+₱۱۰۰۰</div></div>
+      <div class="tx-row"><div class="tx-icon" style="background:#D2992222">🧾</div><div class="tx-info"><div class="tx-label">قبض برق</div><div class="tx-date">0xabc...002</div></div><div class="tx-amount">−₱۴۵</div></div>
+      <div class="tx-row"><div class="tx-icon" style="background:#23863622">❤️</div><div class="tx-info"><div class="tx-label">اعتبار سلامت</div><div class="tx-date">0xabc...003</div></div><div class="tx-amount" style="color:var(--green-lt)">+₱۵۰۰</div></div>
+      <div class="tx-row"><div class="tx-icon" style="background:#C9A84C22">🔒</div><div class="tx-info"><div class="tx-label">قفل در صندوق L2</div><div class="tx-date">0xabc...004</div></div><div class="tx-amount">−₱۵۰۰</div></div>
+      <div class="tx-row"><div class="tx-icon" style="background:#B91C1C22">⬆️</div><div class="tx-info"><div class="tx-label">انتقال به مریم رضایی</div><div class="tx-date">0xabc...005</div></div><div class="tx-amount">−₱۲۰۰</div></div>
+    </div>
+    <div id="wallet-send" style="display:none" class="send-form">
+      <div class="form-label">آدرس گیرنده (0x...)</div>
+      <input class="form-input" id="recipient" placeholder="0x..." type="text">
+      <div class="form-label">مبلغ (PAH)</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:22px;color:var(--gold);font-weight:700">₱</span>
+        <input class="form-input" id="amount" placeholder="۰" type="number" style="flex:1">
+      </div>
+      <div class="fee-note">کارمزد شبکه: ۰ PAH (ZK-Rollup)</div>
+      <button class="send-btn" onclick="doSend()">⬆ ارسال و امضای دیجیتال</button>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: BILLS ════ -->
+  <div class="screen" id="screen-bills">
+    <div class="bill-summary">
+      <div><div class="due-label">مجموع پرداختنی</div><div class="due-amount" id="total-due">₱ ۱۰۸</div></div>
+      <button class="pay-all-btn" onclick="payAll()">پرداخت همه</button>
+    </div>
+    <div class="section-title">پرداخت‌نشده</div>
+    <div class="bill-card" id="bill-electricity">
+      <div class="bill-icon" style="background:#F0C04022">⚡</div>
+      <div class="bill-body"><div class="bill-name">برق</div><div class="bill-due">سررسید: ۱۵ فروردین ۱۴۰۵</div></div>
+      <div class="bill-right"><div class="bill-amount" style="color:#F0C040">₱ ۴۵</div><button class="pay-btn" onclick="payBill('electricity',45)">پرداخت</button></div>
+    </div>
+    <div class="bill-card" id="bill-water">
+      <div class="bill-icon" style="background:#4FC3F722">💧</div>
+      <div class="bill-body"><div class="bill-name">آب</div><div class="bill-due">سررسید: ۲۰ فروردین ۱۴۰۵</div></div>
+      <div class="bill-right"><div class="bill-amount" style="color:#4FC3F7">₱ ۲۸</div><button class="pay-btn" onclick="payBill('water',28)">پرداخت</button></div>
+    </div>
+    <div class="bill-card" id="bill-internet">
+      <div class="bill-icon" style="background:#81C78422">📶</div>
+      <div class="bill-body"><div class="bill-name">اینترنت</div><div class="bill-due">سررسید: ۲۵ فروردین ۱۴۰۵</div></div>
+      <div class="bill-right"><div class="bill-amount" style="color:#81C784">₱ ۳۵</div><button class="pay-btn" onclick="payBill('internet',35)">پرداخت</button></div>
+    </div>
+    <div class="section-title" style="margin-top:16px">پرداخت‌شده</div>
+    <div class="bill-card paid">
+      <div class="bill-icon" style="background:#FF8A6522">🔥</div>
+      <div class="bill-body"><div class="bill-name">گاز</div><div class="bill-due">سررسید: ۱۰ فروردین ۱۴۰۵</div></div>
+      <div class="bill-right"><div class="bill-amount" style="color:#FF8A65">₱ ۶۲</div><div class="paid-badge">✅ پرداخت‌شد</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;margin-top:20px;line-height:20px">پرداخت مستقیم از کیف‌پول پهلوی — بدون درگاه بانکی</div>
+  </div>
+
+  <!-- ════ SCREEN: STAKING ════ -->
+  <div class="screen" id="screen-staking">
+    <div class="apy-card">
+      <div class="apy-title">صندوق ثروت ملی — لایه L2</div>
+      <div class="apy-rate">۱۵٪</div>
+      <div class="apy-label">سود سالانه تضمین‌شده</div>
+      <div class="apy-note">سود به صورت خودکار از L2 به L1 منتقل می‌شود</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><span style="font-size:18px">🔒</span><div class="stat-value" style="color:var(--gold)">₱ ۵۰۰</div><div class="stat-label">قفل‌شده</div></div>
+      <div class="stat-card"><span style="font-size:18px">📈</span><div class="stat-value" style="color:var(--green-lt)">₱ ۱۲.۵</div><div class="stat-label">سود تجمیع‌شده</div></div>
+      <div class="stat-card"><span style="font-size:18px">📅</span><div class="stat-value" style="color:var(--text2);font-size:12px">۱۵ تیر ۱۴۰۵</div><div class="stat-label">آزادسازی</div></div>
+    </div>
+    <div class="progress-card">
+      <div class="progress-hdr">
+        <span style="font-size:13px;color:var(--text2)">پیشرفت دوره</span>
+        <span style="font-size:13px;font-weight:700;color:var(--gold)">۸٪</span>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:8%"></div></div>
+      <div class="progress-note">₱ ۱۲.۵ از ₱ ۷۵ سود سالانه</div>
+    </div>
+    <div class="section-title">ساختار صندوق ثروت ملی (SWF)</div>
+    <div class="layer-row"><div class="layer-badge" style="color:var(--green-lt);border-color:var(--green-lt);background:#23863622">L1</div><div class="layer-body"><div class="layer-lbl">نقد</div><div class="layer-target">هدف: ۳۰۰B دلار</div></div></div>
+    <div class="layer-row active"><div class="layer-badge" style="color:var(--gold);border-color:var(--gold);background:#C9A84C22">L2</div><div class="layer-body"><div class="layer-lbl">مولد — ۱۵٪ سود</div><div class="layer-target">هدف: ۳۰۰B دلار</div></div><span style="color:var(--gold)">✓</span></div>
+    <div class="layer-row"><div class="layer-badge" style="color:var(--text2);border-color:var(--text2);background:#7D859022">L3</div><div class="layer-body"><div class="layer-lbl">گرو (استراتژیک)</div><div class="layer-target">هدف: ۲ تریلیون دلار</div></div></div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="showModal('stake')">➕ استیک جدید</button>
+      <button class="btn-secondary" onclick="showModal('unstake')">🔓 آزادسازی</button>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: KERNEL ════ -->
+  <div class="screen" id="screen-kernel">
+    <div class="kernel-header">
+      <svg width="80" height="60" viewBox="0 0 300 220">
+        <polygon points="210,15 207.1,62.1 212.9,62.1" fill="#C9A84C"/>
+        <polygon points="266.6,38.4 231.2,69.7 235.3,73.8" fill="#C9A84C"/>
+        <polygon points="290,95 242.9,92.1 242.9,97.9" fill="#C9A84C"/>
+        <polygon points="266.6,151.6 235.3,116.2 231.2,120.3" fill="#C9A84C"/>
+        <polygon points="153.4,151.6 188.8,120.3 184.7,116.2" fill="#C9A84C"/>
+        <polygon points="130,95 177.1,97.9 177.1,92.1" fill="#C9A84C"/>
+        <circle cx="210" cy="95" r="33" fill="#C9A84C"/>
+        <ellipse cx="155" cy="158" rx="84" ry="30" fill="#C9A84C"/>
+        <polygon points="72,68 79.8,91 98,75 93.2,98.8 117,94 101,112.2 124,120 101,127.8 117,146 93.2,141.2 98,165 79.8,149 72,172 64.2,149 46,165 50.8,141.2 27,146 43,127.8 20,120 43,112.2 27,94 50.8,98.8 46,75 64.2,91" fill="#C9A84C" opacity=".75"/>
+        <circle cx="72" cy="120" r="30" fill="#C9A84C"/>
+        <ellipse cx="112" cy="143" rx="26" ry="22" fill="#C9A84C"/>
+      </svg>
+      <div class="kernel-status-title">سیستم ایران‌اواس فعال</div>
+      <div class="kernel-block">Block #18,420,001</div>
+      <div class="kernel-sig">امضاهای تحریم: ۰ از ۷</div>
+    </div>
+    <div class="section-title">خطوط قرمز (TR-01 تا TR-06)</div>
+    <div class="red-line-row"><div class="code-chip" style="background:#23863622;color:var(--ok)">TR-01</div><div class="red-line-lbl">پادشاهی مشروطه سکولار</div><span style="color:var(--ok)">✓</span></div>
+    <div class="red-line-row"><div class="code-chip" style="background:#23863622;color:var(--ok)">TR-02</div><div class="red-line-lbl">سکولاریسم ساختاری</div><span style="color:var(--ok)">✓</span></div>
+    <div class="red-line-row"><div class="code-chip" style="background:#23863622;color:var(--ok)">TR-03</div><div class="red-line-lbl">یکپارچگی سرزمینی</div><span style="color:var(--ok)">✓</span></div>
+    <div class="red-line-row"><div class="code-chip" style="background:#23863622;color:var(--ok)">TR-04</div><div class="red-line-lbl">حقوق بنیادین ملت</div><span style="color:var(--ok)">✓</span></div>
+    <div class="red-line-row"><div class="code-chip" style="background:#23863622;color:var(--ok)">TR-05</div><div class="red-line-lbl">استقلال صندوق ثروت ملی</div><span style="color:var(--ok)">✓</span></div>
+    <div class="red-line-row"><div class="code-chip" style="background:#23863622;color:var(--ok)">TR-06</div><div class="red-line-lbl">سقف نقدینگی ۹۰۰B</div><span style="color:var(--ok)">✓</span></div>
+    <div class="section-title" style="margin-top:20px">زیرساخت پولی</div>
+    <div class="monetary-card">
+      <div class="mon-row"><div class="mon-lbl">سقف نقدینگی</div><div class="mon-val">₱ ۹۰۰٬۰۰۰٬۰۰۰٬۰۰۰</div></div>
+      <div class="mon-row"><div class="mon-lbl">ضرب‌شده</div><div class="mon-val" style="color:var(--gold)">₱ ۱۲٬۴۰۰٬۰۰۰٬۰۰۰</div></div>
+      <div class="mon-row"><div class="mon-lbl">درصد استفاده</div><div class="mon-val" style="color:var(--ok)">۱.۳۸٪</div></div>
+      <div class="mon-row"><div class="mon-lbl">پروتکل لایه ۲</div><div class="mon-val" style="color:var(--text2)">ZK-Rollups</div></div>
+      <div class="mon-row" style="border:none"><div class="mon-lbl">حداقل پشتوانه</div><div class="mon-val" style="color:var(--text2)">۳۳.۳٪</div></div>
+    </div>
+    <div class="section-title">ماشه (Trigger Protocol)</div>
+    <div class="trigger-card">
+      <div class="sig-bar" id="sig-bar"></div>
+      <div class="sig-info">۰/۷ امضا برای فعال‌سازی ماشه</div>
+      <div class="trigger-note">پس از ۷ امضای دادگاه عالی، ماشه به‌طور خودکار فعال می‌شود.<br>مهلت: ۷۲ ساعت پس از ثبت تخلف.</div>
+    </div>
+  </div>
+
+  <!-- ════ TAB BAR ════ -->
+  <nav class="tab-bar">
+    <button class="tab active" id="tab-home" onclick="showTab('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      داشبورد
+    </button>
+    <button class="tab" id="tab-card" onclick="showTab('card')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      کارت
+    </button>
+    <button class="tab" id="tab-wallet" onclick="showTab('wallet')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V6H4v14h16v-6"/><circle cx="17" cy="12" r="2"/></svg>
+      کیف‌پول
+    </button>
+    <button class="tab" id="tab-bills" onclick="showTab('bills')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      قبوض
+    </button>
+    <button class="tab" id="tab-staking" onclick="showTab('staking')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      استیک
+    </button>
+  </nav>
+</div>
+
+<!-- ════ MODAL ════ -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-msg" id="modal-msg"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">انصراف</button>
+      <button class="modal-ok" id="modal-ok">تایید</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TOAST ════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ──────────────────── SPLASH
+setTimeout(() => {
+  document.getElementById('splash').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+  }, 500);
+}, 2200);
+
+// ──────────────────── KERNEL SIG DOTS
+const sigBar = document.getElementById('sig-bar');
+for (let i = 0; i < 9; i++) {
+  const d = document.createElement('div');
+  d.className = 'sig-dot';
+  sigBar.appendChild(d);
+}
+
+// ──────────────────── TAB NAVIGATION
+const SCREENS = ['home','card','wallet','bills','staking','kernel'];
+const TITLES  = {
+  home:'ایران‌اواس', card:'کارت شهروندی دیجیتال',
+  wallet:'کیف‌پول پهلوی', bills:'پرداخت قبوض',
+  staking:'صندوق ثروت ملی — L2', kernel:'وضعیت هسته (Kernel)'
+};
+
+function showTab(name) {
+  SCREENS.forEach(s => {
+    document.getElementById('screen-'+s)?.classList.remove('active');
+    const t = document.getElementById('tab-'+s);
+    if (t) t.classList.remove('active');
+  });
+  document.getElementById('screen-'+name)?.classList.add('active');
+  const tab = document.getElementById('tab-'+name);
+  if (tab) tab.classList.add('active');
+  document.getElementById('top-title').textContent = TITLES[name] || 'ایران‌اواس';
+}
+
+// ──────────────────── WALLET TABS
+function walletTab(t) {
+  document.getElementById('wallet-history').style.display = t==='history'?'block':'none';
+  document.getElementById('wallet-send').style.display = t==='send'?'block':'none';
+  document.getElementById('wt-history').classList.toggle('active', t==='history');
+  document.getElementById('wt-send').classList.toggle('active', t==='send');
+}
+
+function doSend() {
+  const r = document.getElementById('recipient').value;
+  const a = document.getElementById('amount').value;
+  if (!r || !a) { showToast('آدرس و مبلغ را وارد کنید'); return; }
+  showModal2('تایید تراکنش', `ارسال ₱${a}\nبه ${r}`, () => {
+    document.getElementById('recipient').value = '';
+    document.getElementById('amount').value = '';
+    showToast('✓ تراکنش در بلاک‌چین ثبت شد');
+  });
+}
+
+// ──────────────────── BILLS
+let billAmounts = {electricity:45, water:28, internet:35};
+let billPaid = {};
+
+function payBill(type, amount) {
+  showModal2(`پرداخت قبض`, `پرداخت ₱${amount} — ${type}\nاز کیف‌پول پهلوی`, () => {
+    billPaid[type] = true;
+    const el = document.getElementById('bill-'+type);
+    if (el) {
+      el.classList.add('paid');
+      el.querySelector('.pay-btn').innerHTML = '<span class="paid-badge">✅ پرداخت‌شد</span>';
+      el.querySelector('.pay-btn').disabled = true;
+    }
+    updateTotal();
+    showToast(`✓ قبض پرداخت شد — تراکنش ثبت شد`);
+  });
+}
+
+function updateTotal() {
+  const total = Object.entries(billAmounts)
+    .filter(([k]) => !billPaid[k])
+    .reduce((s,[,v]) => s+v, 0);
+  document.getElementById('total-due').textContent = `₱ ${total}`;
+}
+
+function payAll() {
+  showModal2('پرداخت همه قبوض', `پرداخت ₱${Object.values(billAmounts).reduce((a,b)=>a+b,0)} یکجا`, () => {
+    ['electricity','water','internet'].forEach(t => payBillSilent(t));
+    updateTotal();
+    showToast('✓ همه قبوض پرداخت شدند');
+  });
+}
+
+function payBillSilent(type) {
+  billPaid[type] = true;
+  const el = document.getElementById('bill-'+type);
+  if (el) {
+    el.classList.add('paid');
+    const btn = el.querySelector('.pay-btn');
+    if (btn) { btn.outerHTML = '<div class="paid-badge">✅ پرداخت‌شد</div>'; }
+  }
+}
+
+// ──────────────────── MODAL
+let modalCallback = null;
+function showModal(type) {
+  const msgs = {
+    stake:   ['قفل در صندوق L2', 'موجودی در لایه مولد صندوق ثروت ملی قفل می‌شود و سود ۱۵٪ سالانه دریافت می‌کنید.'],
+    unstake: ['آزادسازی موجودی', 'در ۱۵ تیر ۱۴۰۵ موجودی آزاد می‌شود.\nسود تجمیع‌شده: ₱ ۱۲.۵'],
+  };
+  showModal2(msgs[type][0], msgs[type][1], () => showToast('✓ قرارداد امضا شد'));
+}
+
+function showModal2(title, msg, cb) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-msg').textContent = msg;
+  document.getElementById('modal').classList.add('open');
+  modalCallback = cb;
+  document.getElementById('modal-ok').onclick = () => { closeModal(); cb && cb(); };
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal')) return;
+  document.getElementById('modal').classList.remove('open');
+}
+
+// ──────────────────── TOAST
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
