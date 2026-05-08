@@ -18,14 +18,13 @@
 
 ## ساختار پروژه
 
-
-| پوشه | محتوا |
-|------|-------|
-| `constitution/` | پیمان ملی مشروطه سکولار |
-| `whitepaper/` | سپیدنامه فنی (۱۳ فصل) |
-| `protocols/` | پروتکل‌های حکمرانی |
-| `contracts/` | قراردادهای هوشمند Solidity |
-| `docs/` | مستندات و اپلیکیشن وب |
+- [constitution/](https://github.com/fafa33/Iran-OS/tree/main/constitution) — پیمان ملی مشروطه سکولار
+- [whitepaper/](https://github.com/fafa33/Iran-OS/tree/main/whitepaper) — سپیدنامه فنی
+- [protocols/](https://github.com/fafa33/Iran-OS/tree/main/protocols) — پروتکل‌های حکمرانی
+- [contracts/](https://github.com/fafa33/Iran-OS/tree/main/contracts) — قراردادهای هوشمند Solidity
+- [docs/](https://github.com/fafa33/Iran-OS/tree/main/docs) — مستندات و اپلیکیشن وب
+- [test/](https://github.com/fafa33/Iran-OS/tree/main/test) — تست‌های فنی
+- [app/](https://github.com/fafa33/Iran-OS/tree/main/app) — رابط کاربری شهروندی|
 
 ---
 
