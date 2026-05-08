@@ -1,0 +1,136 @@
+// SPDX-License-Identifier: MIT
+// تست‌های نگهبان قانون اساسی (ConstitutionGuard)
+const { expect } = require("chai");
+const { ethers }  = require("hardhat");
+
+describe("ConstitutionGuard", function () {
+  let guard;
+  let kernel, proposer, stranger;
+
+  beforeEach(async function () {
+    [kernel, proposer, stranger] = await ethers.getSigners();
+    const Guard = await ethers.getContractFactory("ConstitutionGuard");
+    guard = await Guard.deploy(kernel.address);
+  });
+
+  describe("استقرار", function () {
+    it("آدرس Kernel صحیح ثبت شده", async function () {
+      expect(await guard.kernel()).to.equal(kernel.address);
+    });
+
+    it("ثوابت اصول منشور صحیح است", async function () {
+      expect(await guard.PRINCIPLE_SECULAR()).to.equal(1);
+      expect(await guard.PRINCIPLE_RIGHTS()).to.equal(2);
+      expect(await guard.PRINCIPLE_TERRITORIAL()).to.equal(3);
+      expect(await guard.PRINCIPLE_MONETARY()).to.equal(4);
+      expect(await guard.PRINCIPLE_JUDICIAL()).to.equal(5);
+    });
+  });
+
+  // ─────────────────────────────────────────
+  // پیشنهاد قانون
+  // ─────────────────────────────────────────
+
+  describe("proposeLaw", function () {
+    it("هر کسی می‌تواند قانون پیشنهاد دهد", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("قانون آزادی مطبوعات"));
+      const mask = 0x02; // اصل ۲ — حقوق بنیادین
+
+      await expect(guard.connect(proposer).proposeLaw(hash, mask))
+        .to.emit(guard, "LawProposed")
+        .withArgs(hash, proposer.address, mask, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+    });
+
+    it("پیشنهاد با هش صفر رد می‌شود", async function () {
+      await expect(guard.connect(proposer).proposeLaw(ethers.ZeroHash, 0x01))
+        .to.be.revertedWith("ConstitutionGuard: invalid hash");
+    });
+
+    it("پیشنهاد بدون اعلام اصول رد می‌شود", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("قانون مجهول"));
+      await expect(guard.connect(proposer).proposeLaw(hash, 0))
+        .to.be.revertedWith("ConstitutionGuard: must declare affected principles");
+    });
+
+    it("پیشنهاد تکراری رد می‌شود", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("قانون تکراری"));
+      await guard.connect(proposer).proposeLaw(hash, 0x01);
+      await expect(guard.connect(proposer).proposeLaw(hash, 0x01))
+        .to.be.revertedWith("ConstitutionGuard: already proposed");
+    });
+  });
+
+  // ─────────────────────────────────────────
+  // تایید قانون
+  // ─────────────────────────────────────────
+
+  describe("approveLaw", function () {
+    let lawHash;
+
+    beforeEach(async function () {
+      lawHash = ethers.keccak256(ethers.toUtf8Bytes("قانون حمایت از محیط زیست"));
+      await guard.connect(proposer).proposeLaw(lawHash, 0x04); // اصل ارضی
+    });
+
+    it("Kernel می‌تواند قانون را تایید کند", async function () {
+      await expect(guard.connect(kernel).approveLaw(lawHash))
+        .to.emit(guard, "LawApproved");
+
+      expect(await guard.isLawApproved(lawHash)).to.be.true;
+    });
+
+    it("غیر‌Kernel نمی‌تواند تایید کند", async function () {
+      await expect(guard.connect(stranger).approveLaw(lawHash))
+        .to.be.revertedWith("ConstitutionGuard: caller is not the Kernel");
+    });
+
+    it("تایید دوباره رد می‌شود", async function () {
+      await guard.connect(kernel).approveLaw(lawHash);
+      await expect(guard.connect(kernel).approveLaw(lawHash))
+        .to.be.revertedWith("ConstitutionGuard: already executed");
+    });
+  });
+
+  // ─────────────────────────────────────────
+  // رد قانون
+  // ─────────────────────────────────────────
+
+  describe("rejectLaw", function () {
+    let lawHash;
+
+    beforeEach(async function () {
+      lawHash = ethers.keccak256(ethers.toUtf8Bytes("قانون دین رسمی"));
+      await guard.connect(proposer).proposeLaw(lawHash, 0x01); // اصل سکولاریسم
+    });
+
+    it("Kernel می‌تواند قانون را با ذکر اصل رد کند", async function () {
+      await expect(
+        guard.connect(kernel).rejectLaw(lawHash, "نقض سکولاریسم ساختاری", 1)
+      )
+        .to.emit(guard, "PrincipleViolationDetected")
+        .withArgs(lawHash, 1, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+
+      expect(await guard.isLawApproved(lawHash)).to.be.false;
+    });
+
+    it("کد اصل نامعتبر رد می‌شود", async function () {
+      await expect(
+        guard.connect(kernel).rejectLaw(lawHash, "test", 9)
+      ).to.be.revertedWith("ConstitutionGuard: invalid principle code");
+    });
+  });
+
+  // ─────────────────────────────────────────
+  // بررسی تعارض با اصول غیرقابل تغییر
+  // ─────────────────────────────────────────
+
+  describe("checkImmutableConflict", function () {
+    it("ماسکی که اصل ۱ دارد با اصول غیرقابل تغییر تعارض دارد", async function () {
+      expect(await guard.checkImmutableConflict(0x01)).to.be.true;
+    });
+
+    it("ماسکی که فقط اصل ۴ و ۵ دارد تعارض ندارد", async function () {
+      expect(await guard.checkImmutableConflict(0x18)).to.be.false;
+    });
+  });
+});
