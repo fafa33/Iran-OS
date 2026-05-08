@@ -1,8 +1,8 @@
 <div dir="rtl">
 
-# Iran Operating System whitepaper
+## Iran Operating System whitepaper
 
-# سپیدنامه - ایران‌اواس (IranOS)
+## سپیدنامه - ایران‌اواس (IranOS)
 
 ------
 
