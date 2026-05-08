@@ -48,9 +48,9 @@ body {
   z-index: 999;
   transition: opacity .5s;
 }
-#splash .flag-bar { position: absolute; top:0; left:0; right:0; height:6px; display:flex; }
+#splash .flag-bar { position: absolute; top:0; left:0; right:0; height:18px; display:flex; }
 #splash .flag-bar div { flex:1; }
-.splash-logo { animation: popIn .8s cubic-bezier(.34,1.56,.64,1) forwards; opacity:0; }
+.splash-logo { animation: popIn .8s cubic-bezier(.34,1.56,.64,1) forwards; opacity:0; display:block; filter: drop-shadow(0 4px 16px rgba(201,168,76,0.5)); }
 @keyframes popIn { to { opacity:1; transform:scale(1); } from { opacity:0; transform:scale(.8); } }
 .splash-title { font-size:38px; font-weight:700; color:var(--gold); margin-top:20px; letter-spacing:1px; }
 .splash-sub   { font-size:15px; color:var(--text2); margin-top:8px; }
@@ -110,7 +110,7 @@ body {
 
 /* ────── BALANCE ────── */
 .balance-label { font-size:13px; color:var(--text2); margin-bottom:10px; text-align:center; }
-.balance-amount { font-size:52px; font-weight:700; color:var(--gold); text-align:center; display:flex; align-items:flex-end; justify-content:center; gap:6px; }
+.balance-amount { font-size:52px; font-weight:700; color:var(--gold); text-align:center; line-height:1.1; }
 .balance-symbol { font-size:30px; margin-bottom:8px; }
 .balance-sare { font-size:16px; color:var(--text2); margin-bottom:10px; }
 
@@ -329,55 +329,10 @@ body {
     <div style="background:#B91C1C"></div>
   </div>
 
-  <svg class="splash-logo" width="200" height="148" viewBox="0 0 300 220">
-    <!-- پرتوهای خورشید -->
-    <polygon points="210,15 207.1,62.1 212.9,62.1" fill="#C9A84C"/>
-    <polygon points="232.2,41.4 219.9,63.5 225.2,65.7" fill="#C9A84C"/>
-    <polygon points="266.6,38.4 231.2,69.7 235.3,73.8" fill="#C9A84C"/>
-    <polygon points="263.6,72.8 239.3,79.8 241.5,85.1" fill="#C9A84C"/>
-    <polygon points="290,95 242.9,92.1 242.9,97.9" fill="#C9A84C"/>
-    <polygon points="263.6,117.2 241.5,104.9 239.3,110.2" fill="#C9A84C"/>
-    <polygon points="266.6,151.6 235.3,116.2 231.2,120.3" fill="#C9A84C"/>
-    <polygon points="232.2,148.6 225.2,124.3 219.9,126.5" fill="#C9A84C"/>
-    <polygon points="210,175 212.9,127.9 207.1,127.9" fill="#C9A84C"/>
-    <polygon points="187.8,148.6 200.1,126.5 194.8,124.3" fill="#C9A84C"/>
-    <polygon points="153.4,151.6 188.8,120.3 184.7,116.2" fill="#C9A84C"/>
-    <polygon points="156.4,117.2 180.7,110.2 178.5,104.9" fill="#C9A84C"/>
-    <polygon points="130,95 177.1,97.9 177.1,92.1" fill="#C9A84C"/>
-    <polygon points="156.4,72.8 178.5,85.1 180.7,79.8" fill="#C9A84C"/>
-    <polygon points="153.4,38.4 184.7,73.8 188.8,69.7" fill="#C9A84C"/>
-    <polygon points="187.8,41.4 194.8,65.7 200.1,63.5" fill="#C9A84C"/>
-    <!-- قرص خورشید -->
-    <circle cx="210" cy="95" r="33" fill="#C9A84C"/>
-    <!-- دُم -->
-    <path d="M228 148 Q262 100 248 62 Q242 50 232 56" stroke="#C9A84C" stroke-width="8" fill="none" stroke-linecap="round"/>
-    <ellipse cx="230" cy="54" rx="11" ry="16" transform="rotate(-25 230 54)" fill="#C9A84C"/>
-    <!-- بدن -->
-    <ellipse cx="155" cy="158" rx="84" ry="30" fill="#C9A84C"/>
-    <ellipse cx="218" cy="147" rx="24" ry="20" fill="#C9A84C"/>
-    <!-- یال -->
-    <polygon points="72,68 79.8,91 98,75 93.2,98.8 117,94 101,112.2 124,120 101,127.8 117,146 93.2,141.2 98,165 79.8,149 72,172 64.2,149 46,165 50.8,141.2 27,146 43,127.8 20,120 43,112.2 27,94 50.8,98.8 46,75 64.2,91" fill="#C9A84C" opacity=".75"/>
-    <!-- سر -->
-    <circle cx="72" cy="120" r="30" fill="#C9A84C"/>
-    <ellipse cx="112" cy="143" rx="26" ry="22" fill="#C9A84C"/>
-    <!-- پاها -->
-    <rect x="195" y="182" width="19" height="34" rx="9" fill="#C9A84C"/>
-    <rect x="218" y="180" width="19" height="36" rx="9" fill="#C9A84C"/>
-    <rect x="93"  y="184" width="18" height="32" rx="9" fill="#C9A84C"/>
-    <rect x="115" y="184" width="18" height="34" rx="9" fill="#C9A84C"/>
-    <!-- پنجه -->
-    <ellipse cx="40" cy="154" rx="19" ry="12" transform="rotate(-20 40 154)" fill="#C9A84C"/>
-    <!-- شمشیر -->
-    <path d="M18 195 L46 112" stroke="#C9A84C" stroke-width="5" stroke-linecap="round"/>
-    <polygon points="46,112 40,121 52,121" fill="#C9A84C"/>
-    <rect x="10" y="182" width="12" height="20" rx="6" transform="rotate(-62 16 192)" fill="#C9A84C"/>
-    <rect x="18" y="162" width="30" height="6" rx="3" transform="rotate(-62 33 165)" fill="#C9A84C"/>
-    <!-- چشم و صورت -->
-    <circle cx="57" cy="115" r="4.5" fill="#0D1117"/>
-    <circle cx="58" cy="114" r="1.8" fill="#C9A84C"/>
-    <ellipse cx="67" cy="124" rx="5" ry="3.5" fill="#0D1117"/>
-    <path d="M62 128 Q67 133 72 128" stroke="#0D1117" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-  </svg>
+  <img class="splash-logo"
+       src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Lion_and_Sun.svg"
+       width="230" height="175"
+       alt="شیر و خورشید — نشان ملی ایران">
 
   <div class="splash-title">ایران‌اواس</div>
   <div class="splash-sub">سیستم‌عامل حاکمیتی ایران</div>
@@ -389,20 +344,10 @@ body {
 <!-- ══════════════ APP SHELL ══════════════ -->
 <div id="app">
   <div class="top-bar">
-    <svg width="32" height="24" viewBox="0 0 300 220">
-      <polygon points="210,15 207.1,62.1 212.9,62.1" fill="#C9A84C"/>
-      <polygon points="266.6,38.4 231.2,69.7 235.3,73.8" fill="#C9A84C"/>
-      <polygon points="290,95 242.9,92.1 242.9,97.9" fill="#C9A84C"/>
-      <polygon points="266.6,151.6 235.3,116.2 231.2,120.3" fill="#C9A84C"/>
-      <polygon points="153.4,151.6 188.8,120.3 184.7,116.2" fill="#C9A84C"/>
-      <polygon points="130,95 177.1,97.9 177.1,92.1" fill="#C9A84C"/>
-      <polygon points="153.4,38.4 184.7,73.8 188.8,69.7" fill="#C9A84C"/>
-      <circle cx="210" cy="95" r="33" fill="#C9A84C"/>
-      <ellipse cx="155" cy="158" rx="84" ry="30" fill="#C9A84C"/>
-      <polygon points="72,68 79.8,91 98,75 93.2,98.8 117,94 101,112.2 124,120 101,127.8 117,146 93.2,141.2 98,165 79.8,149 72,172 64.2,149 46,165 50.8,141.2 27,146 43,127.8 20,120 43,112.2 27,94 50.8,98.8 46,75 64.2,91" fill="#C9A84C" opacity=".75"/>
-      <circle cx="72" cy="120" r="30" fill="#C9A84C"/>
-      <ellipse cx="112" cy="143" rx="26" ry="22" fill="#C9A84C"/>
-    </svg>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Lion_and_Sun.svg"
+         width="38" height="38"
+         alt="شیر و خورشید"
+         style="border-radius:50%;border:1.5px solid var(--gold-dim);padding:2px;background:#fff1d6">
     <div class="top-bar-title" id="top-title">ایران‌اواس</div>
     <div class="kernel-badge" onclick="showTab('kernel')">
       <div class="dot"></div>
@@ -414,11 +359,7 @@ body {
   <div class="screen active" id="screen-home">
     <div class="card" style="text-align:center;">
       <div class="balance-label">موجودی کیف‌پول</div>
-      <div class="balance-amount">
-        <span class="balance-symbol" style="color:var(--gold)">₱</span>
-        <span>۱٬۲۵۰</span>
-        <span class="balance-sare">.۴۷ سره</span>
-      </div>
+      <div class="balance-amount">₱ ۱٬۲۵۰<span class="balance-sare">.۴۷ سره</span></div>
       <div class="action-row">
         <button class="action-btn" onclick="showTab('wallet')">
           <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 5 5 12"/></svg>
@@ -494,20 +435,9 @@ body {
         <div style="background:#B91C1C"></div>
       </div>
       <div class="card-header">
-        <svg width="48" height="36" viewBox="0 0 300 220">
-          <polygon points="210,15 207.1,62.1 212.9,62.1" fill="#C9A84C"/>
-          <polygon points="266.6,38.4 231.2,69.7 235.3,73.8" fill="#C9A84C"/>
-          <polygon points="290,95 242.9,92.1 242.9,97.9" fill="#C9A84C"/>
-          <polygon points="266.6,151.6 235.3,116.2 231.2,120.3" fill="#C9A84C"/>
-          <polygon points="153.4,151.6 188.8,120.3 184.7,116.2" fill="#C9A84C"/>
-          <polygon points="130,95 177.1,97.9 177.1,92.1" fill="#C9A84C"/>
-          <polygon points="153.4,38.4 184.7,73.8 188.8,69.7" fill="#C9A84C"/>
-          <circle cx="210" cy="95" r="33" fill="#C9A84C"/>
-          <ellipse cx="155" cy="158" rx="84" ry="30" fill="#C9A84C"/>
-          <polygon points="72,68 79.8,91 98,75 93.2,98.8 117,94 101,112.2 124,120 101,127.8 117,146 93.2,141.2 98,165 79.8,149 72,172 64.2,149 46,165 50.8,141.2 27,146 43,127.8 20,120 43,112.2 27,94 50.8,98.8 46,75 64.2,91" fill="#C9A84C" opacity=".75"/>
-          <circle cx="72" cy="120" r="30" fill="#C9A84C"/>
-          <ellipse cx="112" cy="143" rx="26" ry="22" fill="#C9A84C"/>
-        </svg>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Lion_and_Sun.svg"
+             width="52" height="52" alt="شیر و خورشید"
+             style="background:#fff1d6;border-radius:6px;padding:2px">
         <div class="card-header-text">
           <div class="card-hdr-title">پادشاهی مشروطه سکولار ایران</div>
           <div class="card-hdr-sub">کارت شهروندی دیجیتال</div>
@@ -545,10 +475,7 @@ body {
   <div class="screen" id="screen-wallet">
     <div style="text-align:center;padding:28px 0;border-bottom:1px solid var(--border);margin-bottom:16px">
       <div class="balance-label">موجودی</div>
-      <div class="balance-amount" style="justify-content:center">
-        <span class="balance-symbol" style="color:var(--gold)">₱</span>
-        <span>۱٬۲۵۰</span>
-      </div>
+      <div class="balance-amount">₱ ۱٬۲۵۰</div>
       <div style="font-size:12px;color:var(--text3);font-family:monospace;margin-top:8px">0x7f3A...c4B2</div>
     </div>
     <div class="tabs">
@@ -640,19 +567,9 @@ body {
   <!-- ════ SCREEN: KERNEL ════ -->
   <div class="screen" id="screen-kernel">
     <div class="kernel-header">
-      <svg width="80" height="60" viewBox="0 0 300 220">
-        <polygon points="210,15 207.1,62.1 212.9,62.1" fill="#C9A84C"/>
-        <polygon points="266.6,38.4 231.2,69.7 235.3,73.8" fill="#C9A84C"/>
-        <polygon points="290,95 242.9,92.1 242.9,97.9" fill="#C9A84C"/>
-        <polygon points="266.6,151.6 235.3,116.2 231.2,120.3" fill="#C9A84C"/>
-        <polygon points="153.4,151.6 188.8,120.3 184.7,116.2" fill="#C9A84C"/>
-        <polygon points="130,95 177.1,97.9 177.1,92.1" fill="#C9A84C"/>
-        <circle cx="210" cy="95" r="33" fill="#C9A84C"/>
-        <ellipse cx="155" cy="158" rx="84" ry="30" fill="#C9A84C"/>
-        <polygon points="72,68 79.8,91 98,75 93.2,98.8 117,94 101,112.2 124,120 101,127.8 117,146 93.2,141.2 98,165 79.8,149 72,172 64.2,149 46,165 50.8,141.2 27,146 43,127.8 20,120 43,112.2 27,94 50.8,98.8 46,75 64.2,91" fill="#C9A84C" opacity=".75"/>
-        <circle cx="72" cy="120" r="30" fill="#C9A84C"/>
-        <ellipse cx="112" cy="143" rx="26" ry="22" fill="#C9A84C"/>
-      </svg>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Lion_and_Sun.svg"
+           width="80" height="60" alt="شیر و خورشید — نشان ملی ایران"
+           style="filter:drop-shadow(0 2px 8px rgba(201,168,76,0.5))">
       <div class="kernel-status-title">سیستم ایران‌اواس فعال</div>
       <div class="kernel-block">Block #18,420,001</div>
       <div class="kernel-sig">امضاهای تحریم: ۰ از ۷</div>
