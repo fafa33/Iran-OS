@@ -83,8 +83,10 @@ Smart Contracts
       ↓
 Treasury / Welfare / Judiciary
 
-اصل بنیادین
 
-Governance Kernel نباید به هیچ نهاد انسانی اجازه 
-عبور از محدودیت‌های منشور را بدهد
+      ## اصل بنیادین
+
+Governance Kernel نباید به هیچ 
+نهاد انسانی اجازه عبور 
+از محدودیت‌های منشور را بدهد.
 
