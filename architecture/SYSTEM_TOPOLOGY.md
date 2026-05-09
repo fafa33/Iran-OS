@@ -49,7 +49,16 @@ flowchart TD
     I["نهادهای انسانی ناظر"] --> B
     I --> E
 ```
+## لینک لایه‌ها
 
+- [هسته IranOS](./KERNEL_SPECIFICATION.md)
+- [لایه امنیت](./SECURITY_MODEL.md)
+- [اوراکل‌ها](./ORACLE_LAYER_SPECIFICATION.md)
+- [دفترکل ملی](./LEDGER_SPECIFICATION.md)
+- [گردش‌کارهای اجرایی](../workflows)
+- [قراردادهای هوشمند](../protocols)
+
+⸻
 
 منشور ملی
    ↓
