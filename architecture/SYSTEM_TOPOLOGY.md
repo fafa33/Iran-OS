@@ -14,16 +14,15 @@
 
 ایران‌ او‌اس‌‌‌ از چند لایه اصلی تشکیل می‌شود:
 
-1. [لایه منشور](../constitution/README.md)
+1. [لایه منشور](../README.md)
 2. [لایه هسته](../kernel/KERNEL_SPECIFICATION.md)
-3. [لایه عامل‌های هوشمند](../agents/README.md)
-4. [لایه گردشکارها](../workflows/README.md)
-5. [لایه اوراکل‌ها](../oracles/README.md)
-6. [لایه قراردادهای هوشمند](../contracts/README.md)
+3. [لایه عامل‌های هوشمند](../CLAUDE.md)
+4. [لایه گردشکارها](../workflows/welfare-payment.workflow.md)
+5. [لایه اوراکل‌ها](../architecture/SYSTEM_ARCHITECTURE.md)
+6. [لایه قراردادهای هوشمند](../protocols/README.md)
 7. [لایه دفترکل ملی](../architecture/SYSTEM_ARCHITECTURE.md)
-8. [لایه نظارت انسانی](../protocols/README.md)
-9. [لایه امنیت و ماشه اضطراری](../security/EMERGENCY_TRIGGER.md)
----
+8. [لایه نظارت انسانی](../protocols/citizen-identity-fa.md)
+9. [لایه امنیت و ماشه اضطراری](../constitution/README.md)---
 
 # دیاگرام مفهومی
 
