@@ -24,6 +24,10 @@
 
 - [`/protocols`](https://github.com/fafa33/Iran-OS/tree/main/protocols) — پروتکل‌های حکمرانی و معماری شبکه
 
+- [`/workflows`](./workflows) — گردش‌کارهای اجرایی و معماری عامل‌محور IranOS
+
+- [`/architecture`](./architecture) — معماری هسته، اوراکل‌ها، امنیت، دفترکل و توپولوژی سامانه
+
 - [`/contracts`](https://github.com/fafa33/Iran-OS/tree/main/contracts) — قراردادهای هوشمند Solidity
 
 - [`/docs`](https://github.com/fafa33/Iran-OS/tree/main/docs) — مستندات، راهنماها و اپلیکیشن وب
