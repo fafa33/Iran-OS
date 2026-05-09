@@ -20,10 +20,9 @@
 4. [لایه گردشکارها](../workflows/README.md)
 5. [لایه اوراکل‌ها](../oracles/README.md)
 6. [لایه قراردادهای هوشمند](../contracts/README.md)
-7. [لایه دفترکل ملی](../ledger/README.md)
-8. [لایه نظارت انسانی](../governance/README.md)
-9. [لایه امنیت و ماشه اضطراری](../security/README.md)
-
+7. [لایه دفترکل ملی](../architecture/SYSTEM_ARCHITECTURE.md)
+8. [لایه نظارت انسانی](../protocols/README.md)
+9. [لایه امنیت و ماشه اضطراری](../security/EMERGENCY_TRIGGER.md)
 ---
 
 # دیاگرام مفهومی
