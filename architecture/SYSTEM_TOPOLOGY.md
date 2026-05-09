@@ -29,37 +29,46 @@
 
 ```mermaid
 flowchart TD
-    A[منشور ملی] --> B[هسته IranOS]
+    A["منشور ملی"]
+    B["هسته IranOS"]
+    C["عامل‌های هوشمند"]
+    D["گردش‌کارهای اجرایی"]
+    E["لایه امنیت و ماشه اضطراری"]
+    F["اوراکل‌ها"]
+    G["قراردادهای هوشمند"]
+    H["دفترکل ملی"]
+    I["نهادهای انسانی ناظر"]
 
-    B --> C[عامل‌های هوشمند]
-    B --> D[گردش‌کارهای اجرایی]
-    B --> E[لایه امنیت و ماشه اضطراری]
+    A --> B
 
-    C --> F[عامل رفاه]
-    C --> G[عامل هویت]
-    C --> H[عامل مالی]
-    C --> I[عامل امنیتی]
-    C --> J[عامل حسابرسی]
+    B --> C
+    B --> D
+    B --> E
 
-    D --> K[پرداخت رفاه]
-    D --> L[هویت شهروندی]
-    D --> M[ماشه قانون اساسی]
+    F --> B
+    F --> C
+    F --> D
 
-    N[اوراکل‌ها] --> B
-    N --> C
-    N --> D
+    D --> G
+    G --> H
 
-    D --> O[قراردادهای هوشمند]
-    O --> P[دفترکل ملی]
+    B --> H
+    C --> H
+    E --> H
 
-    B --> P
-    C --> P
-    E --> P
+    I --> B
+    I --> E
 
-    Q[نهادهای انسانی ناظر] --> B
-    Q --> E
+    click A "../constitution/README.md"
+    click B "../architecture/KERNEL_SPECIFICATION.md"
+    click C "../CLAUDE.md"
+    click D "../workflows"
+    click E "../architecture/SECURITY_MODEL.md"
+    click F "../architecture/ORACLE_LAYER_SPECIFICATION.md"
+    click G "../protocols"
+    click H "../architecture/LEDGER_SPECIFICATION.md"
+    click I "../protocols/citizen-identity-fa.md"
 ```
-
 ```text
 منشور ملی
    ↓
