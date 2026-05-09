@@ -51,15 +51,16 @@ flowchart TD
 
 ## لینک لایه‌ها
 
-- [منشور ملی](../constitution/README.md)
-- [هسته IranOS](../architecture/KERNEL_SPECIFICATION.md)
-- [عامل‌های هوشمند](../CLAUDE.md)
-- [گردش‌کارهای اجرایی](../workflows)
-- [لایه امنیت](../architecture/SECURITY_MODEL.md)
-- [اوراکل‌ها](../architecture/ORACLE_LAYER_SPECIFICATION.md)
-- [قراردادهای هوشمند](../protocols)
-- [دفترکل ملی](../architecture/LEDGER_SPECIFICATION.md)
-- [نهادهای انسانی ناظر](../protocols/citizen-identity-fa.md)
+- [`منشور ملی`](https://github.com/fafa33/Iran-OS/tree/main/constitution)
+- [`هسته IranOS`](https://github.com/fafa33/Iran-OS/blob/main/architecture/KERNEL_SPECIFICATION.md)
+- [`عامل‌های هوشمند`](https://github.com/fafa33/Iran-OS/blob/main/CLAUDE.md)
+- [`گردش‌کارهای اجرایی`](https://github.com/fafa33/Iran-OS/tree/main/workflows)
+- [`لایه امنیت`](https://github.com/fafa33/Iran-OS/blob/main/architecture/SECURITY_MODEL.md)
+- [`اوراکل‌ها`](https://github.com/fafa33/Iran-OS/blob/main/architecture/ORACLE_LAYER_SPECIFICATION.md)
+- [`قراردادهای هوشمند`](https://github.com/fafa33/Iran-OS/tree/main/protocols)
+- [`دفترکل ملی`](https://github.com/fafa33/Iran-OS/blob/main/architecture/LEDGER_SPECIFICATION.md)
+- [`نهادهای انسانی ناظر`](https://github.com/fafa33/Iran-OS/blob/main/protocols/citizen-identity-fa.md)- [نهادهای انسانی ناظر](../protocols/citizen-identity-fa.md)
+
 ⸻
 
 منشور ملی
