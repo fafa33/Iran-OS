@@ -46,14 +46,12 @@
 
 ## فناوری
 
-| لایه | ابزار |
-
 - قرارداد هوشمند: Solidity ^0.8.20 + OpenZeppelin
 - اوراکل: API3 / Airnode
 - اثبات صفر: Circom / SnarkJS / Noir
 - تراکنش ملی: ZK-Rollups
 - توسعه و تست: Hardhat / Foundry
-- ممیزی امنیتی: Slither / Mythril / Echidna| ممیزی امنیتی | Slither / Mythril / Echidna |
+- ممیزی امنیتی: Slither / Mythril / Echidna   
 
 ---
 
