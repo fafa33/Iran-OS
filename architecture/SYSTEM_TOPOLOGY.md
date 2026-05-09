@@ -60,8 +60,8 @@ flowchart TD
 - [قراردادهای هوشمند](../protocols)
 - [دفترکل ملی](../architecture/LEDGER_SPECIFICATION.md)
 - [نهادهای انسانی ناظر](../protocols/citizen-identity-fa.md)
+⸻
 
-```text
 منشور ملی
    ↓
 هسته IranOS
