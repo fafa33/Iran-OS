@@ -16,7 +16,7 @@
 
 ---
 
-## ساختار پروژه## ساختار پروژه
+## ساختار پروژه
 
 - [`/constitution`](https://github.com/fafa33/Iran-OS/tree/main/constitution) — پیمان ملی مشروطه سکولار
 
@@ -44,9 +44,9 @@
 
 ---
 
+## فناوری
 
-
-| لایه | ابزار |## فناوری
+| لایه | ابزار |
 
 - قرارداد هوشمند: Solidity ^0.8.20 + OpenZeppelin
 - اوراکل: API3 / Airnode
