@@ -24,7 +24,7 @@
 8. [لایه نظارت انسانی](../protocols/citizen-identity-fa.md)
 9. [لایه امنیت و ماشه اضطراری](../constitution/README.md)
 
-10. 
+
 ## دیاگرام مفهومی
 
 ```mermaid
@@ -60,7 +60,7 @@ flowchart TD
 - [قراردادهای هوشمند](../protocols)
 - [دفترکل ملی](../architecture/LEDGER_SPECIFICATION.md)
 - [نهادهای انسانی ناظر](../protocols/citizen-identity-fa.md)
-```
+
 ```text
 منشور ملی
    ↓
