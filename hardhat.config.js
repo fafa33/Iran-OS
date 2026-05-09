@@ -21,10 +21,10 @@ module.exports = {
     hardhat: {
       chainId: 31337,
     },
-    sepolia: {
-      url: "https://sepolia.infura.io/v3/YOUR_INFURA_KEY", // بعداً Infura/Alchemy بذار
-      accounts: ["YOUR_PRIVATE_KEY"], // بعداً .env بذار (هرگز مستقیم ننویس!)
-    },
+    // sepolia: {
+//   url: process.env.SEPOLIA_RPC_URL,
+//   accounts: [process.env.PRIVATE_KEY]
+// },
   },
   etherscan: {
     apiKey: "YOUR_ETHERSCAN_API_KEY", // بعداً اضافه کن
