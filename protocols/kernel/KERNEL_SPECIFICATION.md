@@ -85,7 +85,7 @@ Treasury / Welfare / Judiciary
 
 
             
-اصل بنیادین #
+اصل بنیادین
 
 Governance Kernel نباید به هیچ 
 نهاد انسانی اجازه عبور 
