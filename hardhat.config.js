@@ -21,17 +21,5 @@ module.exports = {
     hardhat: {
       chainId: 31337,
     },
-    // sepolia: {
-//   url: process.env.SEPOLIA_RPC_URL,
-//   accounts: [process.env.PRIVATE_KEY]
-// },
-  },
-  etherscan: {
-    apiKey: "YOUR_ETHERSCAN_API_KEY", // بعداً اضافه کن
-  },
-  gasReporter: {
-    enabled: true,
-    currency: "USD",
-    coinmarketcap: "YOUR_CMC_KEY", // اختیاری
   },
 };
