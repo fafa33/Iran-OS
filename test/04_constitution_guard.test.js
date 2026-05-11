@@ -69,7 +69,7 @@ describe("ConstitutionGuard", function () {
 
     beforeEach(async function () {
       lawHash = ethers.keccak256(ethers.toUtf8Bytes("قانون حمایت از محیط زیست"));
-      await guard.connect(proposer).proposeLaw(lawHash, 0x04); // اصل ارضی
+      await guard.connect(proposer).proposeLaw(lawHash, 0x08); // اصل استقلال پولی — غیراجباری
     });
 
     it("Kernel می‌تواند قانون را تایید کند", async function () {
@@ -88,6 +88,28 @@ describe("ConstitutionGuard", function () {
       await guard.connect(kernel).approveLaw(lawHash);
       await expect(guard.connect(kernel).approveLaw(lawHash))
         .to.be.revertedWith("ConstitutionGuard: already executed");
+    });
+
+    it("تایید قانون متعارض با اصل سکولاریسم (بیت ۰) رد می‌شود", async function () {
+      const conflictHash = ethers.keccak256(ethers.toUtf8Bytes("قانون دین رسمی"));
+      await guard.connect(proposer).proposeLaw(conflictHash, 0x01); // bit 0 = secularism
+      await expect(guard.connect(kernel).approveLaw(conflictHash))
+        .to.be.revertedWith("ConstitutionGuard: conflicts with immutable principles");
+    });
+
+    it("تایید قانون متعارض با اصول ۱، ۲ و ۳ به‌طور همزمان رد می‌شود", async function () {
+      const conflictHash = ethers.keccak256(ethers.toUtf8Bytes("قانون نقض همه اصول"));
+      await guard.connect(proposer).proposeLaw(conflictHash, 0x07); // all three immutable
+      await expect(guard.connect(kernel).approveLaw(conflictHash))
+        .to.be.revertedWith("ConstitutionGuard: conflicts with immutable principles");
+    });
+
+    it("تایید قانون مرتبط با اصول ۴ و ۵ (غیراجباری) پذیرفته می‌شود", async function () {
+      const safeHash = ethers.keccak256(ethers.toUtf8Bytes("قانون بودجه قضایی"));
+      await guard.connect(proposer).proposeLaw(safeHash, 0x18); // bits 3+4 = monetary+judicial only
+      await expect(guard.connect(kernel).approveLaw(safeHash))
+        .to.emit(guard, "LawApproved");
+      expect(await guard.isLawApproved(safeHash)).to.be.true;
     });
   });
 
