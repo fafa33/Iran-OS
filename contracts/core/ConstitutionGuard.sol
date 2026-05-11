@@ -92,6 +92,10 @@ contract ConstitutionGuard {
         LawProposal storage proposal = proposals[lawHash];
         require(proposal.proposedAt > 0, "ConstitutionGuard: proposal not found");
         require(!proposal.executed,      "ConstitutionGuard: already executed");
+        require(
+            (proposal.principlesMask & IMMUTABLE_PRINCIPLES_MASK) == 0,
+            "ConstitutionGuard: conflicts with immutable principles"
+        );
 
         proposal.isCompliant = true;
         proposal.executed    = true;
