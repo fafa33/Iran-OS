@@ -5,139 +5,160 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
- * @title HealthCoverage
- * @dev بیمه همگانی و پوشش درمانی — فرگرد ۱۰ منشور
- * - بیمه درمانی رایگان برای تمام شهروندان
- * - بودجه مستقیم به کیف پول سلامت هر شهروند
- * - یارانه دارو در لحظه خرید اعمال می‌شود
- * - مرخصی زایمان برای هر دو والد از صندوق رفاه ملی
+ * @title DisabilitySupport
+ * @dev حمایت از شهروندان توان‌خواه — فرگرد ۱۰ منشور رفاه و عدالت
+ * - مستمری ماهانه تضمینی برابر حداقل دستمزد + مکمل درجه ناتوانی
+ * - درجه ۱ (خفیف): ۱۳۰۰ پهلوی | درجه ۲ (متوسط): ۱۵۰۰ | درجه ۳ (شدید): ۱۷۰۰
+ * - کارت دسترسی‌پذیری برای خدمات عمومی
  * نسخه ۱.۰ — فروردین ۲۵۸۵ شاهنشاهی
  */
-contract HealthCoverage is AccessControl, ReentrancyGuard {
+contract DisabilitySupport is AccessControl, ReentrancyGuard {
 
-    bytes32 public constant KERNEL_ROLE   = keccak256("KERNEL_ROLE");
-    bytes32 public constant HEALTH_ROLE   = keccak256("HEALTH_ROLE");
-    bytes32 public constant PROVIDER_ROLE = keccak256("PROVIDER_ROLE");
-    bytes32 public constant PHARMACY_ROLE = keccak256("PHARMACY_ROLE");
-    bytes32 public constant SWF_ROLE      = keccak256("SWF_ROLE");
+    bytes32 public constant KERNEL_ROLE  = keccak256("KERNEL_ROLE");
+    bytes32 public constant HEALTH_ROLE  = keccak256("HEALTH_ROLE");
+    bytes32 public constant WELFARE_ROLE = keccak256("WELFARE_ROLE");
+    bytes32 public constant SWF_ROLE     = keccak256("SWF_ROLE");
 
-    uint256 public constant ANNUAL_HEALTH_CREDIT = 500  * 1e18;
-    uint256 public constant MONTHLY_DRUG_QUOTA   = 100  * 1e18;
-    uint256 public constant MATERNITY_LEAVE_PAY  = 6000 * 1e18;
+    uint256 public constant MIN_WAGE          = 1_000 * 1e18;
+    uint256 public constant LEVEL1_SUPPLEMENT = 300;
+    uint256 public constant LEVEL2_SUPPLEMENT = 500;
+    uint256 public constant LEVEL3_SUPPLEMENT = 700;
 
-    struct HealthWallet {
-        uint256 annualCredit;
-        uint256 monthlyDrugQuota;
-        uint256 lastCreditRenewal;
-        uint256 lastDrugReset;
-        uint256 totalHealthSpent;
-        bool    isActive;
+    uint256 public constant PAYMENT_INTERVAL = 30 days;
+
+    enum DisabilityLevel { None, Mild, Moderate, Severe }
+
+    struct DisabledCitizen {
+        uint8   level;
+        uint256 monthlyStipend;
+        uint256 lastPayment;
+        bool    accessibilityCard;
+        bool    isRegistered;
     }
 
-    struct MaternityLeave {
-        address parent;
-        uint256 startDate;
-        uint256 totalPayment;
-        bool    isPaid;
-    }
-
-    struct HealthProvider {
-        string  name;
-        address wallet;
-        bool    isApproved;
-        uint256 totalBillings;
+    struct AccessibilityAudit {
+        bytes32 subjectId;
+        address auditor;
+        string  subjectType;
         bool    meetsStandard;
+        string  notes;
+        uint256 timestamp;
     }
 
-    mapping(address => HealthWallet)   public healthWallets;
-    mapping(uint256 => MaternityLeave) public maternityLeaves;
-    mapping(address => HealthProvider) public providers;
-    uint256 public maternityLeaveCount;
-    uint256 public strategicReserve;
+    mapping(address => DisabledCitizen)  public citizens;
+    AccessibilityAudit[]                 public auditLog;
 
-    event HealthWalletCreated(address indexed citizen, uint256 timestamp);
-    event HealthCreditUsed(address indexed citizen, uint256 amount, address provider);
-    event DrugQuotaUsed(address indexed citizen, uint256 amount, address pharmacy);
-    event CreditRenewed(address indexed citizen, uint256 newCredit, uint256 timestamp);
-    event DrugQuotaReset(address indexed citizen, uint256 timestamp);
-    event MaternityLeaveGranted(uint256 indexed leaveId, address parent, uint256 amount);
-    event ProviderRegistered(address indexed provider, string name);
-    event ProviderStandardUpdated(address indexed provider, bool meetsStandard);
-    event StrategicReserveUpdated(uint256 newAmount, uint256 timestamp);
+    event DisabledCitizenRegistered(address indexed citizen, uint8 level, uint256 stipend, uint256 timestamp);
+    event StipendPaid(address indexed citizen, uint256 amount, uint256 timestamp);
+    event DisabilityLevelUpdated(address indexed citizen, uint8 oldLevel, uint8 newLevel, uint256 newStipend, uint256 timestamp);
+    event AccessibilityCardIssued(address indexed citizen, uint256 timestamp);
+    event AccessibilityAuditCompleted(bytes32 indexed subjectId, address auditor, bool meetsStandard, uint256 timestamp);
 
     constructor(address _kernel) {
-        require(_kernel != address(0), "HealthCoverage: invalid kernel");
+        require(_kernel != address(0), "DisabilitySupport: invalid kernel");
         _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
         _grantRole(KERNEL_ROLE, _kernel);
     }
 
-    function createHealthWallet(address citizen) external onlyRole(HEALTH_ROLE) nonReentrant {
-        require(citizen != address(0), "HealthCoverage: invalid citizen");
-        require(!healthWallets[citizen].isActive, "HealthCoverage: exists");
-        healthWallets[citizen] = HealthWallet({ annualCredit: ANNUAL_HEALTH_CREDIT, monthlyDrugQuota: MONTHLY_DRUG_QUOTA, lastCreditRenewal: block.timestamp, lastDrugReset: block.timestamp, totalHealthSpent: 0, isActive: true });
-        emit HealthWalletCreated(citizen, block.timestamp);
+    /**
+     * @notice محاسبه مستمری ماهانه بر اساس درجه ناتوانی
+     * @param level درجه ناتوانی (۱=خفیف، ۲=متوسط، ۳=شدید)
+     */
+    function calculateStipend(uint8 level) public pure returns (uint256) {
+        if (level == uint8(DisabilityLevel.Mild))     return MIN_WAGE + LEVEL1_SUPPLEMENT * 1e18;
+        if (level == uint8(DisabilityLevel.Moderate)) return MIN_WAGE + LEVEL2_SUPPLEMENT * 1e18;
+        if (level == uint8(DisabilityLevel.Severe))   return MIN_WAGE + LEVEL3_SUPPLEMENT * 1e18;
+        revert("DisabilitySupport: invalid level");
     }
 
-    function useHealthCredit(address citizen, uint256 amount, address provider) external onlyRole(PROVIDER_ROLE) nonReentrant {
-        require(providers[provider].isApproved, "HealthCoverage: provider not approved");
-        HealthWallet storage wallet = healthWallets[citizen];
-        require(wallet.isActive, "HealthCoverage: not active");
-        require(wallet.annualCredit >= amount, "HealthCoverage: insufficient credit");
-        wallet.annualCredit -= amount;
-        wallet.totalHealthSpent += amount;
-        providers[provider].totalBillings += amount;
-        emit HealthCreditUsed(citizen, amount, provider);
+    /**
+     * @notice ثبت شهروند توان‌خواه
+     * @param citizen آدرس شهروند
+     * @param level درجه ناتوانی (۱–۳)
+     */
+    function registerDisabledCitizen(address citizen, uint8 level) external onlyRole(HEALTH_ROLE) nonReentrant {
+        require(citizen != address(0), "DisabilitySupport: invalid address");
+        require(!citizens[citizen].isRegistered, "DisabilitySupport: registered");
+        uint256 stipend = calculateStipend(level); // reverts on level == 0
+        citizens[citizen] = DisabledCitizen({
+            level:            level,
+            monthlyStipend:   stipend,
+            lastPayment:      0,
+            accessibilityCard: false,
+            isRegistered:     true
+        });
+        emit DisabledCitizenRegistered(citizen, level, stipend, block.timestamp);
     }
 
-    function useDrugQuota(address citizen, uint256 amount, address pharmacy) external onlyRole(PHARMACY_ROLE) nonReentrant {
-        HealthWallet storage wallet = healthWallets[citizen];
-        require(wallet.isActive, "HealthCoverage: not active");
-        if (block.timestamp >= wallet.lastDrugReset + 30 days) {
-            wallet.monthlyDrugQuota = MONTHLY_DRUG_QUOTA;
-            wallet.lastDrugReset = block.timestamp;
-            emit DrugQuotaReset(citizen, block.timestamp);
-        }
-        require(wallet.monthlyDrugQuota >= amount, "HealthCoverage: insufficient quota");
-        wallet.monthlyDrugQuota -= amount;
-        emit DrugQuotaUsed(citizen, amount, pharmacy);
+    /**
+     * @notice پرداخت مستمری ماهانه
+     * @param citizen آدرس شهروند
+     */
+    function payMonthlyStipend(address citizen) external onlyRole(WELFARE_ROLE) nonReentrant {
+        DisabledCitizen storage c = citizens[citizen];
+        require(c.isRegistered, "DisabilitySupport: not registered");
+        require(block.timestamp >= c.lastPayment + PAYMENT_INTERVAL, "DisabilitySupport: too early");
+        c.lastPayment = block.timestamp;
+        emit StipendPaid(citizen, c.monthlyStipend, block.timestamp);
     }
 
-    function renewAnnualCredit(address citizen) external onlyRole(HEALTH_ROLE) nonReentrant {
-        HealthWallet storage wallet = healthWallets[citizen];
-        require(wallet.isActive, "HealthCoverage: not active");
-        require(block.timestamp >= wallet.lastCreditRenewal + 365 days, "HealthCoverage: too early");
-        wallet.annualCredit = ANNUAL_HEALTH_CREDIT;
-        wallet.lastCreditRenewal = block.timestamp;
-        emit CreditRenewed(citizen, ANNUAL_HEALTH_CREDIT, block.timestamp);
+    /**
+     * @notice به‌روزرسانی درجه ناتوانی و مستمری
+     * @param citizen آدرس شهروند
+     * @param newLevel درجه جدید (۱–۳)
+     */
+    function updateDisabilityLevel(address citizen, uint8 newLevel) external onlyRole(HEALTH_ROLE) nonReentrant {
+        DisabledCitizen storage c = citizens[citizen];
+        require(c.isRegistered, "DisabilitySupport: not registered");
+        uint8 oldLevel = c.level;
+        uint256 newStipend = calculateStipend(newLevel);
+        c.level = newLevel;
+        c.monthlyStipend = newStipend;
+        emit DisabilityLevelUpdated(citizen, oldLevel, newLevel, newStipend, block.timestamp);
     }
 
-    function grantMaternityLeave(address parent) external onlyRole(HEALTH_ROLE) nonReentrant returns (uint256 leaveId) {
-        require(parent != address(0), "HealthCoverage: invalid parent");
-        maternityLeaveCount++; leaveId = maternityLeaveCount;
-        maternityLeaves[leaveId] = MaternityLeave({ parent: parent, startDate: block.timestamp, totalPayment: MATERNITY_LEAVE_PAY, isPaid: false });
-        emit MaternityLeaveGranted(leaveId, parent, MATERNITY_LEAVE_PAY);
-        return leaveId;
+    /**
+     * @notice صدور کارت دسترسی‌پذیری برای خدمات عمومی
+     * @param citizen آدرس شهروند
+     */
+    function issueAccessibilityCard(address citizen) external onlyRole(WELFARE_ROLE) nonReentrant {
+        DisabledCitizen storage c = citizens[citizen];
+        require(c.isRegistered, "DisabilitySupport: not registered");
+        c.accessibilityCard = true;
+        emit AccessibilityCardIssued(citizen, block.timestamp);
     }
 
-    function registerProvider(address provider, string calldata name) external onlyRole(KERNEL_ROLE) nonReentrant {
-        require(provider != address(0), "HealthCoverage: invalid provider");
-        providers[provider] = HealthProvider({ name: name, wallet: provider, isApproved: true, totalBillings: 0, meetsStandard: false });
-        _grantRole(PROVIDER_ROLE, provider);
-        emit ProviderRegistered(provider, name);
+    /**
+     * @notice ثبت نتیجه بازرسی دسترسی‌پذیری
+     * @param subjectId شناسه محل یا سازمان
+     * @param auditor بازرس
+     * @param subjectType نوع موضوع (ساختمان، حمل‌ونقل، …)
+     * @param meetsStandard آیا استاندارد رعایت شده
+     * @param notes یادداشت بازرسی
+     */
+    function recordAccessibilityAudit(
+        bytes32 subjectId,
+        address auditor,
+        string calldata subjectType,
+        bool meetsStandard,
+        string calldata notes
+    ) external onlyRole(WELFARE_ROLE) {
+        auditLog.push(AccessibilityAudit({
+            subjectId:    subjectId,
+            auditor:      auditor,
+            subjectType:  subjectType,
+            meetsStandard: meetsStandard,
+            notes:        notes,
+            timestamp:    block.timestamp
+        }));
+        emit AccessibilityAuditCompleted(subjectId, auditor, meetsStandard, block.timestamp);
     }
 
-    function updateProviderStandard(address provider, bool meetsStandard) external onlyRole(HEALTH_ROLE) {
-        require(providers[provider].isApproved, "HealthCoverage: not found");
-        providers[provider].meetsStandard = meetsStandard;
-        emit ProviderStandardUpdated(provider, meetsStandard);
+    function getDisabledCitizen(address citizen) external view returns (DisabledCitizen memory) {
+        return citizens[citizen];
     }
 
-    function updateStrategicReserve(uint256 amount) external onlyRole(SWF_ROLE) {
-        strategicReserve = amount;
-        emit StrategicReserveUpdated(amount, block.timestamp);
+    function getAuditCount() external view returns (uint256) {
+        return auditLog.length;
     }
-
-    function getHealthWallet(address citizen) external view returns (HealthWallet memory) { return healthWallets[citizen]; }
-    function getProvider(address provider) external view returns (HealthProvider memory) { return providers[provider]; }
-    function getMaternityLeave(uint256 leaveId) external view returns (MaternityLeave memory) { return maternityLeaves[leaveId]; }
 }
