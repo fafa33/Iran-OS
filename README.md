@@ -8,7 +8,7 @@
 
 ---
 
-## اپلیکیشن زنده
+## دموی اپلیکیشن زنده
 
 **[https://fafa33.github.io/Iran-OS/](https://fafa33.github.io/Iran-OS/)**
 
