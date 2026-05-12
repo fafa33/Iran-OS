@@ -328,6 +328,7 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
         // لایه دوم اجرا: فراخوانی TriggerProtocol برای مسدودسازی خزانه
         // و اطلاع‌رسانی عمومی (اگر آدرس قرارداد تنظیم شده باشد)
         if (triggerProtocol != address(0)) {
+            // executionId در TriggerProtocol.executions ذخیره می‌شود و نیازی به نگه‌داری در Kernel نیست
             ITriggerProtocol(triggerProtocol).executeTrigger(
                 violationId,
                 record.offender,
@@ -364,6 +365,9 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
         }
         if (hasRole(GUARDIAN_ROLE, offender)) {
             _revokeRole(GUARDIAN_ROLE, offender);
+        }
+        if (hasRole(ORACLE_ROLE, offender)) {
+            _revokeRole(ORACLE_ROLE, offender);
         }
 
         emit AccessRevoked(offender, reason, block.timestamp);
