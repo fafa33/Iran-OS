@@ -68,8 +68,78 @@ contract BudgetAllocation is AccessControl, ReentrancyGuard {
         currentFiscalYear = 1404;
     }
 
+    /**
+     * @notice تصویب بودجه سالانه — فقط مجلس مجاز
+     * @param fiscalYear سال مالی (شمسی)
+     */
     function approveBudget(uint256 fiscalYear) external onlyRole(PARLIAMENT_ROLE) nonReentrant {
         require(fiscalYear >= currentFiscalYear, "BudgetAllocation: invalid year");
         require(!budgetApproved, "BudgetAllocation: approved");
-        sectorBudgets[uint8(Sector.Health)]         = SectorBudget(Sector.Health,         (TOTAL_BUDGET * HEALTH_RATIO) / 1000,         0, fiscalYear, false);
-        sectorBudgets[uint8(Sector.Education)]
+        sectorBudgets[uint8(Sector.Health)]         = SectorBudget(Sector.Health,         (TOTAL_BUDGET * HEALTH_RATIO)         / 1000, 0, fiscalYear, false);
+        sectorBudgets[uint8(Sector.Education)]      = SectorBudget(Sector.Education,      (TOTAL_BUDGET * EDUCATION_RATIO)      / 1000, 0, fiscalYear, false);
+        sectorBudgets[uint8(Sector.Defense)]        = SectorBudget(Sector.Defense,        (TOTAL_BUDGET * DEFENSE_RATIO)        / 1000, 0, fiscalYear, false);
+        sectorBudgets[uint8(Sector.Infrastructure)] = SectorBudget(Sector.Infrastructure, (TOTAL_BUDGET * INFRASTRUCTURE_RATIO) / 1000, 0, fiscalYear, false);
+        sectorBudgets[uint8(Sector.Welfare)]        = SectorBudget(Sector.Welfare,        (TOTAL_BUDGET * WELFARE_RATIO)        / 1000, 0, fiscalYear, false);
+        sectorBudgets[uint8(Sector.Justice)]        = SectorBudget(Sector.Justice,        (TOTAL_BUDGET * JUSTICE_RATIO)        / 1000, 0, fiscalYear, false);
+        sectorBudgets[uint8(Sector.Environment)]    = SectorBudget(Sector.Environment,    (TOTAL_BUDGET * ENVIRONMENT_RATIO)    / 1000, 0, fiscalYear, false);
+        sectorBudgets[uint8(Sector.Administration)] = SectorBudget(Sector.Administration, (TOTAL_BUDGET * ADMINISTRATION_RATIO) / 1000, 0, fiscalYear, false);
+        budgetApproved    = true;
+        currentFiscalYear = fiscalYear;
+        emit BudgetApproved(fiscalYear, TOTAL_BUDGET, block.timestamp);
+    }
+
+    /**
+     * @notice دریافت اطلاعات بودجه یک بخش
+     * @param sectorId شناسه بخش (۰=بهداشت … ۷=اداری)
+     */
+    function getSectorBudget(uint8 sectorId) external view returns (SectorBudget memory) {
+        return sectorBudgets[sectorId];
+    }
+
+    /**
+     * @notice ثبت هزینه — فقط دولت مجاز
+     * @param sectorId بخش مربوطه
+     * @param amount مقدار (در واحد ۱e18)
+     * @param description شرح هزینه
+     */
+    function recordExpenditure(uint8 sectorId, uint256 amount, string calldata description) external onlyRole(GOVERNMENT_ROLE) nonReentrant {
+        require(budgetApproved,                            "BudgetAllocation: not approved");
+        SectorBudget storage sb = sectorBudgets[sectorId];
+        require(!sb.isLocked,                              "BudgetAllocation: locked by Trigger");
+        require(amount > 0,                                "BudgetAllocation: zero amount");
+        require(sb.spent + amount <= sb.allocated,         "BudgetAllocation: exceeds budget");
+        expenditureCount++;
+        expenditures[expenditureCount] = Expenditure({
+            initiator:   msg.sender,
+            sector:      Sector(sectorId),
+            amount:      amount,
+            description: description,
+            timestamp:   block.timestamp,
+            approved:    false,
+            flagged:     false
+        });
+        sb.spent += amount;
+        emit ExpenditureRecorded(expenditureCount, Sector(sectorId), amount);
+    }
+
+    /**
+     * @notice پرچم‌گذاری هزینه مشکوک — فقط حسابرس مجاز
+     * @param expId شناسه هزینه
+     * @param reason دلیل پرچم‌گذاری
+     */
+    function flagExpenditure(uint256 expId, string calldata reason) external onlyRole(AUDITOR_ROLE) {
+        require(expId > 0 && expId <= expenditureCount, "BudgetAllocation: invalid expId");
+        expenditures[expId].flagged = true;
+        emit ExpenditureFlagged(expId, reason);
+    }
+
+    /**
+     * @notice قفل کردن بودجه بخش — فقط Kernel (از طریق ماشه)
+     * @param sectorId بخش مربوطه
+     * @param reason دلیل قفل
+     */
+    function lockSectorBudget(uint8 sectorId, string calldata reason) external onlyRole(KERNEL_ROLE) {
+        sectorBudgets[sectorId].isLocked = true;
+        emit SectorBudgetLocked(Sector(sectorId), reason);
+    }
+}
