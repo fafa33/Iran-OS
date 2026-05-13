@@ -15,6 +15,7 @@ contract SovereignWealthFund is AccessControl, ReentrancyGuard {
     bytes32 public constant SOVEREIGN_ROLE = keccak256("SOVEREIGN_ROLE");
     bytes32 public constant COUNCIL_ROLE   = keccak256("COUNCIL_ROLE");
     bytes32 public constant KERNEL_ROLE    = keccak256("KERNEL_ROLE");
+    bytes32 public constant RECLAIM_ROLE   = keccak256("RECLAIM_ROLE");
 
     uint256 public constant L1_TARGET    = 300_000_000_000 * 1e18;
     uint256 public constant L2_TARGET    = 300_000_000_000 * 1e18;
@@ -120,6 +121,25 @@ contract SovereignWealthFund is AccessControl, ReentrancyGuard {
         require(layerL2.balance >= yield, "SWF: insufficient L2");
         layerL2.balance -= yield; layerL1.balance += yield; layerL1.totalDeposited += yield;
         emit AnnualYieldDistributed(yield, block.timestamp);
+    }
+
+    /**
+     * @notice دریافت دارایی بازپس‌گرفته و ثبت در لایه نقد (L1)
+     * @dev تنها قرارداد AssetFreeze با نقش RECLAIM_ROLE مجاز به فراخوانی است.
+     *      این تابع صرفاً حسابداری است — هیچ توکن PAH ضرب نمی‌شود.
+     * @param amount ارزش دلاری دارایی (در واحد 1e18) — همان estimatedValue در AssetFreeze
+     * @param assetId شناسه دارایی (برای ردیابی در رویداد DepositToL1)
+     */
+    function receiveReclaimedAsset(uint256 amount, string calldata assetId)
+        external
+        onlyRole(RECLAIM_ROLE)
+        nonReentrant
+    {
+        require(amount > 0, "SWF: zero amount");
+        layerL1.balance       += amount;
+        layerL1.totalDeposited += amount;
+        layerL1.lastUpdated    = block.timestamp;
+        emit DepositToL1(amount, assetId, layerL1.balance);
     }
 
     function totalAssets() external view returns (uint256) { return layerL1.balance + layerL2.balance + layerL3.balance; }

@@ -4,6 +4,10 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+interface ISovereignWealthFund {
+    function receiveReclaimedAsset(uint256 amount, string calldata assetId) external;
+}
+
 /**
  * @title AssetFreeze
  * @dev انجماد آنی دارایی‌های غصبی — پروتکل بازپس‌گیری
@@ -33,7 +37,8 @@ contract AssetFreeze is AccessControl, ReentrancyGuard {
 
     bytes32[] public frozenAssetIds;
     uint256   public totalFrozenValue;
-    address   public swfTempWallet;
+    address   public swfTempWallet;  // کیف‌پول موقت — نگهداری دارایی در مرحله ۲ (۲۴–۴۸ ساعت)
+    address   public swfContract;    // قرارداد صندوق ثروت ملی — انتقال دائم در مرحله ۴
     uint8     public constant COUNCIL_THRESHOLD = 3;
 
     event AssetFrozen(bytes32 indexed assetId, address indexed owner, uint256 value, uint256 timestamp);
@@ -42,12 +47,14 @@ contract AssetFreeze is AccessControl, ReentrancyGuard {
     event AssetReleased(bytes32 indexed assetId, string reason, uint256 timestamp);
     event AssetTransferredToSWF(bytes32 indexed assetId, uint256 value, uint256 timestamp);
 
-    constructor(address _kernel, address _swfTempWallet) {
-        require(_kernel != address(0), "AssetFreeze: invalid kernel");
+    constructor(address _kernel, address _swfTempWallet, address _swfContract) {
+        require(_kernel      != address(0), "AssetFreeze: invalid kernel");
         require(_swfTempWallet != address(0), "AssetFreeze: invalid SWF wallet");
+        require(_swfContract != address(0), "AssetFreeze: invalid SWF contract");
         _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
         _grantRole(KERNEL_ROLE, _kernel);
         swfTempWallet = _swfTempWallet;
+        swfContract   = _swfContract;
     }
 
     function freezeAsset(bytes32 assetId, address originalOwner, string calldata assetType, uint256 estimatedValue, string calldata reason) external onlyRole(CRAWLER_ROLE) nonReentrant {
@@ -82,7 +89,18 @@ contract AssetFreeze is AccessControl, ReentrancyGuard {
         FrozenAsset storage asset = frozenAssets[assetId];
         require(asset.status == FreezeStatus.Confirmed, "AssetFreeze: not confirmed");
         require(!asset.transferredToSWF, "AssetFreeze: already transferred");
-        asset.transferredToSWF = true;
+
+        // اثرات پیش از برهم‌کنش (CEI) — اگر فراخوانی SWF ناموفق باشد، کل تراکنش برمی‌گردد
+        asset.transferredToSWF  = true;
+        totalFrozenValue        -= asset.estimatedValue;
+
+        // برهم‌کنش: ثبت حسابداری در لایه نقد (L1) صندوق ثروت ملی
+        // هیچ توکن PAH ضرب نمی‌شود — صرفاً به‌روزرسانی ترازنامه دارایی است
+        ISovereignWealthFund(swfContract).receiveReclaimedAsset(
+            asset.estimatedValue,
+            unicode"بازپس‌گیری"
+        );
+
         emit AssetTransferredToSWF(assetId, asset.estimatedValue, block.timestamp);
     }
 
