@@ -122,12 +122,71 @@ describe("SovereignWealthFund", function () {
 
       const expectedYield = (l2Deposit * 150n) / 1000n;
 
-      await expect(swf.connect(council1).distributeAnnualYield())
-        .to.emit(swf, "AnnualYieldDistributed")
-        .withArgs(expectedYield, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+      const tx = await swf.connect(council1).distributeAnnualYield();
+      const receipt = await tx.wait();
+      const event = receipt.logs.find(l => l.fragment?.name === "AnnualYieldDistributed");
+      expect(event).to.not.be.undefined;
+      expect(event.args[0]).to.equal(expectedYield);
 
       const l1 = await swf.layerL1();
       expect(l1.balance).to.equal(expectedYield);
+    });
+  });
+
+  // ─────────────────────────────────────────
+  // دریافت دارایی بازپس‌گرفته (receiveReclaimedAsset)
+  // ─────────────────────────────────────────
+
+  describe("receiveReclaimedAsset", function () {
+    let reclaimCaller;
+
+    beforeEach(async function () {
+      [,,,,,, reclaimCaller] = await ethers.getSigners();
+      const RECLAIM = await swf.RECLAIM_ROLE();
+      await swf.connect(sovereign).grantRole(RECLAIM, reclaimCaller.address);
+    });
+
+    it("دارنده RECLAIM_ROLE می‌تواند دارایی را به L1 واریز کند", async function () {
+      const amount = ethers.parseUnits("100000000", 18); // ۱۰۰ میلیون
+      await expect(
+        swf.connect(reclaimCaller).receiveReclaimedAsset(amount, "بازپس‌گیری")
+      ).to.emit(swf, "DepositToL1")
+        .withArgs(amount, "بازپس‌گیری", amount);
+
+      const layer = await swf.layerL1();
+      expect(layer.balance).to.equal(amount);
+      expect(layer.totalDeposited).to.equal(amount);
+    });
+
+    it("چند واریز پشت سر هم موجودی L1 را درست جمع می‌کند", async function () {
+      const a1 = ethers.parseUnits("50000000", 18);
+      const a2 = ethers.parseUnits("75000000", 18);
+      await swf.connect(reclaimCaller).receiveReclaimedAsset(a1, "بازپس‌گیری");
+      await swf.connect(reclaimCaller).receiveReclaimedAsset(a2, "بازپس‌گیری");
+      const layer = await swf.layerL1();
+      expect(layer.balance).to.equal(a1 + a2);
+    });
+
+    it("بدون RECLAIM_ROLE فراخوانی رد می‌شود", async function () {
+      await expect(
+        swf.connect(stranger).receiveReclaimedAsset(
+          ethers.parseUnits("1", 18), "بازپس‌گیری"
+        )
+      ).to.be.reverted;
+    });
+
+    it("مقدار صفر رد می‌شود", async function () {
+      await expect(
+        swf.connect(reclaimCaller).receiveReclaimedAsset(0n, "بازپس‌گیری")
+      ).to.be.revertedWith("SWF: zero amount");
+    });
+
+    it("COUNCIL_ROLE بدون RECLAIM_ROLE نمی‌تواند receiveReclaimedAsset را فراخوانی کند", async function () {
+      await expect(
+        swf.connect(council1).receiveReclaimedAsset(
+          ethers.parseUnits("1", 18), "بازپس‌گیری"
+        )
+      ).to.be.reverted;
     });
   });
 

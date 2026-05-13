@@ -4,9 +4,8 @@ const { expect } = require("chai");
 const { ethers }  = require("hardhat");
 
 describe("AssetFreeze", function () {
-  let freeze;
-  let kernel, crawler, council1, council2, council3, owner, stranger;
-  let swfWallet;
+  let freeze, swf;
+  let kernel, crawler, council1, council2, council3, owner, stranger, swfWallet;
 
   const assetId    = ethers.keccak256(ethers.toUtf8Bytes("asset_001"));
   const assetValue = ethers.parseUnits("500000000", 18); // ۵۰۰ میلیون
@@ -14,16 +13,29 @@ describe("AssetFreeze", function () {
   beforeEach(async function () {
     [kernel, crawler, council1, council2, council3, owner, stranger, swfWallet] = await ethers.getSigners();
 
-    const AssetFreeze = await ethers.getContractFactory("AssetFreeze");
-    freeze = await AssetFreeze.deploy(kernel.address, swfWallet.address);
+    // استقرار صندوق ثروت ملی — owner به عنوان حاکم SWF برای اعطای RECLAIM_ROLE
+    const SWF = await ethers.getContractFactory("SovereignWealthFund");
+    swf = await SWF.deploy(owner.address, kernel.address);
 
+    // استقرار قرارداد انجماد با آدرس‌های مجزا برای کیف‌پول موقت و قرارداد SWF
+    const AssetFreeze = await ethers.getContractFactory("AssetFreeze");
+    freeze = await AssetFreeze.deploy(
+      kernel.address,
+      swfWallet.address,        // کیف‌پول موقت مرحله ۲
+      await swf.getAddress()    // قرارداد SWF برای انتقال دائم مرحله ۴
+    );
+
+    // اعطای نقش‌های AssetFreeze
     const CRAWLER = await freeze.CRAWLER_ROLE();
     const COUNCIL = await freeze.COUNCIL_ROLE();
-
     await freeze.connect(kernel).grantRole(CRAWLER, crawler.address);
     await freeze.connect(kernel).grantRole(COUNCIL, council1.address);
     await freeze.connect(kernel).grantRole(COUNCIL, council2.address);
     await freeze.connect(kernel).grantRole(COUNCIL, council3.address);
+
+    // اعطای RECLAIM_ROLE به قرارداد AssetFreeze در SWF
+    const RECLAIM = await swf.RECLAIM_ROLE();
+    await swf.connect(owner).grantRole(RECLAIM, await freeze.getAddress());
   });
 
   // ─────────────────────────────────────────
@@ -128,6 +140,55 @@ describe("AssetFreeze", function () {
       await freeze.connect(council1).transferToSWF(assetId);
       await expect(freeze.connect(council1).transferToSWF(assetId))
         .to.be.revertedWith("AssetFreeze: already transferred");
+    });
+
+    it("موجودی L1 صندوق ثروت ملی به اندازه ارزش دارایی افزایش می‌یابد", async function () {
+      const l1Before = (await swf.layerL1()).balance;
+      await freeze.connect(council1).transferToSWF(assetId);
+      const l1After = (await swf.layerL1()).balance;
+      expect(l1After - l1Before).to.equal(assetValue);
+    });
+
+    it("totalFrozenValue به اندازه ارزش دارایی کاهش می‌یابد", async function () {
+      const frozenBefore = await freeze.totalFrozenValue();
+      await freeze.connect(council1).transferToSWF(assetId);
+      const frozenAfter = await freeze.totalFrozenValue();
+      expect(frozenBefore - frozenAfter).to.equal(assetValue);
+    });
+
+    it("اگر AssetFreeze فاقد RECLAIM_ROLE در SWF باشد، انتقال به‌صورت اتمی revert می‌شود", async function () {
+      // استقرار SWF جدید بدون اعطای RECLAIM_ROLE به هیچ‌کس
+      const SWF = await ethers.getContractFactory("SovereignWealthFund");
+      const freshSwf = await SWF.deploy(owner.address, kernel.address);
+
+      // استقرار AssetFreeze جدید که به SWF بدون نقش اشاره می‌کند
+      const AssetFreeze = await ethers.getContractFactory("AssetFreeze");
+      const freezeNoRole = await AssetFreeze.deploy(
+        kernel.address,
+        swfWallet.address,
+        await freshSwf.getAddress()
+      );
+      const CRAWLER = await freezeNoRole.CRAWLER_ROLE();
+      const COUNCIL = await freezeNoRole.COUNCIL_ROLE();
+      await freezeNoRole.connect(kernel).grantRole(CRAWLER, crawler.address);
+      await freezeNoRole.connect(kernel).grantRole(COUNCIL, council1.address);
+      await freezeNoRole.connect(kernel).grantRole(COUNCIL, council2.address);
+      await freezeNoRole.connect(kernel).grantRole(COUNCIL, council3.address);
+
+      await freezeNoRole.connect(crawler).freezeAsset(assetId, owner.address, "ملک", assetValue, "دارایی غصبی");
+      await freezeNoRole.connect(council1).signConfirmation(assetId);
+      await freezeNoRole.connect(council2).signConfirmation(assetId);
+      await freezeNoRole.connect(council3).signConfirmation(assetId);
+
+      // باید revert شود — SWF فراخوانی را رد می‌کند
+      await expect(
+        freezeNoRole.connect(council1).transferToSWF(assetId)
+      ).to.be.reverted;
+
+      // تأیید اتمیک‌بودن: وضعیت AssetFreeze تغییر نکرده
+      const asset = await freezeNoRole.getFrozenAsset(assetId);
+      expect(asset.transferredToSWF).to.equal(false);
+      expect(await freezeNoRole.totalFrozenValue()).to.equal(assetValue);
     });
   });
 
