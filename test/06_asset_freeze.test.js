@@ -44,12 +44,15 @@ describe("AssetFreeze", function () {
 
   describe("freezeAsset", function () {
     it("خزنده می‌تواند دارایی منجمد کند", async function () {
-      await expect(
-        freeze.connect(crawler).freezeAsset(
-          assetId, owner.address, "ملک", assetValue, "دارایی غصبی"
-        )
-      ).to.emit(freeze, "AssetFrozen")
-        .withArgs(assetId, owner.address, assetValue, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+      const tx = await freeze.connect(crawler).freezeAsset(
+        assetId, owner.address, "ملک", assetValue, "دارایی غصبی"
+      );
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+      await expect(tx)
+        .to.emit(freeze, "AssetFrozen")
+        .withArgs(assetId, owner.address, assetValue, block.timestamp);
 
       expect(await freeze.totalFrozenAssets()).to.equal(1n);
       expect(await freeze.totalFrozenValue()).to.equal(assetValue);
@@ -131,9 +134,13 @@ describe("AssetFreeze", function () {
     });
 
     it("شورا می‌تواند دارایی تایید شده را منتقل کند", async function () {
-      await expect(freeze.connect(council1).transferToSWF(assetId))
+      const tx = await freeze.connect(council1).transferToSWF(assetId);
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+      await expect(tx)
         .to.emit(freeze, "AssetTransferredToSWF")
-        .withArgs(assetId, assetValue, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+        .withArgs(assetId, assetValue, block.timestamp);
     });
 
     it("انتقال دوباره رد می‌شود", async function () {
