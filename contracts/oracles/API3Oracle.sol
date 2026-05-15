@@ -4,6 +4,10 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+interface IIranOSKernel {
+    function flagViolation(uint8 violationCode, address offender, string calldata reason) external returns (uint256 violationId);
+}
+
 /**
  * @title API3Oracle
  * @dev اوراکل اصلی ایران‌اواس — اتصال داده‌های واقعی به قراردادهای هوشمند
@@ -84,6 +88,7 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
         flagId = violationFlagCount;
         violationFlags[flagId] = ViolationFlag({ offender: offender, violationCode: violationCode, reason: reason, timestamp: block.timestamp, confirmed: false });
         emit ViolationFlagged(flagId, offender, violationCode);
+        IIranOSKernel(kernel).flagViolation(violationCode, offender, reason);
         return flagId;
     }
 
