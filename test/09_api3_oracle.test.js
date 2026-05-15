@@ -76,6 +76,18 @@ describe("API3Oracle", function () {
       ).to.be.revertedWith("API3Oracle: caller is not a feeder");
     });
 
+    it("misconfigured Kernel ORACLE_ROLE reverts atomically without orphan oracle flag", async function () {
+      const ORACLE_ROLE = await kernel.ORACLE_ROLE();
+      await kernel.connect(sovereign).revokeRole(ORACLE_ROLE, await api3Oracle.getAddress());
+
+      await expect(
+        api3Oracle.connect(feeder).flagViolation(offender.address, 4, "test")
+      ).to.be.revertedWith("Kernel: caller is not an Oracle");
+
+      expect(await api3Oracle.violationFlagCount()).to.equal(0n);
+      expect(await kernel.violationCount()).to.equal(0n);
+    });
+
     it("invalid violation code is rejected before forwarding", async function () {
       await expect(
         api3Oracle.connect(feeder).flagViolation(offender.address, 7, "invalid")
