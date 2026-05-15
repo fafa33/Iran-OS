@@ -32,11 +32,15 @@ describe("CitizenCard", function () {
 
   describe("registerCitizen", function () {
     it("صادرکننده می‌تواند شهروند ثبت کند", async function () {
-      await expect(
-        card.connect(issuer).registerCitizen(
-          citizen1.address, biometric1, nationalId1, 1370, false, 0
-        )
-      ).to.emit(card, "CitizenRegistered").withArgs(citizen1.address, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+      const tx = await card.connect(issuer).registerCitizen(
+        citizen1.address, biometric1, nationalId1, 1370, false, 0
+      );
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+      await expect(tx)
+        .to.emit(card, "CitizenRegistered")
+        .withArgs(citizen1.address, block.timestamp);
 
       expect(await card.isRegistered(citizen1.address)).to.be.true;
     });

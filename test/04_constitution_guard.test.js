@@ -36,9 +36,13 @@ describe("ConstitutionGuard", function () {
       const hash = ethers.keccak256(ethers.toUtf8Bytes("قانون آزادی مطبوعات"));
       const mask = 0x02; // اصل ۲ — حقوق بنیادین
 
-      await expect(guard.connect(proposer).proposeLaw(hash, mask))
+      const tx = await guard.connect(proposer).proposeLaw(hash, mask);
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+      await expect(tx)
         .to.emit(guard, "LawProposed")
-        .withArgs(hash, proposer.address, mask, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+        .withArgs(hash, proposer.address, mask, block.timestamp);
     });
 
     it("پیشنهاد با هش صفر رد می‌شود", async function () {
@@ -126,11 +130,13 @@ describe("ConstitutionGuard", function () {
     });
 
     it("Kernel می‌تواند قانون را با ذکر اصل رد کند", async function () {
-      await expect(
-        guard.connect(kernel).rejectLaw(lawHash, "نقض سکولاریسم ساختاری", 1)
-      )
+      const tx = await guard.connect(kernel).rejectLaw(lawHash, "نقض سکولاریسم ساختاری", 1);
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+
+      await expect(tx)
         .to.emit(guard, "PrincipleViolationDetected")
-        .withArgs(lawHash, 1, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+        .withArgs(lawHash, 1, block.timestamp);
 
       expect(await guard.isLawApproved(lawHash)).to.be.false;
     });

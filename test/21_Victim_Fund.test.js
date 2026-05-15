@@ -1,18 +1,18 @@
-const { expect } = require(“chai”);
-const { ethers } = require(“hardhat”);
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
 
-describe(“VictimFund”, function () {
+describe("VictimFund", function () {
 let fund;
 let kernel, court, council, penalLabor;
 let victim1, victim2, attacker;
 
-const COURT_ROLE       = ethers.keccak256(ethers.toUtf8Bytes(“COURT_ROLE”));
-const COUNCIL_ROLE     = ethers.keccak256(ethers.toUtf8Bytes(“COUNCIL_ROLE”));
-const PENAL_LABOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes(“PENAL_LABOR_ROLE”));
+const COURT_ROLE       = ethers.keccak256(ethers.toUtf8Bytes("COURT_ROLE"));
+const COUNCIL_ROLE     = ethers.keccak256(ethers.toUtf8Bytes("COUNCIL_ROLE"));
+const PENAL_LABOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("PENAL_LABOR_ROLE"));
 
 beforeEach(async function () {
 [kernel, court, council, penalLabor, victim1, victim2, attacker] = await ethers.getSigners();
-const Fund = await ethers.getContractFactory(“VictimFund”);
+const Fund = await ethers.getContractFactory("VictimFund");
 fund = await Fund.deploy(kernel.address);
 await fund.waitForDeployment();
 await fund.connect(kernel).grantRole(COURT_ROLE, court.address);
@@ -20,19 +20,18 @@ await fund.connect(kernel).grantRole(COUNCIL_ROLE, council.address);
 await fund.connect(kernel).grantRole(PENAL_LABOR_ROLE, penalLabor.address);
 });
 
-describe(“Deployment”, function () {
-it(“باید موجودی اولیه صفر باشد”, async function () {
+describe("Deployment", function () {
+it("باید موجودی اولیه صفر باشد", async function () {
 expect(await fund.getFundBalance()).to.equal(0);
 });
-it(“باید تعداد قربانیان صفر باشد”, async function () {
+it("باید تعداد قربانیان صفر باشد", async function () {
 expect(await fund.victimCount()).to.equal(0);
 });
 });
 
-describe(“Victim Registration”, function () {
-const amount = ethers.parseUnits(“50000”, 18);
+describe("Victim Registration", function () {
+const amount = ethers.parseUnits("50000", 18);
 
-```
 it("باید دادگاه بتواند قربانی ثبت کند", async function () {
   await expect(
     fund.connect(court).registerVictim(victim1.address, 0, 1, amount)
@@ -52,39 +51,37 @@ it("باید شمارنده قربانیان افزایش یابد", async funct
   await fund.connect(court).registerVictim(victim1.address, 0, 1, amount);
   expect(await fund.victimCount()).to.equal(1);
 });
-```
 
 });
 
-describe(“Receive Funds”, function () {
-it(“باید PenalLabor بتواند وجه واریز کند”, async function () {
-const amount = ethers.parseUnits(“10000”, 18);
+describe("Receive Funds", function () {
+it("باید PenalLabor بتواند وجه واریز کند", async function () {
+const amount = ethers.parseUnits("10000", 18);
 await expect(
-fund.connect(penalLabor).receiveFunds(amount, “درآمد کار جبرانی ماه اول”)
-).to.emit(fund, “FundsReceived”);
+fund.connect(penalLabor).receiveFunds(amount, "درآمد کار جبرانی ماه اول")
+).to.emit(fund, "FundsReceived");
 });
-it(“باید موجودی گنجینه افزایش یابد”, async function () {
-const amount = ethers.parseUnits(“10000”, 18);
-await fund.connect(penalLabor).receiveFunds(amount, “درآمد”);
+it("باید موجودی گنجینه افزایش یابد", async function () {
+const amount = ethers.parseUnits("10000", 18);
+await fund.connect(penalLabor).receiveFunds(amount, "درآمد");
 expect(await fund.getFundBalance()).to.equal(amount);
 });
-it(“نباید غیرمجاز وجه واریز کند”, async function () {
+it("نباید غیرمجاز وجه واریز کند", async function () {
 await expect(
-fund.connect(attacker).receiveFunds(1000, “تست”)
-).to.be.revertedWith(“VictimFund: unauthorized”);
+fund.connect(attacker).receiveFunds(1000, "تست")
+).to.be.revertedWith("VictimFund: unauthorized");
 });
-it(“نباید مبلغ صفر واریز شود”, async function () {
+it("نباید مبلغ صفر واریز شود", async function () {
 await expect(
-fund.connect(penalLabor).receiveFunds(0, “تست”)
-).to.be.revertedWith(“VictimFund: zero amount”);
+fund.connect(penalLabor).receiveFunds(0, "تست")
+).to.be.revertedWith("VictimFund: zero amount");
 });
 });
 
-describe(“Pay Compensation”, function () {
-const approved = ethers.parseUnits(“50000”, 18);
-const funded   = ethers.parseUnits(“100000”, 18);
+describe("Pay Compensation", function () {
+const approved = ethers.parseUnits("50000", 18);
+const funded   = ethers.parseUnits("100000", 18);
 
-```
 beforeEach(async function () {
   await fund.connect(court).registerVictim(victim1.address, 0, 1, approved);
   await fund.connect(penalLabor).receiveFunds(funded, "درآمد");
@@ -119,17 +116,16 @@ it("باید موجودی پس از پرداخت کاهش یابد", async funct
   await fund.connect(council).payCompensation(1, approved);
   expect(await fund.getFundBalance()).to.equal(funded - approved);
 });
-```
 
 });
 
-describe(“Remaining Compensation”, function () {
-it(“باید غرامت باقی‌مانده درست باشد”, async function () {
-const approved = ethers.parseUnits(“50000”, 18);
-const partial  = ethers.parseUnits(“20000”, 18);
-const funded   = ethers.parseUnits(“100000”, 18);
+describe("Remaining Compensation", function () {
+it("باید غرامت باقی‌مانده درست باشد", async function () {
+const approved = ethers.parseUnits("50000", 18);
+const partial  = ethers.parseUnits("20000", 18);
+const funded   = ethers.parseUnits("100000", 18);
 await fund.connect(court).registerVictim(victim1.address, 0, 1, approved);
-await fund.connect(penalLabor).receiveFunds(funded, “درآمد”);
+await fund.connect(penalLabor).receiveFunds(funded, "درآمد");
 await fund.connect(council).payCompensation(1, partial);
 expect(await fund.getRemainingCompensation(1)).to.equal(approved - partial);
 });
