@@ -88,6 +88,50 @@ describe("API3Oracle", function () {
       expect(await kernel.violationCount()).to.equal(0n);
     });
 
+    it("feeder report propagates through Kernel court signatures to TriggerProtocol execution", async function () {
+      const signers = await ethers.getSigners();
+      const extraCourts = signers.slice(6, 12);
+      const COURT_ROLE = await kernel.COURT_ROLE();
+
+      const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
+      const triggerProtocol = await TriggerProtocol.deploy(
+        await kernel.getAddress(),
+        stranger.address,
+        swf.address
+      );
+      await kernel.connect(sovereign).setTriggerProtocol(await triggerProtocol.getAddress());
+
+      for (const extraCourt of extraCourts) {
+        await kernel.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
+      }
+
+      await api3Oracle.connect(feeder).flagViolation(
+        offender.address,
+        4,
+        "نقض حقوق بنیادین"
+      );
+
+      expect(await kernel.violationCount()).to.equal(1n);
+
+      const courts = [court, ...extraCourts];
+      for (let i = 0; i < courts.length - 1; i++) {
+        await kernel.connect(courts[i]).signViolation(1);
+      }
+
+      const tx = await kernel.connect(courts[courts.length - 1]).signViolation(1);
+      await expect(tx).to.emit(kernel, "TriggerActivated");
+      await expect(tx).to.emit(triggerProtocol, "TriggerExecuted");
+
+      expect(await triggerProtocol.executionCount()).to.equal(1n);
+      const execution = await triggerProtocol.executions(1);
+      expect(execution.violationId).to.equal(1n);
+      expect(execution.offender).to.equal(offender.address);
+      expect(execution.violationCode).to.equal(4);
+      expect(execution.treasuryBlocked).to.be.true;
+      expect(execution.signatureRevoked).to.be.true;
+      expect(execution.publicNotified).to.be.true;
+    });
+
     it("invalid violation code is rejected before forwarding", async function () {
       await expect(
         api3Oracle.connect(feeder).flagViolation(offender.address, 7, "invalid")
