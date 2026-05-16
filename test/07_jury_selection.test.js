@@ -267,6 +267,28 @@ describe("JurySelection", function () {
       expect(pool[4]).to.be.greaterThan(0n);
     });
 
+    it("completed case rejects later votes without mutating verdict state", async function () {
+      for (let i = 0; i < 8; i++) {
+        await jury.connect(stranger).submitVote(caseId, commitments[i], true, fakeZkProof);
+      }
+
+      const snapshot = await jury.getJuryPool(caseId);
+      expect(await jury.usedCommitments(commitments[8])).to.be.false;
+
+      await expect(
+        jury.connect(stranger).submitVote(caseId, commitments[8], false, fakeZkProof)
+      ).to.be.revertedWith("JurySelection: voting complete");
+
+      const pool = await jury.getJuryPool(caseId);
+      expect(pool[0]).to.equal(8);
+      expect(pool[1]).to.equal(0);
+      expect(pool[2]).to.be.true;
+      expect(pool[3]).to.equal(1);
+      expect(pool[4]).to.equal(snapshot[4]);
+      expect(await jury.getVerdict(caseId)).to.equal(1n);
+      expect(await jury.usedCommitments(commitments[8])).to.be.false;
+    });
+
     it("با ۵ رای غیرمجرم، حکم تبرئه صادر می‌شود", async function () {
       // ابتدا ۴ رای مجرم
       for (let i = 0; i < 4; i++) {
