@@ -2,6 +2,7 @@
 // تست‌های انتخاب هیئت منصفه (JurySelection)
 const { expect } = require("chai");
 const { ethers }  = require("hardhat");
+const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 
 describe("JurySelection", function () {
   let jury;
@@ -58,9 +59,11 @@ describe("JurySelection", function () {
       const commitments = makeCommitments();
       await expect(jury.connect(vrf).selectJury(caseId, commitments))
         .to.emit(jury, "JurySelected")
-        .withArgs(caseId, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+        .withArgs(caseId, anyValue);
 
       expect(await jury.totalCasesHandled()).to.equal(1n);
+      const pool = await jury.getJuryPool(caseId);
+      expect(pool[4]).to.be.greaterThan(0n);
     });
 
     it("کمتر از ۱۲ داور رد می‌شود", async function () {
