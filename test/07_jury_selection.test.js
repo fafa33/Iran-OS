@@ -310,5 +310,25 @@ describe("JurySelection", function () {
       expect(pool[3]).to.equal(2);
       expect(pool[4]).to.be.greaterThan(0n);
     });
+
+    it("completed acquittal case rejects later votes without mutating verdict state", async function () {
+      for (let i = 0; i < 4; i++) {
+        await jury.connect(stranger).submitVote(caseId, commitments[i], true, fakeZkProof);
+      }
+      for (let i = 4; i < 9; i++) {
+        await jury.connect(stranger).submitVote(caseId, commitments[i], false, fakeZkProof);
+      }
+
+      const snapshot = await jury.getJuryPool(caseId);
+      expect(await jury.usedCommitments(commitments[9])).to.be.false;
+
+      await expect(
+        jury.connect(stranger).submitVote(caseId, commitments[9], true, fakeZkProof)
+      ).to.be.revertedWith("JurySelection: voting complete");
+
+      await expectJuryPoolUnchanged(snapshot);
+      expect(await jury.getVerdict(caseId)).to.equal(2n);
+      expect(await jury.usedCommitments(commitments[9])).to.be.false;
+    });
   });
 });
