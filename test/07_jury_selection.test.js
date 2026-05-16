@@ -221,6 +221,35 @@ describe("JurySelection", function () {
       expect(await jury.usedCommitments(commitments[0])).to.be.true;
     });
 
+    it("unresolved vote path remains non-final below verdict thresholds", async function () {
+      for (let i = 0; i < 7; i++) {
+        await jury.connect(stranger).submitVote(caseId, commitments[i], true, fakeZkProof);
+      }
+      for (let i = 7; i < 11; i++) {
+        await jury.connect(stranger).submitVote(caseId, commitments[i], false, fakeZkProof);
+      }
+
+      expect(await jury.getVerdict(caseId)).to.equal(0n);
+      let pool = await jury.getJuryPool(caseId);
+      expect(pool[0]).to.equal(7);
+      expect(pool[1]).to.equal(4);
+      expect(pool[2]).to.be.false;
+      expect(pool[3]).to.equal(0);
+      expect(pool[4]).to.be.greaterThan(0n);
+
+      await expect(
+        jury.connect(stranger).submitVote(caseId, commitments[11], false, fakeZkProof)
+      ).to.emit(jury, "VerdictReached").withArgs(caseId, 2, anyValue);
+
+      expect(await jury.getVerdict(caseId)).to.equal(2n);
+      pool = await jury.getJuryPool(caseId);
+      expect(pool[0]).to.equal(7);
+      expect(pool[1]).to.equal(5);
+      expect(pool[2]).to.be.true;
+      expect(pool[3]).to.equal(2);
+      expect(pool[4]).to.be.greaterThan(0n);
+    });
+
     it("با ۸ رای مجرم، حکم محکومیت صادر می‌شود", async function () {
       for (let i = 0; i < 7; i++) {
         await jury.connect(stranger).submitVote(caseId, commitments[i], true, fakeZkProof);
