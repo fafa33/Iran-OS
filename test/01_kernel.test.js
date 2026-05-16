@@ -200,6 +200,60 @@ describe("IranOS_Kernel", function () {
       expect(await triggerProtocol.executionCount()).to.equal(0);
       expect(await kernel.isAccessActive(stranger.address)).to.be.true;
     });
+
+    it("post-threshold signing attempts do not replay trigger execution", async function () {
+      const signers = await ethers.getSigners();
+      const extraCourts = signers.slice(6, 13);
+      const COURT_ROLE = await kernel.COURT_ROLE();
+      const GUARDIAN_ROLE = await kernel.GUARDIAN_ROLE();
+
+      await kernel.connect(sovereign).grantOfficialAccess(stranger.address, GUARDIAN_ROLE);
+      expect(await kernel.isAccessActive(stranger.address)).to.be.true;
+
+      for (const extraCourt of extraCourts) {
+        await kernel.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
+      }
+
+      const courtSigners = [court, ...extraCourts];
+      for (let i = 0; i < 6; i++) {
+        await kernel.connect(courtSigners[i]).signViolation(violationId);
+      }
+
+      await expect(kernel.connect(courtSigners[6]).signViolation(violationId))
+        .to.emit(kernel, "ViolationSigned")
+        .withArgs(violationId, courtSigners[6].address, 7)
+        .and.to.emit(kernel, "TriggerActivated");
+
+      let record = await kernel.violations(violationId);
+      let execution = await triggerProtocol.executions(1);
+
+      expect(record.signaturesCount).to.equal(7);
+      expect(record.courtConfirmed).to.be.true;
+      expect(record.triggered).to.be.true;
+      expect(await kernel.triggerActivationCount()).to.equal(1);
+      expect(await triggerProtocol.executionCount()).to.equal(1);
+      expect(execution.violationId).to.equal(violationId);
+      expect(execution.offender).to.equal(stranger.address);
+      expect(execution.violationCode).to.equal(4);
+      expect(await kernel.isAccessActive(stranger.address)).to.be.false;
+
+      await expect(
+        kernel.connect(courtSigners[7]).signViolation(violationId)
+      ).to.be.revertedWith("Kernel: trigger already activated");
+
+      record = await kernel.violations(violationId);
+      execution = await triggerProtocol.executions(1);
+
+      expect(record.signaturesCount).to.equal(7);
+      expect(record.courtConfirmed).to.be.true;
+      expect(record.triggered).to.be.true;
+      expect(await kernel.triggerActivationCount()).to.equal(1);
+      expect(await triggerProtocol.executionCount()).to.equal(1);
+      expect(execution.violationId).to.equal(violationId);
+      expect(execution.offender).to.equal(stranger.address);
+      expect(execution.violationCode).to.equal(4);
+      expect(await kernel.isAccessActive(stranger.address)).to.be.false;
+    });
   });
 
   // ─────────────────────────────────────────
