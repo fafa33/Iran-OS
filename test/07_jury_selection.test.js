@@ -55,6 +55,15 @@ describe("JurySelection", function () {
   // ─────────────────────────────────────────
 
   describe("selectJury", function () {
+    async function expectDefaultJuryPool(targetCaseId) {
+      const pool = await jury.getJuryPool(targetCaseId);
+      expect(pool[0]).to.equal(0);
+      expect(pool[1]).to.equal(0);
+      expect(pool[2]).to.be.false;
+      expect(pool[3]).to.equal(0);
+      expect(pool[4]).to.equal(0);
+    }
+
     it("VRF می‌تواند ۱۲ داور انتخاب کند", async function () {
       const commitments = makeCommitments();
       await expect(jury.connect(vrf).selectJury(caseId, commitments))
@@ -72,6 +81,15 @@ describe("JurySelection", function () {
         .to.be.revertedWith("JurySelection: wrong jury size");
     });
 
+    it("wrong jury size is state-neutral", async function () {
+      const commitments = makeCommitments(10);
+      await expect(jury.connect(vrf).selectJury(caseId, commitments))
+        .to.be.revertedWith("JurySelection: wrong jury size");
+
+      expect(await jury.totalCasesHandled()).to.equal(0n);
+      await expectDefaultJuryPool(caseId);
+    });
+
     it("انتخاب دوباره برای همان پرونده رد می‌شود", async function () {
       const c1 = makeCommitments();
       const c2 = makeCommitments();
@@ -80,10 +98,39 @@ describe("JurySelection", function () {
         .to.be.revertedWith("JurySelection: jury already selected");
     });
 
+    it("duplicate jury selection failure preserves existing pool", async function () {
+      const c1 = makeCommitments();
+      const c2 = makeCommitments();
+      await jury.connect(vrf).selectJury(caseId, c1);
+
+      const snapshot = await jury.getJuryPool(caseId);
+      expect(await jury.totalCasesHandled()).to.equal(1n);
+
+      await expect(jury.connect(vrf).selectJury(caseId, c2))
+        .to.be.revertedWith("JurySelection: jury already selected");
+
+      const pool = await jury.getJuryPool(caseId);
+      expect(await jury.totalCasesHandled()).to.equal(1n);
+      expect(pool[0]).to.equal(snapshot[0]);
+      expect(pool[1]).to.equal(snapshot[1]);
+      expect(pool[2]).to.equal(snapshot[2]);
+      expect(pool[3]).to.equal(snapshot[3]);
+      expect(pool[4]).to.equal(snapshot[4]);
+    });
+
     it("غیر‌VRF نمی‌تواند داور انتخاب کند", async function () {
       const commitments = makeCommitments();
       await expect(jury.connect(stranger).selectJury(caseId, commitments))
         .to.be.reverted;
+    });
+
+    it("non-VRF selectJury attempt is state-neutral", async function () {
+      const commitments = makeCommitments();
+      await expect(jury.connect(stranger).selectJury(caseId, commitments))
+        .to.be.reverted;
+
+      expect(await jury.totalCasesHandled()).to.equal(0n);
+      await expectDefaultJuryPool(caseId);
     });
   });
 
