@@ -141,6 +141,15 @@ describe("JurySelection", function () {
   describe("submitVote", function () {
     let commitments;
 
+    async function expectJuryPoolUnchanged(snapshot) {
+      const pool = await jury.getJuryPool(caseId);
+      expect(pool[0]).to.equal(snapshot[0]);
+      expect(pool[1]).to.equal(snapshot[1]);
+      expect(pool[2]).to.equal(snapshot[2]);
+      expect(pool[3]).to.equal(snapshot[3]);
+      expect(pool[4]).to.equal(snapshot[4]);
+    }
+
     beforeEach(async function () {
       commitments = makeCommitments();
       await jury.connect(vrf).selectJury(caseId, commitments);
@@ -159,6 +168,18 @@ describe("JurySelection", function () {
       ).to.be.revertedWith("JurySelection: already voted");
     });
 
+    it("duplicate vote failure preserves pool state", async function () {
+      await jury.connect(stranger).submitVote(caseId, commitments[0], true, fakeZkProof);
+      const snapshot = await jury.getJuryPool(caseId);
+
+      await expect(
+        jury.connect(stranger).submitVote(caseId, commitments[0], true, fakeZkProof)
+      ).to.be.revertedWith("JurySelection: already voted");
+
+      await expectJuryPoolUnchanged(snapshot);
+      expect(await jury.usedCommitments(commitments[0])).to.be.true;
+    });
+
     it("داور غیرمعتبر رد می‌شود", async function () {
       const fakeCommitment = ethers.keccak256(ethers.toUtf8Bytes("fake_juror"));
       await expect(
@@ -166,10 +187,38 @@ describe("JurySelection", function () {
       ).to.be.revertedWith("JurySelection: not a valid juror");
     });
 
+    it("invalid juror vote is state-neutral", async function () {
+      const fakeCommitment = ethers.keccak256(ethers.toUtf8Bytes("fake_juror"));
+      const snapshot = await jury.getJuryPool(caseId);
+
+      await expect(
+        jury.connect(stranger).submitVote(caseId, fakeCommitment, true, fakeZkProof)
+      ).to.be.revertedWith("JurySelection: not a valid juror");
+
+      await expectJuryPoolUnchanged(snapshot);
+      expect(await jury.usedCommitments(fakeCommitment)).to.be.false;
+    });
+
     it("ZK proof خالی رد می‌شود", async function () {
       await expect(
         jury.connect(stranger).submitVote(caseId, commitments[0], true, "0x")
       ).to.be.revertedWith("JurySelection: invalid ZK proof");
+    });
+
+    it("empty proof vote is state-neutral", async function () {
+      const snapshot = await jury.getJuryPool(caseId);
+
+      await expect(
+        jury.connect(stranger).submitVote(caseId, commitments[0], true, "0x")
+      ).to.be.revertedWith("JurySelection: invalid ZK proof");
+
+      await expectJuryPoolUnchanged(snapshot);
+      expect(await jury.usedCommitments(commitments[0])).to.be.false;
+
+      await expect(
+        jury.connect(stranger).submitVote(caseId, commitments[0], true, fakeZkProof)
+      ).to.emit(jury, "VoteSubmitted");
+      expect(await jury.usedCommitments(commitments[0])).to.be.true;
     });
 
     it("با ۸ رای مجرم، حکم محکومیت صادر می‌شود", async function () {
