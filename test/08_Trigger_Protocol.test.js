@@ -153,6 +153,45 @@ await trigger.connect(kernel).executeTrigger(i, user1.address, i, replacement.ad
 }
 expect(await trigger.executionCount()).to.equal(3);
 });
+it("stored execution records remain immutable across later attempts", async function () {
+const expectExecutionRecord = (actual, expected) => {
+expect(actual.violationId).to.equal(expected.violationId);
+expect(actual.offender).to.equal(expected.offender);
+expect(actual.violationCode).to.equal(expected.violationCode);
+expect(actual.executedAt).to.equal(expected.executedAt);
+expect(actual.treasuryBlocked).to.equal(expected.treasuryBlocked);
+expect(actual.signatureRevoked).to.equal(expected.signatureRevoked);
+expect(actual.publicNotified).to.equal(expected.publicNotified);
+expect(actual.interimReplacement).to.equal(expected.interimReplacement);
+};
+
+await trigger.connect(kernel).executeTrigger(1, attacker.address, 1, replacement.address);
+const firstSnapshot = await trigger.executions(1);
+
+await trigger.connect(kernel).executeTrigger(2, user1.address, 2, user2.address);
+const secondSnapshot = await trigger.executions(2);
+
+expect(await trigger.executionCount()).to.equal(2);
+expectExecutionRecord(await trigger.executions(1), firstSnapshot);
+expectExecutionRecord(secondSnapshot, {
+violationId: 2n,
+offender: user1.address,
+violationCode: 2n,
+executedAt: secondSnapshot.executedAt,
+treasuryBlocked: true,
+signatureRevoked: true,
+publicNotified: true,
+interimReplacement: user2.address,
+});
+
+await expect(
+trigger.connect(kernel).executeTrigger(3, ethers.ZeroAddress, 3, replacement.address)
+).to.be.revertedWith("TriggerProtocol: invalid offender");
+
+expect(await trigger.executionCount()).to.equal(2);
+expectExecutionRecord(await trigger.executions(1), firstSnapshot);
+expectExecutionRecord(await trigger.executions(2), secondSnapshot);
+});
 });
 
 describe("Execution Not Found", function () {
