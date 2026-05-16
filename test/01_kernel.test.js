@@ -159,6 +159,47 @@ describe("IranOS_Kernel", function () {
         kernel.connect(stranger).signViolation(violationId)
       ).to.be.revertedWith("Kernel: caller is not the Court");
     });
+
+    it("partial court signatures below threshold do not activate trigger", async function () {
+      const signers = await ethers.getSigners();
+      const extraCourts = signers.slice(6, 11);
+      const COURT_ROLE = await kernel.COURT_ROLE();
+      const GUARDIAN_ROLE = await kernel.GUARDIAN_ROLE();
+
+      await kernel.connect(sovereign).grantOfficialAccess(stranger.address, GUARDIAN_ROLE);
+      expect(await kernel.isAccessActive(stranger.address)).to.be.true;
+
+      for (const extraCourt of extraCourts) {
+        await kernel.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
+      }
+
+      const courtSigners = [court, ...extraCourts];
+      for (let i = 0; i < courtSigners.length; i++) {
+        await expect(kernel.connect(courtSigners[i]).signViolation(violationId))
+          .to.emit(kernel, "ViolationSigned")
+          .withArgs(violationId, courtSigners[i].address, i + 1);
+      }
+
+      let record = await kernel.violations(violationId);
+      expect(record.signaturesCount).to.equal(6);
+      expect(record.courtConfirmed).to.be.false;
+      expect(record.triggered).to.be.false;
+      expect(await kernel.triggerActivationCount()).to.equal(0);
+      expect(await triggerProtocol.executionCount()).to.equal(0);
+      expect(await kernel.isAccessActive(stranger.address)).to.be.true;
+
+      await expect(
+        kernel.connect(courtSigners[0]).signViolation(violationId)
+      ).to.be.revertedWith("Kernel: already signed");
+
+      record = await kernel.violations(violationId);
+      expect(record.signaturesCount).to.equal(6);
+      expect(record.courtConfirmed).to.be.false;
+      expect(record.triggered).to.be.false;
+      expect(await kernel.triggerActivationCount()).to.equal(0);
+      expect(await triggerProtocol.executionCount()).to.equal(0);
+      expect(await kernel.isAccessActive(stranger.address)).to.be.true;
+    });
   });
 
   // ─────────────────────────────────────────
