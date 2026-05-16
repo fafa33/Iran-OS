@@ -227,9 +227,15 @@ describe("JurySelection", function () {
       }
       await expect(
         jury.connect(stranger).submitVote(caseId, commitments[7], true, fakeZkProof)
-      ).to.emit(jury, "VerdictReached").withArgs(caseId, 1, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+      ).to.emit(jury, "VerdictReached").withArgs(caseId, 1, anyValue);
 
       expect(await jury.getVerdict(caseId)).to.equal(1n); // 1 = محکوم
+      const pool = await jury.getJuryPool(caseId);
+      expect(pool[0]).to.equal(8);
+      expect(pool[1]).to.equal(0);
+      expect(pool[2]).to.be.true;
+      expect(pool[3]).to.equal(1);
+      expect(pool[4]).to.be.greaterThan(0n);
     });
 
     it("با ۵ رای غیرمجرم، حکم تبرئه صادر می‌شود", async function () {
@@ -243,9 +249,15 @@ describe("JurySelection", function () {
       }
       await expect(
         jury.connect(stranger).submitVote(caseId, commitments[8], false, fakeZkProof)
-      ).to.emit(jury, "VerdictReached").withArgs(caseId, 2, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
+      ).to.emit(jury, "VerdictReached").withArgs(caseId, 2, anyValue);
 
       expect(await jury.getVerdict(caseId)).to.equal(2n); // 2 = تبرئه
+      const pool = await jury.getJuryPool(caseId);
+      expect(pool[0]).to.equal(4);
+      expect(pool[1]).to.equal(5);
+      expect(pool[2]).to.be.true;
+      expect(pool[3]).to.equal(2);
+      expect(pool[4]).to.be.greaterThan(0n);
     });
   });
 });
