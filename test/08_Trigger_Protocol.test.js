@@ -44,6 +44,27 @@ await expect(
 trigger.connect(attacker).executeTrigger(1, user1.address, 1, replacement.address)
 ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
 });
+it("unauthorized executeTrigger call is state-neutral", async function () {
+await expect(
+trigger.connect(attacker).executeTrigger(1, user1.address, 1, replacement.address)
+).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+
+expect(await trigger.executionCount()).to.equal(0);
+
+const exec = await trigger.executions(1);
+expect(exec.violationId).to.equal(0);
+expect(exec.offender).to.equal(ethers.ZeroAddress);
+expect(exec.violationCode).to.equal(0);
+expect(exec.executedAt).to.equal(0);
+expect(exec.treasuryBlocked).to.be.false;
+expect(exec.signatureRevoked).to.be.false;
+expect(exec.publicNotified).to.be.false;
+expect(exec.interimReplacement).to.equal(ethers.ZeroAddress);
+
+expect(await trigger.isTreasuryBlocked(user1.address)).to.be.false;
+expect(await trigger.isSignatureRevoked(user1.address)).to.be.false;
+expect(await trigger.getInterimReplacement(user1.address)).to.equal(ethers.ZeroAddress);
+});
 it("باید پس از اجرا دسترسی به خزانه مسدود شود", async function () {
 await trigger.connect(kernel).executeTrigger(1, attacker.address, 1, replacement.address);
 expect(await trigger.isTreasuryBlocked(attacker.address)).to.be.true;
@@ -64,6 +85,25 @@ it("نباید آدرس صفر به عنوان خاطی مجاز باشد", asyn
 await expect(
 trigger.connect(kernel).executeTrigger(1, ethers.ZeroAddress, 1, replacement.address)
 ).to.be.revertedWith("TriggerProtocol: invalid offender");
+});
+it("zero offender executeTrigger revert is state-neutral", async function () {
+await expect(
+trigger.connect(kernel).executeTrigger(1, ethers.ZeroAddress, 1, replacement.address)
+).to.be.revertedWith("TriggerProtocol: invalid offender");
+
+expect(await trigger.executionCount()).to.equal(0);
+
+const exec = await trigger.executions(1);
+expect(exec.violationId).to.equal(0);
+expect(exec.offender).to.equal(ethers.ZeroAddress);
+expect(exec.violationCode).to.equal(0);
+expect(exec.executedAt).to.equal(0);
+expect(exec.treasuryBlocked).to.be.false;
+expect(exec.signatureRevoked).to.be.false;
+expect(exec.publicNotified).to.be.false;
+expect(exec.interimReplacement).to.equal(ethers.ZeroAddress);
+
+expect(await trigger.getInterimReplacement(ethers.ZeroAddress)).to.equal(ethers.ZeroAddress);
 });
 it("باید بدون جانشین هم اجرا شود", async function () {
 await expect(
