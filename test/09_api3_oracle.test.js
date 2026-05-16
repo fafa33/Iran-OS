@@ -132,6 +132,75 @@ describe("API3Oracle", function () {
       expect(execution.publicNotified).to.be.true;
     });
 
+    it("duplicate feeder reports are recorded as separate auditable oracle and Kernel violations", async function () {
+      const reason = "نقض حقوق بنیادین";
+
+      await api3Oracle.connect(feeder).flagViolation(offender.address, 4, reason);
+      await api3Oracle.connect(feeder).flagViolation(offender.address, 4, reason);
+
+      expect(await api3Oracle.violationFlagCount()).to.equal(2n);
+      expect(await kernel.violationCount()).to.equal(2n);
+
+      const oracleFlag1 = await api3Oracle.getViolationFlag(1);
+      const oracleFlag2 = await api3Oracle.getViolationFlag(2);
+      expect(oracleFlag1.offender).to.equal(offender.address);
+      expect(oracleFlag2.offender).to.equal(offender.address);
+      expect(oracleFlag1.violationCode).to.equal(4);
+      expect(oracleFlag2.violationCode).to.equal(4);
+      expect(oracleFlag1.reason).to.equal(reason);
+      expect(oracleFlag2.reason).to.equal(reason);
+      expect(oracleFlag1.timestamp).to.be.greaterThan(0n);
+      expect(oracleFlag2.timestamp).to.be.greaterThan(0n);
+
+      const kernelViolation1 = await kernel.violations(1);
+      const kernelViolation2 = await kernel.violations(2);
+      expect(kernelViolation1.violationCode).to.equal(4);
+      expect(kernelViolation2.violationCode).to.equal(4);
+      expect(kernelViolation1.offender).to.equal(offender.address);
+      expect(kernelViolation2.offender).to.equal(offender.address);
+      expect(kernelViolation1.reason).to.equal(reason);
+      expect(kernelViolation2.reason).to.equal(reason);
+      expect(kernelViolation1.timestamp).to.be.greaterThan(0n);
+      expect(kernelViolation2.timestamp).to.be.greaterThan(0n);
+    });
+
+    it("triggered bridged violation cannot be re-signed into a second TriggerProtocol execution", async function () {
+      const signers = await ethers.getSigners();
+      const extraCourts = signers.slice(6, 13);
+      const COURT_ROLE = await kernel.COURT_ROLE();
+
+      const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
+      const triggerProtocol = await TriggerProtocol.deploy(
+        await kernel.getAddress(),
+        stranger.address,
+        swf.address
+      );
+      await kernel.connect(sovereign).setTriggerProtocol(await triggerProtocol.getAddress());
+
+      for (const extraCourt of extraCourts) {
+        await kernel.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
+      }
+
+      await api3Oracle.connect(feeder).flagViolation(
+        offender.address,
+        4,
+        "نقض حقوق بنیادین"
+      );
+
+      const thresholdCourts = [court, ...extraCourts.slice(0, 6)];
+      for (const courtSigner of thresholdCourts) {
+        await kernel.connect(courtSigner).signViolation(1);
+      }
+
+      expect(await triggerProtocol.executionCount()).to.equal(1n);
+
+      await expect(
+        kernel.connect(extraCourts[6]).signViolation(1)
+      ).to.be.revertedWith("Kernel: trigger already activated");
+
+      expect(await triggerProtocol.executionCount()).to.equal(1n);
+    });
+
     it("invalid violation code is rejected before forwarding", async function () {
       await expect(
         api3Oracle.connect(feeder).flagViolation(offender.address, 7, "invalid")
