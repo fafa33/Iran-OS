@@ -254,6 +254,52 @@ describe("IranOS_Kernel", function () {
       expect(execution.violationCode).to.equal(4);
       expect(await kernel.isAccessActive(stranger.address)).to.be.false;
     });
+
+    it("signature path remains explicit after trigger timeout elapses", async function () {
+      const triggerTimeout = await kernel.TRIGGER_TIMEOUT();
+      expect(triggerTimeout).to.equal(72n * 3600n);
+
+      const signers = await ethers.getSigners();
+      const extraCourts = signers.slice(6, 12);
+      const COURT_ROLE = await kernel.COURT_ROLE();
+      const GUARDIAN_ROLE = await kernel.GUARDIAN_ROLE();
+
+      await kernel.connect(sovereign).grantOfficialAccess(stranger.address, GUARDIAN_ROLE);
+      expect(await kernel.isAccessActive(stranger.address)).to.be.true;
+
+      for (const extraCourt of extraCourts) {
+        await kernel.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
+      }
+
+      await ethers.provider.send("evm_increaseTime", [Number(triggerTimeout + 1n)]);
+      await ethers.provider.send("evm_mine");
+
+      const courtSigners = [court, ...extraCourts];
+      for (let i = 0; i < 6; i++) {
+        await kernel.connect(courtSigners[i]).signViolation(violationId);
+      }
+
+      let record = await kernel.violations(violationId);
+      expect(record.signaturesCount).to.equal(6);
+      expect(record.courtConfirmed).to.be.false;
+      expect(record.triggered).to.be.false;
+      expect(await kernel.triggerActivationCount()).to.equal(0);
+      expect(await triggerProtocol.executionCount()).to.equal(0);
+      expect(await kernel.isAccessActive(stranger.address)).to.be.true;
+
+      await expect(kernel.connect(courtSigners[6]).signViolation(violationId))
+        .to.emit(kernel, "ViolationSigned")
+        .withArgs(violationId, courtSigners[6].address, 7)
+        .and.to.emit(kernel, "TriggerActivated");
+
+      record = await kernel.violations(violationId);
+      expect(record.signaturesCount).to.equal(7);
+      expect(record.courtConfirmed).to.be.true;
+      expect(record.triggered).to.be.true;
+      expect(await kernel.triggerActivationCount()).to.equal(1);
+      expect(await triggerProtocol.executionCount()).to.equal(1);
+      expect(await kernel.isAccessActive(stranger.address)).to.be.false;
+    });
   });
 
   // ─────────────────────────────────────────
