@@ -175,6 +175,22 @@ describe("SovereignWealthFund", function () {
       ).to.be.reverted;
     });
 
+    it("unauthorized reclaimed asset deposit is state-neutral", async function () {
+      const l1Snapshot = await swf.layerL1();
+      const totalAssetsSnapshot = await swf.totalAssets();
+
+      await expect(
+        swf.connect(stranger).receiveReclaimedAsset(
+          ethers.parseUnits("1", 18), "بازپس‌گیری"
+        )
+      ).to.be.reverted;
+
+      const l1 = await swf.layerL1();
+      expect(l1.balance).to.equal(l1Snapshot.balance);
+      expect(l1.totalDeposited).to.equal(l1Snapshot.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalAssetsSnapshot);
+    });
+
     it("مقدار صفر رد می‌شود", async function () {
       await expect(
         swf.connect(reclaimCaller).receiveReclaimedAsset(0n, "بازپس‌گیری")
