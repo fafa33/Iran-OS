@@ -6,7 +6,9 @@ This document defines the Step-4.5 Wealth Fund State Transitions for IranOS. It 
 
 Step-4.5 formalizes SovereignWealthFund state transitions under the Step-4 Sovereign Reserve Model, Step-4.1 Treasury Accounting Rules, Step-4.2 Reserve Classification Protocol, Step-4.3 Monetary Expansion Constraints, and Step-4.4 Cross-Layer Conservation Invariants. It does not implement enforcement and does not claim formal verification is complete.
 
-IranOS is sovereign resilience infrastructure. The SovereignWealthFund is an accounting and reserve-continuity component, not a DeFi yield, staking, lending, treasury yield, speculative deployment, or capital-efficiency framework.
+IranOS is sovereign resilience infrastructure. SWF means Sovereign Wealth Fund, but in IranOS the SWF is not modeled as a profit-maximizing sovereign investment vehicle. The IranOS SWF functions as a sovereign reserve resilience layer (SRR-role) inside the broader sovereign reserve architecture. Its purpose is reserve continuity, authorized accounting, conservation, and backing preservation.
+
+The SWF must not become a DeFi treasury, yield engine, speculative deployment layer, lending or staking mechanism, leverage vehicle, or capital-efficiency mechanism.
 
 ## Preserved Checkpoints
 
@@ -31,6 +33,8 @@ Step-4.5 preserves the Step-3 invariant areas for Kernel, TriggerProtocol, JuryS
 ## Sovereign Wealth Fund Definitions
 
 - SovereignWealthFund: the accounting component that tracks permitted deposits, withdrawals, reclaimed assets, and layer balances under sovereign reserve discipline.
+- SWF: Sovereign Wealth Fund. In IranOS, this term identifies a sovereign reserve resilience layer, not a profit-maximizing sovereign investment fund.
+- SRR-role: the SWF's sovereign reserve resilience role inside the broader sovereign reserve architecture. This role supports reserve continuity, authorized accounting, conservation, and backing preservation without creating sovereign authority, mint capacity, reserve unlock authority, transfer authority, classification authority, or governance bypass capability.
 - SWF Balance: value recorded inside the SovereignWealthFund accounting boundary.
 - SWF Layer Balance: value recorded for a specific SovereignWealthFund layer.
 - SWF Deposit: an authorized increase to an SWF balance.
@@ -257,6 +261,9 @@ This Step-4.5 artifact forbids the following assumptions:
 - Do not change tests as part of this artifact.
 - Do not change architecture or governance assumptions.
 - Do not introduce staking, lending, treasury yield, speculative deployment, DeFi yield, or capital-efficiency framing.
+- Do not model the SWF as a profit-maximizing sovereign investment vehicle.
+- Do not allow the SWF to become a DeFi treasury, yield engine, speculative deployment layer, lending or staking mechanism, leverage vehicle, or capital-efficiency mechanism.
+- Do not treat the SWF's SRR-role as sovereign authority, mint capacity, reserve unlock authority, transfer authority, classification authority, or governance bypass capability.
 - Do not treat SovereignWealthFund balances as speculative capital or expansion inventory.
 - Do not allow hidden minting through SWF accounting, reserve reclassification, emergency reserves, oracle/API3 signals, or replayed execution.
 - Do not allow SWF state to bypass reserve classification or monetary constraints.
