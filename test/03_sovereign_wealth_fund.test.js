@@ -109,6 +109,34 @@ describe("SovereignWealthFund", function () {
       await expect(swf.connect(council3).signWithdrawal(1n))
         .to.be.revertedWith("SWF: insufficient L1");
     });
+
+    it("insufficient L1 withdrawal execution is state-neutral", async function () {
+      const overAmount = depositAmount + ethers.parseUnits("1", 18);
+      await swf.connect(council1).proposeWithdrawal(1, overAmount, "test");
+      await swf.connect(council2).signWithdrawal(1n);
+
+      const l1Snapshot = await swf.layerL1();
+      const totalAssetsSnapshot = await swf.totalAssets();
+      const txSnapshot = await swf.transactions(1n);
+      expect(await swf.txSignatures(1n, council3.address)).to.be.false;
+
+      await expect(swf.connect(council3).signWithdrawal(1n))
+        .to.be.revertedWith("SWF: insufficient L1");
+
+      const l1 = await swf.layerL1();
+      const tx_ = await swf.transactions(1n);
+      expect(l1.balance).to.equal(l1Snapshot.balance);
+      expect(l1.totalDeposited).to.equal(l1Snapshot.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalAssetsSnapshot);
+      expect(tx_.initiator).to.equal(txSnapshot.initiator);
+      expect(tx_.layer).to.equal(txSnapshot.layer);
+      expect(tx_.amount).to.equal(txSnapshot.amount);
+      expect(tx_.purpose).to.equal(txSnapshot.purpose);
+      expect(tx_.timestamp).to.equal(txSnapshot.timestamp);
+      expect(tx_.signaturesCount).to.equal(txSnapshot.signaturesCount);
+      expect(tx_.executed).to.equal(false);
+      expect(await swf.txSignatures(1n, council3.address)).to.be.false;
+    });
   });
 
   // ─────────────────────────────────────────
