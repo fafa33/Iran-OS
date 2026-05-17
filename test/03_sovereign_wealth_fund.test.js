@@ -181,6 +181,20 @@ describe("SovereignWealthFund", function () {
       ).to.be.revertedWith("SWF: zero amount");
     });
 
+    it("zero reclaimed asset deposit is state-neutral", async function () {
+      const l1Snapshot = await swf.layerL1();
+      const totalAssetsSnapshot = await swf.totalAssets();
+
+      await expect(
+        swf.connect(reclaimCaller).receiveReclaimedAsset(0n, "بازپس‌گیری")
+      ).to.be.revertedWith("SWF: zero amount");
+
+      const l1 = await swf.layerL1();
+      expect(l1.balance).to.equal(l1Snapshot.balance);
+      expect(l1.totalDeposited).to.equal(l1Snapshot.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalAssetsSnapshot);
+    });
+
     it("COUNCIL_ROLE بدون RECLAIM_ROLE نمی‌تواند receiveReclaimedAsset را فراخوانی کند", async function () {
       await expect(
         swf.connect(council1).receiveReclaimedAsset(
