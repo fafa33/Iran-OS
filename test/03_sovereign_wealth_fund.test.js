@@ -136,6 +136,35 @@ describe("SovereignWealthFund", function () {
       expect(txAfterReplay.signaturesCount).to.equal(tx_.signaturesCount);
     });
 
+    it("executed L1 withdrawal cannot be replayed or mutate accounting again", async function () {
+      await swf.connect(council1).proposeWithdrawal(1, withdrawAmount, "رفاه");
+      const txId = 1n;
+      await swf.connect(council2).signWithdrawal(txId);
+      await swf.connect(council3).signWithdrawal(txId);
+
+      const l1Snapshot = await swf.layerL1();
+      const totalAssetsSnapshot = await swf.totalAssets();
+      const txSnapshot = await swf.transactions(txId);
+      expect(txSnapshot.executed).to.equal(true);
+
+      await expect(swf.connect(council2).signWithdrawal(txId))
+        .to.be.revertedWith("SWF: already executed");
+
+      const l1 = await swf.layerL1();
+      const tx_ = await swf.transactions(txId);
+      expect(l1.balance).to.equal(l1Snapshot.balance);
+      expect(l1.totalDeposited).to.equal(l1Snapshot.totalDeposited);
+      expect(l1.totalWithdrawn).to.equal(l1Snapshot.totalWithdrawn);
+      expect(await swf.totalAssets()).to.equal(totalAssetsSnapshot);
+      expect(tx_.initiator).to.equal(txSnapshot.initiator);
+      expect(tx_.layer).to.equal(txSnapshot.layer);
+      expect(tx_.amount).to.equal(txSnapshot.amount);
+      expect(tx_.purpose).to.equal(txSnapshot.purpose);
+      expect(tx_.timestamp).to.equal(txSnapshot.timestamp);
+      expect(tx_.signaturesCount).to.equal(txSnapshot.signaturesCount);
+      expect(tx_.executed).to.equal(true);
+    });
+
     it("امضای دوباره توسط یک نفر ممنوع است", async function () {
       await swf.connect(council1).proposeWithdrawal(1, withdrawAmount, "رفاه");
       await expect(swf.connect(council1).signWithdrawal(1n))
