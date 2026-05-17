@@ -83,6 +83,35 @@ expect(isValid).to.be.true;
 // میانگین ۸۰+۹۰+۸۵ = ۸۵
 expect(value).to.equal(ethers.parseUnits("85", 18));
 });
+it("repeated feeder submission does not duplicate feeder accounting", async function () {
+const firstPrice = ethers.parseUnits("80", 18);
+const secondPrice = ethers.parseUnits("82", 18);
+const p2 = ethers.parseUnits("90", 18);
+const p3 = ethers.parseUnits("85", 18);
+await oracle.connect(feeder1).submitPrice(KEY_OIL_USD, firstPrice, 900);
+
+const [, , isValidSnapshot] = await oracle.getPrice(KEY_OIL_USD);
+const firstFeeder = await oracle.dataFeeders(KEY_OIL_USD, 0);
+const firstSubmission = await oracle.submissions(KEY_OIL_USD, feeder1.address);
+expect(firstFeeder).to.equal(feeder1.address);
+
+await oracle.connect(feeder1).submitPrice(KEY_OIL_USD, secondPrice, 900);
+
+const repeatedSubmission = await oracle.submissions(KEY_OIL_USD, feeder1.address);
+expect(repeatedSubmission.feeder).to.equal(firstSubmission.feeder);
+expect(repeatedSubmission.value).to.equal(secondPrice);
+expect(repeatedSubmission.timestamp).to.be.greaterThanOrEqual(firstSubmission.timestamp);
+expect(repeatedSubmission.counted).to.equal(firstSubmission.counted);
+expect(await oracle.dataFeeders(KEY_OIL_USD, 0)).to.equal(firstFeeder);
+
+await oracle.connect(feeder2).submitPrice(KEY_OIL_USD, p2, 900);
+await oracle.connect(feeder3).submitPrice(KEY_OIL_USD, p3, 900);
+
+const price = await oracle.prices(KEY_OIL_USD);
+expect(isValidSnapshot).to.be.false;
+expect(price.feederCount).to.equal(3);
+expect(price.value).to.equal((secondPrice + p2 + p3) / 3n);
+});
 });
 
 describe("Price Invalidation", function () {
