@@ -55,6 +55,28 @@ await expect(
 oracle.connect(feeder1).submitPrice(KEY_OIL_USD, 0, 900)
 ).to.be.revertedWith("PriceOracle: invalid value");
 });
+it("zero price submission is state-neutral", async function () {
+const validPrice = ethers.parseUnits("80", 18);
+await oracle.connect(feeder1).submitPrice(KEY_OIL_USD, validPrice, 900);
+
+const priceSnapshot = await oracle.prices(KEY_OIL_USD);
+const submissionSnapshot = await oracle.submissions(KEY_OIL_USD, feeder1.address);
+
+await expect(
+oracle.connect(feeder1).submitPrice(KEY_OIL_USD, 0, 900)
+).to.be.revertedWith("PriceOracle: invalid value");
+
+const price = await oracle.prices(KEY_OIL_USD);
+const submission = await oracle.submissions(KEY_OIL_USD, feeder1.address);
+expect(price.value).to.equal(priceSnapshot.value);
+expect(price.timestamp).to.equal(priceSnapshot.timestamp);
+expect(price.isValid).to.equal(priceSnapshot.isValid);
+expect(price.feederCount).to.equal(priceSnapshot.feederCount);
+expect(submission.feeder).to.equal(submissionSnapshot.feeder);
+expect(submission.value).to.equal(submissionSnapshot.value);
+expect(submission.timestamp).to.equal(submissionSnapshot.timestamp);
+expect(submission.counted).to.equal(submissionSnapshot.counted);
+});
 it("نباید confidence بالای ۱۰۰۰ مجاز باشد", async function () {
 await expect(
 oracle.connect(feeder1).submitPrice(KEY_OIL_USD, 1000, 1001)
