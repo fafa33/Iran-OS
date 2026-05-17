@@ -107,5 +107,42 @@ it("باید تازگی داده قابل بررسی باشد", async function (
 // داده اولیه در constructor ثبت شده
 expect(await oracle.isDataFresh(KEY_PAH_USD)).to.be.true;
 });
+it("stale price freshness check is state-neutral", async function () {
+const price = ethers.parseUnits("80", 18);
+await oracle.connect(feeder1).submitPrice(KEY_OIL_USD, price, 900);
+await oracle.connect(feeder2).submitPrice(KEY_OIL_USD, price, 900);
+await oracle.connect(feeder3).submitPrice(KEY_OIL_USD, price, 900);
+
+const [valueSnapshot, timestampSnapshot, isValidSnapshot] = await oracle.getPrice(KEY_OIL_USD);
+const feeder1Snapshot = await oracle.submissions(KEY_OIL_USD, feeder1.address);
+const feeder2Snapshot = await oracle.submissions(KEY_OIL_USD, feeder2.address);
+const feeder3Snapshot = await oracle.submissions(KEY_OIL_USD, feeder3.address);
+
+await ethers.provider.send("evm_increaseTime", [3601]);
+await ethers.provider.send("evm_mine", []);
+
+expect(await oracle.isDataFresh(KEY_OIL_USD)).to.be.false;
+
+const [value, timestamp, isValid] = await oracle.getPrice(KEY_OIL_USD);
+const feeder1After = await oracle.submissions(KEY_OIL_USD, feeder1.address);
+const feeder2After = await oracle.submissions(KEY_OIL_USD, feeder2.address);
+const feeder3After = await oracle.submissions(KEY_OIL_USD, feeder3.address);
+
+expect(value).to.equal(valueSnapshot);
+expect(timestamp).to.equal(timestampSnapshot);
+expect(isValid).to.equal(isValidSnapshot);
+expect(feeder1After.feeder).to.equal(feeder1Snapshot.feeder);
+expect(feeder1After.value).to.equal(feeder1Snapshot.value);
+expect(feeder1After.timestamp).to.equal(feeder1Snapshot.timestamp);
+expect(feeder1After.counted).to.equal(feeder1Snapshot.counted);
+expect(feeder2After.feeder).to.equal(feeder2Snapshot.feeder);
+expect(feeder2After.value).to.equal(feeder2Snapshot.value);
+expect(feeder2After.timestamp).to.equal(feeder2Snapshot.timestamp);
+expect(feeder2After.counted).to.equal(feeder2Snapshot.counted);
+expect(feeder3After.feeder).to.equal(feeder3Snapshot.feeder);
+expect(feeder3After.value).to.equal(feeder3Snapshot.value);
+expect(feeder3After.timestamp).to.equal(feeder3Snapshot.timestamp);
+expect(feeder3After.counted).to.equal(feeder3Snapshot.counted);
+});
 });
 });
