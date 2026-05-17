@@ -155,6 +155,7 @@ describe("AssetFreeze", function () {
       const assetSnapshot = await freeze.getFrozenAsset(assetId);
       const frozenValueSnapshot = await freeze.totalFrozenValue();
       const l1Snapshot = await swf.layerL1();
+      const totalAssetsSnapshot = await swf.totalAssets();
 
       await expect(freeze.connect(council1).transferToSWF(assetId))
         .to.be.revertedWith("AssetFreeze: already transferred");
@@ -173,6 +174,7 @@ describe("AssetFreeze", function () {
       const l1 = await swf.layerL1();
       expect(l1.balance).to.equal(l1Snapshot.balance);
       expect(l1.totalDeposited).to.equal(l1Snapshot.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalAssetsSnapshot);
     });
 
     it("موجودی L1 صندوق ثروت ملی به اندازه ارزش دارایی افزایش می‌یابد", async function () {

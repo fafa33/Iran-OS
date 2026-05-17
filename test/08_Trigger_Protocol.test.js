@@ -192,6 +192,32 @@ expect(await trigger.executionCount()).to.equal(2);
 expectExecutionRecord(await trigger.executions(1), firstSnapshot);
 expectExecutionRecord(await trigger.executions(2), secondSnapshot);
 });
+
+it("execution records do not authorize external Treasury blocking", async function () {
+const Treasury = await ethers.getContractFactory("Treasury");
+const externalTreasury = await Treasury.deploy(kernel.address);
+await externalTreasury.waitForDeployment();
+
+const Trigger = await ethers.getContractFactory("TriggerProtocol");
+const triggerWithTreasury = await Trigger.deploy(kernel.address, await externalTreasury.getAddress(), swf.address);
+await triggerWithTreasury.waitForDeployment();
+
+const startingBudgetAllocated = await externalTreasury.totalBudgetAllocated();
+const startingFiscalYear = await externalTreasury.currentFiscalYear();
+
+await triggerWithTreasury.connect(kernel).executeTrigger(1, attacker.address, 1, replacement.address);
+
+const exec = await triggerWithTreasury.executions(1);
+expect(exec.violationId).to.equal(1);
+expect(exec.offender).to.equal(attacker.address);
+expect(exec.violationCode).to.equal(1);
+expect(exec.treasuryBlocked).to.be.true;
+expect(await triggerWithTreasury.isTreasuryBlocked(attacker.address)).to.be.true;
+
+expect(await externalTreasury.isBlocked(attacker.address)).to.be.false;
+expect(await externalTreasury.totalBudgetAllocated()).to.equal(startingBudgetAllocated);
+expect(await externalTreasury.currentFiscalYear()).to.equal(startingFiscalYear);
+});
 });
 
 describe("Execution Not Found", function () {
