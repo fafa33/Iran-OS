@@ -167,6 +167,25 @@ describe("SovereignWealthFund", function () {
       expect(layer.balance).to.equal(a1 + a2);
     });
 
+    it("valid reclaimed deposit preserves prior accounting history", async function () {
+      const firstDeposit = ethers.parseUnits("50000000", 18);
+      const secondDeposit = ethers.parseUnits("75000000", 18);
+      await swf.connect(reclaimCaller).receiveReclaimedAsset(firstDeposit, "بازپس‌گیری");
+
+      const l1Snapshot = await swf.layerL1();
+      const totalAssetsSnapshot = await swf.totalAssets();
+
+      await swf.connect(reclaimCaller).receiveReclaimedAsset(secondDeposit, "بازپس‌گیری");
+
+      const l1 = await swf.layerL1();
+      expect(l1Snapshot.balance).to.equal(firstDeposit);
+      expect(l1Snapshot.totalDeposited).to.equal(firstDeposit);
+      expect(totalAssetsSnapshot).to.equal(firstDeposit);
+      expect(l1.balance).to.equal(l1Snapshot.balance + secondDeposit);
+      expect(l1.totalDeposited).to.equal(l1Snapshot.totalDeposited + secondDeposit);
+      expect(await swf.totalAssets()).to.equal(totalAssetsSnapshot + secondDeposit);
+    });
+
     it("بدون RECLAIM_ROLE فراخوانی رد می‌شود", async function () {
       await expect(
         swf.connect(stranger).receiveReclaimedAsset(
