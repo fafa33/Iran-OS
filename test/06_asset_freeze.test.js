@@ -149,6 +149,32 @@ describe("AssetFreeze", function () {
         .to.be.revertedWith("AssetFreeze: already transferred");
     });
 
+    it("duplicate transfer failure preserves reclaim and SWF accounting", async function () {
+      await freeze.connect(council1).transferToSWF(assetId);
+
+      const assetSnapshot = await freeze.getFrozenAsset(assetId);
+      const frozenValueSnapshot = await freeze.totalFrozenValue();
+      const l1Snapshot = await swf.layerL1();
+
+      await expect(freeze.connect(council1).transferToSWF(assetId))
+        .to.be.revertedWith("AssetFreeze: already transferred");
+
+      const asset = await freeze.getFrozenAsset(assetId);
+      expect(asset.originalOwner).to.equal(assetSnapshot.originalOwner);
+      expect(asset.assetType).to.equal(assetSnapshot.assetType);
+      expect(asset.estimatedValue).to.equal(assetSnapshot.estimatedValue);
+      expect(asset.frozenAt).to.equal(assetSnapshot.frozenAt);
+      expect(asset.status).to.equal(assetSnapshot.status);
+      expect(asset.reason).to.equal(assetSnapshot.reason);
+      expect(asset.councilSignatures).to.equal(assetSnapshot.councilSignatures);
+      expect(asset.transferredToSWF).to.equal(assetSnapshot.transferredToSWF);
+      expect(await freeze.totalFrozenValue()).to.equal(frozenValueSnapshot);
+
+      const l1 = await swf.layerL1();
+      expect(l1.balance).to.equal(l1Snapshot.balance);
+      expect(l1.totalDeposited).to.equal(l1Snapshot.totalDeposited);
+    });
+
     it("موجودی L1 صندوق ثروت ملی به اندازه ارزش دارایی افزایش می‌یابد", async function () {
       const l1Before = (await swf.layerL1()).balance;
       await freeze.connect(council1).transferToSWF(assetId);
