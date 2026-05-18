@@ -1308,6 +1308,139 @@ expect(await kernelContract.MIN_RESERVE_RATIO()).to.equal(terminalReserveRatio);
 expect(await kernelContract.LIQUIDITY_CAP()).to.equal(terminalLiquidityCap);
 });
 
+it("independent triggers preserve isolated execution domains", async function () {
+const signers = await ethers.getSigners();
+const [sovereign, court, oracle, swfOwner, offenderOne, offenderTwo] = signers;
+const extraCourts = signers.slice(6, 14);
+
+const Kernel = await ethers.getContractFactory("IranOS_Kernel");
+const kernelContract = await Kernel.deploy(
+sovereign.address,
+court.address,
+oracle.address,
+swfOwner.address
+);
+await kernelContract.waitForDeployment();
+
+const SWF = await ethers.getContractFactory("SovereignWealthFund");
+const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddress());
+await realSwf.waitForDeployment();
+
+const Treasury = await ethers.getContractFactory("Treasury");
+const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+await realTreasury.waitForDeployment();
+
+const Trigger = await ethers.getContractFactory("TriggerProtocol");
+const realTrigger = await Trigger.deploy(
+await kernelContract.getAddress(),
+await realTreasury.getAddress(),
+await realSwf.getAddress()
+);
+await realTrigger.waitForDeployment();
+
+await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
+
+const COURT_ROLE = await kernelContract.COURT_ROLE();
+const GUARDIAN_ROLE = await kernelContract.GUARDIAN_ROLE();
+await kernelContract.connect(sovereign).grantOfficialAccess(offenderOne.address, GUARDIAN_ROLE);
+await kernelContract.connect(sovereign).grantOfficialAccess(offenderTwo.address, GUARDIAN_ROLE);
+for (const extraCourt of extraCourts) {
+await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
+}
+
+await kernelContract.connect(oracle).flagViolation(4, offenderOne.address, "first isolated trigger");
+await kernelContract.connect(oracle).flagViolation(4, offenderTwo.address, "second isolated trigger");
+
+const firstViolationId = 1n;
+const secondViolationId = 2n;
+const courtSigners = [court, ...extraCourts];
+
+for (let i = 0; i < 6; i++) {
+await kernelContract.connect(courtSigners[i]).signViolation(firstViolationId);
+await kernelContract.connect(courtSigners[i]).signViolation(secondViolationId);
+}
+
+const firstPreTerminalRecord = await kernelContract.violations(firstViolationId);
+const secondPreTerminalRecord = await kernelContract.violations(secondViolationId);
+const firstPreTerminalExecution = await realTrigger.executions(1);
+const secondPreTerminalExecution = await realTrigger.executions(2);
+const preTerminalActivationCount = await kernelContract.triggerActivationCount();
+const preTerminalExecutionCount = await realTrigger.executionCount();
+const preTerminalTreasuryOneBlocked = await realTreasury.isBlocked(offenderOne.address);
+const preTerminalTreasuryTwoBlocked = await realTreasury.isBlocked(offenderTwo.address);
+const preTerminalTreasuryBudgetAllocated = await realTreasury.totalBudgetAllocated();
+const preTerminalTreasuryFiscalYear = await realTreasury.currentFiscalYear();
+const preTerminalTreasuryTxCount = await realTreasury.txCount();
+const preTerminalTreasuryBudgetLineCount = await realTreasury.budgetLineCount();
+const preTerminalTreasuryRemainingCapacity = await realTreasury.getRemainingCapacity();
+const preTerminalSwfL1 = await realSwf.layerL1();
+const preTerminalSwfTotalAssets = await realSwf.totalAssets();
+const preTerminalSwfTxCount = await realSwf.txCount();
+const preTerminalReserveRatio = await kernelContract.MIN_RESERVE_RATIO();
+const preTerminalLiquidityCap = await kernelContract.LIQUIDITY_CAP();
+
+expect(firstPreTerminalRecord.signaturesCount).to.equal(6);
+expect(firstPreTerminalRecord.triggered).to.be.false;
+expect(secondPreTerminalRecord.signaturesCount).to.equal(6);
+expect(secondPreTerminalRecord.triggered).to.be.false;
+expect(firstPreTerminalExecution.violationId).to.equal(0);
+expect(secondPreTerminalExecution.violationId).to.equal(0);
+expect(preTerminalActivationCount).to.equal(0);
+expect(preTerminalExecutionCount).to.equal(0);
+
+await kernelContract.connect(courtSigners[6]).signViolation(firstViolationId);
+
+const firstTerminalRecord = await kernelContract.violations(firstViolationId);
+const secondIsolatedRecord = await kernelContract.violations(secondViolationId);
+const firstExecution = await realTrigger.executions(1);
+const secondExecution = await realTrigger.executions(2);
+const postTerminalSwfL1 = await realSwf.layerL1();
+
+expect(firstTerminalRecord.courtConfirmed).to.be.true;
+expect(firstTerminalRecord.signaturesCount).to.equal(7);
+expect(firstTerminalRecord.triggered).to.be.true;
+expect(secondIsolatedRecord.courtConfirmed).to.be.false;
+expect(secondIsolatedRecord.signaturesCount).to.equal(6);
+expect(secondIsolatedRecord.triggered).to.be.false;
+
+expect(await kernelContract.triggerActivationCount()).to.equal(preTerminalActivationCount + 1n);
+expect(await realTrigger.executionCount()).to.equal(preTerminalExecutionCount + 1n);
+expect(firstExecution.violationId).to.equal(firstViolationId);
+expect(firstExecution.offender).to.equal(offenderOne.address);
+expect(firstExecution.violationCode).to.equal(4);
+expect(firstExecution.treasuryBlocked).to.be.true;
+expect(firstExecution.signatureRevoked).to.be.true;
+expect(firstExecution.publicNotified).to.be.true;
+expect(secondExecution.violationId).to.equal(0);
+expect(secondExecution.offender).to.equal(ethers.ZeroAddress);
+expect(secondExecution.violationCode).to.equal(0);
+expect(secondExecution.executedAt).to.equal(0);
+expect(secondExecution.treasuryBlocked).to.be.false;
+expect(secondExecution.signatureRevoked).to.be.false;
+expect(secondExecution.publicNotified).to.be.false;
+expect(secondExecution.interimReplacement).to.equal(ethers.ZeroAddress);
+
+expect(await realTrigger.isTreasuryBlocked(offenderOne.address)).to.be.true;
+expect(await realTrigger.isSignatureRevoked(offenderOne.address)).to.be.true;
+expect(await realTrigger.isTreasuryBlocked(offenderTwo.address)).to.be.false;
+expect(await realTrigger.isSignatureRevoked(offenderTwo.address)).to.be.false;
+expect(await realTrigger.getInterimReplacement(offenderTwo.address)).to.equal(ethers.ZeroAddress);
+expect(await realTreasury.isBlocked(offenderOne.address)).to.equal(preTerminalTreasuryOneBlocked);
+expect(await realTreasury.isBlocked(offenderTwo.address)).to.equal(preTerminalTreasuryTwoBlocked);
+expect(await realTreasury.totalBudgetAllocated()).to.equal(preTerminalTreasuryBudgetAllocated);
+expect(await realTreasury.currentFiscalYear()).to.equal(preTerminalTreasuryFiscalYear);
+expect(await realTreasury.txCount()).to.equal(preTerminalTreasuryTxCount);
+expect(await realTreasury.budgetLineCount()).to.equal(preTerminalTreasuryBudgetLineCount);
+expect(await realTreasury.getRemainingCapacity()).to.equal(preTerminalTreasuryRemainingCapacity);
+expect(postTerminalSwfL1.balance).to.equal(preTerminalSwfL1.balance);
+expect(postTerminalSwfL1.totalDeposited).to.equal(preTerminalSwfL1.totalDeposited);
+expect(postTerminalSwfL1.totalWithdrawn).to.equal(preTerminalSwfL1.totalWithdrawn);
+expect(await realSwf.totalAssets()).to.equal(preTerminalSwfTotalAssets);
+expect(await realSwf.txCount()).to.equal(preTerminalSwfTxCount);
+expect(await kernelContract.MIN_RESERVE_RATIO()).to.equal(preTerminalReserveRatio);
+expect(await kernelContract.LIQUIDITY_CAP()).to.equal(preTerminalLiquidityCap);
+});
+
 it("failed trigger execution path preserves accounting state", async function () {
 const signers = await ethers.getSigners();
 const [sovereign, court, oracle, swfOwner, offender, unauthorizedCaller] = signers;
