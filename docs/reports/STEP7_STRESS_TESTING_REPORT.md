@@ -18,13 +18,16 @@ This is the correct opening surface because Step-7 depends on the Step-6 runtime
 
 ## 3. Initial Stress Scenario
 
-The initial Step-7 test covers stale feeder exclusion during a renewed market stress window:
+The initial Step-7 tests cover stale feeder exclusion and quorum failure during renewed market stress windows:
 
 - A valid oil-price aggregate is established from three feeders.
 - The data becomes stale after the configured staleness threshold.
 - Two fresh stressed submissions are insufficient to replace the prior aggregate.
 - The prior aggregate remains unchanged until a fresh three-feeder quorum exists.
 - Once fresh quorum exists, only fresh submissions participate in the renewed aggregate.
+- A gas-price path with only stale and insufficient fresh submissions cannot form an aggregate.
+- The gas-price path remains invalid while fresh quorum is missing.
+- The gas-price path resumes correct aggregation once three fresh feeder submissions are restored.
 
 ## 4. Doctrine Constraints
 
@@ -39,4 +42,4 @@ Step-7 stress tests must not introduce or imply:
 
 ## 5. Current Status
 
-Step-7 has started with a clean metadata pre-commit and one additive economic stress test. No contract code changes are introduced by this initial checkpoint.
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness and quorum behavior. No contract code changes are introduced by this initial checkpoint.
