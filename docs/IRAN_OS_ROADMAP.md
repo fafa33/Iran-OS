@@ -30,13 +30,15 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Translate the Step-4 reserve and accounting specification into enforceable treasury and state transition invariants only after the formalization checkpoint is complete.
   - Milestone document: pending.
 
-- [ ] Step-6: Governance & constitutional execution hardening
+- [x] Step-6: Governance & constitutional execution hardening
   - Harden governance execution paths while preserving constitutional constants, Kernel immutability, finality assumptions, and human final freeze authority.
-  - Milestone document: pending.
+  - Milestone document: [STEP6_RUNTIME_HARDENING_REPORT.md](reports/STEP6_RUNTIME_HARDENING_REPORT.md).
+  - Status: closed.
 
-- [ ] Step-7: Simulation / adversarial / economic stress testing
+- [ ] Step-7: Simulation / adversarial / economic stress testing - In progress
   - Test adversarial, emergency, and economic stress scenarios against the hardened runtime and formalized reserve model.
-  - Milestone document: pending.
+  - Milestone document started: [STEP7_STRESS_TESTING_REPORT.md](reports/STEP7_STRESS_TESTING_REPORT.md).
+  - Status: started, not complete.
 
 - [ ] Step-8: External audit readiness & formal verification preparation
   - Prepare audit materials, invariant maps, and formal verification targets without claiming formal verification is complete before evidence exists.
@@ -50,6 +52,8 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 
 - [Step-3 Runtime Hardening Matrix](STEP3_RUNTIME_HARDENING_MATRIX.md)
 - [Step-4 Sovereign Reserve Model](STEP4_SOVEREIGN_RESERVE_MODEL.md)
+- [Step-6 Runtime Hardening Report](reports/STEP6_RUNTIME_HARDENING_REPORT.md)
+- [Step-7 Stress Testing Report](reports/STEP7_STRESS_TESTING_REPORT.md)
 
 ## Roadmap Maintenance Rule
 
