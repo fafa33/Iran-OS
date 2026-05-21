@@ -38,6 +38,8 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 - [ ] Step-7: Simulation / adversarial / economic stress testing - In progress
   - Test adversarial, emergency, and economic stress scenarios against the hardened runtime and formalized reserve model.
   - Milestone document started: [STEP7_STRESS_TESTING_REPORT.md](reports/STEP7_STRESS_TESTING_REPORT.md).
+  - Oracle/Economic Data Integrity sub-section: checkpointed complete with 446 passing tests and no contract changes.
+  - Next direction: policy-layer stress testing.
   - Status: started, not complete.
 
 - [ ] Step-8: External audit readiness & formal verification preparation

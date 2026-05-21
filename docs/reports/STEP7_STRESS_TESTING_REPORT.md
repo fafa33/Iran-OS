@@ -63,6 +63,22 @@ The five current Step-7 stress cases map to Fargard 7 economic requirements as f
 
 This is infrastructure validation for Fargard 7 economic strategy, not full policy execution.
 
-## 6. Current Status
+## 6. Oracle / Economic Data Integrity Checkpoint
 
-Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, and multi-path isolation. No contract code changes are introduced by this initial checkpoint.
+The Oracle/Economic Data Integrity sub-section of Step-7 is complete as of this checkpoint. It establishes a documentation and test-backed baseline for `PriceOracle` data freshness, quorum behavior, outlier observability, feeder recovery, and independent economic indicator paths.
+
+Completed oracle/economic stress cases:
+
+- Stale feeder exclusion and fresh quorum behavior.
+- Quorum failure and recovery after stale or insufficient feeder data.
+- Outlier detection, quorum-scoped manipulation observability, and recovery.
+- Feeder liveness degradation and recovery.
+- Multi-path economic indicator isolation.
+
+Final verification for this checkpoint is `446 passing`. No contract files were modified during the Step-7 oracle/economic data-integrity work. This checkpoint validates infrastructure prerequisites for Fargard 7 economic strategy, not full policy execution.
+
+The next intended Step-7 direction is policy-layer testing built on top of these oracle data-integrity prerequisites.
+
+## 7. Current Status
+
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, and multi-path isolation. The Oracle/Economic Data Integrity sub-section is checkpointed as complete, while Step-7 remains open for policy-layer stress testing. No contract code changes are introduced by this checkpoint.
