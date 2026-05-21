@@ -31,6 +31,9 @@ The initial Step-7 tests cover stale feeder exclusion and quorum failure during 
 - A severe inflation-data outlier is flagged through `DeviationDetected` under the current arithmetic-mean design.
 - The outlier path remains quorum-scoped and auditable instead of becoming a single-feeder autonomous execution path.
 - A valid fresh correction restores the prior quorum mean without contract changes.
+- A gold-price path with one offline feeder does not recompute from stale feeder data.
+- The stale aggregate remains observable but fails freshness checks while fresh quorum is missing.
+- A replacement fresh feeder restores quorum and resumes aggregation using only fresh submissions.
 
 ## 4. Doctrine Constraints
 
@@ -45,4 +48,4 @@ Step-7 stress tests must not introduce or imply:
 
 ## 5. Current Status
 
-Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, and outlier detection. No contract code changes are introduced by this initial checkpoint.
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, and feeder liveness recovery. No contract code changes are introduced by this initial checkpoint.

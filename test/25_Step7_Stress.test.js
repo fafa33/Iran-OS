@@ -10,6 +10,7 @@ describe("Step7 Stress Baseline", function () {
   const KEY_OIL_USD = ethers.keccak256(ethers.toUtf8Bytes("OIL_USD"));
   const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
   const KEY_INFLATION = ethers.keccak256(ethers.toUtf8Bytes("GLOBAL_CPI"));
+  const KEY_USD_GOLD = ethers.keccak256(ethers.toUtf8Bytes("USD_GOLD"));
 
   beforeEach(async function () {
     const signers = await ethers.getSigners();
@@ -134,6 +135,54 @@ describe("Step7 Stress Baseline", function () {
       expect(restoredAggregate.feederCount).to.equal(3);
       expect(restoredAggregate.timestamp).to.be.greaterThan(outlierAggregate.timestamp);
       expect(restoredAggregate.isValid).to.equal(true);
+    });
+
+    it("preserves stale state during feeder liveness loss and resumes after quorum recovery", async function () {
+      const initialPrices = [
+        ethers.parseUnits("1900", 18),
+        ethers.parseUnits("1910", 18),
+        ethers.parseUnits("1920", 18),
+      ];
+      const recoveryPrices = [
+        ethers.parseUnits("1930", 18),
+        ethers.parseUnits("1940", 18),
+        ethers.parseUnits("1950", 18),
+      ];
+
+      await oracle.connect(feeders[0]).submitPrice(KEY_USD_GOLD, initialPrices[0], 900);
+      await oracle.connect(feeders[1]).submitPrice(KEY_USD_GOLD, initialPrices[1], 900);
+      await oracle.connect(feeders[2]).submitPrice(KEY_USD_GOLD, initialPrices[2], 900);
+
+      const initialAggregate = await oracle.prices(KEY_USD_GOLD);
+      expect(initialAggregate.value).to.equal(ethers.parseUnits("1910", 18));
+      expect(initialAggregate.feederCount).to.equal(3);
+      expect(initialAggregate.isValid).to.equal(true);
+
+      await ethers.provider.send("evm_increaseTime", [3601]);
+      await ethers.provider.send("evm_mine", []);
+
+      expect(await oracle.isDataFresh(KEY_USD_GOLD)).to.equal(false);
+
+      await oracle.connect(feeders[0]).submitPrice(KEY_USD_GOLD, recoveryPrices[0], 900);
+      await oracle.connect(feeders[1]).submitPrice(KEY_USD_GOLD, recoveryPrices[1], 900);
+
+      const belowRecoveredQuorum = await oracle.prices(KEY_USD_GOLD);
+      expect(belowRecoveredQuorum.value).to.equal(initialAggregate.value);
+      expect(belowRecoveredQuorum.timestamp).to.equal(initialAggregate.timestamp);
+      expect(belowRecoveredQuorum.feederCount).to.equal(initialAggregate.feederCount);
+      expect(belowRecoveredQuorum.isValid).to.equal(true);
+      expect(await oracle.isDataFresh(KEY_USD_GOLD)).to.equal(false);
+
+      await expect(
+        oracle.connect(feeders[3]).submitPrice(KEY_USD_GOLD, recoveryPrices[2], 900)
+      ).to.emit(oracle, "PriceUpdated");
+
+      const recoveredAggregate = await oracle.prices(KEY_USD_GOLD);
+      expect(recoveredAggregate.value).to.equal(ethers.parseUnits("1940", 18));
+      expect(recoveredAggregate.feederCount).to.equal(3);
+      expect(recoveredAggregate.timestamp).to.be.greaterThan(initialAggregate.timestamp);
+      expect(recoveredAggregate.isValid).to.equal(true);
+      expect(await oracle.isDataFresh(KEY_USD_GOLD)).to.equal(true);
     });
   });
 });
