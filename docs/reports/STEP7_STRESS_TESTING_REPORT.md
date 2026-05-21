@@ -49,6 +49,20 @@ Step-7 stress tests must not introduce or imply:
 - Automated replacement of human or governance final authority.
 - Capital-efficiency or speculative optimization framing.
 
-## 5. Current Status
+## 5. Whitepaper / Fargard 7 Alignment
+
+Step-7 oracle/economic stress testing validates the technical data-integrity layer required for the economic strategies described in Fargard 7 of the Iran OS whitepaper. These tests do not yet implement the full Fargard 7 policy logic; they validate infrastructure prerequisites for reliable economic indicators such as `GLOBAL_CPI`, `USD_GOLD`, and `GAS_USD`.
+
+The five current Step-7 stress cases map to Fargard 7 economic requirements as follows:
+
+- Stale data exclusion: economic indicators must not be refreshed from expired feeder submissions.
+- Quorum-based validity: policy inputs require enough fresh independent feeder data before an aggregate is accepted.
+- Manipulation / outlier observability: severe deviations are surfaced through auditable oracle events without treating one feeder as autonomous policy authority.
+- Feeder liveness and recovery: economic indicators remain bounded during feeder degradation and resume aggregation after fresh quorum is restored.
+- Multi-path economic indicator isolation: stress or recovery on one indicator path does not mutate another independent indicator path.
+
+This is infrastructure validation for Fargard 7 economic strategy, not full policy execution.
+
+## 6. Current Status
 
 Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, and multi-path isolation. No contract code changes are introduced by this initial checkpoint.
