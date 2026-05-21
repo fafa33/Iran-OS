@@ -184,5 +184,84 @@ describe("Step7 Stress Baseline", function () {
       expect(recoveredAggregate.isValid).to.equal(true);
       expect(await oracle.isDataFresh(KEY_USD_GOLD)).to.equal(true);
     });
+
+    it("isolates stale quorum loss on one price path from a fresh independent path", async function () {
+      const inflationInitial = [
+        ethers.parseUnits("100", 18),
+        ethers.parseUnits("101", 18),
+        ethers.parseUnits("102", 18),
+      ];
+      const goldInitial = [
+        ethers.parseUnits("1900", 18),
+        ethers.parseUnits("1910", 18),
+        ethers.parseUnits("1920", 18),
+      ];
+      const goldRefresh = [
+        ethers.parseUnits("1930", 18),
+        ethers.parseUnits("1940", 18),
+        ethers.parseUnits("1950", 18),
+      ];
+      const inflationRecovery = [
+        ethers.parseUnits("110", 18),
+        ethers.parseUnits("112", 18),
+        ethers.parseUnits("114", 18),
+      ];
+
+      await oracle.connect(feeders[0]).submitPrice(KEY_INFLATION, inflationInitial[0], 900);
+      await oracle.connect(feeders[1]).submitPrice(KEY_INFLATION, inflationInitial[1], 900);
+      await oracle.connect(feeders[2]).submitPrice(KEY_INFLATION, inflationInitial[2], 900);
+
+      await oracle.connect(feeders[0]).submitPrice(KEY_USD_GOLD, goldInitial[0], 900);
+      await oracle.connect(feeders[1]).submitPrice(KEY_USD_GOLD, goldInitial[1], 900);
+      await oracle.connect(feeders[2]).submitPrice(KEY_USD_GOLD, goldInitial[2], 900);
+
+      const initialInflation = await oracle.prices(KEY_INFLATION);
+      const initialGold = await oracle.prices(KEY_USD_GOLD);
+      expect(initialInflation.value).to.equal(ethers.parseUnits("101", 18));
+      expect(initialInflation.feederCount).to.equal(3);
+      expect(initialInflation.isValid).to.equal(true);
+      expect(initialGold.value).to.equal(ethers.parseUnits("1910", 18));
+      expect(initialGold.feederCount).to.equal(3);
+      expect(initialGold.isValid).to.equal(true);
+
+      await ethers.provider.send("evm_increaseTime", [3601]);
+      await ethers.provider.send("evm_mine", []);
+
+      await oracle.connect(feeders[0]).submitPrice(KEY_USD_GOLD, goldRefresh[0], 900);
+      await oracle.connect(feeders[1]).submitPrice(KEY_USD_GOLD, goldRefresh[1], 900);
+      await oracle.connect(feeders[2]).submitPrice(KEY_USD_GOLD, goldRefresh[2], 900);
+
+      await oracle.connect(feeders[3]).submitPrice(KEY_INFLATION, inflationRecovery[0], 900);
+      await oracle.connect(feeders[4]).submitPrice(KEY_INFLATION, inflationRecovery[1], 900);
+
+      const staleInflation = await oracle.prices(KEY_INFLATION);
+      const refreshedGold = await oracle.prices(KEY_USD_GOLD);
+      expect(staleInflation.value).to.equal(initialInflation.value);
+      expect(staleInflation.timestamp).to.equal(initialInflation.timestamp);
+      expect(staleInflation.feederCount).to.equal(initialInflation.feederCount);
+      expect(await oracle.isDataFresh(KEY_INFLATION)).to.equal(false);
+      expect(refreshedGold.value).to.equal(ethers.parseUnits("1940", 18));
+      expect(refreshedGold.feederCount).to.equal(3);
+      expect(refreshedGold.timestamp).to.be.greaterThan(initialGold.timestamp);
+      expect(refreshedGold.isValid).to.equal(true);
+      expect(await oracle.isDataFresh(KEY_USD_GOLD)).to.equal(true);
+
+      await expect(
+        oracle.connect(feeders[5]).submitPrice(KEY_INFLATION, inflationRecovery[2], 900)
+      ).to.emit(oracle, "PriceUpdated");
+
+      const restoredInflation = await oracle.prices(KEY_INFLATION);
+      const finalGold = await oracle.prices(KEY_USD_GOLD);
+      expect(restoredInflation.value).to.equal(ethers.parseUnits("112", 18));
+      expect(restoredInflation.feederCount).to.equal(3);
+      expect(restoredInflation.timestamp).to.be.greaterThan(initialInflation.timestamp);
+      expect(restoredInflation.isValid).to.equal(true);
+      expect(await oracle.isDataFresh(KEY_INFLATION)).to.equal(true);
+      expect(finalGold.value).to.equal(refreshedGold.value);
+      expect(finalGold.timestamp).to.equal(refreshedGold.timestamp);
+      expect(finalGold.feederCount).to.equal(refreshedGold.feederCount);
+      expect(finalGold.isValid).to.equal(true);
+      expect(await oracle.isDataFresh(KEY_USD_GOLD)).to.equal(true);
+    });
   });
 });

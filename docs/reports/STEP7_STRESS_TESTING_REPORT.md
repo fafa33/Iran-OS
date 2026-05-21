@@ -34,6 +34,9 @@ The initial Step-7 tests cover stale feeder exclusion and quorum failure during 
 - A gold-price path with one offline feeder does not recompute from stale feeder data.
 - The stale aggregate remains observable but fails freshness checks while fresh quorum is missing.
 - A replacement fresh feeder restores quorum and resumes aggregation using only fresh submissions.
+- Independent price paths remain isolated when one path loses fresh quorum.
+- A refreshed gold-price path remains fresh and correctly aggregated while the inflation path is stale and below fresh quorum.
+- Restoring the affected inflation path resumes its aggregate without mutating the already-fresh gold path.
 
 ## 4. Doctrine Constraints
 
@@ -48,4 +51,4 @@ Step-7 stress tests must not introduce or imply:
 
 ## 5. Current Status
 
-Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, and feeder liveness recovery. No contract code changes are introduced by this initial checkpoint.
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, and multi-path isolation. No contract code changes are introduced by this initial checkpoint.
