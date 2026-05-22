@@ -646,4 +646,175 @@ describe("Step7 Policy Layer", function () {
     );
     expect(await adapter.recommendationCount()).to.equal(1);
   });
+
+  it("keeps Fargard 7 adapter review recommendations non-executing under stress", async function () {
+    const [
+      kernel,
+      feeder1,
+      feeder2,
+      feeder3,
+      unauthorized,
+      parliament,
+      government,
+      policyOracle,
+      swf,
+      devBank,
+      productionFeeder,
+      productionBank,
+      provincialOracle,
+      governor,
+      developmentAccount,
+      nationalTreasury,
+      monitoredAccount,
+    ] = await ethers.getSigners();
+
+    const FEEDER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("FEEDER_ROLE"));
+    const ORACLE_ROLE = ethers.keccak256(ethers.toUtf8Bytes("ORACLE_ROLE"));
+    const PARLIAMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("PARLIAMENT_ROLE"));
+    const GOVERNMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("GOVERNMENT_ROLE"));
+    const BANK_ROLE = ethers.keccak256(ethers.toUtf8Bytes("BANK_ROLE"));
+
+    const KEY_GLOBAL_CPI = ethers.keccak256(ethers.toUtf8Bytes("GLOBAL_CPI"));
+    const KEY_USD_GOLD = ethers.keccak256(ethers.toUtf8Bytes("USD_GOLD"));
+    const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
+
+    const PriceOracle = await ethers.getContractFactory("PriceOracle");
+    const priceOracle = await PriceOracle.deploy(kernel.address);
+    await priceOracle.waitForDeployment();
+
+    for (const feeder of [feeder1, feeder2, feeder3]) {
+      await priceOracle.connect(kernel).grantRole(FEEDER_ROLE, feeder.address);
+    }
+
+    const Fargard7PolicyAdapter = await ethers.getContractFactory("Fargard7PolicyAdapter");
+    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, await priceOracle.getAddress());
+    await adapter.waitForDeployment();
+
+    const BaseIncome = await ethers.getContractFactory("BaseIncome");
+    const baseIncome = await BaseIncome.deploy(kernel.address);
+    await baseIncome.waitForDeployment();
+
+    const BudgetAllocation = await ethers.getContractFactory("BudgetAllocation");
+    const budget = await BudgetAllocation.deploy(kernel.address);
+    await budget.waitForDeployment();
+    await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
+    await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
+    await budget.connect(parliament).approveBudget(1404);
+
+    const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+    const pah = await PahlaviToken.deploy(swf.address, kernel.address, ethers.parseUnits("1", 30));
+    await pah.waitForDeployment();
+
+    const VelocityFee = await ethers.getContractFactory("VelocityFee");
+    const velocityFee = await VelocityFee.deploy(kernel.address, devBank.address, await pah.getAddress());
+    await velocityFee.waitForDeployment();
+    await velocityFee.connect(kernel).grantRole(ORACLE_ROLE, policyOracle.address);
+    await velocityFee.connect(policyOracle).registerAccount(monitoredAccount.address);
+
+    const ProductionOracle = await ethers.getContractFactory("ProductionOracle");
+    const productionOracle = await ProductionOracle.deploy(kernel.address);
+    await productionOracle.waitForDeployment();
+    await productionOracle.connect(kernel).grantRole(FEEDER_ROLE, productionFeeder.address);
+    await productionOracle.connect(kernel).grantRole(BANK_ROLE, productionBank.address);
+
+    const Provincial = await ethers.getContractFactory("Provincial");
+    const provincial = await Provincial.deploy(kernel.address, nationalTreasury.address);
+    await provincial.waitForDeployment();
+    await provincial.connect(kernel).grantRole(ORACLE_ROLE, provincialOracle.address);
+    await provincial.connect(kernel).registerProvince("review boundary province", governor.address, developmentAccount.address);
+
+    const reviewThresholds = {
+      elevatedCpi: ethers.parseUnits("120", 18),
+      severeCpi: ethers.parseUnits("150", 18),
+      elevatedGold: ethers.parseUnits("2000", 18),
+      severeGold: ethers.parseUnits("2500", 18),
+      elevatedGas: ethers.parseUnits("50", 18),
+      severeGas: ethers.parseUnits("100", 18),
+    };
+
+    await expect(adapter.connect(unauthorized).setThresholds(reviewThresholds)).to.be.reverted;
+    await expect(adapter.connect(unauthorized).createRecommendation("unauthorized stress review")).to.be.reverted;
+    await expect(adapter.connect(kernel).createRecommendation("missing signal review")).to.be.revertedWith(
+      "Fargard7PolicyAdapter: stale or invalid signal"
+    );
+
+    await priceOracle.connect(feeder1).submitPrice(KEY_GLOBAL_CPI, ethers.parseUnits("180", 18), 950);
+    await priceOracle.connect(feeder2).submitPrice(KEY_GLOBAL_CPI, ethers.parseUnits("181", 18), 950);
+    await priceOracle.connect(feeder3).submitPrice(KEY_GLOBAL_CPI, ethers.parseUnits("182", 18), 950);
+
+    await priceOracle.connect(feeder1).submitPrice(KEY_USD_GOLD, ethers.parseUnits("2700", 18), 940);
+    await priceOracle.connect(feeder2).submitPrice(KEY_USD_GOLD, ethers.parseUnits("2710", 18), 940);
+    await priceOracle.connect(feeder3).submitPrice(KEY_USD_GOLD, ethers.parseUnits("2720", 18), 940);
+
+    await priceOracle.connect(feeder1).submitPrice(KEY_GAS_USD, ethers.parseUnits("120", 18), 930);
+    await priceOracle.connect(feeder2).submitPrice(KEY_GAS_USD, ethers.parseUnits("121", 18), 930);
+    await priceOracle.connect(feeder3).submitPrice(KEY_GAS_USD, ethers.parseUnits("122", 18), 930);
+
+    const minWageBefore = await baseIncome.MIN_WAGE();
+    const taxExemptCapBefore = await baseIncome.TAX_EXEMPT_CAP();
+    const healthBefore = await budget.getSectorBudget(0);
+    const welfareBefore = await budget.getSectorBudget(4);
+    const velocityThresholdBefore = await velocityFee.THRESHOLD();
+    const totalFeesBefore = await velocityFee.totalFeesCollected();
+    const productionUnitsBefore = await productionOracle.getTotalUnits();
+    const provinceBefore = await provincial.getProvince(1);
+
+    await expect(adapter.connect(kernel).createRecommendation("severe Fargard 7 review only"))
+      .to.emit(adapter, "PolicyRecommendationCreated")
+      .withArgs(
+        1,
+        kernel.address,
+        2,
+        false,
+        ethers.parseUnits("181", 18),
+        ethers.parseUnits("2710", 18),
+        ethers.parseUnits("121", 18),
+        "severe Fargard 7 review only"
+      );
+
+    const recommendation = await adapter.getRecommendation(1);
+    expect(recommendation.stressLevel).to.equal(2);
+    expect(recommendation.executable).to.equal(false);
+    expect(recommendation.snapshot.allSignalsFresh).to.equal(true);
+
+    expect(await baseIncome.MIN_WAGE()).to.equal(minWageBefore);
+    expect(await baseIncome.TAX_EXEMPT_CAP()).to.equal(taxExemptCapBefore);
+    expect(await baseIncome.paymentCount()).to.equal(0);
+
+    const healthAfter = await budget.getSectorBudget(0);
+    const welfareAfter = await budget.getSectorBudget(4);
+    expect(healthAfter.allocated).to.equal(healthBefore.allocated);
+    expect(healthAfter.spent).to.equal(healthBefore.spent);
+    expect(welfareAfter.allocated).to.equal(welfareBefore.allocated);
+    expect(welfareAfter.spent).to.equal(welfareBefore.spent);
+    expect(await budget.expenditureCount()).to.equal(0);
+
+    expect(await velocityFee.THRESHOLD()).to.equal(velocityThresholdBefore);
+    expect(await velocityFee.totalFeesCollected()).to.equal(totalFeesBefore);
+    expect((await velocityFee.getAccountStatus(monitoredAccount.address)).totalFeesPaid).to.equal(0);
+
+    expect(await productionOracle.getTotalUnits()).to.equal(productionUnitsBefore);
+    expect(await productionOracle.totalPioneerUnits()).to.equal(0);
+    expect(await productionOracle.totalTransitionUnits()).to.equal(0);
+    expect(await productionOracle.totalCriticalUnits()).to.equal(0);
+    expect(await productionOracle.eligibilityCount()).to.equal(0);
+
+    const provinceAfter = await provincial.getProvince(1);
+    expect(provinceAfter.productivityScore).to.equal(provinceBefore.productivityScore);
+    expect(provinceAfter.totalRevenue).to.equal(provinceBefore.totalRevenue);
+    expect(provinceAfter.provincialBalance).to.equal(provinceBefore.provincialBalance);
+    expect(provinceAfter.nationalContrib).to.equal(provinceBefore.nationalContrib);
+
+    await ethers.provider.send("evm_increaseTime", [3601]);
+    await ethers.provider.send("evm_mine", []);
+    await expect(adapter.connect(kernel).createRecommendation("stale review blocked")).to.be.revertedWith(
+      "Fargard7PolicyAdapter: stale or invalid signal"
+    );
+
+    await priceOracle.connect(kernel).invalidatePrice(KEY_GLOBAL_CPI, "review boundary invalidation");
+    await expect(adapter.connect(kernel).createRecommendation("invalid review blocked")).to.be.revertedWith(
+      "Fargard7PolicyAdapter: stale or invalid signal"
+    );
+    expect(await adapter.recommendationCount()).to.equal(1);
+  });
 });
