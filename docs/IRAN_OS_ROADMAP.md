@@ -50,9 +50,12 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Final closure: complete with 454 passing tests; no autonomous downstream policy mutation is implemented or claimed.
   - Status: closed.
 
-- [ ] Step-8: External audit readiness & formal verification preparation
+- [ ] Step-8: External audit readiness & formal verification preparation - In progress
   - Prepare audit materials, invariant maps, and formal verification targets without claiming formal verification is complete before evidence exists.
-  - Milestone document: pending.
+  - Initial audit-readiness report opened with critical contract surfaces, authority boundaries, subsystem invariant map, existing test evidence references, and formal verification candidate properties.
+  - `Fargard7PolicyAdapter` remains proposal-only/non-executing; Step-8 does not introduce downstream policy mutation.
+  - Milestone document started: [STEP8_AUDIT_READINESS_REPORT.md](reports/STEP8_AUDIT_READINESS_REPORT.md).
+  - Status: started, not complete.
 
 - [ ] Step-9: Production governance specification & deployment doctrine
   - Define final production governance, deployment, operational, and emergency doctrine after prior checkpoints are complete.
@@ -64,6 +67,7 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 - [Step-4 Sovereign Reserve Model](STEP4_SOVEREIGN_RESERVE_MODEL.md)
 - [Step-6 Runtime Hardening Report](reports/STEP6_RUNTIME_HARDENING_REPORT.md)
 - [Step-7 Stress Testing Report](reports/STEP7_STRESS_TESTING_REPORT.md)
+- [Step-8 Audit Readiness Report](reports/STEP8_AUDIT_READINESS_REPORT.md)
 
 ## Roadmap Maintenance Rule
 
