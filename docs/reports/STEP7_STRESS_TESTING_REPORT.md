@@ -79,6 +79,18 @@ Final verification for this checkpoint is `446 passing`. No contract files were 
 
 The next intended Step-7 direction is policy-layer testing built on top of these oracle data-integrity prerequisites.
 
-## 7. Current Status
+## 7. Policy-Layer Neutrality Entry Point
 
-Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, and multi-path isolation. The Oracle/Economic Data Integrity sub-section is checkpointed as complete, while Step-7 remains open for policy-layer stress testing. No contract code changes are introduced by this checkpoint.
+The first policy-layer Step-7 test is a policy neutrality boundary test. It establishes valid fresh `GLOBAL_CPI`, `USD_GOLD`, and `GAS_USD` oracle aggregates, then verifies that existing policy-layer surfaces are not autonomously mutated by those signals.
+
+The covered policy surfaces are:
+
+- `BaseIncome` minimum wage, tax-exempt cap, employer registration state, and wage-payment state.
+- `BudgetAllocation` total budget, allocation ratios, sector allocations, sector lock state, and expenditure state.
+- `VelocityFee` threshold, tier-one rate, dormancy period, fee-collection state, and role-controlled fee behavior.
+
+This test proves the current architecture boundary: economic indicators are observable oracle signals, not autonomous policy executors. Dynamic Fargard 7 policy execution would require a future adapter or consumer contract and must not be claimed from the current implementation.
+
+## 8. Current Status
+
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, and policy-layer neutrality. The Oracle/Economic Data Integrity sub-section is checkpointed as complete, while Step-7 remains open for further policy-layer stress testing. Verification after the policy-layer neutrality entry point is `447 passing`. No contract code changes are introduced by this checkpoint.
