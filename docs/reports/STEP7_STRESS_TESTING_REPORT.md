@@ -160,43 +160,40 @@ The next Step-7 direction is review workflow and approval-path design. That futu
 
 ## 11. Adapter Review Workflow Design
 
-The next `Fargard7PolicyAdapter` slice should add a review workflow around existing recommendations while preserving the proposal-only boundary. The intended lifecycle is:
+The `Fargard7PolicyAdapter` review workflow slice adds lifecycle state around existing recommendations while preserving the proposal-only boundary. The implemented lifecycle is:
 
 - `Created`: a recommender creates a recommendation from fresh `GLOBAL_CPI`, `USD_GOLD`, and `GAS_USD` snapshots.
-- `Reviewed`: an authorized reviewer records review metadata, notes, and a decision timestamp.
 - `Approved`: the reviewer marks the recommendation approved for institutional follow-up only.
 - `Rejected`: the reviewer rejects the recommendation with a reason.
 - `Expired`: the recommendation is no longer actionable because the review window elapsed or signal age exceeds policy freshness rules.
 
-The proposed roles are:
+The implemented roles are:
 
 - `POLICY_ADMIN_ROLE`: manages adapter configuration, review windows, oracle address, and role assignment.
 - `RECOMMENDER_ROLE`: creates recommendations from valid fresh oracle snapshots.
-- `REVIEWER_ROLE`: reviews, approves, rejects, or expires recommendations.
-- `EXECUTOR_ROLE`: reserved for future explicit execution design only; it should not be granted downstream mutation authority in the review-workflow slice.
+- `REVIEWER_ROLE`: approves, rejects, or expires recommendations.
 
-Recommended storage additions:
+Implemented storage additions:
 
-- Recommendation status enum: `Created`, `Reviewed`, `Approved`, `Rejected`, `Expired`.
+- Recommendation status enum: `Created`, `Approved`, `Rejected`, `Expired`.
 - Review metadata keyed by recommendation ID: reviewer, reviewedAt, expiresAt, status, rationale or reason.
 - Immutable signal snapshot remains attached to the original recommendation.
-- Review window parameter, for example `reviewWindow`, set by admin.
+- Review window parameter, `reviewWindow`, set by admin.
 
-Recommended events:
+Implemented events:
 
-- `RecommendationReviewed(recommendationId, reviewer, expiresAt, notes)`.
 - `RecommendationApproved(recommendationId, reviewer, reason)`.
 - `RecommendationRejected(recommendationId, reviewer, reason)`.
-- `RecommendationExpired(recommendationId, reviewerOrCaller)`.
+- `RecommendationExpired(recommendationId, reviewer)`.
 - `ReviewWindowUpdated(oldWindow, newWindow)`.
 
 Expiration and staleness rules:
 
 - A recommendation must be created only from fresh oracle signals, as today.
-- A recommendation can be reviewed only before its review window expires.
+- A recommendation can be approved or rejected only before its review window expires.
 - Approval must not refresh or replace the original signal snapshot.
 - If the original recommendation is expired, stale, rejected, or already approved, later review actions should fail safely.
-- Expiration may be explicit through a reviewer/admin call or derived in view logic from `createdAt + reviewWindow`.
+- Expiration is explicit through a reviewer call and observable in view logic from `createdAt + reviewWindow`.
 
 Required invariants:
 
@@ -206,11 +203,8 @@ Required invariants:
 - Downstream execution requires a separate future contract/interface and separate tests.
 - Reviewer approval must not bypass existing Kernel, parliament, bank, auditor, oracle, government, or module-specific roles.
 
-Minimal next implementation slice:
+The review workflow hardening test validates role-gated approval and rejection, duplicate-action rejection, explicit expiration after the review window, and unchanged downstream `BaseIncome` and `BudgetAllocation` state. Approval remains adapter-local metadata and does not execute policy.
 
-- Add status, review metadata, `REVIEWER_ROLE`, and review/approve/reject/expire functions to the adapter.
-- Keep every new function adapter-local and non-mutating toward downstream modules.
-- Add deterministic tests for role-gated review, approval, rejection, expiration, duplicate-action rejection, and unchanged downstream state.
-- Update docs after verification. Step-7 remains open until an approval-path design and any future execution path are separately implemented and tested.
+Step-7 remains open until an explicit approval-path design and any future execution path are separately implemented and tested. No downstream policy execution exists in this slice.
 
-Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, policy-layer neutrality, dormant-liquidity policy execution boundaries, ProductionOracle industrial policy boundaries, BudgetAllocation containment boundaries, Provincial redistribution/productivity boundaries, proposal-only Fargard 7 policy recommendations, and adapter review-boundary hardening. The Oracle/Economic Data Integrity and Policy-Layer sub-sections are checkpointed as complete for current implemented surfaces, while Step-7 remains open for review workflow and approval-path design. Verification after the adapter hardening checkpoint is `453 passing`.
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, policy-layer neutrality, dormant-liquidity policy execution boundaries, ProductionOracle industrial policy boundaries, BudgetAllocation containment boundaries, Provincial redistribution/productivity boundaries, proposal-only Fargard 7 policy recommendations, adapter review-boundary hardening, and adapter review workflow coverage. The Oracle/Economic Data Integrity and Policy-Layer sub-sections are checkpointed as complete for current implemented surfaces, while Step-7 remains open for approval-path design and any future execution-path implementation. Verification after the adapter review workflow slice is `454 passing`.

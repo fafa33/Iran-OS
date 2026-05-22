@@ -595,6 +595,7 @@ describe("Step7 Policy Layer", function () {
         1,
         kernel.address,
         1,
+        0,
         false,
         ethers.parseUnits("126", 18),
         ethers.parseUnits("2110", 18),
@@ -765,6 +766,7 @@ describe("Step7 Policy Layer", function () {
         1,
         kernel.address,
         2,
+        0,
         false,
         ethers.parseUnits("181", 18),
         ethers.parseUnits("2710", 18),
@@ -816,5 +818,113 @@ describe("Step7 Policy Layer", function () {
       "Fargard7PolicyAdapter: stale or invalid signal"
     );
     expect(await adapter.recommendationCount()).to.equal(1);
+  });
+
+  it("reviews Fargard 7 adapter recommendations without downstream execution", async function () {
+    const [kernel, feeder1, feeder2, feeder3, reviewer, unauthorized, parliament, government] = await ethers.getSigners();
+
+    const FEEDER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("FEEDER_ROLE"));
+    const REVIEWER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("REVIEWER_ROLE"));
+    const PARLIAMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("PARLIAMENT_ROLE"));
+    const GOVERNMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("GOVERNMENT_ROLE"));
+
+    const KEY_GLOBAL_CPI = ethers.keccak256(ethers.toUtf8Bytes("GLOBAL_CPI"));
+    const KEY_USD_GOLD = ethers.keccak256(ethers.toUtf8Bytes("USD_GOLD"));
+    const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
+
+    const PriceOracle = await ethers.getContractFactory("PriceOracle");
+    const priceOracle = await PriceOracle.deploy(kernel.address);
+    await priceOracle.waitForDeployment();
+
+    for (const feeder of [feeder1, feeder2, feeder3]) {
+      await priceOracle.connect(kernel).grantRole(FEEDER_ROLE, feeder.address);
+    }
+
+    const Fargard7PolicyAdapter = await ethers.getContractFactory("Fargard7PolicyAdapter");
+    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, await priceOracle.getAddress());
+    await adapter.waitForDeployment();
+    await adapter.connect(kernel).grantRole(REVIEWER_ROLE, reviewer.address);
+    await adapter.connect(kernel).setReviewWindow(60);
+
+    const BaseIncome = await ethers.getContractFactory("BaseIncome");
+    const baseIncome = await BaseIncome.deploy(kernel.address);
+    await baseIncome.waitForDeployment();
+
+    const BudgetAllocation = await ethers.getContractFactory("BudgetAllocation");
+    const budget = await BudgetAllocation.deploy(kernel.address);
+    await budget.waitForDeployment();
+    await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
+    await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
+    await budget.connect(parliament).approveBudget(1404);
+
+    await priceOracle.connect(feeder1).submitPrice(KEY_GLOBAL_CPI, ethers.parseUnits("125", 18), 950);
+    await priceOracle.connect(feeder2).submitPrice(KEY_GLOBAL_CPI, ethers.parseUnits("126", 18), 950);
+    await priceOracle.connect(feeder3).submitPrice(KEY_GLOBAL_CPI, ethers.parseUnits("127", 18), 950);
+
+    await priceOracle.connect(feeder1).submitPrice(KEY_USD_GOLD, ethers.parseUnits("2100", 18), 940);
+    await priceOracle.connect(feeder2).submitPrice(KEY_USD_GOLD, ethers.parseUnits("2110", 18), 940);
+    await priceOracle.connect(feeder3).submitPrice(KEY_USD_GOLD, ethers.parseUnits("2120", 18), 940);
+
+    await priceOracle.connect(feeder1).submitPrice(KEY_GAS_USD, ethers.parseUnits("55", 18), 930);
+    await priceOracle.connect(feeder2).submitPrice(KEY_GAS_USD, ethers.parseUnits("56", 18), 930);
+    await priceOracle.connect(feeder3).submitPrice(KEY_GAS_USD, ethers.parseUnits("57", 18), 930);
+
+    const minWageBefore = await baseIncome.MIN_WAGE();
+    const healthBefore = await budget.getSectorBudget(0);
+
+    await adapter.connect(kernel).createRecommendation("approve review path");
+    await adapter.connect(kernel).createRecommendation("reject review path");
+    await adapter.connect(kernel).createRecommendation("expire review path");
+
+    await expect(adapter.connect(unauthorized).approveRecommendation(1, "unauthorized approval")).to.be.reverted;
+    await expect(adapter.connect(unauthorized).rejectRecommendation(2, "unauthorized rejection")).to.be.reverted;
+
+    await expect(adapter.connect(reviewer).approveRecommendation(1, "institutional approval only"))
+      .to.emit(adapter, "RecommendationApproved")
+      .withArgs(1, reviewer.address, "institutional approval only");
+
+    const approved = await adapter.getRecommendation(1);
+    expect(approved.status).to.equal(1);
+    expect(approved.executable).to.equal(false);
+    expect(approved.reviewer).to.equal(reviewer.address);
+    expect(approved.reviewReason).to.equal("institutional approval only");
+
+    await expect(
+      adapter.connect(reviewer).rejectRecommendation(1, "duplicate review")
+    ).to.be.revertedWith("Fargard7PolicyAdapter: already reviewed");
+
+    await expect(adapter.connect(reviewer).rejectRecommendation(2, "not adopted"))
+      .to.emit(adapter, "RecommendationRejected")
+      .withArgs(2, reviewer.address, "not adopted");
+
+    const rejected = await adapter.getRecommendation(2);
+    expect(rejected.status).to.equal(2);
+    expect(rejected.executable).to.equal(false);
+
+    await expect(adapter.connect(reviewer).expireRecommendation(3)).to.be.revertedWith(
+      "Fargard7PolicyAdapter: review window active"
+    );
+
+    await ethers.provider.send("evm_increaseTime", [61]);
+    await ethers.provider.send("evm_mine", []);
+    expect(await adapter.isRecommendationExpired(3)).to.equal(true);
+    await expect(adapter.connect(reviewer).approveRecommendation(3, "late approval")).to.be.revertedWith(
+      "Fargard7PolicyAdapter: recommendation expired"
+    );
+
+    await expect(adapter.connect(reviewer).expireRecommendation(3))
+      .to.emit(adapter, "RecommendationExpired")
+      .withArgs(3, reviewer.address);
+
+    const expired = await adapter.getRecommendation(3);
+    expect(expired.status).to.equal(3);
+    expect(expired.executable).to.equal(false);
+    expect(expired.reviewer).to.equal(reviewer.address);
+
+    expect(await baseIncome.MIN_WAGE()).to.equal(minWageBefore);
+    const healthAfter = await budget.getSectorBudget(0);
+    expect(healthAfter.allocated).to.equal(healthBefore.allocated);
+    expect(healthAfter.spent).to.equal(healthBefore.spent);
+    expect(await budget.expenditureCount()).to.equal(0);
   });
 });

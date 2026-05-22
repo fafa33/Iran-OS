@@ -16,6 +16,7 @@ interface IFargard7PriceOracle {
 contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
     bytes32 public constant POLICY_ADMIN_ROLE = keccak256("POLICY_ADMIN_ROLE");
     bytes32 public constant RECOMMENDER_ROLE = keccak256("RECOMMENDER_ROLE");
+    bytes32 public constant REVIEWER_ROLE = keccak256("REVIEWER_ROLE");
 
     bytes32 public constant KEY_GLOBAL_CPI = keccak256("GLOBAL_CPI");
     bytes32 public constant KEY_USD_GOLD = keccak256("USD_GOLD");
@@ -25,6 +26,13 @@ contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
         Normal,
         Elevated,
         Severe
+    }
+
+    enum RecommendationStatus {
+        Created,
+        Approved,
+        Rejected,
+        Expired
     }
 
     struct Thresholds {
@@ -53,14 +61,20 @@ contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
         uint256 id;
         address requester;
         StressLevel stressLevel;
+        RecommendationStatus status;
         bool executable;
         uint256 timestamp;
+        uint256 expiresAt;
+        address reviewer;
+        uint256 reviewedAt;
         SignalSnapshot snapshot;
         string rationale;
+        string reviewReason;
     }
 
     IFargard7PriceOracle public priceOracle;
     Thresholds public thresholds;
+    uint256 public reviewWindow;
     uint256 public recommendationCount;
 
     mapping(uint256 => PolicyRecommendation) private _recommendations;
@@ -78,12 +92,17 @@ contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
         uint256 indexed recommendationId,
         address indexed requester,
         StressLevel stressLevel,
+        RecommendationStatus status,
         bool executable,
         int256 globalCpi,
         int256 usdGold,
         int256 gasUsd,
         string rationale
     );
+    event ReviewWindowUpdated(uint256 oldReviewWindow, uint256 newReviewWindow);
+    event RecommendationApproved(uint256 indexed recommendationId, address indexed reviewer, string reason);
+    event RecommendationRejected(uint256 indexed recommendationId, address indexed reviewer, string reason);
+    event RecommendationExpired(uint256 indexed recommendationId, address indexed reviewer);
 
     constructor(address _kernel, address _priceOracle) {
         require(_kernel != address(0), "Fargard7PolicyAdapter: invalid kernel");
@@ -92,8 +111,10 @@ contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
         _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
         _grantRole(POLICY_ADMIN_ROLE, _kernel);
         _grantRole(RECOMMENDER_ROLE, _kernel);
+        _grantRole(REVIEWER_ROLE, _kernel);
 
         priceOracle = IFargard7PriceOracle(_priceOracle);
+        reviewWindow = 7 days;
         thresholds = Thresholds({
             elevatedCpi: 120 * int256(1e18),
             severeCpi: 150 * int256(1e18),
@@ -122,6 +143,13 @@ contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
             newThresholds.elevatedGas,
             newThresholds.severeGas
         );
+    }
+
+    function setReviewWindow(uint256 newReviewWindow) external onlyRole(POLICY_ADMIN_ROLE) {
+        require(newReviewWindow > 0, "Fargard7PolicyAdapter: invalid review window");
+        uint256 oldReviewWindow = reviewWindow;
+        reviewWindow = newReviewWindow;
+        emit ReviewWindowUpdated(oldReviewWindow, newReviewWindow);
     }
 
     function getSignalSnapshot() public view returns (SignalSnapshot memory snapshot) {
@@ -158,16 +186,22 @@ contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
             id: recommendationId,
             requester: msg.sender,
             stressLevel: stressLevel,
+            status: RecommendationStatus.Created,
             executable: false,
             timestamp: block.timestamp,
+            expiresAt: block.timestamp + reviewWindow,
+            reviewer: address(0),
+            reviewedAt: 0,
             snapshot: snapshot,
-            rationale: rationale
+            rationale: rationale,
+            reviewReason: ""
         });
 
         emit PolicyRecommendationCreated(
             recommendationId,
             msg.sender,
             stressLevel,
+            RecommendationStatus.Created,
             false,
             snapshot.globalCpi,
             snapshot.usdGold,
@@ -176,9 +210,58 @@ contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
         );
     }
 
+    function approveRecommendation(uint256 recommendationId, string calldata reason)
+        external
+        onlyRole(REVIEWER_ROLE)
+        nonReentrant
+    {
+        PolicyRecommendation storage recommendation = _getMutableRecommendation(recommendationId);
+        _requireReviewable(recommendation);
+
+        recommendation.status = RecommendationStatus.Approved;
+        recommendation.reviewer = msg.sender;
+        recommendation.reviewedAt = block.timestamp;
+        recommendation.reviewReason = reason;
+
+        emit RecommendationApproved(recommendationId, msg.sender, reason);
+    }
+
+    function rejectRecommendation(uint256 recommendationId, string calldata reason)
+        external
+        onlyRole(REVIEWER_ROLE)
+        nonReentrant
+    {
+        PolicyRecommendation storage recommendation = _getMutableRecommendation(recommendationId);
+        _requireReviewable(recommendation);
+
+        recommendation.status = RecommendationStatus.Rejected;
+        recommendation.reviewer = msg.sender;
+        recommendation.reviewedAt = block.timestamp;
+        recommendation.reviewReason = reason;
+
+        emit RecommendationRejected(recommendationId, msg.sender, reason);
+    }
+
+    function expireRecommendation(uint256 recommendationId) external onlyRole(REVIEWER_ROLE) nonReentrant {
+        PolicyRecommendation storage recommendation = _getMutableRecommendation(recommendationId);
+        require(recommendation.status == RecommendationStatus.Created, "Fargard7PolicyAdapter: already reviewed");
+        require(block.timestamp > recommendation.expiresAt, "Fargard7PolicyAdapter: review window active");
+
+        recommendation.status = RecommendationStatus.Expired;
+        recommendation.reviewer = msg.sender;
+        recommendation.reviewedAt = block.timestamp;
+
+        emit RecommendationExpired(recommendationId, msg.sender);
+    }
+
     function getRecommendation(uint256 recommendationId) external view returns (PolicyRecommendation memory) {
         require(recommendationId > 0 && recommendationId <= recommendationCount, "Fargard7PolicyAdapter: invalid recommendation");
         return _recommendations[recommendationId];
+    }
+
+    function isRecommendationExpired(uint256 recommendationId) external view returns (bool) {
+        PolicyRecommendation storage recommendation = _getRecommendationStorage(recommendationId);
+        return recommendation.status == RecommendationStatus.Created && block.timestamp > recommendation.expiresAt;
     }
 
     function _classify(SignalSnapshot memory snapshot) internal view returns (StressLevel) {
@@ -203,5 +286,28 @@ contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
         require(newThresholds.severeCpi >= newThresholds.elevatedCpi, "Fargard7PolicyAdapter: invalid CPI order");
         require(newThresholds.severeGold >= newThresholds.elevatedGold, "Fargard7PolicyAdapter: invalid gold order");
         require(newThresholds.severeGas >= newThresholds.elevatedGas, "Fargard7PolicyAdapter: invalid gas order");
+    }
+
+    function _getMutableRecommendation(uint256 recommendationId)
+        internal
+        view
+        returns (PolicyRecommendation storage)
+    {
+        require(recommendationId > 0 && recommendationId <= recommendationCount, "Fargard7PolicyAdapter: invalid recommendation");
+        return _recommendations[recommendationId];
+    }
+
+    function _getRecommendationStorage(uint256 recommendationId)
+        internal
+        view
+        returns (PolicyRecommendation storage)
+    {
+        require(recommendationId > 0 && recommendationId <= recommendationCount, "Fargard7PolicyAdapter: invalid recommendation");
+        return _recommendations[recommendationId];
+    }
+
+    function _requireReviewable(PolicyRecommendation storage recommendation) internal view {
+        require(recommendation.status == RecommendationStatus.Created, "Fargard7PolicyAdapter: already reviewed");
+        require(block.timestamp <= recommendation.expiresAt, "Fargard7PolicyAdapter: recommendation expired");
     }
 }
