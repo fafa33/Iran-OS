@@ -138,4 +138,89 @@ describe("Step7 Policy Layer", function () {
     expect(tier).to.equal(1);
     expect(dormant).to.equal(true);
   });
+
+  it("applies dormant-liquidity fees only through explicit policy execution", async function () {
+    const [
+      kernel,
+      feeder1,
+      feeder2,
+      feeder3,
+      policyOracle,
+      staking,
+      swf,
+      devBank,
+      dormantAccount,
+      stakingAccount,
+    ] = await ethers.getSigners();
+
+    const FEEDER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("FEEDER_ROLE"));
+    const ORACLE_ROLE = ethers.keccak256(ethers.toUtf8Bytes("ORACLE_ROLE"));
+    const STAKING_ROLE = ethers.keccak256(ethers.toUtf8Bytes("STAKING_ROLE"));
+    const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
+
+    const PriceOracle = await ethers.getContractFactory("PriceOracle");
+    const priceOracle = await PriceOracle.deploy(kernel.address);
+    await priceOracle.waitForDeployment();
+
+    for (const feeder of [feeder1, feeder2, feeder3]) {
+      await priceOracle.connect(kernel).grantRole(FEEDER_ROLE, feeder.address);
+    }
+
+    const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+    const pah = await PahlaviToken.deploy(swf.address, kernel.address, ethers.parseUnits("1", 30));
+    await pah.waitForDeployment();
+
+    const VelocityFee = await ethers.getContractFactory("VelocityFee");
+    const velocityFee = await VelocityFee.deploy(kernel.address, devBank.address, await pah.getAddress());
+    await velocityFee.waitForDeployment();
+    await velocityFee.connect(kernel).grantRole(ORACLE_ROLE, policyOracle.address);
+    await velocityFee.connect(kernel).grantRole(STAKING_ROLE, staking.address);
+
+    const tier2Balance = ethers.parseUnits("1000000", 18);
+    const stakingBalance = ethers.parseUnits("6000000", 18);
+    const expectedTier2Fee = (tier2Balance * (await velocityFee.TIER2_RATE())) / 1000n;
+
+    await pah.connect(swf).mint(dormantAccount.address, tier2Balance, "dormant liquidity policy test");
+    await pah.connect(swf).mint(stakingAccount.address, stakingBalance, "staking exemption policy test");
+
+    await velocityFee.connect(policyOracle).registerAccount(dormantAccount.address);
+    await velocityFee.connect(policyOracle).registerAccount(stakingAccount.address);
+    await velocityFee.connect(staking).activateStaking(stakingAccount.address, stakingBalance);
+
+    await ethers.provider.send("evm_increaseTime", [Number(await velocityFee.DORMANCY_PERIOD())]);
+    await ethers.provider.send("evm_mine", []);
+
+    await priceOracle.connect(feeder1).submitPrice(KEY_GAS_USD, ethers.parseUnits("30", 18), 930);
+    await priceOracle.connect(feeder2).submitPrice(KEY_GAS_USD, ethers.parseUnits("31", 18), 930);
+    await expect(
+      priceOracle.connect(feeder3).submitPrice(KEY_GAS_USD, ethers.parseUnits("32", 18), 930)
+    ).to.emit(priceOracle, "PriceUpdated");
+
+    const [gasPrice, , gasIsValid] = await priceOracle.getPrice(KEY_GAS_USD);
+    expect(gasPrice).to.equal(ethers.parseUnits("31", 18));
+    expect(gasIsValid).to.equal(true);
+    expect(await velocityFee.totalFeesCollected()).to.equal(0);
+    expect((await velocityFee.getAccountStatus(dormantAccount.address)).totalFeesPaid).to.equal(0);
+
+    const [feeAmount, tier, dormant] = await velocityFee.calculateFee(dormantAccount.address);
+    expect(feeAmount).to.equal(expectedTier2Fee);
+    expect(tier).to.equal(2);
+    expect(dormant).to.equal(true);
+    expect(await velocityFee.isDormant(dormantAccount.address)).to.equal(true);
+
+    const [stakingFee, stakingTier, stakingDormant] = await velocityFee.calculateFee(stakingAccount.address);
+    expect(stakingFee).to.equal(0);
+    expect(stakingTier).to.equal(0);
+    expect(stakingDormant).to.equal(false);
+    await expect(
+      velocityFee.connect(policyOracle).applyFee(stakingAccount.address)
+    ).to.be.revertedWith("VelocityFee: staking exempt");
+
+    await expect(
+      velocityFee.connect(policyOracle).applyFee(dormantAccount.address)
+    ).to.emit(velocityFee, "FeeCollected");
+
+    expect(await velocityFee.totalFeesCollected()).to.equal(expectedTier2Fee);
+    expect((await velocityFee.getAccountStatus(dormantAccount.address)).totalFeesPaid).to.equal(expectedTier2Fee);
+  });
 });

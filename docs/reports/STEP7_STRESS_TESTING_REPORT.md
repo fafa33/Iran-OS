@@ -91,6 +91,8 @@ The covered policy surfaces are:
 
 This test proves the current architecture boundary: economic indicators are observable oracle signals, not autonomous policy executors. Dynamic Fargard 7 policy execution would require a future adapter or consumer contract and must not be claimed from the current implementation.
 
+The second policy-layer Step-7 test focuses on the existing `VelocityFee` dormant-liquidity policy surface. It verifies that an above-threshold dormant account reaches the correct anti-hoarding fee tier after the configured dormancy period, that staking remains exempt under the implemented rules, and that fee accounting changes only after an explicit authorized policy/module call to `applyFee`. A fresh `GAS_USD` oracle signal is observed in the same scenario, but it does not autonomously mutate dormant-liquidity fees or collection state.
+
 ## 8. Current Status
 
-Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, and policy-layer neutrality. The Oracle/Economic Data Integrity sub-section is checkpointed as complete, while Step-7 remains open for further policy-layer stress testing. Verification after the policy-layer neutrality entry point is `447 passing`. No contract code changes are introduced by this checkpoint.
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, policy-layer neutrality, and dormant-liquidity policy execution boundaries. The Oracle/Economic Data Integrity sub-section is checkpointed as complete, while Step-7 remains open for further policy-layer stress testing. Verification after the dormant-liquidity policy stress case is `448 passing`. No contract code changes are introduced by this checkpoint.
