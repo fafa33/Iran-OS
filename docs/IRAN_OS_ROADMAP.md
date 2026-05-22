@@ -46,7 +46,8 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Adapter review-boundary hardening: severe-signal recommendations remain non-executing, unauthorized review/configuration paths are rejected, and stale or invalid signals fail safely.
   - Adapter hardening checkpoint: complete for the proposal-only/non-execution invariant with 453 passing tests.
   - Adapter review workflow: implemented Created, Approved, Rejected, and Expired recommendation status with reviewer-gated approval/rejection/expiration and no downstream policy mutation.
-  - Next direction: explicit approval-path design before claiming dynamic Fargard 7 policy execution.
+  - Adapter review workflow checkpoint: complete for proposal-only/non-executing review state with 454 passing tests.
+  - Next direction: final Step-7 closure review.
   - Status: started, not complete.
 
 - [ ] Step-8: External audit readiness & formal verification preparation
