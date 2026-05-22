@@ -329,4 +329,61 @@ describe("Step7 Policy Layer", function () {
     expect(subsidizedCriticalUnit.subsidyMonthsRemaining).to.equal(6);
     expect(await productionOracle.eligibilityCount()).to.equal(2);
   });
+
+  it("contains BudgetAllocation spending within approved sector policy boundaries", async function () {
+    const [kernel, parliament, government, auditor] = await ethers.getSigners();
+
+    const PARLIAMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("PARLIAMENT_ROLE"));
+    const GOVERNMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("GOVERNMENT_ROLE"));
+    const AUDITOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("AUDITOR_ROLE"));
+
+    const BudgetAllocation = await ethers.getContractFactory("BudgetAllocation");
+    const budget = await BudgetAllocation.deploy(kernel.address);
+    await budget.waitForDeployment();
+    await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
+    await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
+    await budget.connect(kernel).grantRole(AUDITOR_ROLE, auditor.address);
+
+    await expect(budget.connect(parliament).approveBudget(1404)).to.emit(budget, "BudgetApproved");
+    expect(await budget.budgetApproved()).to.equal(true);
+
+    const totalBudget = await budget.TOTAL_BUDGET();
+    const healthBudget = await budget.getSectorBudget(0);
+    const defenseBudget = await budget.getSectorBudget(2);
+    expect(healthBudget.allocated).to.equal((totalBudget * (await budget.HEALTH_RATIO())) / 1000n);
+    expect(defenseBudget.allocated).to.equal((totalBudget * (await budget.DEFENSE_RATIO())) / 1000n);
+    expect(healthBudget.spent).to.equal(0);
+    expect(defenseBudget.spent).to.equal(0);
+
+    const healthSpend = ethers.parseUnits("1000000000", 18);
+    await expect(
+      budget.connect(government).recordExpenditure(0, healthSpend, "contained health sector spend")
+    ).to.emit(budget, "ExpenditureRecorded");
+
+    const afterHealthSpend = await budget.getSectorBudget(0);
+    expect(afterHealthSpend.spent).to.equal(healthSpend);
+    expect(await budget.expenditureCount()).to.equal(1);
+
+    await expect(
+      budget.connect(government).recordExpenditure(0, afterHealthSpend.allocated - afterHealthSpend.spent + 1n, "overspend")
+    ).to.be.revertedWith("BudgetAllocation: exceeds budget");
+    expect((await budget.getSectorBudget(0)).spent).to.equal(healthSpend);
+    expect(await budget.expenditureCount()).to.equal(1);
+
+    await expect(
+      budget.connect(auditor).flagExpenditure(1, "suspicious contained spend")
+    ).to.emit(budget, "ExpenditureFlagged");
+    expect((await budget.expenditures(1)).flagged).to.equal(true);
+
+    await expect(
+      budget.connect(kernel).lockSectorBudget(2, "containment lock")
+    ).to.emit(budget, "SectorBudgetLocked");
+    expect((await budget.getSectorBudget(2)).isLocked).to.equal(true);
+
+    await expect(
+      budget.connect(government).recordExpenditure(2, ethers.parseUnits("1", 18), "locked defense spend")
+    ).to.be.revertedWith("BudgetAllocation: locked by Trigger");
+    expect((await budget.getSectorBudget(2)).spent).to.equal(0);
+    expect(await budget.expenditureCount()).to.equal(1);
+  });
 });
