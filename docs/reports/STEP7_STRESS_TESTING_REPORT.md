@@ -140,4 +140,16 @@ Required invariants for the adapter design:
 
 ## 10. Current Status
 
-Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, policy-layer neutrality, dormant-liquidity policy execution boundaries, ProductionOracle industrial policy boundaries, BudgetAllocation containment boundaries, and Provincial redistribution/productivity boundaries. The Oracle/Economic Data Integrity and Policy-Layer sub-sections are checkpointed as complete for current implemented surfaces, while Step-7 remains open for `Fargard7PolicyAdapter` implementation. Verification after the adapter design plan is `451 passing`. No contract code changes are introduced by this checkpoint.
+The first `Fargard7PolicyAdapter` implementation slice adds a proposal-only coordinator for `GLOBAL_CPI`, `USD_GOLD`, and `GAS_USD`. The adapter reads fresh `PriceOracle` snapshots, classifies the configured stress level, and emits auditable recommendations with `executable = false`.
+
+This first slice is intentionally non-executing:
+
+- It does not mutate `BaseIncome`, `BudgetAllocation`, `VelocityFee`, `ProductionOracle`, or `Provincial`.
+- It does not spend funds, grant subsidies, apply fees, change wages, alter budgets, reclassify production units, or distribute provincial bonuses.
+- Recommendation creation is role-gated.
+- Stale or invalid oracle data blocks recommendation creation.
+- Threshold configuration is role-gated and bounded by ordering checks.
+
+The adapter validates the first technical bridge from Fargard 7 economic indicators to policy review, not autonomous Fargard 7 execution. Future implementation is still required for any approval-gated execution path.
+
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, policy-layer neutrality, dormant-liquidity policy execution boundaries, ProductionOracle industrial policy boundaries, BudgetAllocation containment boundaries, Provincial redistribution/productivity boundaries, and proposal-only Fargard 7 policy recommendations. The Oracle/Economic Data Integrity and Policy-Layer sub-sections are checkpointed as complete for current implemented surfaces, while Step-7 remains open for further `Fargard7PolicyAdapter` implementation and approval-gated execution design. Verification after the proposal-only adapter slice is `452 passing`.

@@ -41,7 +41,8 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Oracle/Economic Data Integrity sub-section: checkpointed complete with 446 passing tests and no contract changes.
   - Policy-Layer sub-section: checkpointed complete for current implemented surfaces with oracle signal neutrality, dormant-liquidity, ProductionOracle industrial policy, BudgetAllocation containment, and Provincial redistribution/productivity boundary coverage.
   - `Fargard7PolicyAdapter` design plan: documented as a read-only/proposal-only, authority-bounded coordinator over `GLOBAL_CPI`, `USD_GOLD`, and `GAS_USD`, with no autonomous spending, subsidy, fee, reclassification, wage, or budget mutation.
-  - Next direction: implement and test `Fargard7PolicyAdapter` before claiming dynamic Fargard 7 policy execution.
+  - `Fargard7PolicyAdapter` first implementation slice: proposal-only recommendation adapter over fresh `GLOBAL_CPI`, `USD_GOLD`, and `GAS_USD` signals, with role-gated configuration and no downstream policy mutation.
+  - Next direction: extend `Fargard7PolicyAdapter` only through explicit approval-gated design before claiming dynamic Fargard 7 policy execution.
   - Status: started, not complete.
 
 - [ ] Step-8: External audit readiness & formal verification preparation
