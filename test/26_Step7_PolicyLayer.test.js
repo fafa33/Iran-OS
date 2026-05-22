@@ -386,4 +386,85 @@ describe("Step7 Policy Layer", function () {
     expect((await budget.getSectorBudget(2)).spent).to.equal(0);
     expect(await budget.expenditureCount()).to.equal(1);
   });
+
+  it("preserves Provincial redistribution and productivity bonus policy boundaries", async function () {
+    const [kernel, oracle, governor, developmentAccount, nationalTreasury, unauthorized] = await ethers.getSigners();
+
+    const ORACLE_ROLE = ethers.keccak256(ethers.toUtf8Bytes("ORACLE_ROLE"));
+    const GOVERNOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("GOVERNOR_ROLE"));
+
+    const Provincial = await ethers.getContractFactory("Provincial");
+    const provincial = await Provincial.deploy(kernel.address, nationalTreasury.address);
+    await provincial.waitForDeployment();
+    await provincial.connect(kernel).grantRole(ORACLE_ROLE, oracle.address);
+
+    await expect(
+      provincial.connect(unauthorized).registerProvince("unauthorized province", governor.address, developmentAccount.address)
+    ).to.be.reverted;
+
+    await expect(
+      provincial.connect(kernel).registerProvince("redistribution province", governor.address, developmentAccount.address)
+    ).to.emit(provincial, "ProvinceRegistered");
+
+    expect(await provincial.provinceCount()).to.equal(1);
+    expect(await provincial.getProvinceByGovernor(governor.address)).to.equal(1);
+    expect(await provincial.hasRole(GOVERNOR_ROLE, governor.address)).to.equal(true);
+
+    const registeredProvince = await provincial.getProvince(1);
+    expect(registeredProvince.productivityScore).to.equal(50);
+    expect(registeredProvince.totalRevenue).to.equal(0);
+    expect(registeredProvince.provincialBalance).to.equal(0);
+    expect(registeredProvince.nationalContrib).to.equal(0);
+
+    const revenue = ethers.parseUnits("1000000", 18);
+    await expect(
+      provincial.connect(unauthorized).distributeRevenue(1, revenue)
+    ).to.be.reverted;
+
+    await expect(
+      provincial.connect(oracle).distributeRevenue(1, revenue)
+    ).to.emit(provincial, "RevenueDistributed");
+
+    const afterRevenue = await provincial.getProvince(1);
+    const expectedProvincialShare = (revenue * (await provincial.PROVINCIAL_SHARE())) / 1000n;
+    const expectedNationalShare = revenue - expectedProvincialShare;
+    expect(afterRevenue.totalRevenue).to.equal(revenue);
+    expect(afterRevenue.provincialBalance).to.equal(expectedProvincialShare);
+    expect(afterRevenue.nationalContrib).to.equal(expectedNationalShare);
+
+    await expect(
+      provincial.connect(unauthorized).updateProductivityScore(1, 71)
+    ).to.be.reverted;
+    await expect(
+      provincial.connect(oracle).updateProductivityScore(1, 101)
+    ).to.be.revertedWith("Provincial: score out of range");
+
+    await expect(
+      provincial.connect(kernel).payProductivityBonus(1, ethers.parseUnits("50000", 18))
+    ).to.be.revertedWith("Provincial: score too low");
+    expect((await provincial.getProvince(1)).provincialBalance).to.equal(expectedProvincialShare);
+
+    await provincial.connect(oracle).updateProductivityScore(1, 70);
+    await expect(
+      provincial.connect(kernel).payProductivityBonus(1, ethers.parseUnits("50000", 18))
+    ).to.be.revertedWith("Provincial: score too low");
+
+    await provincial.connect(oracle).updateProductivityScore(1, 71);
+    expect((await provincial.getProvince(1)).productivityScore).to.equal(71);
+
+    const bonus = ethers.parseUnits("50000", 18);
+    await expect(
+      provincial.connect(unauthorized).payProductivityBonus(1, bonus)
+    ).to.be.reverted;
+
+    await expect(
+      provincial.connect(kernel).payProductivityBonus(1, bonus)
+    ).to.emit(provincial, "ProductivityBonusPaid");
+
+    const afterBonus = await provincial.getProvince(1);
+    expect(afterBonus.productivityScore).to.equal(71);
+    expect(afterBonus.totalRevenue).to.equal(revenue);
+    expect(afterBonus.nationalContrib).to.equal(expectedNationalShare);
+    expect(afterBonus.provincialBalance).to.equal(expectedProvincialShare + bonus);
+  });
 });
