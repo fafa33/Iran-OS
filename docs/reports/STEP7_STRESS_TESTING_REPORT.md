@@ -115,6 +115,29 @@ These tests validate the existing policy surfaces that are already implemented. 
 
 Final verification for this policy-layer checkpoint is `451 passing`. No contract files were modified during the policy-layer stress-test work.
 
-## 9. Current Status
+## 9. Fargard7PolicyAdapter Design Plan
 
-Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, policy-layer neutrality, dormant-liquidity policy execution boundaries, ProductionOracle industrial policy boundaries, BudgetAllocation containment boundaries, and Provincial redistribution/productivity boundaries. The Oracle/Economic Data Integrity and Policy-Layer sub-sections are checkpointed as complete for current implemented surfaces, while Step-7 remains open for `Fargard7PolicyAdapter` design and implementation. Verification after the policy-layer checkpoint is `451 passing`. No contract code changes are introduced by this checkpoint.
+The next Step-7 implementation direction is a `Fargard7PolicyAdapter` that acts as an authority-bounded coordinator between validated economic signals and existing policy modules. The adapter should read `GLOBAL_CPI`, `USD_GOLD`, and `GAS_USD` from `PriceOracle`, classify stress conditions, and emit recommendations or proposals for policy review.
+
+The first implementation slice should be read-only and proposal-only. It should not autonomously mutate downstream policy modules, and it should not spend funds, grant subsidies, apply fees, reclassify production units, change wages, alter budget allocations, or distribute provincial bonuses. Any material policy action must remain approval-gated through explicit governance, Kernel, parliament, bank, auditor, oracle, or other existing authority paths as appropriate.
+
+Initial adapter outputs should be auditable recommendation events for the currently validated policy surfaces:
+
+- `BaseIncome` review recommendations for inflation-linked wage or support pressure.
+- `BudgetAllocation` review recommendations for budget containment or reallocation pressure.
+- `VelocityFee` review recommendations for dormant-liquidity or gas-cost pressure.
+- `ProductionOracle` review recommendations for industrial resilience pressure.
+- `Provincial` review recommendations for redistribution or productivity pressure.
+
+Required invariants for the adapter design:
+
+- Stale or invalid oracle data must not produce executable policy action.
+- Oracle signals remain inputs, not sovereign authority.
+- The adapter must not bypass existing roles or approval gates.
+- Recommendation creation must be auditable and deterministic from the accepted signal snapshot.
+- Adapter failure must be policy-neutral: downstream module state remains unchanged.
+- Dynamic Fargard 7 execution remains future implementation work until the adapter and its authority model are implemented and tested.
+
+## 10. Current Status
+
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, policy-layer neutrality, dormant-liquidity policy execution boundaries, ProductionOracle industrial policy boundaries, BudgetAllocation containment boundaries, and Provincial redistribution/productivity boundaries. The Oracle/Economic Data Integrity and Policy-Layer sub-sections are checkpointed as complete for current implemented surfaces, while Step-7 remains open for `Fargard7PolicyAdapter` implementation. Verification after the adapter design plan is `451 passing`. No contract code changes are introduced by this checkpoint.
