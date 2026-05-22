@@ -39,7 +39,8 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Test adversarial, emergency, and economic stress scenarios against the hardened runtime and formalized reserve model.
   - Milestone document started: [STEP7_STRESS_TESTING_REPORT.md](reports/STEP7_STRESS_TESTING_REPORT.md).
   - Oracle/Economic Data Integrity sub-section: checkpointed complete with 446 passing tests and no contract changes.
-  - Policy-layer stress testing: started with oracle signal neutrality, dormant-liquidity, ProductionOracle industrial policy, BudgetAllocation containment, and Provincial redistribution/productivity boundary coverage.
+  - Policy-Layer sub-section: checkpointed complete for current implemented surfaces with oracle signal neutrality, dormant-liquidity, ProductionOracle industrial policy, BudgetAllocation containment, and Provincial redistribution/productivity boundary coverage.
+  - Next direction: `Fargard7PolicyAdapter` design and implementation to connect validated signals to explicit, authority-bounded dynamic Fargard 7 policy execution.
   - Status: started, not complete.
 
 - [ ] Step-8: External audit readiness & formal verification preparation

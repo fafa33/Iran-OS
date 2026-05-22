@@ -99,6 +99,22 @@ The fourth policy-layer Step-7 test focuses on the existing `BudgetAllocation` c
 
 The fifth policy-layer Step-7 test focuses on the existing `Provincial` redistribution and productivity surface. It verifies Kernel-controlled province registration, 30/70 revenue distribution through the current oracle-authorized revenue path, productivity score update bounds, the implemented productivity bonus threshold of strictly greater than 70, and rejection of unauthorized registration, revenue distribution, score update, and bonus calls. This validates explicit provincial redistribution and productivity policy behavior only; it does not introduce or imply PriceOracle-driven provincial policy.
 
-## 8. Current Status
+## 8. Policy-Layer Checkpoint
 
-Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, policy-layer neutrality, dormant-liquidity policy execution boundaries, ProductionOracle industrial policy boundaries, BudgetAllocation containment boundaries, and Provincial redistribution/productivity boundaries. The Oracle/Economic Data Integrity sub-section is checkpointed as complete, while Step-7 remains open for further policy-layer stress testing. Verification after the Provincial policy stress case is `451 passing`. No contract code changes are introduced by this checkpoint.
+The Policy-Layer sub-section of Step-7 is checkpointed as complete for the current implemented policy surfaces. It establishes a documentation and test-backed baseline for existing policy behavior without claiming dynamic Fargard 7 execution.
+
+Completed policy-layer stress cases:
+
+- Policy neutrality boundary across `PriceOracle`, `BaseIncome`, `BudgetAllocation`, and `VelocityFee`.
+- `VelocityFee` dormant-liquidity policy execution boundary.
+- `ProductionOracle` industrial policy classification, loan eligibility, and critical subsidy boundary.
+- `BudgetAllocation` approval, sector allocation, overspend rejection, flagging, and lock containment boundary.
+- `Provincial` 30/70 redistribution and productivity bonus threshold boundary.
+
+These tests validate the existing policy surfaces that are already implemented. They also confirm the current architectural gap: dynamic Fargard 7 execution is still missing because no adapter or consumer currently converts CPI, gold, gas, production, budget, or provincial signals into coordinated policy updates. The next Step-7 direction is `Fargard7PolicyAdapter` design and implementation, with explicit authority boundaries and tests, before any claim of dynamic Fargard 7 policy execution.
+
+Final verification for this policy-layer checkpoint is `451 passing`. No contract files were modified during the policy-layer stress-test work.
+
+## 9. Current Status
+
+Step-7 has started with a clean metadata pre-commit and additive economic stress tests for oracle freshness, quorum behavior, outlier detection, feeder liveness recovery, multi-path isolation, policy-layer neutrality, dormant-liquidity policy execution boundaries, ProductionOracle industrial policy boundaries, BudgetAllocation containment boundaries, and Provincial redistribution/productivity boundaries. The Oracle/Economic Data Integrity and Policy-Layer sub-sections are checkpointed as complete for current implemented surfaces, while Step-7 remains open for `Fargard7PolicyAdapter` design and implementation. Verification after the policy-layer checkpoint is `451 passing`. No contract code changes are introduced by this checkpoint.
