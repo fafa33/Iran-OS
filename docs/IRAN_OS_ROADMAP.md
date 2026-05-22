@@ -44,7 +44,8 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - `Fargard7PolicyAdapter` first implementation slice: proposal-only recommendation adapter over fresh `GLOBAL_CPI`, `USD_GOLD`, and `GAS_USD` signals, with role-gated configuration and no downstream policy mutation.
   - First adapter slice checkpoint: complete for proposal-only behavior with 452 passing tests.
   - Adapter review-boundary hardening: severe-signal recommendations remain non-executing, unauthorized review/configuration paths are rejected, and stale or invalid signals fail safely.
-  - Next direction: adapter hardening, review workflow, and explicit approval-path design before claiming dynamic Fargard 7 policy execution.
+  - Adapter hardening checkpoint: complete for the proposal-only/non-execution invariant with 453 passing tests.
+  - Next direction: review workflow and explicit approval-path design before claiming dynamic Fargard 7 policy execution.
   - Status: started, not complete.
 
 - [ ] Step-8: External audit readiness & formal verification preparation
