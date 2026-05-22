@@ -35,7 +35,7 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Milestone document: [STEP6_RUNTIME_HARDENING_REPORT.md](reports/STEP6_RUNTIME_HARDENING_REPORT.md).
   - Status: closed.
 
-- [ ] Step-7: Simulation / adversarial / economic stress testing - In progress
+- [x] Step-7: Simulation / adversarial / economic stress testing - Complete
   - Test adversarial, emergency, and economic stress scenarios against the hardened runtime and formalized reserve model.
   - Milestone document started: [STEP7_STRESS_TESTING_REPORT.md](reports/STEP7_STRESS_TESTING_REPORT.md).
   - Oracle/Economic Data Integrity sub-section: checkpointed complete with 446 passing tests and no contract changes.
@@ -47,8 +47,8 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Adapter hardening checkpoint: complete for the proposal-only/non-execution invariant with 453 passing tests.
   - Adapter review workflow: implemented Created, Approved, Rejected, and Expired recommendation status with reviewer-gated approval/rejection/expiration and no downstream policy mutation.
   - Adapter review workflow checkpoint: complete for proposal-only/non-executing review state with 454 passing tests.
-  - Next direction: final Step-7 closure review.
-  - Status: started, not complete.
+  - Final closure: complete with 454 passing tests; no autonomous downstream policy mutation is implemented or claimed.
+  - Status: closed.
 
 - [ ] Step-8: External audit readiness & formal verification preparation
   - Prepare audit materials, invariant maps, and formal verification targets without claiming formal verification is complete before evidence exists.
