@@ -230,6 +230,7 @@ This log records Step-8 remediation evidence as it is added. It does not claim e
 | Gap ID | Subsystem | Evidence added | File | Coverage | Remaining status |
 | --- | --- | --- | --- | --- | --- |
 | GAP-001 | Kernel / authority | Added one deterministic Kernel authority-boundary test covering unauthorized admin attempts, state-neutral failure, and the valid sovereign role path. | `test/01_Kernel.test.js` | Unauthorized callers cannot grant official access, update Kernel dependency addresses, or clear the emergency lock; failed attempts preserve access flags, role assignments, dependency addresses, violation counts, trigger counts, and lock state; sovereign grant path still works. | Partial remediation evidence added; formal role graph and proof target remain open. |
+| GAP-002 | PahlaviToken / monetary controls | Added one deterministic monetary-boundary test covering unauthorized mint/burn attempts, state-neutral failure, authorized SWF mint/burn paths, and unaffected transfer behavior. | `test/02_pahlavi_token.test.js` | Unauthorized callers cannot mint or burn; failed attempts preserve balances and total supply; SWF mint and burn still work; normal ERC-20 transfer remains available outside emergency mode. | Partial remediation evidence added; formal reserve-backed mint and monetary accounting proof targets remain open. |
 
 ### Audit Package Reviewer Handoff
 

@@ -211,5 +211,44 @@ describe("PahlaviToken", function () {
         token.connect(user2).transferFrom(user1.address, stranger.address, 100n)
       ).to.be.revertedWith("ERC20: insufficient allowance");
     });
+
+    it("Step8: unauthorized monetary actions remain state-neutral while SWF mint burn and transfers work", async function () {
+      const initialSupply = await token.totalSupply();
+      const initialUser1Balance = await token.balanceOf(user1.address);
+      const initialUser2Balance = await token.balanceOf(user2.address);
+      const mintAmount = ethers.parseUnits("250", 18);
+      const burnAmount = ethers.parseUnits("100", 18);
+      const transferAmount = ethers.parseUnits("75", 18);
+
+      await expect(
+        token.connect(stranger).mint(user2.address, mintAmount, "unauthorized mint")
+      ).to.be.reverted;
+
+      await expect(
+        token.connect(stranger).burn(user1.address, burnAmount, "unauthorized burn")
+      ).to.be.reverted;
+
+      expect(await token.totalSupply()).to.equal(initialSupply);
+      expect(await token.balanceOf(user1.address)).to.equal(initialUser1Balance);
+      expect(await token.balanceOf(user2.address)).to.equal(initialUser2Balance);
+
+      await expect(
+        token.connect(swf).mint(user2.address, mintAmount, "Step8 authorized mint")
+      ).to.emit(token, "PahlaviMinted");
+
+      expect(await token.totalSupply()).to.equal(initialSupply + mintAmount);
+      expect(await token.balanceOf(user2.address)).to.equal(initialUser2Balance + mintAmount);
+
+      await expect(
+        token.connect(swf).burn(user2.address, burnAmount, "Step8 authorized burn")
+      ).to.emit(token, "PahlaviBurned");
+
+      expect(await token.totalSupply()).to.equal(initialSupply + mintAmount - burnAmount);
+      expect(await token.balanceOf(user2.address)).to.equal(initialUser2Balance + mintAmount - burnAmount);
+
+      await token.connect(user1).transfer(user2.address, transferAmount);
+      expect(await token.balanceOf(user1.address)).to.equal(initialUser1Balance - transferAmount);
+      expect(await token.balanceOf(user2.address)).to.equal(initialUser2Balance + mintAmount - burnAmount + transferAmount);
+    });
   });
 });
