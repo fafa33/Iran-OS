@@ -144,4 +144,103 @@ expect(dormant).to.be.false;
 expect(feeAmount).to.equal(0);
 });
 });
+
+describe("Step8 Velocity Fee Boundary Remediation", function () {
+it("keeps unauthorized fee paths state-neutral while dormant staking and threshold rules hold", async function () {
+  const tier2Balance = ethers.parseUnits("1000000", 18);
+  const stakingBalance = ethers.parseUnits("6000000", 18);
+  const belowThresholdBalance = ethers.parseUnits("50000", 18);
+  const expectedTier2Fee = (tier2Balance * 50n) / 1000n;
+
+  await expect(
+    fee.connect(attacker).registerAccount(account1.address)
+  ).to.be.reverted;
+  expect(await fee.totalFeesCollected()).to.equal(0);
+  expect((await fee.getAccountStatus(account1.address)).isRegistered).to.equal(false);
+
+  await pah.connect(swf).mint(account1.address, tier2Balance, "step8 dormant account");
+  await pah.connect(swf).mint(account2.address, stakingBalance, "step8 staking account");
+  await pah.connect(swf).mint(attacker.address, belowThresholdBalance, "step8 below threshold account");
+
+  await fee.connect(oracle).registerAccount(account1.address);
+  await fee.connect(oracle).registerAccount(account2.address);
+  await fee.connect(oracle).registerAccount(attacker.address);
+
+  const account1Before = await fee.getAccountStatus(account1.address);
+  const account2Before = await fee.getAccountStatus(account2.address);
+
+  await expect(
+    fee.connect(attacker).recordActivity(account1.address)
+  ).to.be.reverted;
+  await expect(
+    fee.connect(attacker).applyFee(account1.address)
+  ).to.be.reverted;
+  await expect(
+    fee.connect(attacker).activateStaking(account2.address, stakingBalance)
+  ).to.be.reverted;
+  await expect(
+    fee.connect(attacker).deactivateStaking(account2.address)
+  ).to.be.reverted;
+
+  const account1AfterRejected = await fee.getAccountStatus(account1.address);
+  const account2AfterRejected = await fee.getAccountStatus(account2.address);
+  expect(await fee.totalFeesCollected()).to.equal(0);
+  expect(account1AfterRejected.lastActivityTime).to.equal(account1Before.lastActivityTime);
+  expect(account1AfterRejected.isStaking).to.equal(false);
+  expect(account1AfterRejected.stakingAmount).to.equal(0);
+  expect(account1AfterRejected.totalFeesPaid).to.equal(0);
+  expect(account1AfterRejected.isRegistered).to.equal(true);
+  expect(account2AfterRejected.lastActivityTime).to.equal(account2Before.lastActivityTime);
+  expect(account2AfterRejected.isStaking).to.equal(false);
+  expect(account2AfterRejected.stakingAmount).to.equal(0);
+  expect(account2AfterRejected.totalFeesPaid).to.equal(0);
+  expect(account2AfterRejected.isRegistered).to.equal(true);
+
+  const [nonDormantFee, nonDormantTier, nonDormant] = await fee.calculateFee(account1.address);
+  expect(nonDormantFee).to.equal(0);
+  expect(nonDormantTier).to.equal(0);
+  expect(nonDormant).to.equal(false);
+
+  await fee.connect(staking).activateStaking(account2.address, stakingBalance);
+
+  await ethers.provider.send("evm_increaseTime", [Number(await fee.DORMANCY_PERIOD())]);
+  await ethers.provider.send("evm_mine", []);
+
+  const [belowFee, belowTier, belowDormant] = await fee.calculateFee(attacker.address);
+  expect(belowFee).to.equal(0);
+  expect(belowTier).to.equal(0);
+  expect(belowDormant).to.equal(false);
+  await expect(
+    fee.connect(oracle).applyFee(attacker.address)
+  ).to.be.revertedWith("VelocityFee: below threshold");
+  expect((await fee.getAccountStatus(attacker.address)).totalFeesPaid).to.equal(0);
+  expect(await fee.totalFeesCollected()).to.equal(0);
+
+  const [stakingFee, stakingTier, stakingDormant] = await fee.calculateFee(account2.address);
+  expect(stakingFee).to.equal(0);
+  expect(stakingTier).to.equal(0);
+  expect(stakingDormant).to.equal(false);
+  expect(await fee.isDormant(account2.address)).to.equal(false);
+  await expect(
+    fee.connect(oracle).applyFee(account2.address)
+  ).to.be.revertedWith("VelocityFee: staking exempt");
+  expect((await fee.getAccountStatus(account2.address)).totalFeesPaid).to.equal(0);
+  expect(await fee.totalFeesCollected()).to.equal(0);
+
+  const [feeAmount, tier, dormant] = await fee.calculateFee(account1.address);
+  expect(feeAmount).to.equal(expectedTier2Fee);
+  expect(tier).to.equal(2);
+  expect(dormant).to.equal(true);
+  expect(await fee.isDormant(account1.address)).to.equal(true);
+
+  await expect(
+    fee.connect(oracle).applyFee(account1.address)
+  ).to.emit(fee, "FeeCollected");
+
+  expect(await fee.totalFeesCollected()).to.equal(expectedTier2Fee);
+  expect((await fee.getAccountStatus(account1.address)).totalFeesPaid).to.equal(expectedTier2Fee);
+  expect((await fee.getAccountStatus(account2.address)).totalFeesPaid).to.equal(0);
+  expect((await fee.getAccountStatus(attacker.address)).totalFeesPaid).to.equal(0);
+});
+});
 });
