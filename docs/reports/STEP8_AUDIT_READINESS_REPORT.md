@@ -204,6 +204,25 @@ This register tracks open audit-preparation gaps only. It does not claim that au
 | GAP-009 | Fargard7PolicyAdapter | Formal downstream non-interference harness and future execution-path separation are pending. | Invariant inventory; evidence index; formal verification targets; threat matrix | Proposal approval could be misread as execution authority in future design work. | Define non-execution properties proving adapter lifecycle calls cannot mutate downstream modules or set executable authority. | High | Open |
 | GAP-010 | Cross-subsystem audit packet | Contract-by-contract entry-point, role, state-variable, and event checklist is not yet expanded. | Evidence index; Step-8 opening status | External auditors need a navigable checklist beyond the high-level evidence tables. | Expand this report into a contract-by-contract audit checklist. | Medium | Open |
 
+### Gap Remediation Plan
+
+This plan prioritizes open gaps for later Step-8 work. It does not claim the gaps are fixed, does not claim audit completion, and does not claim formal verification completion.
+
+| Priority | Gap ID | Subsystem | Remediation type | Action | Expected evidence | Suggested phase | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| P0 | GAP-001 | Kernel / authority | stronger docs | Build a role graph and privileged-entry-point checklist for Kernel, TriggerProtocol, API3 bridge, and Kernel-connected modules. | Authority graph, entry-point checklist, and reviewer questions linked from this report. | Step-8 audit checklist expansion | Planned |
+| P0 | GAP-002 | PahlaviToken / monetary controls | formal verification target | Define supply-cap, reserve-backed mint, SWF withdrawal, and reclaimed-asset conservation proof obligations. | Formal target specification plus mapped tests for monetary and reserve invariants. | Step-8 formal verification preparation | Planned |
+| P0 | GAP-003 | PriceOracle | stronger docs | Document aggregation arithmetic, staleness assumptions, deviation-event meaning, and feeder quorum threat assumptions. | Oracle assumptions note and reviewer checklist for feeder manipulation and stale data. | Step-8 audit checklist expansion | Planned |
+| P0 | GAP-006 | BudgetAllocation | formal verification target | Specify per-sector `spent <= allocated` and locked-sector immutability proof obligations. | Formal target specification and mapped BudgetAllocation evidence. | Step-8 formal verification preparation | Planned |
+| P0 | GAP-009 | Fargard7PolicyAdapter | formal verification target | Define downstream non-interference and non-execution properties for every recommendation lifecycle function. | Formal target specification confirming `executable = false` and no downstream policy mutation. | Step-8 formal verification preparation | Planned |
+| P1 | GAP-004 | ProductionOracle | new test | Add future counter-conservation tests for repeated category transitions and score edge cases if audit review identifies current coverage gaps. | New test evidence or documented auditor finding that existing coverage is sufficient. | Future Step-8 evidence work | Planned |
+| P1 | GAP-005 | BaseIncome | formal verification target | Model non-interference between economic oracle signals and BaseIncome wage, employer, payment, and subsidy state. | Non-interference proof target and mapped Step-7 neutrality evidence. | Step-8 formal verification preparation | Planned |
+| P1 | GAP-007 | Provincial | formal verification target | Specify revenue and bonus balance deltas for provincial and national accounting flows. | Formal conservation relation and reviewer checklist for bonus effects. | Step-8 formal verification preparation | Planned |
+| P1 | GAP-008 | VelocityFee | new test | Add future fee-accounting and staking-exemption stress tests around token-balance dependency if audit review requests deeper coverage. | New test evidence or documented reviewer acceptance of existing fee tests. | Future Step-8 evidence work | Planned |
+| P1 | GAP-010 | Cross-subsystem audit packet | stronger docs | Expand the audit package into contract-by-contract entry points, roles, state variables, events, invariants, and non-goals. | Contract-by-contract audit checklist appended to or linked from this report. | Step-8 audit checklist expansion | Planned |
+| P2 | GAP-003 | PriceOracle | external audit review | Ask external reviewers to assess whether arithmetic mean and deviation event design are acceptable for the stated signal-only doctrine. | Auditor notes, findings, or accepted-risk rationale. | External audit execution | Planned |
+| P2 | GAP-009 | Fargard7PolicyAdapter | future implementation | Keep any future execution-path design separate from the current proposal-only adapter and require new tests before implementation claims. | Separate design document, explicit non-goal preservation, and new tests before any code path is added. | Future post-audit design phase | Planned |
+
 ### Audit Package Reviewer Handoff
 
 This handoff section is a reviewer-facing index for Step-8 audit preparation. It does not claim that audit review, formal verification, or production readiness is complete.
