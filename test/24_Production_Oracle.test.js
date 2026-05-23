@@ -107,6 +107,77 @@ it("باید تغییر دسته رویداد CategoryChanged منتشر کند"
   ).to.emit(oracle, "CategoryChanged");
 });
 
+it("Step8: production authority failures are state-neutral while classification loan and subsidy paths remain bounded", async function () {
+  const pioneerMonthlyValue = ethers.parseUnits("1000000", 18);
+  const initialUnit = await oracle.getUnit(unit1.address);
+  const initialTotalUnits = await oracle.getTotalUnits();
+  const initialPioneerCount = await oracle.totalPioneerUnits();
+  const initialTransitionCount = await oracle.totalTransitionUnits();
+  const initialCriticalCount = await oracle.totalCriticalUnits();
+  const initialEligibilityCount = await oracle.eligibilityCount();
+
+  await expect(
+    oracle.connect(attacker).updateProductionData(unit1.address, 150, pioneerMonthlyValue, 100, 100)
+  ).to.be.reverted;
+
+  let unit = await oracle.getUnit(unit1.address);
+  expect(unit.employeeCount).to.equal(initialUnit.employeeCount);
+  expect(unit.monthlyValueAdded).to.equal(initialUnit.monthlyValueAdded);
+  expect(unit.renewalCommitment).to.equal(initialUnit.renewalCommitment);
+  expect(unit.financialCompliance).to.equal(initialUnit.financialCompliance);
+  expect(unit.compositeScore).to.equal(initialUnit.compositeScore);
+  expect(unit.category).to.equal(initialUnit.category);
+  expect(unit.isEligibleForLoan).to.equal(initialUnit.isEligibleForLoan);
+  expect(unit.subsidyMonthsRemaining).to.equal(initialUnit.subsidyMonthsRemaining);
+  expect(await oracle.getTotalUnits()).to.equal(initialTotalUnits);
+  expect(await oracle.totalPioneerUnits()).to.equal(initialPioneerCount);
+  expect(await oracle.totalTransitionUnits()).to.equal(initialTransitionCount);
+  expect(await oracle.totalCriticalUnits()).to.equal(initialCriticalCount);
+  expect(await oracle.eligibilityCount()).to.equal(initialEligibilityCount);
+
+  await expect(
+    oracle.connect(feeder).updateProductionData(unit1.address, 150, pioneerMonthlyValue, 100, 100)
+  ).to.emit(oracle, "CategoryChanged");
+
+  unit = await oracle.getUnit(unit1.address);
+  expect(unit.category).to.equal(0);
+  expect(unit.isEligibleForLoan).to.be.true;
+  expect(await oracle.totalPioneerUnits()).to.equal(1);
+  expect(await oracle.totalTransitionUnits()).to.equal(0);
+  expect(await oracle.totalCriticalUnits()).to.equal(0);
+
+  await expect(
+    oracle.connect(bank).grantLoanEligibility(unit1.address)
+  ).to.emit(oracle, "LoanEligibilityGranted");
+
+  const pioneerEligibility = await oracle.getLoanEligibility(1);
+  expect(pioneerEligibility.unit).to.equal(unit1.address);
+  expect(pioneerEligibility.maxLoanAmount).to.equal(pioneerMonthlyValue * 12n);
+  expect(pioneerEligibility.interestRate).to.equal(10);
+
+  await oracle.connect(feeder).updateProductionData(unit1.address, 0, 0, 0, 0);
+  unit = await oracle.getUnit(unit1.address);
+  expect(unit.category).to.equal(2);
+  expect(unit.isEligibleForLoan).to.be.false;
+  expect(await oracle.totalPioneerUnits()).to.equal(0);
+  expect(await oracle.totalTransitionUnits()).to.equal(0);
+  expect(await oracle.totalCriticalUnits()).to.equal(1);
+
+  await expect(
+    oracle.connect(bank).grantLoanEligibility(unit1.address)
+  ).to.be.revertedWith("ProductionOracle: not eligible");
+
+  await expect(
+    oracle.connect(attacker).grantCriticalSubsidy(unit1.address)
+  ).to.be.reverted;
+  expect((await oracle.getUnit(unit1.address)).subsidyMonthsRemaining).to.equal(0);
+
+  await expect(
+    oracle.connect(bank).grantCriticalSubsidy(unit1.address)
+  ).to.emit(oracle, "SubsidyGranted");
+  expect((await oracle.getUnit(unit1.address)).subsidyMonthsRemaining).to.equal(6);
+});
+
 });
 
 describe("Loan Eligibility", function () {
