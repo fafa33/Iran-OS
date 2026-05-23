@@ -310,3 +310,19 @@ The Step-8 audit-readiness package v1 is checkpointed as complete for documentat
 This checkpoint does not mark external audit complete, does not mark formal verification complete, and does not claim production readiness. Step-8 remains open for actual audit execution, formal verification work, gap remediation planning, and any future evidence-driven tests or implementation work.
 
 The recommended next Step-8 task is to convert the high-priority audit gap register items into contract-by-contract reviewer checklists and proof obligations.
+
+## 8. Step-8 Midpoint Status
+
+Step-8 has reached a midpoint documentation checkpoint. The audit-readiness package v1 is complete, and the gap remediation plan is prepared.
+
+Current status:
+
+- Audit-readiness package v1 is complete for documentation readiness.
+- Gap remediation items are planned, not fixed.
+- External audit execution has not been completed.
+- Formal verification has not been completed.
+- No implementation, contract, source, or test changes are included in this checkpoint.
+- `Fargard7PolicyAdapter` remains proposal-only and non-executing.
+- Step-8 remains open.
+
+The next Step-8 direction is to execute prioritized remediation items, starting with the P0 items in the gap remediation plan: Kernel authority graphing, PahlaviToken monetary proof targets, PriceOracle assumptions, BudgetAllocation fiscal bounds, and `Fargard7PolicyAdapter` downstream non-interference.
