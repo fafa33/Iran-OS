@@ -223,6 +223,14 @@ This plan prioritizes open gaps for later Step-8 work. It does not claim the gap
 | P2 | GAP-003 | PriceOracle | external audit review | Ask external reviewers to assess whether arithmetic mean and deviation event design are acceptable for the stated signal-only doctrine. | Auditor notes, findings, or accepted-risk rationale. | External audit execution | Planned |
 | P2 | GAP-009 | Fargard7PolicyAdapter | future implementation | Keep any future execution-path design separate from the current proposal-only adapter and require new tests before implementation claims. | Separate design document, explicit non-goal preservation, and new tests before any code path is added. | Future post-audit design phase | Planned |
 
+### Remediation Evidence Log
+
+This log records Step-8 remediation evidence as it is added. It does not claim external audit completion, formal verification completion, or full gap closure.
+
+| Gap ID | Subsystem | Evidence added | File | Coverage | Remaining status |
+| --- | --- | --- | --- | --- | --- |
+| GAP-001 | Kernel / authority | Added one deterministic Kernel authority-boundary test covering unauthorized admin attempts, state-neutral failure, and the valid sovereign role path. | `test/01_Kernel.test.js` | Unauthorized callers cannot grant official access, update Kernel dependency addresses, or clear the emergency lock; failed attempts preserve access flags, role assignments, dependency addresses, violation counts, trigger counts, and lock state; sovereign grant path still works. | Partial remediation evidence added; formal role graph and proof target remain open. |
+
 ### Audit Package Reviewer Handoff
 
 This handoff section is a reviewer-facing index for Step-8 audit preparation. It does not claim that audit review, formal verification, or production readiness is complete.

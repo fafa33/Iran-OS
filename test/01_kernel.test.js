@@ -352,6 +352,50 @@ describe("IranOS_Kernel", function () {
         kernel.connect(stranger).grantOfficialAccess(guardian.address, GUARDIAN)
       ).to.be.revertedWith("Kernel: caller is not the Sovereign");
     });
+
+    it("Step8: unauthorized Kernel admin attempts remain state-neutral while sovereign role path works", async function () {
+      const GUARDIAN = await kernel.GUARDIAN_ROLE();
+      const ORACLE = await kernel.ORACLE_ROLE();
+      const originalTriggerProtocol = await kernel.triggerProtocol();
+      const originalSwf = await kernel.sovereignWealthFund();
+      const originalViolationCount = await kernel.violationCount();
+      const originalTriggerActivationCount = await kernel.triggerActivationCount();
+
+      expect(await kernel.isAccessActive(guardian.address)).to.be.false;
+      expect(await kernel.hasRole(GUARDIAN, guardian.address)).to.be.false;
+
+      await expect(
+        kernel.connect(stranger).grantOfficialAccess(guardian.address, GUARDIAN)
+      ).to.be.revertedWith("Kernel: caller is not the Sovereign");
+
+      await expect(
+        kernel.connect(stranger).setTriggerProtocol(guardian.address)
+      ).to.be.revertedWith("Kernel: caller is not the Sovereign");
+
+      await expect(
+        kernel.connect(stranger).setSovereignWealthFund(guardian.address)
+      ).to.be.revertedWith("Kernel: caller is not the Sovereign");
+
+      await expect(
+        kernel.connect(stranger).deactivateEmergencyLock()
+      ).to.be.revertedWith("Kernel: caller is not the Court");
+
+      expect(await kernel.isAccessActive(guardian.address)).to.be.false;
+      expect(await kernel.hasRole(GUARDIAN, guardian.address)).to.be.false;
+      expect(await kernel.triggerProtocol()).to.equal(originalTriggerProtocol);
+      expect(await kernel.sovereignWealthFund()).to.equal(originalSwf);
+      expect(await kernel.violationCount()).to.equal(originalViolationCount);
+      expect(await kernel.triggerActivationCount()).to.equal(originalTriggerActivationCount);
+      expect(await kernel.emergencyLockActive()).to.be.false;
+
+      await expect(
+        kernel.connect(sovereign).grantOfficialAccess(guardian.address, GUARDIAN)
+      ).to.emit(kernel, "AccessGranted");
+
+      expect(await kernel.isAccessActive(guardian.address)).to.be.true;
+      expect(await kernel.hasRole(GUARDIAN, guardian.address)).to.be.true;
+      expect(await kernel.hasRole(ORACLE, guardian.address)).to.be.false;
+    });
   });
 
   // ─────────────────────────────────────────
