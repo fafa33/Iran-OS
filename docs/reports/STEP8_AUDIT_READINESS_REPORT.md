@@ -204,6 +204,63 @@ This register tracks open audit-preparation gaps only. It does not claim that au
 | GAP-009 | Fargard7PolicyAdapter | Formal downstream non-interference harness and future execution-path separation are pending. | Invariant inventory; evidence index; formal verification targets; threat matrix | Proposal approval could be misread as execution authority in future design work. | Define non-execution properties proving adapter lifecycle calls cannot mutate downstream modules or set executable authority. | High | Open |
 | GAP-010 | Cross-subsystem audit packet | Contract-by-contract entry-point, role, state-variable, and event checklist is not yet expanded. | Evidence index; Step-8 opening status | External auditors need a navigable checklist beyond the high-level evidence tables. | Expand this report into a contract-by-contract audit checklist. | Medium | Open |
 
+### Audit Package Reviewer Handoff
+
+This handoff section is a reviewer-facing index for Step-8 audit preparation. It does not claim that audit review, formal verification, or production readiness is complete.
+
+Recommended reading order:
+
+1. `docs/IRAN_OS_ROADMAP.md` for phase context and doctrine preservation rules.
+2. `docs/STEP3_RUNTIME_HARDENING_MATRIX.md` for runtime invariant history.
+3. `docs/STEP4_SOVEREIGN_RESERVE_MODEL.md` for reserve and accounting assumptions.
+4. `docs/reports/STEP6_RUNTIME_HARDENING_REPORT.md` for governance and constitutional execution hardening.
+5. `docs/reports/STEP7_STRESS_TESTING_REPORT.md` for oracle, policy-layer, and adapter stress evidence.
+6. This Step-8 report for the invariant inventory, evidence index, formal verification targets, threat matrix, and open gap register.
+
+Key contracts to inspect first:
+
+- `contracts/IranOS_Kernel.sol`
+- `contracts/token/PahlaviToken.sol`
+- `contracts/oracle/PriceOracle.sol`
+- `contracts/governance/Fargard7PolicyAdapter.sol`
+- `contracts/governance/BudgetAllocation.sol`
+- `contracts/oracle/ProductionOracle.sol`
+- `contracts/social/BaseIncome.sol`
+- `contracts/governance/Provincial.sol`
+- `contracts/economic/VelocityFee.sol`
+
+Key test files and reports as evidence:
+
+- `test/25_Step7_StressBaseline.test.js`
+- `test/26_Step7_PolicyLayer.test.js`
+- Core Kernel, TriggerProtocol, PahlaviToken, SWF, PriceOracle, ProductionOracle, BaseIncome, BudgetAllocation, Provincial, and VelocityFee tests in the existing Hardhat suite.
+- `docs/reports/STEP6_RUNTIME_HARDENING_REPORT.md`
+- `docs/reports/STEP7_STRESS_TESTING_REPORT.md`
+
+Known non-claims:
+
+- External audit is not complete.
+- Formal verification is not complete.
+- Production readiness is not claimed.
+- `Fargard7PolicyAdapter` is proposal-only and non-executing.
+- Adapter review approval is local review metadata, not downstream policy execution.
+
+High-priority gaps from the audit gap register:
+
+- GAP-001: Kernel role graph and privileged-entry-point model.
+- GAP-002: PahlaviToken reserve-backed mint and monetary accounting proof.
+- GAP-003: PriceOracle aggregation, staleness, and outlier assumptions.
+- GAP-006: BudgetAllocation sector-spend bounds and lock immutability.
+- GAP-009: Fargard7PolicyAdapter downstream non-interference and execution-path separation.
+
+Suggested next reviewer actions:
+
+- Build the contract-by-contract entry-point, role, state-variable, and event checklist.
+- Prioritize the high-severity threat rows before medium-severity policy-module rows.
+- Convert the high-priority gaps into concrete audit questions and proof obligations.
+- Confirm that every adapter claim remains proposal-only and non-executing.
+- Identify any missing tests before proposing implementation changes.
+
 ## 6. Initial Audit Packet Contents
 
 The first external audit packet should include:
