@@ -121,4 +121,84 @@ const aboveCap = ethers.parseUnits("1001", 18);
 expect(await baseIncome.isWageTaxExempt(aboveCap)).to.be.false;
 });
 });
+
+describe("Step8 Welfare Boundary Remediation", function () {
+it("keeps unauthorized welfare actions state-neutral while authorized employer subsidy and tax paths work", async function () {
+const minWageBefore = await baseIncome.MIN_WAGE();
+const taxExemptCapBefore = await baseIncome.TAX_EXEMPT_CAP();
+const paymentCountBefore = await baseIncome.paymentCount();
+const compliantBefore = await baseIncome.totalCompliantEmployers();
+const nonCompliantBefore = await baseIncome.totalNonCompliantEmployers();
+const employerBefore = await baseIncome.getEmployerRecord(employer.address);
+
+await expect(
+baseIncome.connect(attacker).registerEmployer(employer.address, 10)
+).to.be.reverted;
+
+await expect(
+baseIncome.connect(attacker).recordWagePayment(employee1.address, MIN_WAGE)
+).to.be.reverted;
+
+await expect(
+baseIncome.connect(attacker).grantSubsidy(employer.address, MIN_WAGE)
+).to.be.reverted;
+
+let employerRecord = await baseIncome.getEmployerRecord(employer.address);
+expect(employerRecord.employer).to.equal(employerBefore.employer);
+expect(employerRecord.employeeCount).to.equal(employerBefore.employeeCount);
+expect(employerRecord.totalPaidThisMonth).to.equal(employerBefore.totalPaidThisMonth);
+expect(employerRecord.lastPaymentTime).to.equal(employerBefore.lastPaymentTime);
+expect(employerRecord.isCompliant).to.equal(employerBefore.isCompliant);
+expect(employerRecord.receivesSubsidy).to.equal(employerBefore.receivesSubsidy);
+expect(employerRecord.subsidyAmount).to.equal(employerBefore.subsidyAmount);
+expect(employerRecord.isRegistered).to.equal(employerBefore.isRegistered);
+expect(await baseIncome.paymentCount()).to.equal(paymentCountBefore);
+expect(await baseIncome.totalCompliantEmployers()).to.equal(compliantBefore);
+expect(await baseIncome.totalNonCompliantEmployers()).to.equal(nonCompliantBefore);
+expect(await baseIncome.MIN_WAGE()).to.equal(minWageBefore);
+expect(await baseIncome.TAX_EXEMPT_CAP()).to.equal(taxExemptCapBefore);
+
+await expect(
+baseIncome.connect(oracle).registerEmployer(employer.address, 10)
+).to.emit(baseIncome, "EmployerRegistered");
+
+await expect(
+baseIncome.connect(employer).recordWagePayment(employee1.address, MIN_WAGE)
+).to.emit(baseIncome, "WagePaymentRecorded");
+
+employerRecord = await baseIncome.getEmployerRecord(employer.address);
+expect(employerRecord.isRegistered).to.be.true;
+expect(employerRecord.isCompliant).to.be.true;
+expect(employerRecord.totalPaidThisMonth).to.equal(MIN_WAGE);
+expect(await baseIncome.paymentCount()).to.equal(paymentCountBefore + 1n);
+
+await expect(
+baseIncome.connect(swf).grantSubsidy(employer.address, MIN_WAGE)
+).to.emit(baseIncome, "SubsidyGranted");
+
+employerRecord = await baseIncome.getEmployerRecord(employer.address);
+expect(employerRecord.receivesSubsidy).to.be.true;
+expect(employerRecord.subsidyAmount).to.equal(MIN_WAGE);
+
+await expect(
+baseIncome.connect(attacker).revokeSubsidy(employer.address)
+).to.be.reverted;
+
+employerRecord = await baseIncome.getEmployerRecord(employer.address);
+expect(employerRecord.receivesSubsidy).to.be.true;
+expect(employerRecord.subsidyAmount).to.equal(MIN_WAGE);
+
+await expect(
+baseIncome.connect(swf).revokeSubsidy(employer.address)
+).to.emit(baseIncome, "SubsidyRevoked");
+
+employerRecord = await baseIncome.getEmployerRecord(employer.address);
+expect(employerRecord.receivesSubsidy).to.be.false;
+expect(employerRecord.subsidyAmount).to.equal(0);
+expect(await baseIncome.isWageTaxExempt(MIN_WAGE)).to.be.true;
+expect(await baseIncome.isWageTaxExempt(MIN_WAGE + 1n)).to.be.false;
+expect(await baseIncome.MIN_WAGE()).to.equal(minWageBefore);
+expect(await baseIncome.TAX_EXEMPT_CAP()).to.equal(taxExemptCapBefore);
+});
+});
 });
