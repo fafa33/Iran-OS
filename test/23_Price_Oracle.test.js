@@ -134,6 +134,60 @@ expect(isValidSnapshot).to.be.false;
 expect(price.feederCount).to.equal(3);
 expect(price.value).to.equal((secondPrice + p2 + p3) / 3n);
 });
+
+it("Step8: unauthorized and stale submissions cannot mutate aggregate while fresh quorum updates", async function () {
+const p1 = ethers.parseUnits("80", 18);
+const p2 = ethers.parseUnits("90", 18);
+const p3 = ethers.parseUnits("85", 18);
+await oracle.connect(feeder1).submitPrice(KEY_OIL_USD, p1, 900);
+await oracle.connect(feeder2).submitPrice(KEY_OIL_USD, p2, 900);
+await oracle.connect(feeder3).submitPrice(KEY_OIL_USD, p3, 900);
+
+const aggregateSnapshot = await oracle.prices(KEY_OIL_USD);
+const attackerSnapshot = await oracle.submissions(KEY_OIL_USD, attacker.address);
+
+await expect(
+oracle.connect(attacker).submitPrice(KEY_OIL_USD, ethers.parseUnits("1000", 18), 900)
+).to.be.reverted;
+
+let aggregate = await oracle.prices(KEY_OIL_USD);
+let attackerSubmission = await oracle.submissions(KEY_OIL_USD, attacker.address);
+expect(aggregate.value).to.equal(aggregateSnapshot.value);
+expect(aggregate.timestamp).to.equal(aggregateSnapshot.timestamp);
+expect(aggregate.confidence).to.equal(aggregateSnapshot.confidence);
+expect(aggregate.feederCount).to.equal(aggregateSnapshot.feederCount);
+expect(aggregate.isValid).to.equal(aggregateSnapshot.isValid);
+expect(attackerSubmission.feeder).to.equal(attackerSnapshot.feeder);
+expect(attackerSubmission.value).to.equal(attackerSnapshot.value);
+expect(attackerSubmission.timestamp).to.equal(attackerSnapshot.timestamp);
+expect(attackerSubmission.counted).to.equal(attackerSnapshot.counted);
+
+await ethers.provider.send("evm_increaseTime", [3601]);
+await ethers.provider.send("evm_mine", []);
+
+const highDeviation = ethers.parseUnits("170", 18);
+await expect(
+oracle.connect(feeder1).submitPrice(KEY_OIL_USD, highDeviation, 900)
+).to.emit(oracle, "DeviationDetected");
+
+aggregate = await oracle.prices(KEY_OIL_USD);
+expect(aggregate.value).to.equal(aggregateSnapshot.value);
+expect(aggregate.timestamp).to.equal(aggregateSnapshot.timestamp);
+expect(aggregate.confidence).to.equal(aggregateSnapshot.confidence);
+expect(aggregate.feederCount).to.equal(aggregateSnapshot.feederCount);
+expect(aggregate.isValid).to.equal(aggregateSnapshot.isValid);
+
+await oracle.connect(feeder2).submitPrice(KEY_OIL_USD, highDeviation, 900);
+await expect(
+oracle.connect(feeder3).submitPrice(KEY_OIL_USD, highDeviation, 900)
+).to.emit(oracle, "PriceUpdated");
+
+aggregate = await oracle.prices(KEY_OIL_USD);
+expect(aggregate.value).to.equal(highDeviation);
+expect(aggregate.timestamp).to.be.greaterThan(aggregateSnapshot.timestamp);
+expect(aggregate.feederCount).to.equal(3);
+expect(aggregate.isValid).to.be.true;
+});
 });
 
 describe("Price Invalidation", function () {
