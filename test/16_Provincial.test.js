@@ -110,6 +110,119 @@ provincial.connect(oracle).updateProductivityScore(1, 101)
 });
 });
 
+describe("Step8 Provincial Boundary Remediation", function () {
+it("preserves provincial boundaries across unauthorized and authorized revenue paths", async function () {
+  const revenue = ethers.parseUnits("1000000", 18);
+  const bonus = ethers.parseUnits("25000", 18);
+  const expectedProvincialShare = (revenue * 300n) / 1000n;
+  const expectedNationalShare = revenue - expectedProvincialShare;
+
+  expect(await provincial.provinceCount()).to.equal(0);
+  expect(await provincial.getProvinceByGovernor(governor.address)).to.equal(0);
+  expect(await provincial.hasRole(GOVERNOR_ROLE, governor.address)).to.be.false;
+
+  await expect(
+    provincial.connect(attacker).registerProvince("Unauthorized", governor.address, devAccount.address)
+  ).to.be.reverted;
+  await expect(
+    provincial.connect(attacker).distributeRevenue(1, revenue)
+  ).to.be.reverted;
+  await expect(
+    provincial.connect(attacker).updateProductivityScore(1, 80)
+  ).to.be.reverted;
+  await expect(
+    provincial.connect(attacker).payProductivityBonus(1, bonus)
+  ).to.be.reverted;
+
+  const emptyProvince = await provincial.getProvince(1);
+  expect(await provincial.provinceCount()).to.equal(0);
+  expect(await provincial.getProvinceByGovernor(governor.address)).to.equal(0);
+  expect(await provincial.hasRole(GOVERNOR_ROLE, governor.address)).to.be.false;
+  expect(emptyProvince.governor).to.equal(ethers.ZeroAddress);
+  expect(emptyProvince.developmentAccount).to.equal(ethers.ZeroAddress);
+  expect(emptyProvince.totalRevenue).to.equal(0);
+  expect(emptyProvince.provincialBalance).to.equal(0);
+  expect(emptyProvince.nationalContrib).to.equal(0);
+  expect(emptyProvince.productivityScore).to.equal(0);
+  expect(emptyProvince.isActive).to.equal(false);
+
+  await expect(
+    provincial.connect(kernel).registerProvince("Step8 Province", governor.address, devAccount.address)
+  ).to.emit(provincial, "ProvinceRegistered");
+
+  const registeredProvince = await provincial.getProvince(1);
+  expect(await provincial.provinceCount()).to.equal(1);
+  expect(await provincial.getProvinceByGovernor(governor.address)).to.equal(1);
+  expect(await provincial.hasRole(GOVERNOR_ROLE, governor.address)).to.be.true;
+  expect(registeredProvince.governor).to.equal(governor.address);
+  expect(registeredProvince.developmentAccount).to.equal(devAccount.address);
+  expect(registeredProvince.totalRevenue).to.equal(0);
+  expect(registeredProvince.provincialBalance).to.equal(0);
+  expect(registeredProvince.nationalContrib).to.equal(0);
+  expect(registeredProvince.productivityScore).to.equal(50);
+  expect(registeredProvince.isActive).to.equal(true);
+
+  await expect(
+    provincial.connect(attacker).distributeRevenue(1, revenue)
+  ).to.be.reverted;
+  await expect(
+    provincial.connect(attacker).updateProductivityScore(1, 80)
+  ).to.be.reverted;
+  await expect(
+    provincial.connect(attacker).payProductivityBonus(1, bonus)
+  ).to.be.reverted;
+
+  const afterRejectedCalls = await provincial.getProvince(1);
+  expect(afterRejectedCalls.totalRevenue).to.equal(0);
+  expect(afterRejectedCalls.provincialBalance).to.equal(0);
+  expect(afterRejectedCalls.nationalContrib).to.equal(0);
+  expect(afterRejectedCalls.productivityScore).to.equal(50);
+  expect(afterRejectedCalls.isActive).to.equal(true);
+
+  await expect(
+    provincial.connect(oracle).distributeRevenue(1, revenue)
+  ).to.emit(provincial, "RevenueDistributed");
+
+  const afterRevenue = await provincial.getProvince(1);
+  expect(afterRevenue.totalRevenue).to.equal(revenue);
+  expect(afterRevenue.provincialBalance).to.equal(expectedProvincialShare);
+  expect(afterRevenue.nationalContrib).to.equal(expectedNationalShare);
+  expect(afterRevenue.productivityScore).to.equal(50);
+
+  await expect(
+    provincial.connect(kernel).payProductivityBonus(1, bonus)
+  ).to.be.revertedWith("Provincial: score too low");
+  const afterLowScoreBonus = await provincial.getProvince(1);
+  expect(afterLowScoreBonus.provincialBalance).to.equal(expectedProvincialShare);
+
+  await expect(
+    provincial.connect(oracle).updateProductivityScore(1, 101)
+  ).to.be.revertedWith("Provincial: score out of range");
+  const afterOutOfRangeScore = await provincial.getProvince(1);
+  expect(afterOutOfRangeScore.productivityScore).to.equal(50);
+
+  await provincial.connect(oracle).updateProductivityScore(1, 71);
+  const afterValidScore = await provincial.getProvince(1);
+  expect(afterValidScore.productivityScore).to.equal(71);
+
+  await expect(
+    provincial.connect(attacker).payProductivityBonus(1, bonus)
+  ).to.be.reverted;
+  const afterRejectedBonus = await provincial.getProvince(1);
+  expect(afterRejectedBonus.provincialBalance).to.equal(expectedProvincialShare);
+
+  await expect(
+    provincial.connect(kernel).payProductivityBonus(1, bonus)
+  ).to.emit(provincial, "ProductivityBonusPaid");
+
+  const afterAuthorizedBonus = await provincial.getProvince(1);
+  expect(afterAuthorizedBonus.totalRevenue).to.equal(revenue);
+  expect(afterAuthorizedBonus.provincialBalance).to.equal(expectedProvincialShare + bonus);
+  expect(afterAuthorizedBonus.nationalContrib).to.equal(expectedNationalShare);
+  expect(afterAuthorizedBonus.productivityScore).to.equal(71);
+});
+});
+
 describe("Governor Update", function () {
 let newGovernor;
 
