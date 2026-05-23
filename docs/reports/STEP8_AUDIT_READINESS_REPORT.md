@@ -274,8 +274,20 @@ The first external audit packet should include:
 - Critical contract list from this report
 - Test summary from the latest clean `npm test`
 
-## 7. Step-8 Opening Status
+## 7. Step-8 Checkpoint Status
 
 Step-8 is opened as a docs-only audit-readiness phase. No implementation changes, test changes, contract changes, or formal-verification claims are included in this opening checkpoint.
 
-The recommended next Step-8 task is to expand this report into a detailed audit checklist with contract-by-contract entry points, roles, state variables, events, invariants, known non-goals, and test references.
+The Step-8 audit-readiness package v1 is checkpointed as complete for documentation readiness. This package now includes:
+
+- Critical contract surfaces and authority boundary map.
+- Subsystem invariant map and initial invariant inventory.
+- Audit evidence index.
+- Formal verification candidate properties and formal verification target list.
+- Threat model / attack surface matrix.
+- Audit gap register.
+- Reviewer-facing audit package handoff.
+
+This checkpoint does not mark external audit complete, does not mark formal verification complete, and does not claim production readiness. Step-8 remains open for actual audit execution, formal verification work, gap remediation planning, and any future evidence-driven tests or implementation work.
+
+The recommended next Step-8 task is to convert the high-priority audit gap register items into contract-by-contract reviewer checklists and proof obligations.

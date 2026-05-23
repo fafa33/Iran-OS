@@ -53,9 +53,11 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 - [ ] Step-8: External audit readiness & formal verification preparation - In progress
   - Prepare audit materials, invariant maps, and formal verification targets without claiming formal verification is complete before evidence exists.
   - Initial audit-readiness report opened with critical contract surfaces, authority boundaries, subsystem invariant map, existing test evidence references, and formal verification candidate properties.
+  - Audit-readiness package v1 checkpointed with invariant inventory, audit evidence index, formal verification targets, threat model matrix, audit gap register, and reviewer handoff.
+  - External audit is not complete; formal verification is not complete; Step-8 remains open for actual audit execution, proof work, and gap remediation planning.
   - `Fargard7PolicyAdapter` remains proposal-only/non-executing; Step-8 does not introduce downstream policy mutation.
   - Milestone document started: [STEP8_AUDIT_READINESS_REPORT.md](reports/STEP8_AUDIT_READINESS_REPORT.md).
-  - Status: started, not complete.
+  - Status: audit-readiness package v1 checkpointed; Step-8 still in progress.
 
 - [ ] Step-9: Production governance specification & deployment doctrine
   - Define final production governance, deployment, operational, and emergency doctrine after prior checkpoints are complete.
