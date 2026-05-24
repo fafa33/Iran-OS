@@ -95,7 +95,148 @@ Evidence packets must be specific, attributable, current, and mapped to the exac
 - Evidence cannot close blockers by implication; disposition must be explicit.
 - If evidence is missing, stale, unattributed, or insufficient, the blocker remains open.
 
-## 7. Opening Non-Claims
+## 7. Evidence Packet Schema
+
+Every evidence packet must use a consistent schema so reviewers can decide whether the evidence is acceptable, rejected, stale, or eligible for risk acceptance. A packet that omits required fields remains pending or rejected and cannot close a blocker.
+
+Required fields per packet:
+
+| Field | Requirement |
+| --- | --- |
+| Packet ID | Stable identifier using the blocker and packet category, such as `STEP9-BLOCK-001-AUDIT-PACKET-001`. |
+| Blocker ID | Exact `STEP9-BLOCK-*` item the packet supports. |
+| Evidence category | One of audit, formal verification, custody, oracle ops, emergency, deployment dry-run, release signoff, or non-claim preservation. |
+| Candidate commit or release package | Commit hash, release package hash, or explicit statement that the packet is doctrine-only and not release-bound. |
+| Owner | Accountable owner from the evidence intake register. |
+| Reviewer or signoff authority | Required reviewer, governance body, auditor, formal reviewer, operations lead, or release council representative. |
+| Evidence artifacts | Links, file paths, reports, tool outputs, minutes, manifests, runbooks, dry-run logs, attestations, or records being submitted. |
+| Evidence summary | Short statement of what the packet proves and which blocker condition it addresses. |
+| Acceptance criteria | Specific criteria from Step-10 and this Step-11 register that the packet must satisfy. |
+| Stale rule | The packet-specific stale trigger copied from the evidence intake register. |
+| Current disposition | One of pending, accepted, rejected, stale, or risk-accepted. |
+| Disposition rationale | Reviewer explanation for the current disposition. |
+| Non-claims confirmation | Explicit confirmation that production readiness, audit completion, formal verification completion, release approval, and blocker closure are not claimed unless the required evidence supports that exact claim. |
+
+### Owner and Reviewer Requirements
+
+| Evidence category | Owner | Reviewer or signoff authority |
+| --- | --- | --- |
+| Audit | External audit coordinator | Auditor or authorized audit reviewer, plus external audit coordinator. |
+| Formal verification | Formal methods owner | Formal verification reviewer. |
+| Custody | Governance operations lead | Release council representative or governance reviewer. |
+| Oracle ops | Oracle operations lead | Governance reviewer confirming signal-only boundaries. |
+| Emergency | Emergency operations lead | Governance reviewer confirming human or institution-gated authority. |
+| Deployment dry-run | Deployment coordinator | Engineering maintainer and deployment reviewer. |
+| Release signoff | Release council | Release council signers recorded in go/no-go minutes. |
+| Non-claim preservation | Release coordinator | Governance reviewer. |
+
+### Disposition States
+
+| State | Meaning | Blocker effect |
+| --- | --- | --- |
+| Pending | Packet has been identified or submitted but has not passed review. | Blocker remains open. |
+| Accepted | Packet is attributable, current, complete, and satisfies the acceptance criteria for the specific blocker condition. | Blocker may move toward explicit closure only if all required evidence for that blocker is accepted and no higher-priority dependency remains open. |
+| Rejected | Packet is incomplete, unattributed, insufficient, inconsistent with doctrine, or fails acceptance criteria. | Blocker remains open and the packet cannot support release disposition. |
+| Stale | Packet may have been acceptable before, but a stale trigger occurred. | Blocker remains open until refreshed evidence or explicit revalidation is accepted. |
+| Risk-accepted | A specific unresolved item has governed risk acceptance under Step-10 rules. | The underlying gap remains recorded; blocker disposition may proceed only within the limits of the accepted risk and never for non-eligible conditions. |
+
+## 8. Intake and Disposition Workflow
+
+Step-11 intake follows a conservative workflow. The workflow records evidence status only; it does not independently grant release approval or production readiness.
+
+1. Packet submission.
+   - Owner submits a packet using the required schema.
+   - Packet starts in `pending` disposition.
+   - Missing owner, missing blocker ID, missing candidate commit, or missing evidence artifacts keep the packet pending or rejected.
+
+2. Initial completeness review.
+   - Reviewer confirms required fields are present.
+   - Reviewer checks that the packet maps to one blocker and one evidence category.
+   - Reviewer rejects packets that attempt to close multiple blockers by implication.
+
+3. Staleness review.
+   - Reviewer applies the stale rule before evaluating substance.
+   - If any stale trigger applies, disposition becomes `stale`.
+   - Stale packets cannot support blocker closure, release signoff, audit-complete language, formal-verification-complete language, or production-ready language.
+
+4. Substantive review.
+   - Reviewer checks the packet against Step-10 evidence acceptance criteria and Step-11 category requirements.
+   - Evidence must be attributable, current, specific to the candidate, and tied to the exact blocker.
+   - Repository documentation alone cannot satisfy external audit, formal verification, custody, emergency, deployment dry-run, oracle operations, or release signoff blockers that require external or operational evidence.
+
+5. Disposition assignment.
+   - Reviewer assigns `accepted`, `rejected`, `stale`, or `risk-accepted`.
+   - `Risk-accepted` may be used only for eligible blocker conditions under Step-10 rules.
+   - Non-eligible conditions must remain rejected, stale, or pending until resolved with acceptable evidence.
+
+6. Blocker status update.
+   - No blocker may be closed without accepted evidence for all required conditions or a valid, specific, governed risk acceptance where allowed.
+   - Blocker closure must be explicit and must identify the accepted packet IDs.
+   - Release approval remains separate and requires release council go/no-go evidence.
+
+### Acceptance Criteria
+
+Evidence may be accepted only when it is:
+
+- Mapped to an exact blocker ID and evidence category.
+- Submitted by or attributable to the required owner.
+- Reviewed by the required reviewer or signoff authority.
+- Current under the stale rule.
+- Specific to the candidate commit, release package, role set, runbook, manifest, audit scope, proof target, or oracle setup it claims to support.
+- Sufficient under the Step-10 evidence acceptance matrix.
+- Compatible with Kernel immutability, oracle-as-signal-only doctrine, final human or institution-gated freeze authority, and `Fargard7PolicyAdapter` proposal-only behavior.
+
+### Rejection Criteria
+
+Evidence must be rejected when it:
+
+- Omits required packet fields.
+- Has no accountable owner or reviewer.
+- Is stale and not revalidated.
+- Uses informal claims where external attestation, proof artifacts, operational records, dry-run output, or release minutes are required.
+- Attempts to claim production readiness before every readiness gate is evidence-backed.
+- Attempts to claim audit completion without final audit disposition.
+- Attempts to claim formal verification completion without proof artifacts or explicit proof-risk disposition.
+- Attempts to claim release approval without release council go/no-go evidence.
+- Treats oracle signals as sovereign execution authority.
+- Treats `Fargard7PolicyAdapter` approval as downstream policy execution.
+- Implies blocker closure without accepted evidence.
+
+## 9. Stale Evidence Handling
+
+Stale evidence remains useful as history, but it cannot support production-readiness, audit-complete, formal-verification-complete, release-approved, or blocker-closed claims.
+
+Evidence becomes stale when its packet stale rule is triggered, including changes to:
+
+- Candidate commit, release package, contract surface, tests, deployment scripts, artifacts, constructor arguments, dependency addresses, or role assignments.
+- Audit scope, finding register, authority model, formal proof target, compiler assumptions, proof harness, or tool assumptions.
+- Signer membership, custody owner, quorum rule, key ceremony, feeder set, data source, monitoring process, invalidation procedure, deviation process, emergency contact, release authority, or runbook sequence.
+- Accepted-risk expiry, release scope, package hash, release packet, public handoff, or non-claim language.
+
+Stale evidence handling steps:
+
+1. Mark the packet `stale`.
+2. Identify the stale trigger and affected blocker.
+3. Preserve the stale packet as historical evidence only.
+4. Request refreshed evidence or explicit reviewer revalidation.
+5. Keep the blocker open until refreshed or revalidated evidence is accepted.
+6. Do not use stale evidence for production-ready, audit-complete, formal-verification-complete, release-approved, or blocker-closed language.
+
+Revalidation must identify the stale trigger, explain why the evidence still applies, confirm the candidate and affected assumptions, and obtain the same reviewer or stronger authority required for the original packet.
+
+## 10. Workflow Non-Claims
+
+The evidence intake workflow does not claim:
+
+- Production readiness.
+- External audit completion.
+- Formal verification completion.
+- Release approval.
+- Closure of any `STEP9-BLOCK-*` item.
+
+Accepted evidence may support a later explicit blocker disposition, but acceptance alone does not create a production-ready claim, audit-complete claim, formal-verification-complete claim, or release-approved claim unless all required evidence and signoff for that specific claim exists.
+
+## 11. Opening Non-Claims
 
 At Step-11 opening:
 
@@ -107,7 +248,7 @@ At Step-11 opening:
 - `Fargard7PolicyAdapter` remains proposal-only and non-executing.
 - Oracle signals remain non-sovereign and cannot autonomously freeze, unfreeze, mint, burn, transfer, spend, classify, subsidize, apply fees, change wages, alter budgets, approve loans, mutate provincial balances, or execute governance.
 
-## 8. Opening Status
+## 12. Opening Status
 
 Step-11 is open as a docs-only production-readiness evidence intake phase.
 
