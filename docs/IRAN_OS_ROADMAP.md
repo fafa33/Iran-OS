@@ -65,10 +65,13 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Milestone document: [STEP8_AUDIT_READINESS_REPORT.md](reports/STEP8_AUDIT_READINESS_REPORT.md).
   - Status: closed.
 
-- [ ] Step-9: Production governance specification & deployment doctrine - Planning
+- [ ] Step-9: Production governance specification & deployment doctrine - In progress
   - Define final production governance, deployment, operational, and emergency doctrine after prior checkpoints are complete.
-  - Milestone document: pending.
-  - Status: planning.
+  - Initial production governance doctrine opened with scope/non-goals, Step-8 inputs, deployment gate checklist, governance authority map, emergency/freeze doctrine, role custody runbooks, audit/formal-verification prerequisites, production-readiness blockers, and non-claims.
+  - External audit is not complete; formal verification is not complete; production readiness is not claimed.
+  - No autonomous policy execution is introduced or claimed.
+  - Milestone document started: [STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md](reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md).
+  - Status: started, not complete.
 
 ## Major Milestone References
 
@@ -77,6 +80,7 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 - [Step-6 Runtime Hardening Report](reports/STEP6_RUNTIME_HARDENING_REPORT.md)
 - [Step-7 Stress Testing Report](reports/STEP7_STRESS_TESTING_REPORT.md)
 - [Step-8 Audit Readiness Report](reports/STEP8_AUDIT_READINESS_REPORT.md)
+- [Step-9 Production Governance Deployment Doctrine](reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md)
 
 ## Roadmap Maintenance Rule
 
