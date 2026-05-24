@@ -77,11 +77,12 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Milestone document: [STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md](reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md).
   - Status: closed.
 
-- [ ] Step-10: Production readiness planning & blocker resolution
+- [ ] Step-10: Production readiness planning & blocker resolution - In progress
   - Plan the follow-up phase for resolving or risk-accepting the explicit production blockers carried forward from Step-9.
+  - Initial blocker resolution plan opened with Step-9 blocker inputs, owner/evidence mapping, resolution criteria, risk-acceptance limits, sequencing, and non-claims.
   - Must not claim production readiness, external audit completion, or formal verification completion until the required evidence exists.
-  - Milestone document: pending.
-  - Status: planned, not started.
+  - Milestone document started: [STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md](reports/STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md).
+  - Status: started, not complete.
 
 ## Major Milestone References
 
@@ -91,6 +92,7 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 - [Step-7 Stress Testing Report](reports/STEP7_STRESS_TESTING_REPORT.md)
 - [Step-8 Audit Readiness Report](reports/STEP8_AUDIT_READINESS_REPORT.md)
 - [Step-9 Production Governance Deployment Doctrine](reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md)
+- [Step-10 Production Readiness Blocker Resolution Plan](reports/STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md)
 
 ## Roadmap Maintenance Rule
 
