@@ -90,6 +90,79 @@ Step-10 resolution should proceed in dependency order so later release evidence 
    - Address `STEP9-BLOCK-006` only after every other blocker is closed or formally risk-accepted where allowed.
    - The release packet must include audit/proof disposition, custody evidence, runbook links, dry-run evidence, blocker status, and non-claims.
 
+### Blocker Dependency Graph
+
+| Blocker id | Depends on | Blocks | Dependency rationale |
+| --- | --- | --- | --- |
+| STEP9-BLOCK-008 | None | Every Step-10 phase and every release artifact | Non-claims must be preserved before any other evidence is collected so planning language does not imply readiness. |
+| STEP9-BLOCK-001 | Audit scope, critical surface list, Step-8 evidence, Step-9 doctrine | STEP9-BLOCK-006 | Release signoff cannot proceed without external audit disposition or explicitly governed unresolved findings. |
+| STEP9-BLOCK-002 | Formal target list, assumptions, harness/proof outputs, Step-8 proof candidates | STEP9-BLOCK-006 | Release signoff cannot proceed without proof disposition or explicit risk acceptance for unresolved proof obligations. |
+| STEP9-BLOCK-003 | Owner assignment, role graph, signer registry, quorum model | STEP9-BLOCK-004, STEP9-BLOCK-005, STEP9-BLOCK-006 | Emergency runbooks, deployment manifests, and release signoff depend on known custodians and quorum rules. |
+| STEP9-BLOCK-007 | Feeder registry, source-data expectations, stale/deviation procedures | STEP9-BLOCK-004, STEP9-BLOCK-005, STEP9-BLOCK-006 | Emergency response and deployment verification must know how oracle incidents and feeder authority are operated. |
+| STEP9-BLOCK-004 | STEP9-BLOCK-003, STEP9-BLOCK-007 | STEP9-BLOCK-005, STEP9-BLOCK-006 | Deployment dry-run and release signoff need rehearsed emergency, freeze, release, oracle incident, and post-incident procedures. |
+| STEP9-BLOCK-005 | STEP9-BLOCK-003, STEP9-BLOCK-004, STEP9-BLOCK-007 | STEP9-BLOCK-006 | Release signoff depends on reproducible manifest, dry-run logs, address book, role assignments, and post-run verification. |
+| STEP9-BLOCK-006 | STEP9-BLOCK-001 through STEP9-BLOCK-005, STEP9-BLOCK-007, STEP9-BLOCK-008 | Production-readiness claim and deployment approval | Release signoff is the final aggregation point and cannot be completed before upstream blockers are closed or validly risk-accepted. |
+
+### Phase Order
+
+| Phase | Blockers addressed | Entry criteria | Exit criteria |
+| --- | --- | --- | --- |
+| Phase 0: Non-claim preservation | STEP9-BLOCK-008 | Step-10 document exists and Step-9 blockers are carried forward as open. | All Step-10 materials state that production readiness, audit completion, formal verification completion, and release approval are not claimed. |
+| Phase 1: Evidence ownership setup | STEP9-BLOCK-001, STEP9-BLOCK-002, STEP9-BLOCK-003, STEP9-BLOCK-004, STEP9-BLOCK-005, STEP9-BLOCK-007 | Non-claims are preserved and blocker owners are identified from Step-9. | Required evidence packages, owner responsibilities, and accepted evidence formats are documented for each blocker. |
+| Phase 2: Audit and proof disposition | STEP9-BLOCK-001, STEP9-BLOCK-002 | Evidence ownership setup is complete and Step-8 audit/proof targets are available for review. | Audit findings and formal proof obligations are either resolved, left open as blockers, or explicitly risk-accepted where allowed. |
+| Phase 3: Custody and operations readiness | STEP9-BLOCK-003, STEP9-BLOCK-004, STEP9-BLOCK-007 | Audit/proof status is known enough to avoid conflicting operational assumptions. | Custody, emergency/freeze, and oracle operations runbooks are complete, rehearsed where required, and linked to evidence. |
+| Phase 4: Deployment dry-run evidence | STEP9-BLOCK-005 | Custody and operations evidence is complete enough to verify roles, emergency paths, oracle paths, and non-execution boundaries. | Deployment manifest, dry-run logs, artifact hashes, constructor arguments, address book, role assignments, and post-run verification are complete. |
+| Phase 5: Release disposition | STEP9-BLOCK-006 | All upstream blockers are closed or validly risk-accepted; non-claims remain explicit. | Release council records go/no-go minutes, release package hash, signer approvals, blocker disposition, and risk acceptance record. |
+
+### Entry Criteria
+
+Step-10 blocker resolution work may proceed only when:
+
+- The repository candidate is identified and the working tree state is known.
+- The full test baseline is current.
+- `git diff -- contracts` and `git diff -- test` are empty unless a later implementation phase explicitly authorizes reviewed changes.
+- The Step-9 blocker register is preserved without silently closing any blocker.
+- Production readiness, external audit completion, formal verification completion, and release approval remain explicit non-claims.
+- `Fargard7PolicyAdapter` remains proposal-only and oracle signals remain non-sovereign.
+
+### Exit Criteria
+
+Step-10 should not close until:
+
+- Every `STEP9-BLOCK-*` item has a final status of closed, explicitly carried forward as a production blocker, or risk-accepted where allowed.
+- External audit disposition is attached or the missing audit remains an explicit release blocker.
+- Formal verification disposition is attached or unresolved proof obligations remain explicit blockers or signed accepted risks.
+- Custody, emergency/freeze, oracle operations, deployment dry-run, and release-signoff evidence is linked or marked incomplete.
+- Release signoff, if requested, is backed by go/no-go minutes, signer approvals, release package hash, blocker disposition, and risk acceptance record.
+- Non-claims remain intact unless every production-readiness gate is satisfied by evidence.
+
+### Blockers That Cannot Be Risk-Accepted
+
+The following conditions cannot be risk-accepted for a production-readiness or release-approval claim:
+
+| Blocker / condition | Reason risk acceptance is not allowed |
+| --- | --- |
+| STEP9-BLOCK-005 with no deployment manifest or unverifiable dry-run state | Release cannot verify constructor arguments, dependency wiring, role assignments, or authority boundaries without reproducible deployment evidence. |
+| STEP9-BLOCK-008 before all gates are satisfied | Production readiness must remain a non-claim until evidence supports every required gate. |
+| Any hidden Kernel upgradeability, proxy ambiguity, or governance backdoor | This violates the constitutional immutability doctrine rather than creating an acceptable operational risk. |
+| Any autonomous oracle authority over freeze, unfreeze, mint, burn, transfer, governance execution, budget mutation, fee application, wage changes, production classification, subsidy, loan, or provincial balance mutation | This violates oracle-as-signal-only doctrine and cannot be accepted as a production-readiness risk. |
+| Any `Fargard7PolicyAdapter` downstream execution or policy mutation path | This violates the adapter proposal-only boundary and requires separate design, implementation, review, and tests before any future claim. |
+| Missing release council go/no-go record for release approval | Release approval cannot exist without the explicit approving record. |
+
+### Blockers Requiring External Evidence
+
+Some blockers cannot be closed by repository documentation alone.
+
+| Blocker id | External evidence required | Why repository docs are insufficient |
+| --- | --- | --- |
+| STEP9-BLOCK-001 | External auditor report, finding register, severity triage, remediation disposition, accepted-risk notes, and auditor or coordinator signoff. | Audit completion requires independent review evidence outside the local doctrine package. |
+| STEP9-BLOCK-002 | Formal tool output, proof artifact index, assumptions file, counterexample notes, and formal reviewer signoff. | Formal verification requires proof artifacts or explicit proof-risk disposition, not only planned targets. |
+| STEP9-BLOCK-003 | Signer registry, custodian attestations, quorum records, key-rotation records, and compromised-key procedure approval. | Production custody depends on appointed operators and key-management evidence outside code and docs. |
+| STEP9-BLOCK-004 | Rehearsal notes, incident packet templates, authority signature examples, escalation contacts, and post-incident review records. | Emergency readiness requires operational rehearsal and evidence trail validation. |
+| STEP9-BLOCK-005 | Dry-run logs, deployed test addresses, artifact hashes, gas estimates, address book, and post-run verification output. | Deployment readiness requires executable dry-run evidence and manifest/state matching. |
+| STEP9-BLOCK-006 | Release council minutes, signer approvals, release package hash, blocker disposition, and risk acceptance record. | Release signoff requires governance approval evidence, not local planning text. |
+| STEP9-BLOCK-007 | Feeder registry, data-source attestations, liveness monitoring records, invalidation records, and deviation review notes. | Oracle operations readiness depends on real operators, data sources, and monitoring evidence. |
+
 ## 6. Risk Acceptance Rules
 
 Risk acceptance is a blocker disposition mechanism, not a production-readiness shortcut.
