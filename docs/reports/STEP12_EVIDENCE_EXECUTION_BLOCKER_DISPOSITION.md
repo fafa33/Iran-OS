@@ -81,7 +81,7 @@ Formal verification, custody, emergency/freeze, deployment dry-run, release sign
 
 | Blocker id | Evidence path | Required packet | Current evidence | Disposition | Reviewer/signoff | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| STEP9-BLOCK-001 | External audit evidence intake | `STEP9-BLOCK-001-AUDIT-PACKET-001` final audit scope; `STEP9-BLOCK-001-AUDIT-PACKET-002` final audit report and finding register; `STEP9-BLOCK-001-AUDIT-PACKET-003` remediation, deferral, or accepted-risk disposition. | No accepted audit packet recorded at opening. | Pending; not accepted; audit completion is not claimed. | External audit coordinator and auditor or authorized audit reviewer. | Open |
+| STEP9-BLOCK-001 | External audit evidence intake | Audit scope, auditor identity or engagement record, final auditor report, finding register, remediation status, and reviewer signoff through `STEP9-BLOCK-001-AUDIT-PACKET-001` final audit scope; `STEP9-BLOCK-001-AUDIT-PACKET-002` final audit report and finding register; `STEP9-BLOCK-001-AUDIT-PACKET-003` remediation, deferral, or accepted-risk disposition. | External audit packet not provided; pending external packet. No accepted audit evidence is recorded. | Pending; blocker remains open; audit completion is not claimed. | External audit coordinator and auditor or authorized audit reviewer. | Open |
 | STEP9-BLOCK-002 | Formal verification evidence intake | `STEP9-BLOCK-002-FORMAL-PACKET-001` proof target map; `STEP9-BLOCK-002-FORMAL-PACKET-002` tool output and proof artifacts; `STEP9-BLOCK-002-FORMAL-PACKET-003` unresolved proof-risk disposition. | No accepted formal verification packet recorded at opening. | Pending; not accepted; formal verification completion is not claimed. | Formal methods owner and formal verification reviewer. | Open |
 | STEP9-BLOCK-003 | Custody and key-management evidence intake | `STEP9-BLOCK-003-CUSTODY-PACKET-001` signer registry; `STEP9-BLOCK-003-CUSTODY-PACKET-002` role-to-custodian and quorum map; `STEP9-BLOCK-003-CUSTODY-PACKET-003` rotation, onboarding/offboarding, and compromised-key procedure evidence. | No accepted custody packet recorded at opening. | Pending; not accepted. | Governance operations lead and release council representative or governance reviewer. | Open |
 | STEP9-BLOCK-004 | Emergency and freeze readiness evidence intake | `STEP9-BLOCK-004-EMERGENCY-PACKET-001` emergency and freeze runbooks; `STEP9-BLOCK-004-EMERGENCY-PACKET-002` rehearsal and authority-check record; `STEP9-BLOCK-004-EMERGENCY-PACKET-003` release, public-notice, and post-incident review evidence. | No accepted emergency packet recorded at opening. | Pending; not accepted. | Emergency operations lead and governance reviewer. | Open |
@@ -138,7 +138,32 @@ Checked non-claims:
 
 Disposition: non-claim preservation evidence is recorded for review, but `STEP9-BLOCK-008` remains open unless the required release coordinator and governance reviewer accept the packet. This record does not close `STEP9-BLOCK-008`, does not close any other production blocker, and does not claim production readiness.
 
-## 9. Opening Status
+## 9. External Audit Evidence Intake
+
+`STEP9-BLOCK-001` has an external audit evidence intake record, but the required external audit packet has not been provided.
+
+Required audit packet:
+
+- Audit scope.
+- Auditor identity or engagement record.
+- Final auditor report.
+- Finding register with severity triage.
+- Remediation status, deferral record, or accepted-risk notes for each finding.
+- Reviewer signoff from the external audit coordinator and auditor or authorized audit reviewer.
+
+Current evidence:
+
+- External audit packet not provided.
+- No auditor report is recorded.
+- No finding register is recorded.
+- No remediation status or audit-risk disposition is recorded.
+- No reviewer signoff is recorded.
+
+Disposition: pending. `STEP9-BLOCK-001` remains open until required audit evidence is submitted, reviewed, and accepted, or a specific eligible audit finding receives valid governed risk acceptance under Step-10 rules. Passing tests do not close the external audit blocker and do not substitute for external audit evidence.
+
+This intake record does not claim external audit completion, does not claim production readiness, and does not close `STEP9-BLOCK-001` or any other blocker by implication.
+
+## 10. Opening Status
 
 Step-12 is open as a docs-only evidence execution and blocker disposition phase.
 
