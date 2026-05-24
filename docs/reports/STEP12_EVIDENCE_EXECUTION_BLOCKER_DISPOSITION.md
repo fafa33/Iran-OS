@@ -85,7 +85,7 @@ Formal verification, custody, emergency/freeze, deployment dry-run, release sign
 | STEP9-BLOCK-002 | Formal verification evidence intake | Proof scope, target list, tool and configuration record, assumptions, proof artifacts, failed obligations, and reviewer signoff through `STEP9-BLOCK-002-FORMAL-PACKET-001` proof target map; `STEP9-BLOCK-002-FORMAL-PACKET-002` tool output and proof artifacts; `STEP9-BLOCK-002-FORMAL-PACKET-003` unresolved proof-risk disposition. | Formal verification packet not provided; pending proof packet. No accepted formal verification evidence is recorded. | Pending; blocker remains open; formal verification completion is not claimed. | Formal methods owner and formal verification reviewer. | Open |
 | STEP9-BLOCK-003 | Custody and key-management evidence intake | Custody map, signer list, multisig threshold, key rotation plan, onboarding/offboarding log, compromise response, and reviewer signoff through `STEP9-BLOCK-003-CUSTODY-PACKET-001` signer registry; `STEP9-BLOCK-003-CUSTODY-PACKET-002` role-to-custodian and quorum map; `STEP9-BLOCK-003-CUSTODY-PACKET-003` rotation, onboarding/offboarding, and compromised-key procedure evidence. | Custody packet not provided; pending custody packet. No accepted custody evidence is recorded. | Pending; blocker remains open; production readiness is not claimed. | Governance operations lead and release council representative or governance reviewer. | Open |
 | STEP9-BLOCK-004 | Oracle operations evidence intake | Feeder registry, quorum config, freshness and staleness config, deviation handling, incident runbook, monitoring evidence, and reviewer signoff. | Oracle operations packet not provided; pending oracle ops packet. No accepted oracle operations evidence or required reviewer signoff is recorded. | Disposition reviewed as pending; blocker remains open; oracle signals remain non-sovereign; production readiness is not claimed. | Oracle operations lead and governance reviewer. | Open |
-| STEP9-BLOCK-005 | Deployment dry-run and manifest evidence intake | `STEP9-BLOCK-005-DEPLOYMENT-PACKET-001` deployment manifest; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-002` dry-run logs and gas estimates; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-003` post-run role, dependency, and authority-boundary verification. | No accepted deployment dry-run packet recorded at opening. | Pending; not accepted; missing manifest or unverifiable dry-run state cannot be risk-accepted for release readiness. | Deployment coordinator and engineering maintainer or deployment reviewer. | Open |
+| STEP9-BLOCK-005 | Deployment dry-run and manifest evidence intake | Deployment manifest, artifact hashes, constructor arguments, dependency address book, initial role assignments, dry-run logs, gas estimates, post-run verification, and reviewer signoff through `STEP9-BLOCK-005-DEPLOYMENT-PACKET-001` deployment manifest; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-002` dry-run logs and gas estimates; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-003` post-run role, dependency, and authority-boundary verification. | Deployment dry-run packet not provided; pending deployment packet. No accepted deployment evidence is recorded. | Pending; blocker remains open; missing manifest or unverifiable dry-run state cannot be risk-accepted for release readiness; production readiness is not claimed. | Deployment coordinator and engineering maintainer or deployment reviewer. | Open |
 | STEP9-BLOCK-006 | Release signoff evidence intake | `STEP9-BLOCK-006-RELEASE-PACKET-001` upstream blocker disposition summary; `STEP9-BLOCK-006-RELEASE-PACKET-002` release package hash and signer approvals; `STEP9-BLOCK-006-RELEASE-PACKET-003` release council go/no-go minutes. | No accepted release signoff packet recorded at opening. | Pending; not accepted; release approval is not granted or implied. | Release council. | Open |
 | STEP9-BLOCK-007 | Oracle operations evidence intake | `STEP9-BLOCK-007-ORACLE-PACKET-001` feeder registry and data-source attestations; `STEP9-BLOCK-007-ORACLE-PACKET-002` feeder onboarding, suspension, stale-data, and invalidation procedures; `STEP9-BLOCK-007-ORACLE-PACKET-003` deviation review, liveness monitoring, and signal-only governance review. | No accepted oracle operations packet recorded at opening. | Pending; not accepted; oracle signals remain non-sovereign. | Oracle operations lead and governance reviewer. | Open |
 | STEP9-BLOCK-008 | Non-claim preservation control | `STEP9-BLOCK-008-NONCLAIM-PACKET-001` current roadmap and blocker register non-claim check; `STEP9-BLOCK-008-NONCLAIM-PACKET-002` release packet and handoff non-claim excerpt; `STEP9-BLOCK-008-NONCLAIM-PACKET-003` governance reviewer confirmation. | Non-claim preservation evidence recorded from the roadmap and Step-8 through Step-12 documentation. No reviewer acceptance or closure packet is recorded. | Evidence recorded; pending reviewer acceptance; production readiness remains a non-claim and cannot be risk-accepted away. | Release coordinator and governance reviewer. | Open |
@@ -270,7 +270,40 @@ Disposition: `pending`. `STEP9-BLOCK-004` remains open because accepted evidence
 
 This disposition review does not claim production readiness, does not claim release approval, does not close `STEP9-BLOCK-004`, and does not close any other blocker by implication. Oracle signals remain non-sovereign and `Fargard7PolicyAdapter` remains proposal-only and non-executing.
 
-## 14. Opening Status
+## 14. Deployment Dry-Run Evidence Intake
+
+`STEP9-BLOCK-005` has a deployment dry-run evidence intake record, but the required deployment packet has not been provided.
+
+Required deployment packet:
+
+- Deployment manifest.
+- Contract artifact hashes.
+- Constructor arguments.
+- Dependency address book.
+- Initial role assignments.
+- Dry-run logs.
+- Gas estimates.
+- Post-run role, dependency, and authority-boundary verification.
+- Reviewer signoff from the deployment coordinator and engineering maintainer or deployment reviewer.
+
+Current evidence:
+
+- Deployment dry-run packet not provided.
+- No deployment manifest is recorded.
+- No contract artifact hashes are recorded.
+- No constructor arguments are recorded.
+- No dependency address book is recorded.
+- No initial role assignments are recorded.
+- No dry-run logs are recorded.
+- No gas estimates are recorded.
+- No post-run verification is recorded.
+- No reviewer signoff is recorded.
+
+Disposition: pending. `STEP9-BLOCK-005` remains open until required deployment evidence is submitted, reviewed, and accepted. Tests and repository documentation alone do not close the deployment dry-run blocker and do not substitute for reproducible manifest evidence, dry-run logs, role-state verification, artifact hashes, constructor arguments, dependency wiring, gas estimates, post-run verification, or reviewer signoff.
+
+This intake record does not claim production readiness, does not claim release approval, does not close `STEP9-BLOCK-005`, and does not close any other blocker by implication.
+
+## 15. Opening Status
 
 Step-12 is open as a docs-only evidence execution and blocker disposition phase.
 
