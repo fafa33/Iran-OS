@@ -84,7 +84,7 @@ Formal verification, custody, emergency/freeze, deployment dry-run, release sign
 | STEP9-BLOCK-001 | External audit evidence intake | Audit scope, auditor identity or engagement record, final auditor report, finding register, remediation status, and reviewer signoff through `STEP9-BLOCK-001-AUDIT-PACKET-001` final audit scope; `STEP9-BLOCK-001-AUDIT-PACKET-002` final audit report and finding register; `STEP9-BLOCK-001-AUDIT-PACKET-003` remediation, deferral, or accepted-risk disposition. | External audit packet not provided; pending external packet. No accepted audit evidence is recorded. | Pending; blocker remains open; audit completion is not claimed. | External audit coordinator and auditor or authorized audit reviewer. | Open |
 | STEP9-BLOCK-002 | Formal verification evidence intake | Proof scope, target list, tool and configuration record, assumptions, proof artifacts, failed obligations, and reviewer signoff through `STEP9-BLOCK-002-FORMAL-PACKET-001` proof target map; `STEP9-BLOCK-002-FORMAL-PACKET-002` tool output and proof artifacts; `STEP9-BLOCK-002-FORMAL-PACKET-003` unresolved proof-risk disposition. | Formal verification packet not provided; pending proof packet. No accepted formal verification evidence is recorded. | Pending; blocker remains open; formal verification completion is not claimed. | Formal methods owner and formal verification reviewer. | Open |
 | STEP9-BLOCK-003 | Custody and key-management evidence intake | Custody map, signer list, multisig threshold, key rotation plan, onboarding/offboarding log, compromise response, and reviewer signoff through `STEP9-BLOCK-003-CUSTODY-PACKET-001` signer registry; `STEP9-BLOCK-003-CUSTODY-PACKET-002` role-to-custodian and quorum map; `STEP9-BLOCK-003-CUSTODY-PACKET-003` rotation, onboarding/offboarding, and compromised-key procedure evidence. | Custody packet not provided; pending custody packet. No accepted custody evidence is recorded. | Pending; blocker remains open; production readiness is not claimed. | Governance operations lead and release council representative or governance reviewer. | Open |
-| STEP9-BLOCK-004 | Oracle operations evidence intake | Feeder registry, quorum config, freshness and staleness config, deviation handling, incident runbook, monitoring evidence, and reviewer signoff. | Oracle operations packet not provided; pending oracle ops packet. No accepted oracle operations evidence is recorded. | Pending; blocker remains open; oracle signals remain non-sovereign; production readiness is not claimed. | Oracle operations lead and governance reviewer. | Open |
+| STEP9-BLOCK-004 | Oracle operations evidence intake | Feeder registry, quorum config, freshness and staleness config, deviation handling, incident runbook, monitoring evidence, and reviewer signoff. | Oracle operations packet not provided; pending oracle ops packet. No accepted oracle operations evidence or required reviewer signoff is recorded. | Disposition reviewed as pending; blocker remains open; oracle signals remain non-sovereign; production readiness is not claimed. | Oracle operations lead and governance reviewer. | Open |
 | STEP9-BLOCK-005 | Deployment dry-run and manifest evidence intake | `STEP9-BLOCK-005-DEPLOYMENT-PACKET-001` deployment manifest; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-002` dry-run logs and gas estimates; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-003` post-run role, dependency, and authority-boundary verification. | No accepted deployment dry-run packet recorded at opening. | Pending; not accepted; missing manifest or unverifiable dry-run state cannot be risk-accepted for release readiness. | Deployment coordinator and engineering maintainer or deployment reviewer. | Open |
 | STEP9-BLOCK-006 | Release signoff evidence intake | `STEP9-BLOCK-006-RELEASE-PACKET-001` upstream blocker disposition summary; `STEP9-BLOCK-006-RELEASE-PACKET-002` release package hash and signer approvals; `STEP9-BLOCK-006-RELEASE-PACKET-003` release council go/no-go minutes. | No accepted release signoff packet recorded at opening. | Pending; not accepted; release approval is not granted or implied. | Release council. | Open |
 | STEP9-BLOCK-007 | Oracle operations evidence intake | `STEP9-BLOCK-007-ORACLE-PACKET-001` feeder registry and data-source attestations; `STEP9-BLOCK-007-ORACLE-PACKET-002` feeder onboarding, suspension, stale-data, and invalidation procedures; `STEP9-BLOCK-007-ORACLE-PACKET-003` deviation review, liveness monitoring, and signal-only governance review. | No accepted oracle operations packet recorded at opening. | Pending; not accepted; oracle signals remain non-sovereign. | Oracle operations lead and governance reviewer. | Open |
@@ -250,7 +250,27 @@ Oracle signals remain non-sovereign and cannot autonomously freeze, unfreeze, mi
 
 This intake record does not claim production readiness and does not close `STEP9-BLOCK-004` or any other blocker by implication.
 
-## 13. Opening Status
+## 13. Oracle Operations Blocker Disposition Review
+
+`STEP9-BLOCK-004` has been reviewed for disposition after the oracle operations evidence intake record.
+
+Disposition review result:
+
+- Required oracle operations packet is still missing.
+- No feeder registry has been submitted or accepted.
+- No quorum configuration has been submitted or accepted.
+- No freshness or staleness configuration has been submitted or accepted.
+- No deviation handling procedure has been submitted or accepted.
+- No oracle incident runbook has been submitted or accepted.
+- No monitoring evidence has been submitted or accepted.
+- No oracle operations lead signoff is recorded.
+- No governance reviewer signoff is recorded.
+
+Disposition: `pending`. `STEP9-BLOCK-004` remains open because accepted evidence and required signoff do not exist in the documentation. Tests and repository documentation alone do not close this blocker.
+
+This disposition review does not claim production readiness, does not claim release approval, does not close `STEP9-BLOCK-004`, and does not close any other blocker by implication. Oracle signals remain non-sovereign and `Fargard7PolicyAdapter` remains proposal-only and non-executing.
+
+## 14. Opening Status
 
 Step-12 is open as a docs-only evidence execution and blocker disposition phase.
 
