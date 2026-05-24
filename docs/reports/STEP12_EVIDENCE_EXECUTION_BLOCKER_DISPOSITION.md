@@ -83,7 +83,7 @@ Formal verification, custody, emergency/freeze, deployment dry-run, release sign
 | --- | --- | --- | --- | --- | --- | --- |
 | STEP9-BLOCK-001 | External audit evidence intake | Audit scope, auditor identity or engagement record, final auditor report, finding register, remediation status, and reviewer signoff through `STEP9-BLOCK-001-AUDIT-PACKET-001` final audit scope; `STEP9-BLOCK-001-AUDIT-PACKET-002` final audit report and finding register; `STEP9-BLOCK-001-AUDIT-PACKET-003` remediation, deferral, or accepted-risk disposition. | External audit packet not provided; pending external packet. No accepted audit evidence is recorded. | Pending; blocker remains open; audit completion is not claimed. | External audit coordinator and auditor or authorized audit reviewer. | Open |
 | STEP9-BLOCK-002 | Formal verification evidence intake | Proof scope, target list, tool and configuration record, assumptions, proof artifacts, failed obligations, and reviewer signoff through `STEP9-BLOCK-002-FORMAL-PACKET-001` proof target map; `STEP9-BLOCK-002-FORMAL-PACKET-002` tool output and proof artifacts; `STEP9-BLOCK-002-FORMAL-PACKET-003` unresolved proof-risk disposition. | Formal verification packet not provided; pending proof packet. No accepted formal verification evidence is recorded. | Pending; blocker remains open; formal verification completion is not claimed. | Formal methods owner and formal verification reviewer. | Open |
-| STEP9-BLOCK-003 | Custody and key-management evidence intake | `STEP9-BLOCK-003-CUSTODY-PACKET-001` signer registry; `STEP9-BLOCK-003-CUSTODY-PACKET-002` role-to-custodian and quorum map; `STEP9-BLOCK-003-CUSTODY-PACKET-003` rotation, onboarding/offboarding, and compromised-key procedure evidence. | No accepted custody packet recorded at opening. | Pending; not accepted. | Governance operations lead and release council representative or governance reviewer. | Open |
+| STEP9-BLOCK-003 | Custody and key-management evidence intake | Custody map, signer list, multisig threshold, key rotation plan, onboarding/offboarding log, compromise response, and reviewer signoff through `STEP9-BLOCK-003-CUSTODY-PACKET-001` signer registry; `STEP9-BLOCK-003-CUSTODY-PACKET-002` role-to-custodian and quorum map; `STEP9-BLOCK-003-CUSTODY-PACKET-003` rotation, onboarding/offboarding, and compromised-key procedure evidence. | Custody packet not provided; pending custody packet. No accepted custody evidence is recorded. | Pending; blocker remains open; production readiness is not claimed. | Governance operations lead and release council representative or governance reviewer. | Open |
 | STEP9-BLOCK-004 | Emergency and freeze readiness evidence intake | `STEP9-BLOCK-004-EMERGENCY-PACKET-001` emergency and freeze runbooks; `STEP9-BLOCK-004-EMERGENCY-PACKET-002` rehearsal and authority-check record; `STEP9-BLOCK-004-EMERGENCY-PACKET-003` release, public-notice, and post-incident review evidence. | No accepted emergency packet recorded at opening. | Pending; not accepted. | Emergency operations lead and governance reviewer. | Open |
 | STEP9-BLOCK-005 | Deployment dry-run and manifest evidence intake | `STEP9-BLOCK-005-DEPLOYMENT-PACKET-001` deployment manifest; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-002` dry-run logs and gas estimates; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-003` post-run role, dependency, and authority-boundary verification. | No accepted deployment dry-run packet recorded at opening. | Pending; not accepted; missing manifest or unverifiable dry-run state cannot be risk-accepted for release readiness. | Deployment coordinator and engineering maintainer or deployment reviewer. | Open |
 | STEP9-BLOCK-006 | Release signoff evidence intake | `STEP9-BLOCK-006-RELEASE-PACKET-001` upstream blocker disposition summary; `STEP9-BLOCK-006-RELEASE-PACKET-002` release package hash and signer approvals; `STEP9-BLOCK-006-RELEASE-PACKET-003` release council go/no-go minutes. | No accepted release signoff packet recorded at opening. | Pending; not accepted; release approval is not granted or implied. | Release council. | Open |
@@ -190,7 +190,36 @@ Disposition: pending. `STEP9-BLOCK-002` remains open until required formal verif
 
 This intake record does not claim formal verification completion, does not claim production readiness, and does not close `STEP9-BLOCK-002` or any other blocker by implication.
 
-## 11. Opening Status
+## 11. Role Custody Evidence Intake
+
+`STEP9-BLOCK-003` has a role custody evidence intake record, but the required custody packet has not been provided.
+
+Required custody packet:
+
+- Custody map for privileged roles.
+- Production signer list.
+- Multisig threshold or quorum rule for critical roles.
+- Key rotation plan.
+- Onboarding and offboarding log.
+- Compromise response procedure.
+- Reviewer signoff from the governance operations lead and release council representative or governance reviewer.
+
+Current evidence:
+
+- Custody packet not provided.
+- No custody map is recorded.
+- No production signer list is recorded.
+- No multisig threshold or quorum rule is recorded.
+- No key rotation plan is recorded.
+- No onboarding/offboarding log is recorded.
+- No compromise response procedure is recorded.
+- No reviewer signoff is recorded.
+
+Disposition: pending. `STEP9-BLOCK-003` remains open until required custody evidence is submitted, reviewed, and accepted. Repository documentation alone does not close the custody blocker and does not substitute for accountable custodian records, signer evidence, quorum rules, rotation procedures, onboarding/offboarding evidence, compromise response, or reviewer signoff.
+
+This intake record does not claim production readiness and does not close `STEP9-BLOCK-003` or any other blocker by implication.
+
+## 12. Opening Status
 
 Step-12 is open as a docs-only evidence execution and blocker disposition phase.
 
