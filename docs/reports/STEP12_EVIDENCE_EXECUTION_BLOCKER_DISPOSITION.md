@@ -82,7 +82,7 @@ Formal verification, custody, emergency/freeze, deployment dry-run, release sign
 | Blocker id | Evidence path | Required packet | Current evidence | Disposition | Reviewer/signoff | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | STEP9-BLOCK-001 | External audit evidence intake | Audit scope, auditor identity or engagement record, final auditor report, finding register, remediation status, and reviewer signoff through `STEP9-BLOCK-001-AUDIT-PACKET-001` final audit scope; `STEP9-BLOCK-001-AUDIT-PACKET-002` final audit report and finding register; `STEP9-BLOCK-001-AUDIT-PACKET-003` remediation, deferral, or accepted-risk disposition. | External audit packet not provided; pending external packet. No accepted audit evidence is recorded. | Pending; blocker remains open; audit completion is not claimed. | External audit coordinator and auditor or authorized audit reviewer. | Open |
-| STEP9-BLOCK-002 | Formal verification evidence intake | `STEP9-BLOCK-002-FORMAL-PACKET-001` proof target map; `STEP9-BLOCK-002-FORMAL-PACKET-002` tool output and proof artifacts; `STEP9-BLOCK-002-FORMAL-PACKET-003` unresolved proof-risk disposition. | No accepted formal verification packet recorded at opening. | Pending; not accepted; formal verification completion is not claimed. | Formal methods owner and formal verification reviewer. | Open |
+| STEP9-BLOCK-002 | Formal verification evidence intake | Proof scope, target list, tool and configuration record, assumptions, proof artifacts, failed obligations, and reviewer signoff through `STEP9-BLOCK-002-FORMAL-PACKET-001` proof target map; `STEP9-BLOCK-002-FORMAL-PACKET-002` tool output and proof artifacts; `STEP9-BLOCK-002-FORMAL-PACKET-003` unresolved proof-risk disposition. | Formal verification packet not provided; pending proof packet. No accepted formal verification evidence is recorded. | Pending; blocker remains open; formal verification completion is not claimed. | Formal methods owner and formal verification reviewer. | Open |
 | STEP9-BLOCK-003 | Custody and key-management evidence intake | `STEP9-BLOCK-003-CUSTODY-PACKET-001` signer registry; `STEP9-BLOCK-003-CUSTODY-PACKET-002` role-to-custodian and quorum map; `STEP9-BLOCK-003-CUSTODY-PACKET-003` rotation, onboarding/offboarding, and compromised-key procedure evidence. | No accepted custody packet recorded at opening. | Pending; not accepted. | Governance operations lead and release council representative or governance reviewer. | Open |
 | STEP9-BLOCK-004 | Emergency and freeze readiness evidence intake | `STEP9-BLOCK-004-EMERGENCY-PACKET-001` emergency and freeze runbooks; `STEP9-BLOCK-004-EMERGENCY-PACKET-002` rehearsal and authority-check record; `STEP9-BLOCK-004-EMERGENCY-PACKET-003` release, public-notice, and post-incident review evidence. | No accepted emergency packet recorded at opening. | Pending; not accepted. | Emergency operations lead and governance reviewer. | Open |
 | STEP9-BLOCK-005 | Deployment dry-run and manifest evidence intake | `STEP9-BLOCK-005-DEPLOYMENT-PACKET-001` deployment manifest; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-002` dry-run logs and gas estimates; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-003` post-run role, dependency, and authority-boundary verification. | No accepted deployment dry-run packet recorded at opening. | Pending; not accepted; missing manifest or unverifiable dry-run state cannot be risk-accepted for release readiness. | Deployment coordinator and engineering maintainer or deployment reviewer. | Open |
@@ -163,7 +163,34 @@ Disposition: pending. `STEP9-BLOCK-001` remains open until required audit eviden
 
 This intake record does not claim external audit completion, does not claim production readiness, and does not close `STEP9-BLOCK-001` or any other blocker by implication.
 
-## 10. Opening Status
+## 10. Formal Verification Evidence Intake
+
+`STEP9-BLOCK-002` has a formal verification evidence intake record, but the required proof packet has not been provided.
+
+Required formal verification packet:
+
+- Proof scope.
+- Formal target list and target-to-contract mapping.
+- Tool, version, and configuration record.
+- Assumptions file or assumptions register.
+- Proof artifacts and tool output.
+- Failed obligations, counterexamples, or unresolved proof-risk records.
+- Reviewer signoff from the formal methods owner and formal verification reviewer.
+
+Current evidence:
+
+- Formal verification packet not provided.
+- No proof scope is recorded.
+- No target list or target-to-contract map is recorded.
+- No tool output or proof artifact is recorded.
+- No failed-obligation or unresolved proof-risk disposition is recorded.
+- No reviewer signoff is recorded.
+
+Disposition: pending. `STEP9-BLOCK-002` remains open until required formal verification evidence is submitted, reviewed, and accepted, or a specific unresolved proof obligation receives valid governed risk acceptance under Step-10 rules. Passing tests do not close the formal verification blocker and do not substitute for proof artifacts, tool output, assumptions, or formal reviewer signoff.
+
+This intake record does not claim formal verification completion, does not claim production readiness, and does not close `STEP9-BLOCK-002` or any other blocker by implication.
+
+## 11. Opening Status
 
 Step-12 is open as a docs-only evidence execution and blocker disposition phase.
 
