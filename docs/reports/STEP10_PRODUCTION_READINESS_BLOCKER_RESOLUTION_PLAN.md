@@ -321,7 +321,30 @@ Risk acceptance must preserve the following non-claims unless every required pro
 - `Fargard7PolicyAdapter` remains proposal-only and non-executing.
 - Oracle signals remain non-sovereign and cannot autonomously mutate downstream policy or emergency state.
 
-## 8. Non-Claims
+## 8. Blocker Owner Action Plan
+
+This action plan identifies the next concrete owner action for each open Step-9 blocker. The table is planning evidence only; it does not close any blocker until the expected artifact exists, is current, and has the required review or signoff.
+
+| Blocker id | Owner | Next action | Deliverable | Unblock condition | Expected evidence artifact | Dependency type |
+| --- | --- | --- | --- | --- | --- | --- |
+| STEP9-BLOCK-001 | External audit coordinator | Confirm audit scope, auditor, target commit, reviewed contract surfaces, and finding workflow. | External audit execution packet. | Final audit disposition exists and every finding is remediated, deferred, or risk-accepted under policy. | Audit scope, final report, finding register, severity triage, remediation links, accepted-risk notes, and auditor/coordinator signoff. | Audit |
+| STEP9-BLOCK-002 | Formal methods owner | Select high-priority proof targets and map each target to artifact, assumption, tool output, or risk disposition. | Formal verification disposition packet. | Proof targets are proven or unresolved properties are explicitly blocked or risk-accepted without claiming formal verification completion. | Proof artifact index, target-to-contract map, assumptions file, tool output, counterexample notes, and formal reviewer signoff. | Proof |
+| STEP9-BLOCK-003 | Governance operations lead | Build production role-to-custodian map and quorum/key-management procedure set. | Production custody package. | Every privileged role has named custodian, quorum rule, rotation path, onboarding/offboarding process, and compromised-key response. | Signer registry, role custody map, quorum records, key rotation procedure, custody attestation, and compromised-key runbook. | Custody |
+| STEP9-BLOCK-004 | Emergency operations lead | Prepare and rehearse emergency trigger, freeze, release, oracle incident, reserve incident, and post-incident review runbooks. | Emergency and freeze readiness packet. | Critical emergency and freeze paths are rehearsed, auditable, human or institution-gated, and have clear release authority. | Runbook set, rehearsal notes, incident packet template, authority checks, escalation contacts, and post-incident review checklist. | Runbook |
+| STEP9-BLOCK-005 | Deployment coordinator | Produce candidate deployment manifest and execute a dry-run against the approved package. | Deployment dry-run evidence packet. | Manifest, dry-run logs, artifact hashes, constructor arguments, address book, role assignments, and post-run verification match. | Deployment manifest, artifact hash list, dry-run logs, gas estimates, deployed test addresses, role-state checks, and post-run verification output. | Dry-run |
+| STEP9-BLOCK-006 | Release council | Assemble final blocker disposition and decide go/no-go after upstream evidence is reviewed. | Release decision packet. | Release council records go/no-go minutes, signer approvals, release package hash, blocker disposition, and accepted-risk record if any. | Go/no-go minutes, signer approvals, release package hash, audit/proof disposition, custody confirmation, and final blocker register. | Signoff |
+| STEP9-BLOCK-007 | Oracle operations lead | Finalize feeder onboarding, source attestation, liveness monitoring, stale-data, invalidation, and deviation review procedures. | Oracle operations readiness packet. | Oracle workflows are auditable, feeder authority is bounded, and signal-only doctrine is preserved. | Feeder registry, data-source attestations, liveness monitoring record, suspension procedure, invalidation record, and deviation review notes. | Runbook / custody |
+| STEP9-BLOCK-008 | Release coordinator | Keep non-claim language synchronized across roadmap, blocker plan, release packet, and handoff materials. | Non-claims preservation packet. | Every public or release-facing artifact states no production readiness, audit completion, formal verification completion, or release approval until evidence exists. | Current non-claims statement, release packet excerpt, handoff checklist, and governance reviewer confirmation. | Signoff / doctrine |
+
+Owner action plan dependencies:
+
+- Audit and formal proof disposition should precede final release signoff.
+- Custody and oracle operations evidence should precede emergency/freeze rehearsal and deployment dry-run verification.
+- Emergency/freeze and oracle runbook readiness should precede deployment dry-run acceptance.
+- Deployment dry-run evidence should precede release council go/no-go review.
+- Non-claim preservation applies continuously across every blocker and cannot wait until final release review.
+
+## 9. Non-Claims
 
 This Step-10 opening checkpoint does not claim:
 
@@ -340,7 +363,7 @@ This Step-10 opening checkpoint does not claim:
 
 Oracle signals remain non-sovereign. Oracle data may inform review, but must not autonomously freeze, unfreeze, mint, burn, transfer, spend, classify, subsidize, apply fees, change wages, alter budgets, approve loans, mutate provincial balances, or execute governance.
 
-## 9. Opening Status
+## 10. Opening Status
 
 Step-10 is open as a docs-only production-readiness blocker resolution planning phase.
 
