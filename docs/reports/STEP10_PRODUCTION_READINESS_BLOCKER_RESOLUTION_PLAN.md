@@ -238,6 +238,89 @@ Risk acceptance is a blocker disposition mechanism, not a production-readiness s
 - Risk acceptance must not authorize hidden upgradeability, autonomous oracle authority, autonomous policy execution, or bypass of final human or institutional freeze authority.
 - Risk acceptance must not replace deployment manifest evidence, dry-run verification, or release council go/no-go approval.
 
+### Risk Acceptance Policy
+
+Risk acceptance may be used only to document a governed decision to carry a specific unresolved risk forward. It does not close the underlying evidence gap, does not convert incomplete work into completed work, and does not permit production-readiness language unless every readiness gate is otherwise satisfied.
+
+Every accepted risk must include:
+
+- Blocker ID and exact unresolved condition.
+- Affected contract, role, runbook, operation, or release artifact.
+- Severity and rationale for accepting the risk.
+- Evidence reviewed before acceptance.
+- Compensating controls and operational limits.
+- Required approvers.
+- Expiry date or revalidation trigger.
+- Statement of claims that remain prohibited.
+
+### Eligible and Non-Eligible Blockers
+
+| Blocker id / condition | Risk acceptance eligibility | Required disposition |
+| --- | --- | --- |
+| STEP9-BLOCK-001 | Eligible only for documented non-critical audit findings or scoped deferrals after external review. | Critical/high unresolved findings remain release blockers unless the required governance body explicitly records accepted risk and release limits. |
+| STEP9-BLOCK-002 | Eligible for specific unproven proof obligations with documented assumptions, severity, and compensating controls. | Formal verification completion must not be claimed for any unproven target. |
+| STEP9-BLOCK-003 | Limited eligibility for non-critical custody process gaps. | Single-person critical custody, missing quorum, or unclear compromised-key response remains a release blocker. |
+| STEP9-BLOCK-004 | Limited eligibility for non-critical rehearsal gaps. | Missing release authority, unrehearsed critical freeze/emergency path, or automation replacing final human authority remains a release blocker. |
+| STEP9-BLOCK-005 | Not eligible when manifest, dry-run, or post-run verification is missing or unverifiable. | Deployment evidence must be produced and reviewed before release approval. |
+| STEP9-BLOCK-006 | Eligible only as a no-go or conditional-go record after all upstream blocker dispositions are known. | Release approval cannot be implied without release council go/no-go minutes and signer approvals. |
+| STEP9-BLOCK-007 | Limited eligibility for non-critical monitoring or process gaps. | Any oracle path implying autonomous sovereign or policy authority is not eligible. |
+| STEP9-BLOCK-008 | Not eligible. | Production readiness remains a non-claim until every readiness gate is satisfied by evidence. |
+| Hidden Kernel upgradeability, proxy ambiguity, or governance backdoor | Not eligible. | Must be removed, disproven, or treated as a blocking defect. |
+| `Fargard7PolicyAdapter` downstream execution or policy mutation | Not eligible. | Requires separate design, implementation, review, and tests before any future claim. |
+
+### Required Approvers
+
+| Risk category | Required approvers |
+| --- | --- |
+| External audit finding or audit deferral | External audit coordinator, auditor or authorized audit reviewer, and release council. |
+| Formal verification gap or proof-risk acceptance | Formal methods owner, formal verification reviewer, and release council. |
+| Custody or key-management gap | Governance operations lead and release council representative. |
+| Emergency/freeze runbook or rehearsal gap | Emergency operations lead, governance reviewer, and release council representative. |
+| Oracle operations gap | Oracle operations lead, governance reviewer, and release council representative. |
+| Deployment dry-run discrepancy that is not blocking | Deployment coordinator, engineering maintainer, and release council. |
+| Release-level accepted risk | Release council with the responsible blocker owner present in the record. |
+
+### Evidence Required for Acceptance
+
+Risk acceptance records must attach or link:
+
+- Current candidate commit and test baseline.
+- Current `contracts` and `test` diff status.
+- The evidence reviewed for the blocker.
+- Affected scope and severity classification.
+- Reason the issue is eligible for acceptance.
+- Compensating controls and monitoring requirements.
+- Expiry date or revalidation trigger.
+- Approver identities and approval timestamp.
+- Non-claims statement preserving production-readiness, audit, formal-verification, and release limits.
+
+Acceptance based only on verbal approval, missing owner identity, stale evidence, or broad category-level waiver is insufficient.
+
+### Expiry and Revalidation Rules
+
+Accepted risk expires or must be revalidated when:
+
+- The candidate commit changes.
+- Any affected contract, test, deployment script, manifest, constructor argument, address, role assignment, runbook, signer, feeder, reviewer, or external dependency changes.
+- New audit or formal verification evidence contradicts the acceptance rationale.
+- A compensating control is not implemented or cannot be monitored.
+- The stated expiry date is reached.
+- The release scope changes.
+- The accepted risk could affect non-claims, oracle signal boundaries, adapter non-execution, Kernel immutability, or final human/institutional freeze authority.
+
+Expired or stale accepted risk reopens the affected blocker until the responsible owner refreshes evidence and obtains the required approvers again.
+
+### Production-Readiness Non-Claim Preservation
+
+Risk acceptance must preserve the following non-claims unless every required production-readiness gate is satisfied by evidence:
+
+- IranOS is not production ready.
+- External audit is not complete unless a final audit disposition exists.
+- Formal verification is not complete unless proof artifacts support that claim.
+- Release approval is not granted unless release council go/no-go evidence exists.
+- `Fargard7PolicyAdapter` remains proposal-only and non-executing.
+- Oracle signals remain non-sovereign and cannot autonomously mutate downstream policy or emergency state.
+
 ## 8. Non-Claims
 
 This Step-10 opening checkpoint does not claim:
