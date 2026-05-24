@@ -364,3 +364,23 @@ At opening:
 - Formal verification is not complete.
 - Release approval is not granted or implied.
 - No contract, source, or test changes are introduced.
+
+## 15. Evidence Intake Package V1 Checkpoint
+
+The Step-11 evidence intake package v1 is checkpointed as complete for the current documentation scope.
+
+Checkpointed Step-11 coverage includes:
+
+- Evidence intake register for `STEP9-BLOCK-001` through `STEP9-BLOCK-008`.
+- Evidence packet categories for audit, formal verification, custody, oracle operations, emergency/freeze readiness, deployment dry-run, release signoff, and non-claim preservation.
+- Evidence packet schema with required owner, reviewer, artifact, stale-rule, disposition, and non-claim fields.
+- Intake and disposition workflow for pending, accepted, rejected, stale, and risk-accepted packet states.
+- Stale evidence handling and revalidation requirements.
+- Blocker-to-evidence packet index, including required packets, packet status, missing evidence, and disposition rules for each blocker.
+- Evidence reviewer checklist with acceptance, rejection, stale-evidence, risk-acceptance, and signoff checks.
+
+No evidence has been accepted in this checkpoint. `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain open until required evidence, signoff, or valid risk disposition exists.
+
+This checkpoint does not claim production readiness. External audit is not complete. Formal verification is not complete. Release approval is not complete or implied. `Fargard7PolicyAdapter` remains proposal-only and non-executing. Oracle signals remain non-sovereign.
+
+Next direction: closure review or remaining intake gaps.
