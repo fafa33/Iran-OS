@@ -188,6 +188,81 @@ Required runbooks:
 
 Each runbook must identify the authorized role, required evidence, action sequence, abort conditions, and post-action verification.
 
+### Role Custody Table
+
+| Role group | Custody model | Minimum controls | Required evidence | Rotation trigger | Blocker |
+| --- | --- | --- | --- | --- | --- |
+| Kernel sovereign/admin | Multi-person constitutional custody with named primary and backup signers. | No single-person custody; documented signer quorum; hardware-backed keys; role graph review before any privileged action. | Signer registry, role assignment transaction, custody attestation, key ceremony notes, and privileged-action log. | Signer departure, suspected compromise, governance change, failed access review, or scheduled rotation. | Unknown sovereign custodian, single-person control, or missing role graph. |
+| Court and emergency signers | Multi-signer institutional custody aligned to emergency and trigger runbooks. | Threshold coordination procedure; emergency contact registry; action-specific evidence packet before signing. | Court signer list, emergency call record, violation packet, signature log, and post-action verification. | Court membership change, incident review finding, lost key, or emergency rehearsal failure. | Missing signer threshold, missing emergency escalation path, or unrehearsed signing process. |
+| SWF council/minter authority | Multi-sig council custody for withdrawals, reclaimed assets, mint, and burn paths. | Quorum evidence; pre/post accounting snapshot; reserve check; no unilateral mint/burn authority. | Council registry, withdrawal or mint/burn proposal, signature record, reserve evidence, and accounting delta. | Council change, monetary audit finding, reserve mismatch, or compromised signer. | Single signer can move funds or mint/burn, or reserve evidence is missing. |
+| Oracle feeders | Individually accountable feeder keys under oracle operations custody. | Feeder onboarding review; source-data record; suspension path; liveness monitoring; stale-data and invalidation procedure. | Feeder registry, data source attestation, submission timestamps, liveness logs, and suspension/invalidation records. | Feeder compromise, stale behavior, deviation incident, source change, or operator departure. | Unknown feeder operator, missing source evidence, or no suspension path. |
+| Policy reviewers | Governance review board custody for adapter-local recommendation review. | Reviewer identity check; no execution authority; status-transition evidence; downstream state check. | Reviewer registry, recommendation snapshot, review rationale, status transaction, and `executable = false` confirmation. | Reviewer change, conflict of interest, adapter audit finding, or compromised reviewer key. | Reviewer approval can execute policy or mutate downstream modules. |
+| Deployment signer | Deployment ceremony custody controlled by release council. | Approved manifest; artifact hash; constructor review; no hidden proxy or upgrade authority; post-deploy verification. | Deployment manifest, deployer identity, artifact hash, constructor arguments, address book, and role assignment log. | Release candidate change, deployer change, failed verification, or compromised deployment key. | Unknown deployer, missing manifest, or unverifiable role assignment. |
+| Auditor and formal verification reviewers | Independent reviewer custody for audit/proof disposition, not runtime authority. | Separation from deployment execution; signed findings/proof disposition; risk acceptance record for unresolved items. | Audit report, finding register, proof artifact index, assumptions file, reviewer signoff, and risk record. | Reviewer replacement, scope change, unresolved critical finding, or proof assumption change. | Audit or proof completion is claimed without artifacts. |
+
+### Key Rotation Rules
+
+- Every production role must have a documented rotation interval before production readiness can be claimed.
+- Rotation must be performed through the same or stronger authority path as the original role assignment.
+- Rotation must include pre-rotation state snapshot, outgoing signer identity, incoming signer identity, authorization record, transaction hash, and post-rotation verification.
+- Emergency rotation may occur only under a compromised-key runbook and must preserve a later review packet.
+- Rotation must not change constitutional constants, threshold constants, timeout constants, trigger codes, Kernel assumptions, oracle authority, or freeze authority.
+- Rotation records must distinguish routine rotation, personnel change, suspected compromise, confirmed compromise, and governance restructuring.
+
+### Signer Onboarding and Offboarding
+
+Onboarding requirements:
+
+- Verify institutional authority for the role.
+- Record signer identity, role scope, allowed actions, prohibited actions, backup contact, and escalation path.
+- Confirm the signer understands non-execution boundaries, especially oracle signal limits and `Fargard7PolicyAdapter` proposal-only behavior.
+- Execute a test or dry-run ceremony where safe and document the result.
+- Add the signer only through the approved role assignment path and verify emitted events or role state.
+
+Offboarding requirements:
+
+- Revoke or replace role access before the signer loses operational accountability.
+- Confirm no pending transactions, recommendations, freeze actions, withdrawal proposals, or emergency signatures depend on the outgoing signer.
+- Record the reason, authorization, transaction hash, and post-offboarding role state.
+- Escalate immediately if offboarding is caused by compromise, legal conflict, or failed custody review.
+
+### Lost or Compromised Key Response
+
+| Scenario | Immediate action | Required evidence | Recovery path | Blocker |
+| --- | --- | --- | --- | --- |
+| Lost key, no compromise suspected | Suspend signer participation and initiate replacement review. | Signer report, last known valid action, affected role, and pending-action inventory. | Rotate signer through approved authority path and verify quorum remains available. | Quorum unavailable or replacement authority unclear. |
+| Suspected compromised key | Freeze signer authority where possible and escalate to emergency custody review. | Suspicion source, affected role, recent transactions, mempool/pending actions, and incident timestamp. | Rotate key, review recent actions, and record accepted/rejected incident findings. | Key can still execute privileged actions without quorum review. |
+| Confirmed compromised key | Treat as security incident and activate emergency role replacement. | Confirming evidence, affected state, transaction history, role exposure map, and reviewer signoff. | Revoke/replace signer, invalidate affected operational assumptions, and refer to audit/formal review if needed. | Compromise affects Kernel, SWF, freeze, oracle, or deployer authority without containment. |
+| Lost quorum | Halt affected authority path until governance restores quorum. | Signer availability record, quorum calculation, affected actions, and risk assessment. | Governance-authorized replacement ceremony and post-restore verification. | Any attempt to bypass quorum or lower threshold without explicit governed authority. |
+
+### Multisig and Evidence Requirements
+
+- Multi-party roles must maintain signer registry, quorum rule, signer availability status, and action-specific signature logs.
+- Every multi-sig action must include a proposal identifier, signer identities, signature timestamps, execution transaction hash, emitted events, and post-action state diff.
+- Quorum evidence must be retained for SWF withdrawals, emergency/court actions, freeze confirmations, deployment approvals, and release signoff.
+- Failed or rejected multi-sig attempts must be recorded when they reveal custody, quorum, or authority ambiguity.
+- Multi-sig evidence is operational evidence only; it does not replace external audit or formal verification.
+
+### Prohibited Single-Person Custody
+
+- No single person may independently control Kernel sovereign/admin authority.
+- No single person may independently mint, burn, withdraw SWF assets, confirm freeze transfer, or approve production release.
+- No oracle feeder may become autonomous policy authority through custody design.
+- No deployer may grant themselves post-deployment runtime powers outside the deployment manifest.
+- No policy reviewer may convert recommendation approval into execution authority.
+- No emergency operator may replace final human or institution-gated freeze authority with automation.
+
+### Pre-Deployment Custody Blockers
+
+- Role-to-custodian map is missing or incomplete.
+- Any critical role has single-person custody.
+- Signer onboarding/offboarding procedure is not documented.
+- Lost or compromised key response is not documented.
+- SWF, Kernel, emergency, freeze, deployment, or release signoff quorum is unavailable or untested.
+- Oracle feeder suspension and rotation procedure is missing.
+- Custody records do not preserve required evidence.
+- Custody design implies production readiness before audit and formal verification prerequisites are resolved.
+
 ## 8. Audit and Formal Verification Prerequisites
 
 Before production readiness can be claimed, Step-9 must either complete or explicitly block on the following:
