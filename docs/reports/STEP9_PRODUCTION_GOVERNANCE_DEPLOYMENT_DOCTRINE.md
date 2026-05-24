@@ -54,20 +54,20 @@ Step-8 inputs remain preparation evidence. They do not complete audit, formal ve
 
 ## 4. Deployment Gate Checklist
 
-Production deployment must not be claimed until every gate is satisfied and linked to evidence.
+Production deployment must not be claimed until every gate is satisfied and linked to evidence. At Step-9 opening, these gates are doctrine and readiness criteria only.
 
-| Gate | Requirement | Evidence needed | Current status |
-| --- | --- | --- | --- |
-| Clean repository | Deployment candidate commit is clean, reviewed, and reproducible. | `git status`, commit hash, deployment manifest. | Pending production candidate. |
-| Full test suite | Latest candidate passes the full Hardhat suite. | `npm test` output. | Baseline: 463 passing at Step-8 closure. |
-| Contract inventory | Every deployed contract, constructor argument, role assignment, and dependency address is listed. | Deployment manifest and address book. | Pending. |
-| Authority review | Kernel, TriggerProtocol, oracle, SWF, budget, freeze, welfare, production, provincial, fee, and adapter authorities are reviewed. | Role graph and privileged-entry-point checklist. | Pending; Step-8 GAP-001 remains open. |
-| External audit | External auditors review critical surfaces and issue findings or acceptance notes. | Audit report and remediation record. | Not complete. |
-| Formal verification | High-priority proof targets are specified and completed or explicitly accepted as unproven risk. | Proof artifacts or signed risk acceptance. | Not complete. |
-| Emergency procedure | Emergency lock, trigger, freeze, release, and communications runbooks are rehearsed. | Runbook record and rehearsal notes. | Pending. |
-| Role custody | Production key custody, quorum procedures, replacement procedures, and incident paths are defined. | Custody runbook and signer registry. | Pending. |
-| Oracle operation | Feeder onboarding, stale-data handling, invalidation, and deviation review process are documented. | Oracle operations runbook. | Pending. |
-| Non-execution boundary | `Fargard7PolicyAdapter` remains proposal-only and non-executing. | Code review, tests, and deployment manifest. | Required; no autonomous execution allowed. |
+| Gate | Owner | Required evidence | Pass criteria | Blocker | Status |
+| --- | --- | --- | --- | --- | --- |
+| Test baseline | Engineering maintainer | Latest clean `npm test` output, candidate commit hash, and confirmation that `git diff -- contracts` and `git diff -- test` are empty unless paired with reviewed implementation work. | Full Hardhat suite passes on the deployment candidate and no undocumented contract or test drift exists. | Failing tests, undocumented test baseline, or unreviewed contract/test changes. | Baseline: 463 passing at Step-8 closure; production candidate pending. |
+| External audit | External audit coordinator | Final audit report, finding register, severity triage, remediation evidence, and accepted-risk notes. | Critical surfaces from Step-8 are reviewed and every finding is fixed, explicitly accepted, or deferred with documented rationale. | External audit has not been completed. | Blocked. |
+| Formal verification | Formal methods owner | Proof artifacts or signed risk acceptance for high-priority targets: Kernel role reachability, Pahlavi supply/reserve constraints, PriceOracle quorum/staleness, BudgetAllocation spend bounds, and adapter non-interference. | Required proof obligations are complete or unresolved properties are explicitly classified as production blockers or accepted risks. | Formal verification has not been completed. | Blocked. |
+| Role custody | Governance operations lead | Production signer registry, role-to-custodian map, quorum procedures, key rotation procedure, compromised-key procedure, and replacement runbook. | Every privileged role has an accountable custodian, recovery path, quorum rule, and incident escalation path. | Missing custody owner, missing quorum procedure, or unresolved key compromise process. | Pending. |
+| Emergency/freeze doctrine | Emergency operations lead | Emergency lock, trigger execution, freeze confirmation, SWF transfer, release, public notice, and post-incident review runbooks. | Emergency and freeze actions remain human or institution-gated, rehearsed, auditable, and reversible only through documented authority paths. | Unrehearsed emergency path, unclear release authority, or automation replacing final human freeze authority. | Pending. |
+| Oracle operations | Oracle operations lead | Feeder onboarding checklist, feeder suspension procedure, stale-data response, invalidation process, deviation review process, and liveness monitoring record. | Oracle data remains signal-only, fresh quorum expectations are operationalized, and invalidation/deviation workflows are auditable. | Missing feeder controls, stale-data procedure, or any oracle path that autonomously mutates policy state. | Pending. |
+| Deployment authority | Deployment coordinator | Deployment manifest, constructor arguments, dependency address book, deployer identity, review signoff, and post-deploy verification log. | Only approved deployment authority executes the candidate, every address and role assignment is reproducible, and post-deploy state matches the manifest. | Missing manifest, unreviewed constructor arguments, unknown deployer, or unverifiable role assignment. | Pending. |
+| Rollback/non-upgrade posture | Constitutional governance lead | Non-upgradeability statement, redeployment/rollback doctrine, emergency halt path, data migration assumptions, and no-proxy/no-backdoor review evidence. | Doctrine confirms Kernel immutability and avoids hidden upgrade authority; rollback means governed emergency response or redeployment, not mutable production logic. | Any upgrade backdoor, proxy ambiguity, undocumented migration path, or rollback process that bypasses governance. | Pending. |
+| Release signoff | Release council | Signed production-readiness checklist, audit/proof disposition, risk acceptance record, deployment package hash, and final go/no-go minutes. | Release is approved only after all production blockers are closed or formally accepted by the required governance body. | Open blocker, missing signoff, missing risk acceptance, or unresolved audit/proof item. | Pending. |
+| Non-execution boundary | Engineering maintainer and governance reviewer | Code review, test evidence, deployment manifest, and adapter review-state inspection. | `Fargard7PolicyAdapter` remains proposal-only, `executable = false`, and no lifecycle function mutates downstream policy modules. | Any autonomous policy execution or downstream mutation path. | Required; no autonomous execution allowed. |
 
 ## 5. Governance Authority Map
 
