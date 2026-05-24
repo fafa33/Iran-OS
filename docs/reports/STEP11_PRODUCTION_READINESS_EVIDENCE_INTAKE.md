@@ -224,7 +224,32 @@ Stale evidence handling steps:
 
 Revalidation must identify the stale trigger, explain why the evidence still applies, confirm the candidate and affected assumptions, and obtain the same reviewer or stronger authority required for the original packet.
 
-## 10. Workflow Non-Claims
+## 10. Blocker Evidence Packet Index
+
+This index maps each open production blocker to the evidence packets required before any blocker disposition can change. At this checkpoint, all packets are missing unless explicitly marked otherwise, and all `STEP9-BLOCK-*` items remain open.
+
+| Blocker id | Required packets | Packet status | Missing evidence | Disposition rule |
+| --- | --- | --- | --- | --- |
+| STEP9-BLOCK-001 | `STEP9-BLOCK-001-AUDIT-PACKET-001` final audit scope; `STEP9-BLOCK-001-AUDIT-PACKET-002` final audit report and finding register; `STEP9-BLOCK-001-AUDIT-PACKET-003` remediation, deferral, or accepted-risk disposition. | Pending; no accepted packets recorded. | Audit scope, auditor report, finding register, severity triage, remediation links, accepted-risk notes, auditor or audit-coordinator signoff. | Blocker remains open until all required audit packets are accepted or specific eligible findings are risk-accepted under Step-10 rules; audit completion must not be claimed before final audit disposition exists. |
+| STEP9-BLOCK-002 | `STEP9-BLOCK-002-FORMAL-PACKET-001` proof target map; `STEP9-BLOCK-002-FORMAL-PACKET-002` tool output and proof artifacts; `STEP9-BLOCK-002-FORMAL-PACKET-003` unresolved proof-risk disposition. | Pending; no accepted packets recorded. | Proof artifact index, target-to-contract mapping, assumptions file, tool output, counterexample notes, formal reviewer signoff, unresolved-risk record. | Blocker remains open until proof packets are accepted or specific unresolved proof obligations are risk-accepted; formal verification completion must not be claimed for unproven targets. |
+| STEP9-BLOCK-003 | `STEP9-BLOCK-003-CUSTODY-PACKET-001` signer registry; `STEP9-BLOCK-003-CUSTODY-PACKET-002` role-to-custodian and quorum map; `STEP9-BLOCK-003-CUSTODY-PACKET-003` rotation, onboarding/offboarding, and compromised-key procedure evidence. | Pending; no accepted packets recorded. | Production signer registry, role-to-custodian map, quorum rules, key rotation procedure, onboarding/offboarding records, compromised-key runbook, custody attestation, custody rehearsal notes where applicable. | Blocker remains open until custody packets are accepted; single-person critical custody, missing quorum, or unclear compromised-key response cannot support release readiness. |
+| STEP9-BLOCK-004 | `STEP9-BLOCK-004-EMERGENCY-PACKET-001` emergency and freeze runbooks; `STEP9-BLOCK-004-EMERGENCY-PACKET-002` rehearsal and authority-check record; `STEP9-BLOCK-004-EMERGENCY-PACKET-003` release, public-notice, and post-incident review evidence. | Pending; no accepted packets recorded. | Emergency trigger, freeze, release, oracle incident, reserve incident, public-notice, and post-incident runbooks; rehearsal notes; authority checks; incident packet templates; escalation contacts; post-incident review checklist. | Blocker remains open until emergency packets are accepted; critical emergency and freeze paths must remain human or institution-gated, rehearsed, auditable, and supported by clear release authority. |
+| STEP9-BLOCK-005 | `STEP9-BLOCK-005-DEPLOYMENT-PACKET-001` deployment manifest; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-002` dry-run logs and gas estimates; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-003` post-run role, dependency, and authority-boundary verification. | Pending; no accepted packets recorded. | Deployment manifest, artifact hashes, constructor arguments, dependency address book, role assignments, dry-run logs, gas estimates, deployed test addresses, post-run verification output. | Blocker remains open until deployment packets are accepted; missing manifest, unverifiable dry-run state, or mismatched verification cannot be risk-accepted for release readiness. |
+| STEP9-BLOCK-006 | `STEP9-BLOCK-006-RELEASE-PACKET-001` upstream blocker disposition summary; `STEP9-BLOCK-006-RELEASE-PACKET-002` release package hash and signer approvals; `STEP9-BLOCK-006-RELEASE-PACKET-003` release council go/no-go minutes. | Pending; no accepted packets recorded. | Go/no-go minutes, signer approvals, release package hash, final blocker disposition, audit/proof disposition, custody confirmation, deployment dry-run acceptance, oracle operations confirmation, accepted-risk record if any. | Blocker remains open until release packets are accepted after upstream blocker disposition; release approval is not granted or implied without release council go/no-go evidence. |
+| STEP9-BLOCK-007 | `STEP9-BLOCK-007-ORACLE-PACKET-001` feeder registry and data-source attestations; `STEP9-BLOCK-007-ORACLE-PACKET-002` feeder onboarding, suspension, stale-data, and invalidation procedures; `STEP9-BLOCK-007-ORACLE-PACKET-003` deviation review, liveness monitoring, and signal-only governance review. | Pending; no accepted packets recorded. | Feeder registry, data-source attestations, feeder onboarding procedure, feeder suspension path, stale-data response, invalidation process, deviation review notes, liveness monitoring record, governance review confirming signal-only boundaries. | Blocker remains open until oracle packets are accepted; any oracle path implying autonomous sovereign, freeze, transfer, mint, burn, spending, classification, fee, wage, budget, subsidy, loan, or provincial mutation authority is unacceptable. |
+| STEP9-BLOCK-008 | `STEP9-BLOCK-008-NONCLAIM-PACKET-001` current roadmap and blocker register non-claim check; `STEP9-BLOCK-008-NONCLAIM-PACKET-002` release packet and handoff non-claim excerpt; `STEP9-BLOCK-008-NONCLAIM-PACKET-003` governance reviewer confirmation. | Pending; opening non-claim language exists, but no accepted closure packet is recorded. | Current roadmap, blocker register, release packet excerpt, handoff checklist, governance reviewer confirmation preserving production-readiness, audit, formal-verification, release, blocker, adapter, and oracle non-claims. | Blocker remains open until every readiness gate is evidence-backed and release approval exists; production readiness remains a non-claim and cannot be risk-accepted away. |
+
+Packet index rules:
+
+- Packet names are tracking identifiers only; creating an index entry does not create evidence.
+- Packet status starts as `pending` unless accepted, rejected, stale, or risk-accepted by the required reviewer.
+- Missing evidence keeps the related blocker open.
+- Rejected or stale packets cannot support blocker closure.
+- Risk-accepted packets can support disposition only for eligible conditions under Step-10 rules.
+- No blocker may close without accepted evidence for all required conditions or valid, specific, governed risk acceptance where allowed.
+- No packet may claim production readiness, audit completion, formal verification completion, release approval, or blocker closure by implication.
+
+## 11. Workflow Non-Claims
 
 The evidence intake workflow does not claim:
 
@@ -236,7 +261,7 @@ The evidence intake workflow does not claim:
 
 Accepted evidence may support a later explicit blocker disposition, but acceptance alone does not create a production-ready claim, audit-complete claim, formal-verification-complete claim, or release-approved claim unless all required evidence and signoff for that specific claim exists.
 
-## 11. Opening Non-Claims
+## 12. Opening Non-Claims
 
 At Step-11 opening:
 
@@ -248,7 +273,7 @@ At Step-11 opening:
 - `Fargard7PolicyAdapter` remains proposal-only and non-executing.
 - Oracle signals remain non-sovereign and cannot autonomously freeze, unfreeze, mint, burn, transfer, spend, classify, subsidize, apply fees, change wages, alter budgets, approve loans, mutate provincial balances, or execute governance.
 
-## 12. Opening Status
+## 13. Opening Status
 
 Step-11 is open as a docs-only production-readiness evidence intake phase.
 
