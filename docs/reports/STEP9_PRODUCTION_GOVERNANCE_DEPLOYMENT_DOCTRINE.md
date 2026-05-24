@@ -3,10 +3,11 @@
 **Checkpoint:** opened after `7f5b6a2 docs(step8): close audit readiness phase`
 **Runtime baseline:** `463 passing` at Step-8 closure
 **Scope:** Production governance specification, deployment doctrine, operational runbooks, emergency doctrine, and readiness gates
+**Status:** Closed as the Step-9 production governance doctrine phase
 
 ## 1. Purpose
 
-Step-9 defines the production governance and deployment doctrine for IranOS after the audit-readiness and remediation-evidence phase. This phase is documentation-only at opening. It does not change contracts, tests, architecture, thresholds, timeout constants, constitutional constants, Kernel assumptions, oracle authority, freeze authority, or `Fargard7PolicyAdapter` execution behavior.
+Step-9 defines the production governance and deployment doctrine for IranOS after the audit-readiness and remediation-evidence phase. This phase is documentation-only. It does not change contracts, tests, architecture, thresholds, timeout constants, constitutional constants, Kernel assumptions, oracle authority, freeze authority, or `Fargard7PolicyAdapter` execution behavior.
 
 Step-9 is intended to make production entry requirements explicit before any deployment claim is made. It records what must be true before production use, who may operate each authority path, what evidence must exist, and which blockers remain unresolved.
 
@@ -54,7 +55,7 @@ Step-8 inputs remain preparation evidence. They do not complete audit, formal ve
 
 ## 4. Deployment Gate Checklist
 
-Production deployment must not be claimed until every gate is satisfied and linked to evidence. At Step-9 opening, these gates are doctrine and readiness criteria only.
+Production deployment must not be claimed until every gate is satisfied and linked to evidence. At Step-9 closure, these gates are doctrine and readiness criteria only.
 
 | Gate | Owner | Required evidence | Pass criteria | Blocker | Status |
 | --- | --- | --- | --- | --- | --- |
@@ -392,7 +393,7 @@ Required release artifacts:
 
 ## 10. Production-Readiness Blockers
 
-The following blockers prevent a production-readiness claim at Step-9 opening:
+The following blockers prevent a production-readiness claim at Step-9 closure:
 
 - External audit is not complete.
 - Formal verification is not complete.
@@ -419,7 +420,7 @@ The following blockers prevent a production-readiness claim at Step-9 opening:
 
 ## 11. Non-Claims
 
-This Step-9 opening checkpoint does not claim:
+This Step-9 closure checkpoint does not claim:
 
 - Production readiness.
 - External audit completion.
@@ -431,11 +432,11 @@ This Step-9 opening checkpoint does not claim:
 - Oracle authority over freeze, unfreeze, mint, burn, transfer, governance execution, budget mutation, fee application, wage changes, production classification, subsidy, loan, or provincial balance mutation.
 - `Fargard7PolicyAdapter` downstream execution authority.
 
-## 12. Initial Step-9 Status
+## 12. Final Step-9 Status
 
-Step-9 is opened as a documentation-only production governance and deployment doctrine phase.
+Step-9 is closed as a documentation-only production governance and deployment doctrine phase.
 
-The first Step-9 task is to expand this document into a contract-by-contract production deployment and operations checklist covering:
+The Step-9 doctrine package v1 is complete for the current production governance documentation scope. It covers:
 
 - Deployment inputs and constructor arguments.
 - Role assignments and custody.
@@ -445,7 +446,7 @@ The first Step-9 task is to expand this document into a contract-by-contract pro
 - Audit and formal verification prerequisites.
 - Production-readiness blockers and non-claims.
 
-Step-9 remains open. No production readiness, external audit completion, formal verification completion, or autonomous policy execution is claimed.
+Step-9 closes with blockers remaining explicit. No production readiness, external audit completion, formal verification completion, or autonomous policy execution is claimed.
 
 ## 13. Doctrine Package V1 Checkpoint
 
@@ -466,4 +467,4 @@ Checkpointed Step-9 doctrine package v1 includes:
 
 This checkpoint does not claim production readiness. External audit is not complete. Formal verification is not complete. Production deployment approval is not granted or implied. No autonomous policy execution is introduced or claimed.
 
-The next Step-9 direction is final Step-9 closure review or identification of any remaining doctrine gaps before closure.
+The final Step-9 closure review found the doctrine phase closeable. The next roadmap direction is Step-10 planning for production-readiness follow-up, including audit execution, formal verification execution or risk disposition, custody completion, dry-run evidence, release signoff, and blocker resolution.

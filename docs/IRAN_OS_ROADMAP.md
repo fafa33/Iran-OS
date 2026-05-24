@@ -65,16 +65,23 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Milestone document: [STEP8_AUDIT_READINESS_REPORT.md](reports/STEP8_AUDIT_READINESS_REPORT.md).
   - Status: closed.
 
-- [ ] Step-9: Production governance specification & deployment doctrine - In progress
+- [x] Step-9: Production governance specification & deployment doctrine - Complete
   - Define final production governance, deployment, operational, and emergency doctrine after prior checkpoints are complete.
   - Initial production governance doctrine opened with scope/non-goals, Step-8 inputs, deployment gate checklist, governance authority map, emergency/freeze doctrine, role custody runbooks, audit/formal-verification prerequisites, production-readiness blockers, and non-claims.
   - Doctrine package v1 checkpointed with deployment gates, authority mapping, custody/key-management runbooks, emergency/freeze doctrine, audit/proof prerequisites, deployment/release runbook, and production blocker register.
   - Deployment gates, authority/custody, emergency/freeze, release, and blocker documentation are complete for the v1 doctrine package.
+  - Final closure: complete as the production governance doctrine phase with doctrine package v1 complete and blockers remaining explicit.
   - External audit is not complete; formal verification is not complete; production readiness is not claimed.
   - No autonomous policy execution is introduced or claimed.
-  - Next direction: final Step-9 closure review or identification of any remaining doctrine gaps before closure.
-  - Milestone document started: [STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md](reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md).
-  - Status: started, not complete.
+  - Next direction: Step-10 planning for production-readiness follow-up, including audit execution, formal verification execution or risk disposition, custody completion, dry-run evidence, release signoff, and blocker resolution.
+  - Milestone document: [STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md](reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md).
+  - Status: closed.
+
+- [ ] Step-10: Production readiness planning & blocker resolution
+  - Plan the follow-up phase for resolving or risk-accepting the explicit production blockers carried forward from Step-9.
+  - Must not claim production readiness, external audit completion, or formal verification completion until the required evidence exists.
+  - Milestone document: pending.
+  - Status: planned, not started.
 
 ## Major Milestone References
 
