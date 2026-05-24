@@ -88,7 +88,7 @@ Formal verification, custody, emergency/freeze, deployment dry-run, release sign
 | STEP9-BLOCK-005 | Deployment dry-run and manifest evidence intake | `STEP9-BLOCK-005-DEPLOYMENT-PACKET-001` deployment manifest; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-002` dry-run logs and gas estimates; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-003` post-run role, dependency, and authority-boundary verification. | No accepted deployment dry-run packet recorded at opening. | Pending; not accepted; missing manifest or unverifiable dry-run state cannot be risk-accepted for release readiness. | Deployment coordinator and engineering maintainer or deployment reviewer. | Open |
 | STEP9-BLOCK-006 | Release signoff evidence intake | `STEP9-BLOCK-006-RELEASE-PACKET-001` upstream blocker disposition summary; `STEP9-BLOCK-006-RELEASE-PACKET-002` release package hash and signer approvals; `STEP9-BLOCK-006-RELEASE-PACKET-003` release council go/no-go minutes. | No accepted release signoff packet recorded at opening. | Pending; not accepted; release approval is not granted or implied. | Release council. | Open |
 | STEP9-BLOCK-007 | Oracle operations evidence intake | `STEP9-BLOCK-007-ORACLE-PACKET-001` feeder registry and data-source attestations; `STEP9-BLOCK-007-ORACLE-PACKET-002` feeder onboarding, suspension, stale-data, and invalidation procedures; `STEP9-BLOCK-007-ORACLE-PACKET-003` deviation review, liveness monitoring, and signal-only governance review. | No accepted oracle operations packet recorded at opening. | Pending; not accepted; oracle signals remain non-sovereign. | Oracle operations lead and governance reviewer. | Open |
-| STEP9-BLOCK-008 | Non-claim preservation control | `STEP9-BLOCK-008-NONCLAIM-PACKET-001` current roadmap and blocker register non-claim check; `STEP9-BLOCK-008-NONCLAIM-PACKET-002` release packet and handoff non-claim excerpt; `STEP9-BLOCK-008-NONCLAIM-PACKET-003` governance reviewer confirmation. | Opening Step-12 non-claim language is present, but no accepted closure packet is recorded. | Pending control active; production readiness remains a non-claim and cannot be risk-accepted away. | Release coordinator and governance reviewer. | Open |
+| STEP9-BLOCK-008 | Non-claim preservation control | `STEP9-BLOCK-008-NONCLAIM-PACKET-001` current roadmap and blocker register non-claim check; `STEP9-BLOCK-008-NONCLAIM-PACKET-002` release packet and handoff non-claim excerpt; `STEP9-BLOCK-008-NONCLAIM-PACKET-003` governance reviewer confirmation. | Non-claim preservation evidence recorded from the roadmap and Step-8 through Step-12 documentation. No reviewer acceptance or closure packet is recorded. | Evidence recorded; pending reviewer acceptance; production readiness remains a non-claim and cannot be risk-accepted away. | Release coordinator and governance reviewer. | Open |
 
 ## 6. Execution and Disposition Rules
 
@@ -115,7 +115,30 @@ At Step-12 opening:
 - `Fargard7PolicyAdapter` remains proposal-only and non-executing.
 - Oracle signals remain non-sovereign.
 
-## 8. Opening Status
+## 8. Non-Claim Preservation Evidence
+
+`STEP9-BLOCK-008-NONCLAIM-PACKET-001` has an initial evidence record for non-claim preservation based on the current roadmap and Step-8 through Step-12 documentation:
+
+- `docs/IRAN_OS_ROADMAP.md`
+- `docs/reports/STEP8_AUDIT_READINESS_REPORT.md`
+- `docs/reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md`
+- `docs/reports/STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md`
+- `docs/reports/STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md`
+- `docs/reports/STEP12_EVIDENCE_EXECUTION_BLOCKER_DISPOSITION.md`
+
+Checked non-claims:
+
+- IranOS is not production ready.
+- External audit is not complete.
+- Formal verification is not complete.
+- Release is not approved.
+- No `STEP9-BLOCK-*` item is closed by implication.
+- `Fargard7PolicyAdapter` remains proposal-only and non-executing.
+- Oracle signals remain non-sovereign and cannot autonomously freeze, unfreeze, mint, burn, transfer, spend, classify, subsidize, apply fees, change wages, alter budgets, approve loans, mutate provincial balances, or execute governance.
+
+Disposition: non-claim preservation evidence is recorded for review, but `STEP9-BLOCK-008` remains open unless the required release coordinator and governance reviewer accept the packet. This record does not close `STEP9-BLOCK-008`, does not close any other production blocker, and does not claim production readiness.
+
+## 9. Opening Status
 
 Step-12 is open as a docs-only evidence execution and blocker disposition phase.
 
