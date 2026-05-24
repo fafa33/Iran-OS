@@ -292,7 +292,105 @@ Step-9 may document proof obligations and audit questions before proofs are comp
 | Emergency runbook | Emergency trigger, freeze, release, oracle incident, reserve incident, and post-incident review runbooks are complete and rehearsed. | Runbook set, rehearsal notes, incident packet template, escalation contacts, authority checks, and post-action verification checklist. | Emergency operations lead. | Emergency and freeze paths are not operationally safe; automation or unclear release authority blocks readiness. | Pending. |
 | Release signoff | Final go/no-go process confirms audit, proof, custody, deployment, emergency, oracle, and non-execution blockers are closed or accepted. | Signed release checklist, risk acceptance record, deployment package hash, blocker disposition, and release council minutes. | Release council. | No production deployment approval may be claimed. | Pending. |
 
-## 9. Production-Readiness Blockers
+## 9. Deployment and Release Runbook
+
+This runbook is a production-entry checklist only. It does not approve deployment, does not claim production readiness, and does not replace external audit, formal verification, role custody, or emergency-runbook prerequisites.
+
+### Deployment Sequence Checklist
+
+| Sequence | Action | Required evidence | Owner | Abort if |
+| --- | --- | --- | --- | --- |
+| 1 | Select deployment candidate commit. | Commit hash, clean `git status`, latest test output, and release branch/tag reference. | Release coordinator. | Working tree is dirty, candidate is not reviewed, or tests are not current. |
+| 2 | Freeze deployment manifest. | Contract list, constructor arguments, dependency addresses, initial role assignments, artifact hashes, and network target. | Deployment coordinator. | Any constructor argument, dependency address, or role assignment is unknown or unreviewed. |
+| 3 | Confirm blockers. | Audit/proof/custody/emergency/oracle/release blocker checklist and accepted-risk record. | Release council. | External audit, formal verification, custody, emergency, or oracle blockers remain unresolved or unaccepted. |
+| 4 | Execute dry-run. | Dry-run logs, deployed test addresses, gas estimates, role-state checks, and post-run state verification. | Deployment coordinator. | Dry-run output differs from manifest or role assignment verification fails. |
+| 5 | Collect signer approval. | Signer identities, approval timestamps, signed release package hash, and go/no-go minutes. | Release council. | Required quorum is unavailable, conflicted, or disagrees on release package hash. |
+| 6 | Execute deployment. | Deployment transaction hashes, emitted events, deployer identity, and live address book. | Approved deployer. | Deployer identity or artifact hash differs from approved package. |
+| 7 | Verify post-deploy state. | Address verification, role assignments, dependency wiring, constants, non-upgrade posture, and adapter non-execution checks. | Engineering maintainer and governance reviewer. | Any state differs from manifest or any autonomous execution path appears. |
+| 8 | Publish release packet. | Final manifest, verification log, signer approvals, audit/proof disposition, and non-claims statement. | Release coordinator. | Release packet omits blockers, non-claims, or verification evidence. |
+
+### Preflight Checks
+
+- Repository state is clean and candidate commit is identified.
+- Full test suite passes on the candidate commit.
+- `git diff -- contracts` and `git diff -- test` are empty unless paired with reviewed implementation work and updated evidence.
+- Deployment manifest lists every contract, constructor argument, dependency address, role assignment, artifact hash, and network target.
+- External audit status is recorded and unresolved findings are either fixed or explicitly accepted as risk.
+- Formal verification status is recorded and unproven high-priority targets are explicitly blocked or risk-accepted.
+- Role custody, signer quorum, emergency/freeze runbook, oracle operations runbook, and release signoff process are complete.
+- `Fargard7PolicyAdapter` remains proposal-only and non-executing.
+- Kernel immutability and no hidden proxy/upgrade authority are explicitly reviewed.
+
+### Dry-Run Requirements
+
+- Dry-run must use the exact artifact set, constructor arguments, role assignments, and deployment order intended for release.
+- Dry-run output must include deployed addresses, gas usage, emitted events, role assignments, dependency wiring, and post-deploy state checks.
+- Dry-run must verify that thresholds, timeout constants, trigger codes, constitutional constants, Kernel assumptions, oracle authority, and freeze authority are unchanged.
+- Dry-run must verify that oracle feeds and adapter recommendations do not mutate downstream policy state.
+- Any dry-run mismatch requires a new manifest review and signer approval before release can proceed.
+
+### Release Artifact Evidence
+
+Required release artifacts:
+
+- Candidate commit hash and repository status.
+- Full test output.
+- Deployment manifest and address book.
+- Contract artifact hashes.
+- Constructor argument record.
+- Role assignment record.
+- Audit disposition and finding register.
+- Formal verification disposition and proof/risk record.
+- Custody signer registry and release approval evidence.
+- Emergency/freeze and oracle operations runbook links.
+- Post-deploy verification checklist.
+- Non-claims statement confirming no production-readiness claim unless all gates are satisfied.
+
+### Signer Approval Flow
+
+1. Release coordinator prepares the release packet and package hash.
+2. Engineering maintainer verifies test baseline, artifact hashes, and deployment manifest.
+3. Governance operations lead verifies role custody, signer quorum, and key-management evidence.
+4. Emergency operations lead verifies emergency/freeze runbook readiness.
+5. Oracle operations lead verifies feeder, stale-data, invalidation, and deviation procedures.
+6. External audit coordinator records audit disposition.
+7. Formal methods owner records proof disposition.
+8. Release council signs go/no-go minutes only after blockers are closed or formally accepted.
+
+### Post-Deploy Verification
+
+- Confirm every deployed address matches the manifest.
+- Confirm constructor arguments and dependency wiring match the approved package.
+- Confirm role assignments, signer quorums, and privileged entry points match the custody map.
+- Confirm Kernel immutability and absence of hidden upgrade authority.
+- Confirm PahlaviToken, SWF, TriggerProtocol, AssetFreeze, PriceOracle, ProductionOracle, BudgetAllocation, VelocityFee, Provincial, BaseIncome, and `Fargard7PolicyAdapter` state align with expected deployment values.
+- Confirm `Fargard7PolicyAdapter` recommendations remain `executable = false` and cannot mutate downstream policy modules.
+- Confirm emergency/freeze, oracle invalidation, and release verification evidence is archived.
+
+### Abort Conditions
+
+- Full test suite does not pass.
+- Contract or test diff is present without reviewed implementation evidence.
+- External audit is missing or unresolved findings are not accepted as risk.
+- Formal verification prerequisites are missing or unresolved proof blockers are not accepted as risk.
+- Deployment manifest is incomplete or dry-run output differs from the manifest.
+- Required signer quorum is unavailable.
+- Any critical role has single-person custody.
+- Kernel immutability or non-upgrade posture is ambiguous.
+- Oracle or adapter path implies autonomous policy execution.
+- Emergency/freeze release authority is unclear.
+- Release packet omits non-claims or production-readiness blockers.
+
+### Deployment Production-Readiness Blockers
+
+- No deployment may be described as production-ready while external audit is incomplete.
+- No deployment may be described as formally verified while formal verification is incomplete.
+- No release may proceed without role custody, key rotation, compromised-key response, and signer quorum evidence.
+- No release may proceed without emergency/freeze and oracle operations runbooks.
+- No release may proceed if the deployment manifest or post-deploy verification cannot prove the intended authority boundaries.
+- No release may proceed if autonomous policy execution is introduced or implied.
+
+## 10. Production-Readiness Blockers
 
 The following blockers prevent a production-readiness claim at Step-9 opening:
 
@@ -306,7 +404,7 @@ The following blockers prevent a production-readiness claim at Step-9 opening:
 - High-priority Step-8 proof and audit-review items remain open.
 - Production risk acceptance process is not documented.
 
-## 10. Non-Claims
+## 11. Non-Claims
 
 This Step-9 opening checkpoint does not claim:
 
@@ -320,7 +418,7 @@ This Step-9 opening checkpoint does not claim:
 - Oracle authority over freeze, unfreeze, mint, burn, transfer, governance execution, budget mutation, fee application, wage changes, production classification, subsidy, loan, or provincial balance mutation.
 - `Fargard7PolicyAdapter` downstream execution authority.
 
-## 11. Initial Step-9 Status
+## 12. Initial Step-9 Status
 
 Step-9 is opened as a documentation-only production governance and deployment doctrine phase.
 
