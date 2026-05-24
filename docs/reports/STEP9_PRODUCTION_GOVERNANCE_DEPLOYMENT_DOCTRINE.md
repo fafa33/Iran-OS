@@ -404,6 +404,19 @@ The following blockers prevent a production-readiness claim at Step-9 opening:
 - High-priority Step-8 proof and audit-review items remain open.
 - Production risk acceptance process is not documented.
 
+### Production Blocker Register
+
+| Blocker ID | Blocker | Source section | Required resolution | Owner | Status |
+| --- | --- | --- | --- | --- | --- |
+| STEP9-BLOCK-001 | External audit is not complete. | Audit and Formal Verification Prerequisites; Audit and Proof Prerequisite Matrix; Deployment and Release Runbook. | Complete external audit scope, triage findings, record remediation or accepted risk, and attach final audit disposition. | External audit coordinator. | Open. |
+| STEP9-BLOCK-002 | Formal verification is not complete. | Audit and Formal Verification Prerequisites; Audit and Proof Prerequisite Matrix. | Complete high-priority proof targets or record explicit risk acceptance for unresolved proof obligations. | Formal methods owner. | Open. |
+| STEP9-BLOCK-003 | Role custody and key management are not production-complete. | Role Custody and Runbooks; Role Custody Table; Pre-Deployment Custody Blockers. | Finalize role-to-custodian map, signer registry, quorum rules, key rotation, onboarding/offboarding, and compromised-key response. | Governance operations lead. | Open. |
+| STEP9-BLOCK-004 | Emergency and freeze runbooks are not complete or rehearsed. | Emergency and Freeze Doctrine; Deployment Gate Checklist; Deployment and Release Runbook. | Complete emergency trigger, freeze, release, oracle incident, reserve incident, and post-incident review runbooks with rehearsal evidence. | Emergency operations lead. | Open. |
+| STEP9-BLOCK-005 | Deployment dry-run and manifest evidence are not complete. | Deployment and Release Runbook; Deployment Gate Checklist. | Produce reviewed deployment manifest, dry-run logs, artifact hashes, constructor arguments, role assignments, address book, and post-run verification. | Deployment coordinator. | Open. |
+| STEP9-BLOCK-006 | Release signoff is not complete. | Deployment and Release Runbook; Audit and Proof Prerequisite Matrix. | Obtain release council go/no-go minutes, signer approvals, release package hash, blocker disposition, and risk acceptance record. | Release council. | Open. |
+| STEP9-BLOCK-007 | Oracle operations runbook is not complete. | Deployment Gate Checklist; Governance Authority Map; Audit and Proof Prerequisite Matrix. | Finalize feeder onboarding, suspension, stale-data response, invalidation, deviation review, and liveness monitoring procedures. | Oracle operations lead. | Open. |
+| STEP9-BLOCK-008 | Production-readiness remains a non-claim. | Non-Claims; Production-Readiness Blockers. | Keep all docs, release packets, and handoff materials explicit that production readiness is not claimed until all gates are satisfied. | Release coordinator. | Open. |
+
 ## 11. Non-Claims
 
 This Step-9 opening checkpoint does not claim:
