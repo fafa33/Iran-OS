@@ -101,6 +101,17 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Milestone document: [STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md](reports/STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md).
   - Status: closed.
 
+- [ ] Step-12: Evidence execution & blocker disposition - In progress
+  - Open the evidence execution phase for the explicit Step-9 production blockers carried forward by Step-11.
+  - Starts with `STEP9-BLOCK-008` non-claim preservation control, then begins `STEP9-BLOCK-001` external audit evidence intake.
+  - Tracks execution and disposition status for `STEP9-BLOCK-001` through `STEP9-BLOCK-008` without closing any blocker by implication.
+  - No evidence has been accepted yet; no production blocker has been closed.
+  - Tests alone do not close audit, formal verification, custody, deployment dry-run, oracle operations, emergency/freeze, or release signoff blockers.
+  - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete or implied.
+  - `Fargard7PolicyAdapter` remains proposal-only/non-executing and oracle signals remain non-sovereign.
+  - Milestone document: [STEP12_EVIDENCE_EXECUTION_BLOCKER_DISPOSITION.md](reports/STEP12_EVIDENCE_EXECUTION_BLOCKER_DISPOSITION.md).
+  - Status: open.
+
 ## Major Milestone References
 
 - [Step-3 Runtime Hardening Matrix](STEP3_RUNTIME_HARDENING_MATRIX.md)
@@ -111,6 +122,7 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 - [Step-9 Production Governance Deployment Doctrine](reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md)
 - [Step-10 Production Readiness Blocker Resolution Plan](reports/STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md)
 - [Step-11 Production Readiness Evidence Intake](reports/STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md)
+- [Step-12 Evidence Execution and Blocker Disposition](reports/STEP12_EVIDENCE_EXECUTION_BLOCKER_DISPOSITION.md)
 
 ## Roadmap Maintenance Rule
 
