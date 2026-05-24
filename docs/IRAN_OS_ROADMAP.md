@@ -88,6 +88,15 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Milestone document: [STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md](reports/STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md).
   - Status: closed.
 
+- [ ] Step-11: Production readiness evidence intake - In progress
+  - Open the evidence intake phase for the explicit Step-9 production blockers carried forward by Step-10.
+  - Initial evidence intake register created for audit, formal verification, custody, oracle operations, emergency/freeze readiness, deployment dry-run, release signoff, and non-claim preservation packets.
+  - `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain open unless backed by required evidence, signoff, or valid risk disposition.
+  - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete or implied.
+  - `Fargard7PolicyAdapter` remains proposal-only/non-executing and oracle signals remain non-sovereign.
+  - Milestone document started: [STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md](reports/STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md).
+  - Status: started, not complete.
+
 ## Major Milestone References
 
 - [Step-3 Runtime Hardening Matrix](STEP3_RUNTIME_HARDENING_MATRIX.md)
@@ -97,6 +106,7 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 - [Step-8 Audit Readiness Report](reports/STEP8_AUDIT_READINESS_REPORT.md)
 - [Step-9 Production Governance Deployment Doctrine](reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md)
 - [Step-10 Production Readiness Blocker Resolution Plan](reports/STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md)
+- [Step-11 Production Readiness Evidence Intake](reports/STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md)
 
 ## Roadmap Maintenance Rule
 
