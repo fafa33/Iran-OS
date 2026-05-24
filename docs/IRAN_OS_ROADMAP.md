@@ -50,7 +50,7 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Final closure: complete with 454 passing tests; no autonomous downstream policy mutation is implemented or claimed.
   - Status: closed.
 
-- [ ] Step-8: External audit readiness & formal verification preparation - In progress
+- [x] Step-8: External audit readiness & formal verification preparation - Complete
   - Prepare audit materials, invariant maps, and formal verification targets without claiming formal verification is complete before evidence exists.
   - Initial audit-readiness report opened with critical contract surfaces, authority boundaries, subsystem invariant map, existing test evidence references, and formal verification candidate properties.
   - Audit-readiness package v1 checkpointed with invariant inventory, audit evidence index, formal verification targets, threat model matrix, audit gap register, and reviewer handoff.
@@ -59,14 +59,16 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - First remediation evidence pass complete across Kernel, PahlaviToken, PriceOracle, ProductionOracle, BaseIncome, BudgetAllocation, Provincial, VelocityFee, and Fargard7PolicyAdapter.
   - Test evidence increased from the Step-7 closure baseline of 454 passing tests to 463 passing tests, with no contract or source changes in the remediation pass.
   - Remediation gaps are better evidenced, not formally closed by audit.
-  - External audit is not complete; formal verification is not complete; Step-8 remains open for actual audit execution, proof work, and gap remediation planning.
+  - Final closure: complete as an audit-readiness and remediation-evidence phase with 463 passing tests.
+  - External audit is not complete; formal verification is not complete; open proof and audit-review items remain future work.
   - `Fargard7PolicyAdapter` remains proposal-only/non-executing; Step-8 does not introduce downstream policy mutation.
-  - Milestone document started: [STEP8_AUDIT_READINESS_REPORT.md](reports/STEP8_AUDIT_READINESS_REPORT.md).
-  - Status: remediation evidence checkpoint reached; Step-8 still in progress pending final closure review.
+  - Milestone document: [STEP8_AUDIT_READINESS_REPORT.md](reports/STEP8_AUDIT_READINESS_REPORT.md).
+  - Status: closed.
 
-- [ ] Step-9: Production governance specification & deployment doctrine
+- [ ] Step-9: Production governance specification & deployment doctrine - Planning
   - Define final production governance, deployment, operational, and emergency doctrine after prior checkpoints are complete.
   - Milestone document: pending.
+  - Status: planning.
 
 ## Major Milestone References
 

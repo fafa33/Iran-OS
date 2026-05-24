@@ -364,3 +364,25 @@ This remediation pass did not include contract or source changes. The added test
 External audit is not complete. Formal verification is not complete. Step-8 remains open for final closure review, audit execution decisions, proof work, and any future evidence-driven remediation.
 
 The recommended next Step-8 direction is final Step-8 closure review.
+
+## 10. Final Step-8 Closure
+
+Step-8 is complete and closed as an audit-readiness and remediation-evidence phase. The final Step-8 test state is 463 passing tests.
+
+Closed Step-8 deliverables:
+
+- Audit-readiness package v1.
+- Invariant inventory.
+- Audit evidence index.
+- Formal verification target list.
+- Threat model / attack surface matrix.
+- Audit gap register.
+- Reviewer handoff package.
+- Gap remediation plan.
+- First remediation evidence test pass across Kernel, PahlaviToken, PriceOracle, ProductionOracle, BaseIncome, BudgetAllocation, Provincial, VelocityFee, and Fargard7PolicyAdapter.
+
+This closure does not mark external audit complete. This closure does not mark formal verification complete. Open proof and audit-review items remain future work, and the documented gaps are better evidenced rather than formally closed by audit.
+
+No contract or source changes are included in the Step-8 closure. `Fargard7PolicyAdapter` remains proposal-only and non-executing.
+
+The next direction is Step-9 planning: production governance specification and deployment doctrine.
