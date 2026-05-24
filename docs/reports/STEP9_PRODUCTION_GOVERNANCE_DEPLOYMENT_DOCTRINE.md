@@ -112,6 +112,65 @@ Emergency and freeze operations are high-risk authority paths and require conser
 - Every emergency action must preserve a post-incident evidence trail: caller, role, target, reason, related trigger or violation, transaction hash, and reviewer sign-off.
 - Freeze release must be at least as auditable as freeze initiation.
 
+### Emergency Trigger Matrix
+
+| Trigger class | Initial signal | Authorized path | Required evidence before action | Allowed response | Prohibited response | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| Constitutional violation | Kernel violation report, court-signature evidence, or bridged API3 feeder report. | `IranOS_Kernel` violation path and `TriggerProtocol` terminal execution only after required signatures. | Violation code, offender address, source report, signer identities, signature count, timestamp, and transaction hashes. | Emergency lock, terminal trigger execution, treasury access blocking, signature revocation, and public notice through documented paths. | Oracle-only emergency activation, replayed trigger execution, threshold bypass, or trigger-code mutation. | Doctrine target; rehearsal pending. |
+| Asset recovery/freeze | Crawler target identification, node confirmation, council review, or Kernel release request. | `SovereignCrawler`, `AssetFreeze`, SWF reclaim path, and Kernel release path. | Target ID, asset description, valuation, source graph, confirmation count, council/Kernal authorization, legal rationale, and transfer/release record. | Freeze, confirmation, SWF transfer, or release through explicit contract roles. | Autonomous freeze, duplicate transfer, undocumented release, or oracle-only asset seizure. | Doctrine target; runbook pending. |
+| Oracle integrity incident | Stale quorum, feeder liveness loss, severe deviation, invalid submission, or compromised feeder suspicion. | Oracle operations runbook, feeder suspension, invalidation review, and governance escalation. | Affected feed key, feeder list, submitted values, timestamps, freshness state, deviation notes, and invalidation decision. | Suspend feeder, invalidate price, request fresh quorum, or escalate to reviewers. | Treating oracle values as direct freeze, budget, fee, wage, subsidy, mint, burn, or transfer authority. | Doctrine target; operations procedure pending. |
+| Budget or reserve emergency | Overspend attempt, locked-sector issue, withdrawal anomaly, reclaimed-asset anomaly, or reserve mismatch. | Budget/government/auditor/Kernel/SWF role paths according to affected module. | Sector or layer state, proposed action, authorization record, balance deltas, signer quorum, and failed-call neutrality review. | Budget lock, rejected spend, SWF review, or accounting hold through existing roles. | Autonomous fund movement, reserve-backed mint bypass, hidden withdrawal, or role escalation. | Doctrine target; proof/audit review pending. |
+| Adapter recommendation stress | Severe Fargard 7 signal recommendation or reviewer escalation. | `Fargard7PolicyAdapter` local review lifecycle only. | Fresh `GLOBAL_CPI`, `USD_GOLD`, and `GAS_USD` snapshots, recommendation ID, reviewer identity, review status, and downstream state check. | Create, approve, reject, or expire non-executing recommendation metadata. | Treating approval as execution, setting executable policy authority, or mutating downstream modules. | Required non-execution boundary. |
+
+### Freeze Authority Limits
+
+- Freeze authority is limited to implemented contract roles and documented institutional paths.
+- Freeze initiation must identify the legal or constitutional reason, target, evidence source, approving authority, and expected review path.
+- Freeze confirmation must satisfy the implemented confirmation threshold before SWF transfer.
+- SWF transfer is not a general confiscation mechanism; it requires the implemented confirmed-freeze path and reclaim authority.
+- Unfreeze or release authority must be documented before action and must preserve an evidence trail equal to or stronger than freeze initiation.
+- Freeze authority must not be expanded through oracle feeds, adapter approvals, automation scripts, deployment operators, or emergency messaging.
+
+### Escalation Path
+
+1. Signal intake: collect oracle, crawler, court, council, auditor, or governance evidence without mutating protected state.
+2. Triage: classify the incident as constitutional, asset-freeze, oracle-integrity, budget/reserve, or adapter-review stress.
+3. Authority check: identify the exact contract role, signer quorum, and runbook required for the next action.
+4. Evidence lock: snapshot pre-action state, supporting documents, feeder data, signer identities, and timestamps.
+5. Human or institution approval: obtain the required signatures or role-holder approval before executing any freeze, release, trigger, transfer, lock, or invalidation.
+6. Execution: perform only the approved action through the documented contract path.
+7. Verification: record post-action state, emitted events, transaction hashes, and whether any follow-up is required.
+8. Review: route the incident packet to post-incident review.
+
+### Evidence Required Before Freeze or Unfreeze
+
+| Action | Required evidence | Minimum pass condition | Blocker |
+| --- | --- | --- | --- |
+| Freeze initiation | Target identifier, asset details, valuation, source graph or report, initiating role, reason code, and timestamp. | The target is specific, evidence-backed, nonzero-value where applicable, and initiated by an authorized role. | Anonymous target, missing valuation, missing authority, or unsupported reason. |
+| Freeze confirmation | Confirmation signer identities, confirmation count, freeze record, prior signatures, and target state. | Required confirmation threshold is reached without duplicate signer assumptions. | Duplicate confirmation, insufficient confirmations, or stale/ambiguous freeze record. |
+| Transfer to SWF | Confirmed freeze status, council authority, reclaim authority, SWF address, transfer amount, and pre-transfer accounting snapshot. | Transfer is authorized, non-duplicate, and accounting deltas match expected state. | Missing reclaim role, duplicate transfer, amount mismatch, or failed accounting verification. |
+| Release/unfreeze | Kernel or release authority record, original freeze packet, release rationale, affected target state, and post-release verification plan. | Release is authorized, traceable to the original freeze, and does not hide prior evidence. | Missing release authority, missing original packet, or unclear post-release state. |
+
+### Prohibited Autonomous Freeze Paths
+
+- Oracle feeder submissions directly freezing, unfreezing, transferring, minting, burning, spending, classifying, subsidizing, applying fees, changing wages, altering budgets, or executing governance.
+- `Fargard7PolicyAdapter` recommendation creation, approval, rejection, or expiration causing downstream policy mutation.
+- Automation scripts replacing final human or institution-gated freeze authority.
+- Emergency notifications or monitoring alerts executing freeze or release actions.
+- Deployment operators granting themselves freeze, Kernel, SWF, or oracle powers outside the deployment manifest.
+- Any hidden proxy, upgrade hook, fallback, or off-chain service that can bypass the documented role path.
+
+### Post-Incident Review Requirements
+
+- Reconstruct the full timeline from signal intake through execution and verification.
+- Confirm every signer, role holder, and caller matched the applicable runbook.
+- Compare pre-action and post-action state for Kernel, TriggerProtocol, AssetFreeze, SWF, Treasury, oracle, budget, and adapter surfaces as applicable.
+- Record emitted events, transaction hashes, failed calls, and state-neutral reverts.
+- Identify whether the incident exposes an audit gap, formal verification target, runbook defect, custody issue, or missing test.
+- Preserve any release/unfreeze rationale alongside the original freeze packet.
+- Produce a finding disposition: no issue, documentation update, test addition, implementation review, external-audit referral, or formal-verification referral.
+- Do not use post-incident review to claim production readiness, external audit completion, or formal verification completion unless the required evidence exists.
+
 ## 7. Role Custody and Runbooks
 
 Production role custody must be documented before deployment.
