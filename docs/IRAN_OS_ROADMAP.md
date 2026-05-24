@@ -68,8 +68,11 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 - [ ] Step-9: Production governance specification & deployment doctrine - In progress
   - Define final production governance, deployment, operational, and emergency doctrine after prior checkpoints are complete.
   - Initial production governance doctrine opened with scope/non-goals, Step-8 inputs, deployment gate checklist, governance authority map, emergency/freeze doctrine, role custody runbooks, audit/formal-verification prerequisites, production-readiness blockers, and non-claims.
+  - Doctrine package v1 checkpointed with deployment gates, authority mapping, custody/key-management runbooks, emergency/freeze doctrine, audit/proof prerequisites, deployment/release runbook, and production blocker register.
+  - Deployment gates, authority/custody, emergency/freeze, release, and blocker documentation are complete for the v1 doctrine package.
   - External audit is not complete; formal verification is not complete; production readiness is not claimed.
   - No autonomous policy execution is introduced or claimed.
+  - Next direction: final Step-9 closure review or identification of any remaining doctrine gaps before closure.
   - Milestone document started: [STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md](reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md).
   - Status: started, not complete.
 

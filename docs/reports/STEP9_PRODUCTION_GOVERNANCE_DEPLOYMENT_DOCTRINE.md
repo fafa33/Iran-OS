@@ -446,3 +446,24 @@ The first Step-9 task is to expand this document into a contract-by-contract pro
 - Production-readiness blockers and non-claims.
 
 Step-9 remains open. No production readiness, external audit completion, formal verification completion, or autonomous policy execution is claimed.
+
+## 13. Doctrine Package V1 Checkpoint
+
+Step-9 doctrine package v1 is checkpointed as complete for production governance documentation readiness.
+
+Checkpointed Step-9 doctrine package v1 includes:
+
+- Scope and non-goals.
+- Step-8 input mapping.
+- Deployment gate checklist.
+- Governance authority map and production role authority checklist.
+- Emergency and freeze doctrine, including emergency trigger matrix, freeze authority limits, escalation path, freeze/unfreeze evidence requirements, prohibited autonomous freeze paths, and post-incident review requirements.
+- Role custody and key-management runbook, including custody table, key rotation, signer onboarding/offboarding, lost or compromised key response, multi-sig evidence requirements, and prohibited single-person custody.
+- Audit and formal verification prerequisites.
+- Deployment and release runbook, including preflight checks, dry-run requirements, release artifact evidence, signer approval flow, post-deploy verification, abort conditions, and deployment blockers.
+- Production blocker register.
+- Non-claims.
+
+This checkpoint does not claim production readiness. External audit is not complete. Formal verification is not complete. Production deployment approval is not granted or implied. No autonomous policy execution is introduced or claimed.
+
+The next Step-9 direction is final Step-9 closure review or identification of any remaining doctrine gaps before closure.
