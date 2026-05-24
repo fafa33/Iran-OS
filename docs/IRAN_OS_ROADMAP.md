@@ -56,10 +56,13 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Audit-readiness package v1 checkpointed with invariant inventory, audit evidence index, formal verification targets, threat model matrix, audit gap register, and reviewer handoff.
   - Gap remediation plan prepared for prioritized follow-up; gaps are planned, not fixed.
   - Midpoint checkpoint: audit package v1 complete and remediation planning complete; external audit execution and formal verification are not complete.
+  - First remediation evidence pass complete across Kernel, PahlaviToken, PriceOracle, ProductionOracle, BaseIncome, BudgetAllocation, Provincial, VelocityFee, and Fargard7PolicyAdapter.
+  - Test evidence increased from the Step-7 closure baseline of 454 passing tests to 463 passing tests, with no contract or source changes in the remediation pass.
+  - Remediation gaps are better evidenced, not formally closed by audit.
   - External audit is not complete; formal verification is not complete; Step-8 remains open for actual audit execution, proof work, and gap remediation planning.
   - `Fargard7PolicyAdapter` remains proposal-only/non-executing; Step-8 does not introduce downstream policy mutation.
   - Milestone document started: [STEP8_AUDIT_READINESS_REPORT.md](reports/STEP8_AUDIT_READINESS_REPORT.md).
-  - Status: midpoint checkpoint reached; Step-8 still in progress.
+  - Status: remediation evidence checkpoint reached; Step-8 still in progress pending final closure review.
 
 - [ ] Step-9: Production governance specification & deployment doctrine
   - Define final production governance, deployment, operational, and emergency doctrine after prior checkpoints are complete.

@@ -342,3 +342,25 @@ Current status:
 - Step-8 remains open.
 
 The next Step-8 direction is to execute prioritized remediation items, starting with the P0 items in the gap remediation plan: Kernel authority graphing, PahlaviToken monetary proof targets, PriceOracle assumptions, BudgetAllocation fiscal bounds, and `Fargard7PolicyAdapter` downstream non-interference.
+
+## 9. Step-8 Remediation Evidence Checkpoint
+
+The first Step-8 remediation test pass is complete. The test suite increased from the Step-7 closure baseline of 454 passing tests to 463 passing tests.
+
+Remediation evidence has been added for:
+
+- Kernel authority boundaries.
+- PahlaviToken monetary controls.
+- PriceOracle integrity and stale-data boundaries.
+- ProductionOracle classification, loan, and subsidy boundaries.
+- BaseIncome welfare-policy boundaries.
+- BudgetAllocation spending boundaries.
+- Provincial revenue and productivity boundaries.
+- VelocityFee dormant-liquidity boundaries.
+- Fargard7PolicyAdapter proposal-only and review workflow boundaries.
+
+This remediation pass did not include contract or source changes. The added tests and report entries improve audit evidence for the listed gaps, but they do not formally close the gaps through external audit or formal verification.
+
+External audit is not complete. Formal verification is not complete. Step-8 remains open for final closure review, audit execution decisions, proof work, and any future evidence-driven remediation.
+
+The recommended next Step-8 direction is final Step-8 closure review.
