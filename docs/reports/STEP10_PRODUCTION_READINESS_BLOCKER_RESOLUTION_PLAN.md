@@ -163,7 +163,72 @@ Some blockers cannot be closed by repository documentation alone.
 | STEP9-BLOCK-006 | Release council minutes, signer approvals, release package hash, blocker disposition, and risk acceptance record. | Release signoff requires governance approval evidence, not local planning text. |
 | STEP9-BLOCK-007 | Feeder registry, data-source attestations, liveness monitoring records, invalidation records, and deviation review notes. | Oracle operations readiness depends on real operators, data sources, and monitoring evidence. |
 
-## 6. Risk Acceptance Rules
+## 6. Evidence Acceptance Criteria
+
+Evidence must be specific, attributable, current, and tied to the exact blocker it is intended to resolve. Planning text, informal assurances, and test output alone are not enough to close production-readiness blockers that require external or operational evidence.
+
+### Evidence Acceptance Matrix
+
+| Evidence type | Applies to | Acceptable evidence | Insufficient evidence | Required reviewer/signoff | Expiry or staleness rule |
+| --- | --- | --- | --- | --- | --- |
+| Audit | STEP9-BLOCK-001 | Final audit report, scope statement, finding register, severity triage, remediation links, accepted-risk notes, and auditor or audit coordinator signoff. | Internal checklist, planned audit scope, unresolved draft notes, or tests presented as audit completion. | External audit coordinator and auditor or authorized audit reviewer. | Stale if candidate commit, contract surface, authority model, or critical dependency changes after report issuance. |
+| Formal verification | STEP9-BLOCK-002 | Proof artifact index, tool output, assumptions file, target-to-contract map, counterexample notes, unresolved-risk record, and formal reviewer signoff. | Informal proof notes, intended properties without tool output, test coverage alone, or proof claims with undocumented assumptions. | Formal methods owner and formal verification reviewer. | Stale if verified source, compiler assumptions, proof harness, target property, or dependency wiring changes. |
+| Custody | STEP9-BLOCK-003 | Signer registry, role-to-custodian map, quorum rules, key rotation procedure, onboarding/offboarding records, compromised-key runbook, and custody attestation. | Named owner without key evidence, incomplete quorum model, single-person critical custody, or missing compromise procedure. | Governance operations lead and release council representative. | Stale if signer membership, role assignment, quorum threshold, custody operator, or key ceremony changes. |
+| Emergency/freeze runbook | STEP9-BLOCK-004 | Emergency trigger, freeze, release, oracle incident, reserve incident, public-notice, and post-incident runbooks with rehearsal notes and authority evidence. | Unrehearsed procedure, missing release authority, notification-only process, or automation replacing final human authority. | Emergency operations lead and governance reviewer. | Stale if authority paths, signers, incident contacts, deployment addresses, or release procedures change. |
+| Deployment dry-run | STEP9-BLOCK-005 | Deployment manifest, artifact hashes, constructor arguments, dependency address book, role assignments, dry-run logs, gas estimates, and post-run verification. | Unexecuted manifest, unmatched dry-run logs, missing constructor arguments, unknown deployer, or unverifiable role state. | Deployment coordinator and engineering maintainer. | Stale if candidate commit, artifacts, constructor arguments, deployment script, network target, or role assignments change. |
+| Release signoff | STEP9-BLOCK-006 | Go/no-go minutes, signer approvals, release package hash, final blocker disposition, audit/proof disposition, and accepted-risk record. | Verbal approval, unsigned notes, missing package hash, or signoff that omits open blockers. | Release council. | Stale if any upstream blocker changes, candidate commit changes, package hash changes, or accepted risk expires. |
+| Oracle operations | STEP9-BLOCK-007 | Feeder registry, source attestations, stale-data response, feeder suspension process, invalidation procedure, deviation review notes, and liveness monitoring evidence. | Feeder address list without operators, missing source record, no suspension path, or any oracle-to-policy execution ambiguity. | Oracle operations lead and governance reviewer. | Stale if feeder set, data source, monitoring process, oracle contract address, or deviation procedure changes. |
+| Non-claims | STEP9-BLOCK-008 | Current roadmap, blocker register, release packet, and handoff materials explicitly preserving production-readiness, audit, formal-verification, and release non-claims. | Ambiguous launch language, partial non-claims, or readiness wording before all gates are satisfied. | Release coordinator and governance reviewer. | Stale if any release document or public handoff is changed without rechecking non-claims. |
+
+### Acceptable vs. Insufficient Evidence
+
+| Evidence class | Acceptable | Insufficient |
+| --- | --- | --- |
+| Commit and test baseline | Candidate commit hash, clean repository status, full `npm test` output, and empty `contracts` and `test` diffs unless implementation work is explicitly in scope. | Old test output, partial test run, dirty working tree, or undocumented contract/test changes. |
+| External attestation | Signed or attributable audit, formal, custody, oracle, deployment, or release evidence from the responsible owner. | Anonymous notes, unowned checklists, unreviewed drafts, or repository text claiming external completion. |
+| Risk acceptance | Specific unresolved item, severity, rationale, compensating control, approving body, expiry/review trigger, and affected release scope. | Blanket acceptance, missing owner, no expiry, unclear severity, or acceptance of non-acceptable doctrine violations. |
+| Operational rehearsal | Dated rehearsal record, participants, scenario, authority checks, abort conditions, observed gaps, and post-rehearsal corrections. | Hypothetical runbook, meeting notes without scenario evidence, or untested emergency/freeze path. |
+| Deployment verification | Manifest-to-dry-run match, artifact hash match, constructor argument record, role-state verification, and post-run authority-boundary check. | Script exists, deployment command was planned, or addresses are listed without state verification. |
+| Non-execution boundary | Explicit confirmation that `Fargard7PolicyAdapter` remains `executable = false` and no lifecycle function mutates downstream modules. | Reviewer approval language that could be read as policy execution or downstream authorization. |
+
+### Required Reviewer and Signoff Rules
+
+- Audit evidence requires the external audit coordinator plus auditor or authorized audit reviewer signoff.
+- Formal verification evidence requires the formal methods owner plus formal verification reviewer signoff.
+- Custody evidence requires governance operations lead signoff and release council acknowledgement for critical roles.
+- Emergency and freeze evidence requires emergency operations lead signoff and governance review of final human or institutional authority.
+- Oracle operations evidence requires oracle operations lead signoff and governance review confirming signal-only boundaries.
+- Deployment dry-run evidence requires deployment coordinator and engineering maintainer signoff.
+- Release approval requires release council go/no-go minutes and signer approvals.
+- Non-claim evidence requires release coordinator and governance reviewer confirmation before public handoff.
+
+### Evidence Expiry and Staleness Rules
+
+Evidence must be refreshed or explicitly revalidated when:
+
+- The candidate commit changes.
+- Any contract, test, deployment script, artifact, constructor argument, dependency address, or role assignment changes.
+- Any signer, custodian, feeder, reviewer, deployer, auditor, or formal reviewer changes.
+- Any oracle source, feeder quorum assumption, liveness process, invalidation procedure, or deviation review procedure changes.
+- Any emergency/freeze contact, release authority, incident runbook, or post-incident review procedure changes.
+- Any accepted risk reaches its expiry date or review trigger.
+- Any release packet or public handoff document changes in a way that could weaken non-claims.
+
+If evidence is stale, the blocker remains open until refreshed evidence or explicit revalidation is attached.
+
+### Blockers Needing External Attestation
+
+| Blocker id | External attestation required | Minimum attesting party |
+| --- | --- | --- |
+| STEP9-BLOCK-001 | Audit completion or accepted-risk disposition. | External audit coordinator and auditor or authorized audit reviewer. |
+| STEP9-BLOCK-002 | Proof completion, proof-risk disposition, or accepted-risk disposition. | Formal methods owner and formal verification reviewer. |
+| STEP9-BLOCK-003 | Role custody, signer registry, quorum, and key-management readiness. | Governance operations lead and release council representative. |
+| STEP9-BLOCK-004 | Emergency/freeze runbook completion and rehearsal readiness. | Emergency operations lead and governance reviewer. |
+| STEP9-BLOCK-005 | Deployment manifest, dry-run, and post-run verification acceptance. | Deployment coordinator and engineering maintainer. |
+| STEP9-BLOCK-006 | Final release approval or no-go disposition. | Release council. |
+| STEP9-BLOCK-007 | Oracle feeder, data-source, liveness, invalidation, and deviation operations readiness. | Oracle operations lead and governance reviewer. |
+
+## 7. Risk Acceptance Rules
 
 Risk acceptance is a blocker disposition mechanism, not a production-readiness shortcut.
 
@@ -173,7 +238,7 @@ Risk acceptance is a blocker disposition mechanism, not a production-readiness s
 - Risk acceptance must not authorize hidden upgradeability, autonomous oracle authority, autonomous policy execution, or bypass of final human or institutional freeze authority.
 - Risk acceptance must not replace deployment manifest evidence, dry-run verification, or release council go/no-go approval.
 
-## 7. Non-Claims
+## 8. Non-Claims
 
 This Step-10 opening checkpoint does not claim:
 
@@ -192,7 +257,7 @@ This Step-10 opening checkpoint does not claim:
 
 Oracle signals remain non-sovereign. Oracle data may inform review, but must not autonomously freeze, unfreeze, mint, burn, transfer, spend, classify, subsidize, apply fees, change wages, alter budgets, approve loans, mutate provincial balances, or execute governance.
 
-## 8. Opening Status
+## 9. Opening Status
 
 Step-10 is open as a docs-only production-readiness blocker resolution planning phase.
 
