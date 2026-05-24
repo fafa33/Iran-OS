@@ -3,7 +3,7 @@
 **Checkpoint:** opened after `dc4193e docs(step10): close blocker resolution planning phase`
 **Runtime baseline:** `463 passing` at Step-10 closure verification
 **Scope:** Production-readiness evidence intake, blocker packet tracking, staleness control, and disposition readiness
-**Status:** Open as the Step-11 evidence intake phase
+**Status:** Closed as the Step-11 evidence-intake planning/package phase
 
 ## 1. Purpose
 
@@ -384,3 +384,15 @@ No evidence has been accepted in this checkpoint. `STEP9-BLOCK-001` through `STE
 This checkpoint does not claim production readiness. External audit is not complete. Formal verification is not complete. Release approval is not complete or implied. `Fargard7PolicyAdapter` remains proposal-only and non-executing. Oracle signals remain non-sovereign.
 
 Next direction: closure review or remaining intake gaps.
+
+## 16. Final Step-11 Status
+
+Step-11 is closed as a docs-only evidence-intake planning/package phase.
+
+The evidence intake package v1 is complete for the current documentation scope. It documents the intake register, packet schema, intake and disposition workflow, stale-evidence handling, blocker evidence packet index, reviewer checklist, signoff requirements, and non-claim preservation rules.
+
+No evidence has been accepted in Step-11. `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain explicit and open until required evidence, signoff, or valid risk disposition exists.
+
+This closure does not claim production readiness. External audit is not complete. Formal verification is not complete. Release approval is not complete or implied. `Fargard7PolicyAdapter` remains proposal-only and non-executing. Oracle signals remain non-sovereign.
+
+Next direction: Step-12 planning for actual evidence execution and blocker disposition.

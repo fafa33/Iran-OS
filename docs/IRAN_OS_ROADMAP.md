@@ -88,17 +88,18 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
   - Milestone document: [STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md](reports/STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md).
   - Status: closed.
 
-- [ ] Step-11: Production readiness evidence intake - In progress
+- [x] Step-11: Production readiness evidence intake - Complete
   - Open the evidence intake phase for the explicit Step-9 production blockers carried forward by Step-10.
   - Initial evidence intake register created for audit, formal verification, custody, oracle operations, emergency/freeze readiness, deployment dry-run, release signoff, and non-claim preservation packets.
   - Evidence intake package v1 checkpointed with intake register, workflow, packet index, reviewer checklist, stale-evidence handling, and disposition rules documented.
+  - Final closure: complete as the evidence-intake planning/package phase with v1 evidence intake package complete.
   - No evidence has been accepted yet; no production blocker has been closed.
   - `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain open unless backed by required evidence, signoff, or valid risk disposition.
   - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete or implied.
-  - Next direction: closure review or remaining intake gaps.
+  - Next direction: Step-12 planning for actual evidence execution and blocker disposition.
   - `Fargard7PolicyAdapter` remains proposal-only/non-executing and oracle signals remain non-sovereign.
-  - Milestone document started: [STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md](reports/STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md).
-  - Status: started, not complete.
+  - Milestone document: [STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md](reports/STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md).
+  - Status: closed.
 
 ## Major Milestone References
 
