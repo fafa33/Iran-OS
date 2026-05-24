@@ -375,3 +375,21 @@ At opening:
 - Formal verification is not complete.
 - Release approval is not granted or implied.
 - No contract or test changes are introduced.
+
+## 11. Blocker Resolution Plan V1 Checkpoint
+
+The Step-10 blocker resolution plan v1 is checkpointed as complete for the current planning scope.
+
+Checkpointed Step-10 planning coverage includes:
+
+- Step-9 blocker inputs and blocker resolution register.
+- Sequencing, dependency graph, phase order, entry criteria, and exit criteria.
+- Evidence acceptance criteria, acceptable and insufficient evidence examples, reviewer and signoff rules, evidence expiry, and external attestation requirements.
+- Risk acceptance policy, eligible and non-eligible blockers, required approvers, acceptance evidence, expiry and revalidation rules, and non-claim preservation.
+- Owner action plan with next action, deliverable, unblock condition, expected evidence artifact, and audit/proof/custody/runbook/dry-run/signoff dependencies for each blocker.
+
+This checkpoint plans blocker resolution but does not resolve the blockers. `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain open until the required evidence, signoff, or valid risk disposition exists.
+
+This checkpoint does not claim production readiness. External audit is not complete. Formal verification is not complete. Release approval is not complete or implied. `Fargard7PolicyAdapter` remains proposal-only and non-executing. Oracle signals remain non-sovereign.
+
+Next direction: Step-10 closure review or any remaining planning-gap pass before closing the blocker resolution planning phase.

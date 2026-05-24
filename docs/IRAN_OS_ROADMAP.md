@@ -80,6 +80,9 @@ IranOS is sovereign resilience infrastructure, not a DeFi yield optimization sys
 - [ ] Step-10: Production readiness planning & blocker resolution - In progress
   - Plan the follow-up phase for resolving or risk-accepting the explicit production blockers carried forward from Step-9.
   - Initial blocker resolution plan opened with Step-9 blocker inputs, owner/evidence mapping, resolution criteria, risk-acceptance limits, sequencing, and non-claims.
+  - Blocker resolution plan v1 checkpointed with sequencing, evidence acceptance criteria, risk acceptance policy, and owner action plan documented.
+  - Blockers are planned, not resolved; production readiness, external audit completion, formal verification completion, and release approval remain non-claims.
+  - Next direction: Step-10 closure review or remaining planning-gap pass.
   - Must not claim production readiness, external audit completion, or formal verification completion until the required evidence exists.
   - Milestone document started: [STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md](reports/STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md).
   - Status: started, not complete.
