@@ -3,7 +3,7 @@
 **Checkpoint:** opened after `3b892ce docs(step9): close production governance doctrine phase`
 **Runtime baseline:** `463 passing` at Step-9 closure verification
 **Scope:** Production-readiness blocker resolution planning, evidence mapping, sequencing, and risk-disposition criteria
-**Status:** Open as a docs-only planning phase
+**Status:** Closed as the Step-10 blocker-resolution planning phase
 
 ## 1. Purpose
 
@@ -392,4 +392,14 @@ This checkpoint plans blocker resolution but does not resolve the blockers. `STE
 
 This checkpoint does not claim production readiness. External audit is not complete. Formal verification is not complete. Release approval is not complete or implied. `Fargard7PolicyAdapter` remains proposal-only and non-executing. Oracle signals remain non-sovereign.
 
-Next direction: Step-10 closure review or any remaining planning-gap pass before closing the blocker resolution planning phase.
+## 12. Final Step-10 Status
+
+Step-10 is closed as a docs-only blocker-resolution planning phase.
+
+The blocker resolution planning package v1 is complete for the current planning scope. It documents Step-9 blocker carry-forward, sequencing, evidence acceptance criteria, risk acceptance policy, owner actions, external attestation needs, and non-claim preservation.
+
+Step-10 closes with blockers remaining explicit and unresolved. `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain open until required evidence, signoff, or valid risk disposition exists.
+
+This closure does not claim production readiness. External audit is not complete. Formal verification is not complete. Release approval is not complete or implied. `Fargard7PolicyAdapter` remains proposal-only and non-executing. Oracle signals remain non-sovereign.
+
+Next direction: Step-11 planning.
