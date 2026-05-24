@@ -249,7 +249,84 @@ Packet index rules:
 - No blocker may close without accepted evidence for all required conditions or valid, specific, governed risk acceptance where allowed.
 - No packet may claim production readiness, audit completion, formal verification completion, release approval, or blocker closure by implication.
 
-## 11. Workflow Non-Claims
+## 11. Evidence Reviewer Checklist
+
+This checklist is used by the required reviewer or signoff authority before any packet disposition is recorded. It is a review control only; completing the checklist does not close a blocker unless the packet is accepted and all blocker-specific evidence requirements are satisfied.
+
+### Packet Completeness Checks
+
+- Packet ID is present and matches the relevant blocker and evidence category.
+- Blocker ID is one of `STEP9-BLOCK-001` through `STEP9-BLOCK-008`.
+- Evidence category matches the Step-11 evidence intake register.
+- Candidate commit, release package, or doctrine-only scope is identified.
+- Owner is the accountable owner listed for the blocker.
+- Reviewer or signoff authority is identified and has authority for the packet category.
+- Evidence artifacts are linked, named, or otherwise attributable.
+- Evidence summary states exactly what condition the packet supports.
+- Stale rule is copied or referenced from the Step-11 register.
+- Current disposition is one of `pending`, `accepted`, `rejected`, `stale`, or `risk-accepted`.
+- Non-claims confirmation is included.
+
+### Acceptance Checks
+
+- Evidence is specific to the blocker and does not attempt to close other blockers by implication.
+- Evidence is current under the packet stale rule.
+- Evidence is attributable to the required owner or external authority.
+- Evidence satisfies the Step-10 evidence acceptance matrix for the packet category.
+- Evidence includes required signoff from the reviewer or governance body.
+- Evidence does not conflict with Kernel immutability, oracle-as-signal-only boundaries, final human or institution-gated freeze authority, or `Fargard7PolicyAdapter` proposal-only behavior.
+- Evidence does not claim production readiness, audit completion, formal verification completion, release approval, or blocker closure unless that exact claim is supported by all required evidence and signoff.
+
+### Rejection Checks
+
+- Reject the packet if required fields are missing.
+- Reject the packet if owner or reviewer authority is missing or ambiguous.
+- Reject the packet if evidence is informal where external attestation, proof artifact, custody record, runbook rehearsal, deployment dry-run, oracle operations record, or release minutes are required.
+- Reject the packet if it relies on stale evidence without revalidation.
+- Reject the packet if it implies autonomous oracle authority over sovereign or policy actions.
+- Reject the packet if it treats `Fargard7PolicyAdapter` approval as downstream execution.
+- Reject the packet if it attempts to close a blocker without accepted evidence for all required conditions.
+- Reject the packet if it weakens non-claims.
+
+### Stale-Evidence Checks
+
+- Check whether the candidate commit, release package, contract surface, tests, deployment script, artifact, constructor argument, dependency address, or role assignment changed.
+- Check whether audit scope, finding register, authority model, formal proof target, compiler assumption, proof harness, or tool assumption changed.
+- Check whether signer membership, custody owner, quorum rule, key ceremony, feeder set, data source, monitoring process, invalidation procedure, deviation process, emergency contact, release authority, or runbook sequence changed.
+- Check whether accepted-risk expiry, release scope, package hash, release packet, public handoff, or non-claim language changed.
+- If any stale trigger applies, mark the packet `stale` and keep the blocker open until refreshed evidence or explicit revalidation is accepted.
+
+### Risk-Acceptance Checks
+
+- Confirm the condition is eligible for risk acceptance under Step-10 rules.
+- Confirm the accepted risk is specific, not blanket or category-wide.
+- Confirm severity, rationale, compensating controls, approving body, expiry date, and revalidation trigger are recorded.
+- Confirm non-eligible conditions are not risk-accepted, including missing deployment manifest or unverifiable dry-run state, production-readiness non-claim removal, hidden Kernel upgradeability, autonomous oracle authority, downstream adapter execution, or missing release council go/no-go record.
+- Confirm risk acceptance does not claim audit completion for incomplete audit work.
+- Confirm risk acceptance does not claim formal verification completion for unproven targets.
+- Confirm the underlying blocker gap remains visible unless all required evidence and signoff exist.
+
+### Signoff Requirements
+
+| Evidence category | Required signoff |
+| --- | --- |
+| Audit | External audit coordinator and auditor or authorized audit reviewer. |
+| Formal verification | Formal methods owner and formal verification reviewer. |
+| Custody | Governance operations lead and release council representative or governance reviewer. |
+| Emergency | Emergency operations lead and governance reviewer. |
+| Deployment dry-run | Deployment coordinator and engineering maintainer or deployment reviewer. |
+| Oracle ops | Oracle operations lead and governance reviewer. |
+| Release signoff | Release council go/no-go minutes and signer approvals. |
+| Non-claim preservation | Release coordinator and governance reviewer. |
+
+Reviewer checklist rules:
+
+- The reviewer must record disposition rationale for accepted, rejected, stale, or risk-accepted packets.
+- Accepted packet status does not automatically close a blocker.
+- No blocker closure is allowed without accepted evidence for all required conditions or valid, specific, governed risk acceptance where allowed.
+- Release approval remains separate and requires release council evidence.
+
+## 12. Workflow Non-Claims
 
 The evidence intake workflow does not claim:
 
@@ -261,7 +338,7 @@ The evidence intake workflow does not claim:
 
 Accepted evidence may support a later explicit blocker disposition, but acceptance alone does not create a production-ready claim, audit-complete claim, formal-verification-complete claim, or release-approved claim unless all required evidence and signoff for that specific claim exists.
 
-## 12. Opening Non-Claims
+## 13. Opening Non-Claims
 
 At Step-11 opening:
 
@@ -273,7 +350,7 @@ At Step-11 opening:
 - `Fargard7PolicyAdapter` remains proposal-only and non-executing.
 - Oracle signals remain non-sovereign and cannot autonomously freeze, unfreeze, mint, burn, transfer, spend, classify, subsidize, apply fees, change wages, alter budgets, approve loans, mutate provincial balances, or execute governance.
 
-## 13. Opening Status
+## 14. Opening Status
 
 Step-11 is open as a docs-only production-readiness evidence intake phase.
 
