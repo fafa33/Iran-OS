@@ -78,6 +78,8 @@ Further progress requires accepted evidence and reviewer signoff from qualified 
 
 See the accepted-evidence checklist: [`docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md`](docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md)
 
+GitHub issue workflow guide: [`docs/reports/STEP12_GITHUB_EVIDENCE_WORKFLOW.md`](docs/reports/STEP12_GITHUB_EVIDENCE_WORKFLOW.md)
+
 Evidence contributions should be submitted through GitHub Issues or Pull Requests using the relevant `STEP9-BLOCK-*` identifier:
 
 - `STEP9-BLOCK-001`: external audit evidence and auditor/reviewer signoff.
@@ -100,6 +102,8 @@ Please do not submit PRs or Issues that claim blocker closure, production readin
 ادامه‌ی کار نیازمند شواهد پذیرفته‌شده و تأیید بازبین‌های واجد صلاحیت است. این پروژه در این مرحله ادعای آمادگی تولید، تأیید انتشار، تکمیل حسابرسی بیرونی، یا تکمیل راستی‌آزمایی رسمی ندارد.
 
 چک‌لیست شواهد پذیرفته‌شده: [`docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md`](docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md)
+
+راهنمای گردش‌کار Issue در GitHub: [`docs/reports/STEP12_GITHUB_EVIDENCE_WORKFLOW.md`](docs/reports/STEP12_GITHUB_EVIDENCE_WORKFLOW.md)
 
 مشارکت‌های مربوط به شواهد باید از طریق GitHub Issues یا Pull Requests و با شناسه‌ی مربوط `STEP9-BLOCK-*` ثبت شوند:
 
