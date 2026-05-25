@@ -1,0 +1,114 @@
+name: Step 12 evidence/signoff submission
+description: Submit accepted-evidence candidates and reviewer signoff for pending Step 12 blockers.
+title: "[Step 12 Evidence]: STEP9-BLOCK-___ - "
+labels:
+  - step12
+  - evidence
+  - signoff
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to submit evidence packets or reviewer signoff for Iran-OS Step 12.
+
+        Step 12 remains open. No `STEP9-BLOCK-*` blocker is closed by opening this issue. Do not claim blocker closure, production readiness, release approval, completed external audit, or completed formal verification unless the required accepted evidence and reviewer signoff are attached or clearly linked.
+
+        `Fargard7PolicyAdapter` remains proposal-only/non-executing, and oracle signals remain non-sovereign.
+
+        Accepted-evidence checklist: `docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md`
+  - type: dropdown
+    id: blocker_id
+    attributes:
+      label: STEP9-BLOCK id
+      description: Select the blocker this evidence/signoff submission targets.
+      options:
+        - STEP9-BLOCK-001
+        - STEP9-BLOCK-002
+        - STEP9-BLOCK-003
+        - STEP9-BLOCK-004
+        - STEP9-BLOCK-005
+        - STEP9-BLOCK-006
+        - STEP9-BLOCK-007
+        - STEP9-BLOCK-008
+    validations:
+      required: true
+  - type: dropdown
+    id: blocker_topic
+    attributes:
+      label: Blocker topic
+      description: Select the topic that matches the selected blocker id.
+      options:
+        - STEP9-BLOCK-001 external audit evidence and auditor/reviewer signoff
+        - STEP9-BLOCK-002 formal verification packet and formal verification reviewer signoff
+        - STEP9-BLOCK-003 role custody/key-management packet and governance reviewer signoff
+        - STEP9-BLOCK-004 oracle operations packet and oracle/governance signoff
+        - STEP9-BLOCK-005 deployment dry-run/manifest packet and deployment reviewer signoff
+        - STEP9-BLOCK-006 release signoff packet and release council approval
+        - STEP9-BLOCK-007 oracle operations runbook and oracle/governance signoff
+        - STEP9-BLOCK-008 non-claim preservation review and governance/release signoff
+    validations:
+      required: true
+  - type: textarea
+    id: evidence_links
+    attributes:
+      label: Evidence packet links or attachments
+      description: Link or describe the evidence packet. Attach files where appropriate. Do not mark evidence accepted unless reviewer signoff is attached or clearly linked.
+      placeholder: |
+        - Evidence artifact:
+        - Related commit/PR:
+        - Report, proof output, runbook, manifest, minutes, or signoff link:
+    validations:
+      required: true
+  - type: textarea
+    id: reviewer_signoff
+    attributes:
+      label: Reviewer/signoff identity or role
+      description: Identify the reviewer role and any attached signoff. If no signoff exists yet, state that clearly.
+      placeholder: |
+        - Reviewer/signoff role:
+        - Reviewer identity:
+        - Signoff link or attachment:
+        - If pending, state: "Signoff pending."
+    validations:
+      required: true
+  - type: dropdown
+    id: evidence_state
+    attributes:
+      label: Evidence state
+      description: Select the current state. Only choose accepted when required evidence and required signoff are attached or clearly linked.
+      options:
+        - draft
+        - submitted
+        - reviewed
+        - accepted
+    validations:
+      required: true
+  - type: checkboxes
+    id: non_claims
+    attributes:
+      label: Required non-claim confirmations
+      description: Confirm that this issue preserves Step 12 non-claims.
+      options:
+        - label: I am not claiming blocker closure unless accepted evidence and required signoff are attached or clearly linked.
+          required: true
+        - label: I am not claiming production readiness.
+          required: true
+        - label: I am not claiming release approval.
+          required: true
+        - label: I am not claiming completed external audit unless accepted audit evidence and signoff are attached or clearly linked.
+          required: true
+        - label: I am not claiming completed formal verification unless accepted proof evidence and signoff are attached or clearly linked.
+          required: true
+        - label: I acknowledge `Fargard7PolicyAdapter` remains proposal-only/non-executing.
+          required: true
+        - label: I acknowledge oracle signals remain non-sovereign.
+          required: true
+  - type: textarea
+    id: closure_basis
+    attributes:
+      label: Closure basis, if any
+      description: If this submission claims blocker closure, quote or link the accepted evidence and required signoff. Otherwise state that blocker closure is not claimed.
+      placeholder: |
+        Blocker closure is not claimed.
+    validations:
+      required: true
