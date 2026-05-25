@@ -477,7 +477,26 @@ This rollup checkpoint is not a production-readiness claim, release-approval cla
 
 Step-12 remains open as an evidence execution and blocker disposition phase.
 
-## 22. Opening Status
+## 22. Evidence Execution Handoff Checkpoint
+
+This checkpoint records the current Step-12 exit and handoff state. The Step-12 evidence execution and blocker disposition pass has completed its current documentation sweep, but the documentation does not define or satisfy criteria that would close Step-12 while production-readiness blockers remain pending/open.
+
+Handoff status:
+
+- `STEP9-BLOCK-001` through `STEP9-BLOCK-008` all have evidence intake or status recorded.
+- `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain pending/open.
+- No `STEP9-BLOCK-*` item is closed.
+- No accepted evidence packet and required signoff are recorded for blocker closure.
+- No production-readiness claim is made.
+- No release approval is claimed.
+- No external audit completion is claimed.
+- No formal verification completion is claimed.
+- `Fargard7PolicyAdapter` remains proposal-only and non-executing.
+- Oracle signals remain non-sovereign.
+
+Further progress requires accepted evidence and required signoff for the pending blockers under the Step-10 and Step-11 evidence acceptance rules. This handoff checkpoint does not mark Step-12 complete and does not authorize release or deployment.
+
+## 23. Opening Status
 
 Step-12 is open as a docs-only evidence execution and blocker disposition phase.
 
