@@ -132,6 +132,16 @@ English remains valid for technical evidence, audit, formal verification, securi
   - Milestone document: [STEP12_EVIDENCE_EXECUTION_BLOCKER_DISPOSITION.md](reports/STEP12_EVIDENCE_EXECUTION_BLOCKER_DISPOSITION.md).
   - Status: open.
 
+- [ ] Step-13: Whitepaper-to-system mapping - In progress
+  - Open a Persian-first traceability layer from the whitepaper into implementation, governance, evidence, tests, issues, blockers, and signoff requirements.
+  - Mapping path: سپیدنامه → اصل/بند → ماژول فنی/حکمرانی → وضعیت اجرا → evidence/test → issue/blocker/signoff.
+  - This step is documentation-only and does not close Step-12.
+  - No evidence is accepted by this mapping; no production blocker is closed.
+  - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete.
+  - `Fargard7PolicyAdapter` remains proposal-only/non-executing and oracle signals remain non-sovereign.
+  - Milestone document: [WHITEPAPER_TO_SYSTEM_MAPPING_FA.md](WHITEPAPER_TO_SYSTEM_MAPPING_FA.md).
+  - Status: open.
+
 ## Major Milestone References
 
 - [Step-3 Runtime Hardening Matrix](STEP3_RUNTIME_HARDENING_MATRIX.md)
@@ -143,6 +153,7 @@ English remains valid for technical evidence, audit, formal verification, securi
 - [Step-10 Production Readiness Blocker Resolution Plan](reports/STEP10_PRODUCTION_READINESS_BLOCKER_RESOLUTION_PLAN.md)
 - [Step-11 Production Readiness Evidence Intake](reports/STEP11_PRODUCTION_READINESS_EVIDENCE_INTAKE.md)
 - [Step-12 Evidence Execution and Blocker Disposition](reports/STEP12_EVIDENCE_EXECUTION_BLOCKER_DISPOSITION.md)
+- [Step-13 Whitepaper-to-System Mapping](WHITEPAPER_TO_SYSTEM_MAPPING_FA.md)
 
 ## Roadmap Maintenance Rule
 

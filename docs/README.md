@@ -14,6 +14,7 @@
 |[Faq-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/Faq-fa.md)                  |سوالات متداول — پاسخ به منتقدان         |
 |[roadmap-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/roadmap-fa.md)          |نقشه راه — مراحل و زمان‌بندی استقرار     |
 |[contributing-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/contributing-fa.md)|راهنمای مشارکت — نحوه مشارکت فنی        |
+|[WHITEPAPER_TO_SYSTEM_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_TO_SYSTEM_MAPPING_FA.md)|نگاشت فارسی‌محور سپیدنامه به ماژول‌ها، وضعیت اجرا، evidence/test، issue، blocker و signoff|
 
 -----
 

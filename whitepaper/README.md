@@ -100,6 +100,7 @@
 
 - [منشور رفاه و عدالت (پیمان ملی مشروطه سکولار)](../constitution/constitution-fa.md) — سند حقوقی و سیاسی پایه
 - [سپیدنامه فنی کامل](./whitepaper-fa.md) — معماری اجرایی سیستم
+- [نگاشت سپیدنامه به سیستم](../docs/WHITEPAPER_TO_SYSTEM_MAPPING_FA.md) — مسیر ردیابی از اصل/بند سپیدنامه به ماژول، وضعیت اجرا، evidence/test، issue، blocker و signoff
 
 -----
 

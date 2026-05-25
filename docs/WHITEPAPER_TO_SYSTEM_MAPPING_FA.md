@@ -1,0 +1,96 @@
+<div dir="rtl">
+
+# گام ۱۳: نگاشت سپیدنامه به سیستم
+
+**نام گام:** Whitepaper-to-System Mapping  
+**دامنه:** سپیدنامه → اصل/بند → ماژول فنی/حکمرانی → وضعیت اجرا → evidence/test → issue/blocker/signoff  
+**وضعیت:** باز؛ سند نگاشت و ردیابی، نه سند تأیید نهایی  
+**زبان:** فارسی‌محور، با ارجاع‌های فنی انگلیسی در نام فایل‌ها، testها، issueها و blockerها
+
+## ۱. هدف
+
+این سند برای تبدیل سپیدنامه ایران‌اواس به یک سیستم قابل ردیابی ساخته شده است. هر اصل یا بند سپیدنامه باید بتواند به یک یا چند سطح اجرایی وصل شود:
+
+سپیدنامه → اصل/بند → ماژول فنی یا حکمرانی → وضعیت اجرا → evidence/test → issue/blocker/signoff
+
+این نگاشت برای بازبین فارسی‌زبان، مشارکت‌کننده فنی، auditor، بازبین formal verification، و reviewer حکمرانی یک مسیر مشترک می‌سازد تا معلوم باشد هر ادعای سپیدنامه در کجای repo مستند، پیاده‌سازی، تست، یا هنوز باز/نیازمند evidence است.
+
+## ۲. حدود و non-claim
+
+این سند مستندات‌محور است و هیچ قرارداد، test، معماری، threshold، timeout، ثابت مشروطه‌ای، اختیار Kernel، اختیار اوراکل، اختیار freeze، یا رفتار اجرایی `Fargard7PolicyAdapter` را تغییر نمی‌دهد.
+
+این سند هیچ‌کدام از موارد زیر را ادعا نمی‌کند:
+
+- آمادگی تولید ادعا نمی‌شود.
+- تأیید انتشار ادعا نمی‌شود.
+- حسابرسی بیرونی کامل نشده است.
+- formal verification کامل نشده است.
+- هیچ blocker بسته نشده است.
+- هیچ evidence پذیرفته‌شده تلقی نمی‌شود.
+- هیچ reviewer signoff ادعا نمی‌شود.
+- گام ۱۲ همچنان باز می‌ماند.
+- `Fargard7PolicyAdapter` همچنان فقط پیشنهاددهنده و غیر اجرایی است.
+- سیگنال‌های اوراکل همچنان غیرحاکمیتی و signal-only هستند.
+
+## ۳. واژه‌نامه وضعیت اجرا
+
+| وضعیت | معنی در این سند |
+| --- | --- |
+| پیاده‌سازی و تست شده در repo | قرارداد یا test مرتبط در repo وجود دارد؛ این وضعیت به‌تنهایی production readiness یا blocker closure نیست. |
+| مستند/طراحی‌شده | سند یا پروتکل وجود دارد، اما اجرای production یا evidence پذیرفته‌شده ادعا نمی‌شود. |
+| بخشی/نیازمند تکمیل | سطحی از پیاده‌سازی یا مستندات وجود دارد، اما دامنه کامل سپیدنامه پوشش داده نشده است. |
+| proposal-only / غیر اجرایی | مسیر فقط پیشنهاد، توصیه یا design است و downstream execution ندارد. |
+| شکاف اجرایی | ادعای سپیدنامه هنوز ماژول اجرایی یا test مستقیم ندارد. |
+| evidence pending | برای پذیرش، signoff، audit، proof، custody، deployment، oracle ops یا release evidence هنوز بسته معتبر لازم است. |
+
+## ۴. رجیستر اصلی نگاشت
+
+| سپیدنامه | اصل/بند | ماژول فنی/حکمرانی | وضعیت اجرا | evidence/test | issue/blocker/signoff |
+| --- | --- | --- | --- | --- | --- |
+| پیش‌آگاهی | ایران‌اواس، زنجیره ارزش ملی، گنجینه ثروت ملی | `contracts/kernel.sol`، `contracts/CONTRACT_RUNTIME_MAP.md`، `contracts/monetary/SovereignWealthFund.sol`، `contracts/monetary/Treasury.sol`، `contracts/monetary/PahlaviToken.sol` | بخشی پیاده‌سازی و تست شده؛ زنجیره ملی production و استقرار واقعی ادعا نمی‌شود | `test/01_kernel.test.js`، `test/02_pahlavi_token.test.js`، `test/03_sovereign_wealth_fund.test.js`، `test/09_Treasury.test.js`، Step-8/Step-12 docs | `STEP9-BLOCK-001` تا `STEP9-BLOCK-008` باز؛ issueهای #12 تا #19 برای evidence/signoff |
+| فرابخش Kernel | قفل سه ستون: آرتش غیرسیاسی، فرمول ثروت، ماشه | `contracts/kernel.sol`، `contracts/core/TriggerProtocol.sol`، `contracts/core/ConstitutionGuard.sol`، `protocols/kernel/KERNEL_SPECIFICATION.md` | Kernel/trigger/guard در repo پوشش اجرایی دارند؛ C4I/آرتش production ندارد | `test/01_kernel.test.js`، `test/04_constitution_guard.test.js`، `test/08_Trigger_Protocol.test.js`، `docs/STEP3_RUNTIME_HARDENING_MATRIX.md` | audit و formal verification هنوز کامل نیستند: #12، #13 |
+| فرگرد ۱ | سکولاریسم ساختاری، استان‌ها، نمادها، هم‌بست نخبگان | `ConstitutionGuard`، `BudgetAllocation`، `Provincial`، `VotingSystem`، `docs/outreach/STEP12_REVIEWER_OUTREACH_FA.md` | بخشی پیاده‌سازی/مستند؛ نمادهای ملی در docs/assets وجود دارد؛ enforcement کامل بودجه مذهبی نیازمند audit/spec تکمیلی است | `test/04_constitution_guard.test.js`، `test/16_Provincial.test.js`، `test/17_Budget_Allocation.test.js`، `test/18_Voting_System.test.js` | evidence/signoff pending؛ #12، #13، #14، #18 |
+| فرگرد ۲ | حقوق بنیادین، privacy/ZKP، منع شکنجه/اعدام، آزادی تجمع | `CitizenCard`، `BaseIncome`، `JusticeProtocol`، `PenalLabor`، `ConstitutionGuard`، doctrine docs | هویت/رفاه/دادگستری بخشی پیاده‌سازی شده؛ ZKP production و شبکه آزادی اینترنت شکاف اجرایی دارند | `test/05_citizen_card.test.js`، `test/12_Base_Income.test.js`، `test/19_Justice_Protocol.test.js`، `test/20-Penal_Labor.test.js` | audit/formal/custody evidence pending؛ #12، #13، #14 |
+| فرگرد ۳ | نهاد پادشاهی، امضا/داوری، فرماندهی، anti-deadlock | `Parliament`، `VotingSystem`، governance/constitution docs، `protocols/defense-protocol-fa.md` | عمدتاً مستند/حکمرانی؛ اجرای production برای جانشینی، C4I، و دسترسی‌های پادشاهی ادعا نمی‌شود | `test/15_Parliament.test.js`، `test/18_Voting_System.test.js`، docs doctrine | signoff حکمرانی و custody لازم است؛ #14، #18، #19 |
+| فرگرد ۴ | قانون‌گذاری، نسخه‌گذاری، بودجه، نقد عمومی | `Parliament`، `VotingSystem`، `BudgetAllocation`، `Treasury` | بخشی پیاده‌سازی و تست شده؛ workflow حقوقی کامل production نیازمند signoff است | `test/15_Parliament.test.js`، `test/17_Budget_Allocation.test.js`، `test/18_Voting_System.test.js`، `test/09_Treasury.test.js` | #12، #13، #14، #19 باز |
+| فرگرد ۵ | دولت اجرایی، بودجه، لجستیک، شفافیت | `Treasury`، `BudgetAllocation`، `SovereignWealthFund`، `ProductionOracle` | بودجه/خزانه/SWF بخشی پیاده‌سازی و تست شده؛ لجستیک آرتش production ندارد | `test/03_sovereign_wealth_fund.test.js`، `test/09_Treasury.test.js`، `test/17_Budget_Allocation.test.js`، `test/24_Production_Oracle.test.js` | deployment/custody/oracle evidence pending؛ #14، #15، #17 |
+| فرگرد ۶ | دادگستری دیجیتال، داوری، integrity guard، victim economy، penal labor | `JusticeProtocol`، `JurySelection`، `VictimFund`، `PenalLabor`، `AssetFreeze` | لایه‌های اصلی تست دارند؛ اجرای قضایی production و runbook عملیاتی ادعا نمی‌شود | `test/07_jury_selection.test.js`، `test/19_Justice_Protocol.test.js`، `test/20-Penal_Labor.test.js`، `test/21_Victim_Fund.test.js`، `test/06_asset_freeze.test.js` | audit/formal/emergency evidence pending؛ #12، #13، #18 |
+| فرگرد ۷ | reclaim، SWF، پهلوی، hard cap، velocity fee، API3، policy layer | `AssetFreeze`، `SovereignCrawler`، `SovereignWealthFund`، `PahlaviToken`، `Treasury`، `VelocityFee`، `PriceOracle`، `API3Oracle`، `Fargard7PolicyAdapter` | مالی/reclaim/oracle بخشی پیاده‌سازی و تست شده؛ `Fargard7PolicyAdapter` proposal-only/non-executing است | `test/02_pahlavi_token.test.js`، `test/03_sovereign_wealth_fund.test.js`، `test/06_asset_freeze.test.js`، `test/11_Velocity_Fee.test.js`، `test/22_Sovereign_Crawler.test.js`، `test/23_Price_Oracle.test.js`، `test/09_api3_oracle.test.js`، `test/25_Step7_Stress.test.js`، `test/26_Step7_PolicyLayer.test.js` | oracle ops و audit/proof pending؛ #12، #13، #15، #16 |
+| فرگرد ۸ | اقتدار ملی و آرتش ملی | `protocols/defense-protocol-fa.md`، Kernel/trigger doctrine | عمدتاً مستند/حکمرانی؛ C4I، sentinel، نیروی ذخیره و عملیات نظامی production پیاده‌سازی نشده‌اند | defense protocol، roadmap/doctrine docs | شکاف اجرایی؛ نیازمند governance/security review؛ #12، #13، #18 |
+| فرگرد ۹ | مدیریت غیرمتمرکز، fiscal federalism، تنوع فرهنگی | `Provincial`، `BudgetAllocation`، `VotingSystem`، `Parliament`، governance protocol | بخشی پیاده‌سازی و تست شده؛ مشارکت محلی production و داده‌های واقعی ادعا نمی‌شود | `test/16_Provincial.test.js`، `test/17_Budget_Allocation.test.js`، `test/18_Voting_System.test.js`، `test/15_Parliament.test.js` | custody/release/governance signoff pending؛ #14، #18، #19 |
+| فرگرد ۱۰ | رفاه، سلامت، کارت رفاه، توان‌خواهان | `CitizenCard`، `BaseIncome`، `HealthCoverage`، `DisabilitySupport` | پیاده‌سازی و تست repo برای سطوح پایه وجود دارد؛ production service یا real-world enrollment ادعا نمی‌شود | `test/05_citizen_card.test.js`، `test/12_Base_Income.test.js`، `test/13_Health_Coverage.test.js`، `test/14_Disability_Support.test.js` | audit/formal/custody evidence pending؛ #12، #13، #14 |
+| فرگرد ۱۱ | آموزش، پژوهش، human capital | docs و whitepaper؛ پیوند غیرمستقیم با budget/governance | شکاف اجرایی مستقیم؛ ماژول dedicated آموزش در contracts وجود ندارد | whitepaper، docs/roadmap، BudgetAllocation به‌عنوان ظرفیت عمومی | نیازمند issue/spec آینده؛ Step-12 blocker closure ادعا نمی‌شود |
+| فرگرد ۱۲ | محیط زیست، آب، جنگل، انرژی، پسماند | docs و whitepaper؛ پیوند غیرمستقیم با oracle/budget | شکاف اجرایی مستقیم؛ ماژول dedicated environment در contracts وجود ندارد | whitepaper، `ProductionOracle` و `BudgetAllocation` به‌عنوان ظرفیت‌های عمومی | نیازمند issue/spec آینده؛ oracle evidence همچنان pending در #15 و #16 |
+| فرگرد ۱۳ | بازنگری، trigger، anti-hijack، blockchain invalidation | `TriggerProtocol`، `ConstitutionGuard`، `Kernel`، `VotingSystem`، doctrine docs | هسته anti-hijack و trigger بخشی پیاده‌سازی/تست شده؛ formal proof کامل نیست | `test/01_kernel.test.js`، `test/04_constitution_guard.test.js`، `test/08_Trigger_Protocol.test.js`، `test/18_Voting_System.test.js`، Step-3/Step-8 docs | formal verification و audit pending؛ #12، #13، #18 |
+| پیوست صفر | pre-transition protocol، readiness، deployment | Step-9 تا Step-12 reports، deployment doctrine، evidence packets | مستند/آماده‌سازی؛ dry-run/manifest production پذیرفته نشده است | `docs/reports/STEP9_PRODUCTION_GOVERNANCE_DEPLOYMENT_DOCTRINE.md`، `docs/reports/STEP12_DEPLOYMENT_DRY_RUN_EVIDENCE_PACKET.md` | `STEP9-BLOCK-005` باز؛ #17 |
+| پیوست ۳۶۵ روزه | deployment roadmap و استقرار حکمرانی | roadmap، release doctrine، GitHub evidence workflow | برنامه/مستند؛ release approval ادعا نمی‌شود | `docs/IRAN_OS_ROADMAP.md`، `docs/reports/STEP12_GITHUB_EVIDENCE_WORKFLOW.md`، `docs/reports/STEP12_RELEASE_SIGNOFF_PREP_PACKET.md` | `STEP9-BLOCK-006` باز؛ #19 |
+| فاز صفر / Genesis Call | فراخوان نخبگان و مشارکت متن‌باز | README، contributing، outreach فارسی‌محور | مستند و باز برای مشارکت؛ reviewer signoff ادعا نمی‌شود | `README.md`، `docs/contributing-fa.md`، `docs/outreach/STEP12_REVIEWER_OUTREACH_FA.md` | issueهای #12 تا #19 مسیر مشارکت فعلی هستند؛ evidence پذیرفته‌شده ادعا نمی‌شود |
+
+## ۵. نگاشت issue/blocker/signoff فعلی
+
+| blocker | issue | موضوع | وضعیت در گام ۱۳ |
+| --- | --- | --- | --- |
+| `STEP9-BLOCK-001` | https://github.com/fafa33/Iran-OS/issues/12 | external audit | باز؛ draft packet وجود دارد؛ audit completion و accepted evidence ادعا نمی‌شود. |
+| `STEP9-BLOCK-002` | https://github.com/fafa33/Iran-OS/issues/13 | formal verification | باز؛ prep packet وجود دارد؛ formal verification completion ادعا نمی‌شود. |
+| `STEP9-BLOCK-003` | https://github.com/fafa33/Iran-OS/issues/14 | custody/key-management | باز؛ production custody و reviewer signoff ادعا نمی‌شود. |
+| `STEP9-BLOCK-004` | https://github.com/fafa33/Iran-OS/issues/15 | oracle operations packet | باز؛ oracle ops evidence پذیرفته‌شده ادعا نمی‌شود. |
+| `STEP9-BLOCK-005` | https://github.com/fafa33/Iran-OS/issues/17 | deployment dry-run/manifest | باز؛ dry-run/manifest پذیرفته‌شده و deployment readiness ادعا نمی‌شود. |
+| `STEP9-BLOCK-006` | https://github.com/fafa33/Iran-OS/issues/19 | release signoff | باز؛ release approval ادعا نمی‌شود. |
+| `STEP9-BLOCK-007` | https://github.com/fafa33/Iran-OS/issues/16 | oracle operations runbook | باز؛ runbook پذیرفته‌شده و signoff ادعا نمی‌شود. |
+| `STEP9-BLOCK-008` | https://github.com/fafa33/Iran-OS/issues/18 | non-claim preservation | باز؛ non-claim evidence recorded است، اما accepted/signoff/closure ادعا نمی‌شود. |
+
+## ۶. راهنمای مشارکت فارسی‌محور برای تکمیل نگاشت
+
+برای هر پیشنهاد اصلاح یا تکمیل:
+
+۱. بند سپیدنامه را مشخص کنید؛ مثل «فرگرد ۷، بخش ۴۱.۶».  
+۲. ماژول فنی/حکمرانی مرتبط را بنویسید؛ اگر ماژول وجود ندارد، آن را «شکاف اجرایی» بنامید.  
+۳. evidence یا test موجود را با مسیر فایل ذکر کنید.  
+۴. اگر موضوع به production readiness، audit، formal verification، custody، oracle ops، deployment، release، یا non-claim مربوط است، issue مربوط #12 تا #19 را لینک کنید.  
+۵. از عبارت‌هایی مثل «blocker بسته شد»، «evidence پذیرفته شد»، «production-ready»، «audit complete»، «formal verification complete»، یا «release approved» استفاده نکنید مگر اینکه evidence پذیرفته‌شده و signoff معتبر واقعاً ثبت و لینک شده باشد.
+
+## ۷. خروجی گام ۱۳
+
+خروجی فعلی گام ۱۳ یک نگاشت قابل ردیابی است، نه تأیید نهایی سیستم. این سند به بازبین‌ها کمک می‌کند از سپیدنامه به کد، test، سند، issue، blocker و signoff مورد نیاز برسند، اما Step-12 را نمی‌بندد و هیچ blocker یا evidence را accepted نمی‌کند.
+
+</div>
