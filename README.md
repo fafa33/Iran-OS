@@ -68,4 +68,50 @@
 
 ۳. یک branch بسازید و Pull Request ارسال کنید.
 
+<div dir="ltr">
+
+## Call for Evidence and Reviewer Signoff — Step 12
+
+Iran-OS Step 12 has reached an evidence handoff checkpoint. All `STEP9-BLOCK-001` through `STEP9-BLOCK-008` have evidence/status recorded, but every blocker remains pending/open and no blocker has been closed.
+
+Further progress requires accepted evidence and reviewer signoff from qualified contributors. The project does not claim production readiness, release approval, completed external audit, or completed formal verification.
+
+See the accepted-evidence checklist: [`docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md`](docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md)
+
+Evidence contributions should be submitted through GitHub Issues or Pull Requests using the relevant `STEP9-BLOCK-*` identifier:
+
+- `STEP9-BLOCK-001`: external audit evidence and auditor/reviewer signoff.
+- `STEP9-BLOCK-002`: formal verification packet and formal verification reviewer signoff.
+- `STEP9-BLOCK-003`: role custody/key-management packet and governance reviewer signoff.
+- `STEP9-BLOCK-004`: oracle operations packet and oracle/governance signoff.
+- `STEP9-BLOCK-005`: deployment dry-run/manifest packet and deployment reviewer signoff.
+- `STEP9-BLOCK-006`: release signoff packet and release council approval.
+- `STEP9-BLOCK-007`: oracle operations runbook and oracle/governance signoff.
+- `STEP9-BLOCK-008`: non-claim preservation review and governance/release signoff.
+
+Please do not submit PRs or Issues that claim blocker closure, production readiness, audit completion, formal verification completion, or release approval unless the required accepted evidence and reviewer signoff are attached or clearly linked. `Fargard7PolicyAdapter` remains proposal-only/non-executing, and oracle signals remain non-sovereign.
+
+</div>
+
+## دعوت به مشارکت برای ارائه شواهد و تأیید بازبین — گام ۱۲
+
+گام ۱۲ ایران‌اواس به نقطه‌ی تحویل شواهد رسیده است. برای همه‌ی `STEP9-BLOCK-001` تا `STEP9-BLOCK-008` وضعیت یا شواهد اولیه ثبت شده، اما همه‌ی blockerها همچنان pending/open هستند و هیچ blocker بسته نشده است.
+
+ادامه‌ی کار نیازمند شواهد پذیرفته‌شده و تأیید بازبین‌های واجد صلاحیت است. این پروژه در این مرحله ادعای آمادگی تولید، تأیید انتشار، تکمیل حسابرسی بیرونی، یا تکمیل راستی‌آزمایی رسمی ندارد.
+
+چک‌لیست شواهد پذیرفته‌شده: [`docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md`](docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md)
+
+مشارکت‌های مربوط به شواهد باید از طریق GitHub Issues یا Pull Requests و با شناسه‌ی مربوط `STEP9-BLOCK-*` ثبت شوند:
+
+- `STEP9-BLOCK-001`: شواهد حسابرسی بیرونی و تأیید حسابرس/بازبین.
+- `STEP9-BLOCK-002`: بسته‌ی راستی‌آزمایی رسمی و تأیید بازبین راستی‌آزمایی رسمی.
+- `STEP9-BLOCK-003`: بسته‌ی نگهداشت نقش‌ها/مدیریت کلید و تأیید بازبین حکمرانی.
+- `STEP9-BLOCK-004`: بسته‌ی عملیات اوراکل و تأیید اوراکل/حکمرانی.
+- `STEP9-BLOCK-005`: بسته‌ی dry-run و manifest استقرار و تأیید بازبین استقرار.
+- `STEP9-BLOCK-006`: بسته‌ی تأیید انتشار و تصویب شورای انتشار.
+- `STEP9-BLOCK-007`: runbook عملیات اوراکل و تأیید اوراکل/حکمرانی.
+- `STEP9-BLOCK-008`: بازبینی حفظ non-claim و تأیید حکمرانی/انتشار.
+
+لطفاً Pull Request یا Issueای که مدعی بسته‌شدن blocker، آمادگی تولید، تکمیل حسابرسی، تکمیل راستی‌آزمایی رسمی، یا تأیید انتشار است ثبت نکنید، مگر اینکه شواهد پذیرفته‌شده و تأیید بازبین لازم به آن پیوست شده یا به‌روشنی لینک شده باشد. `Fargard7PolicyAdapter` همچنان فقط پیشنهاددهنده و غیر اجرایی است و سیگنال‌های اوراکل همچنان غیرحاکمیتی هستند.
+
 </div>
