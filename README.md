@@ -80,6 +80,8 @@ See the accepted-evidence checklist: [`docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQ
 
 GitHub issue workflow guide: [`docs/reports/STEP12_GITHUB_EVIDENCE_WORKFLOW.md`](docs/reports/STEP12_GITHUB_EVIDENCE_WORKFLOW.md)
 
+Persian-first reviewer outreach kit: [`docs/outreach/STEP12_REVIEWER_OUTREACH_FA.md`](docs/outreach/STEP12_REVIEWER_OUTREACH_FA.md)
+
 Evidence contributions should be submitted through GitHub Issues or Pull Requests using the relevant `STEP9-BLOCK-*` identifier:
 
 - `STEP9-BLOCK-001`: external audit evidence and auditor/reviewer signoff.
@@ -104,6 +106,8 @@ Please do not submit PRs or Issues that claim blocker closure, production readin
 چک‌لیست شواهد پذیرفته‌شده: [`docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md`](docs/reports/STEP12_ACCEPTED_EVIDENCE_ACQUISITION_CHECKLIST.md)
 
 راهنمای گردش‌کار Issue در GitHub: [`docs/reports/STEP12_GITHUB_EVIDENCE_WORKFLOW.md`](docs/reports/STEP12_GITHUB_EVIDENCE_WORKFLOW.md)
+
+بسته‌ی فارسی‌محور دعوت از بازبین و مشارکت‌کننده: [`docs/outreach/STEP12_REVIEWER_OUTREACH_FA.md`](docs/outreach/STEP12_REVIEWER_OUTREACH_FA.md)
 
 مشارکت‌های مربوط به شواهد باید از طریق GitHub Issues یا Pull Requests و با شناسه‌ی مربوط `STEP9-BLOCK-*` ثبت شوند:
 
