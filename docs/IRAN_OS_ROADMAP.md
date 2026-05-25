@@ -6,6 +6,26 @@ This roadmap tracks high-level IranOS formalization and hardening progress. It i
 
 IranOS is sovereign resilience infrastructure, not a DeFi yield optimization system. Roadmap steps must preserve Kernel immutability, existing threshold and timeout assumptions, oracle-as-signal-only boundaries, and final human freeze authority.
 
+<div dir="rtl">
+
+## اصل راهبردی زبان و جامعه
+
+مخاطب اصلی عمومی و اجتماعی ایران‌اواس، جامعه‌ی فارسی‌زبان ایران است. از این مرحله به بعد، اسناد دعوت، مشارکت عمومی، نقشه‌راه، سپیدنامه و نگاشت سپیدنامه به سیستم باید فارسی‌محور باشند.
+
+انگلیسی همچنان برای اسناد فنی، audit، formal verification، security review، issue templateها و ارتباط با بازبین‌های بین‌المللی استفاده می‌شود؛ اما لایه‌ی عمومی و اجتماعی پروژه باید برای مشارکت‌کننده‌ی فارسی‌زبان قابل فهم، قابل پیگیری و قابل مشارکت باشد.
+
+نگاشت آینده‌ی گام ۱۳ از سپیدنامه به سیستم باید فارسی‌محور باشد و در صورت نیاز از ارجاع‌های فنی انگلیسی برای audit، security review، formal verification و بازبینی بین‌المللی استفاده کند.
+
+این اصل هیچ ادعای تازه‌ای درباره‌ی آمادگی تولید، تأیید انتشار، تکمیل حسابرسی، تکمیل formal verification، بسته‌شدن blockerها، یا پذیرفته‌شدن evidence ایجاد نمی‌کند.
+
+</div>
+
+## Community Language Principle
+
+The primary public and community audience for IranOS is Persian-speaking Iranian contributors and reviewers. Public/community-facing invitations, contribution materials, roadmap notes, whitepaper work, and future whitepaper-to-system mapping should be Persian-first.
+
+English remains valid for technical evidence, audit, formal verification, security review, issue templates, and international reviewer support. This language principle does not weaken evidence requirements, reviewer signoff requirements, or non-claim preservation. Production readiness is not claimed, external audit is not complete, formal verification is not complete, release approval is not complete, no blocker is closed, `Fargard7PolicyAdapter` remains proposal-only/non-executing, and oracle signals remain non-sovereign.
+
 ## Project Phases
 
 - [x] Step-1: Core architecture & constitutional foundation
