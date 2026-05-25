@@ -136,6 +136,10 @@ English remains valid for technical evidence, audit, formal verification, securi
   - Open a Persian-first traceability layer from the whitepaper into implementation, governance, evidence, tests, issues, blockers, and signoff requirements.
   - Mapping path: سپیدنامه → اصل/بند → ماژول فنی/حکمرانی → وضعیت اجرا → evidence/test → issue/blocker/signoff.
   - This step is documentation-only and does not close Step-12.
+  - Post-merge checkpoint: Step-13 is present on `main` as a Persian-first, English-supported mapping/tracing phase; it is not a release-readiness or production-readiness claim.
+  - Post-merge verification: `npm ci` succeeds and `npm test` remains at 463 passing after merge.
+  - Dependency reproducibility checkpoint: `package.json` OpenZeppelin metadata is aligned to the existing 4.9.x lockfile and import-path reality.
+  - Step-12 remains open; all Step-12 evidence/prep packets remain draft/pending.
   - No evidence is accepted by this mapping; no production blocker is closed.
   - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete.
   - `Fargard7PolicyAdapter` remains proposal-only/non-executing and oracle signals remain non-sovereign.
