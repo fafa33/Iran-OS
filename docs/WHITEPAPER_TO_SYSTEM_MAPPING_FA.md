@@ -15,6 +15,8 @@
 
 این نگاشت برای بازبین فارسی‌زبان، مشارکت‌کننده فنی، auditor، بازبین formal verification، و reviewer حکمرانی یک مسیر مشترک می‌سازد تا معلوم باشد هر ادعای سپیدنامه در کجای repo مستند، پیاده‌سازی، تست، یا هنوز باز/نیازمند evidence است.
 
+برای تقسیم کار و دریافت پیشنهادهای کوچک و قابل review، برنامه intake گام ۱۳ در [WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md](WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md) ثبت شده است.
+
 ## ۲. حدود و non-claim
 
 این سند مستندات‌محور است و هیچ قرارداد، test، معماری، threshold، timeout، ثابت مشروطه‌ای، اختیار Kernel، اختیار اوراکل، اختیار freeze، یا رفتار اجرایی `Fargard7PolicyAdapter` را تغییر نمی‌دهد.

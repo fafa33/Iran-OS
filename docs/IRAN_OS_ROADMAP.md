@@ -140,6 +140,7 @@ English remains valid for technical evidence, audit, formal verification, securi
   - Post-merge verification: `npm ci` succeeds and `npm test` remains at 463 passing after merge.
   - Dependency reproducibility checkpoint: `package.json` OpenZeppelin metadata is aligned to the existing 4.9.x lockfile and import-path reality.
   - Step-12 remains open; all Step-12 evidence/prep packets remain draft/pending.
+  - Intake plan opened for small Persian-first reviewable mapping workstreams: [WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md](WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md).
   - No evidence is accepted by this mapping; no production blocker is closed.
   - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete.
   - `Fargard7PolicyAdapter` remains proposal-only/non-executing and oracle signals remain non-sovereign.
