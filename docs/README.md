@@ -20,6 +20,7 @@
 |[WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md)|نگاشت draft فارسی‌محور ساختار حکمرانی برای گام ۱۳|
 |[WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md)|نگاشت draft فارسی‌محور رفاه و عدالت برای گام ۱۳|
 |[WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md)|نگاشت draft فارسی‌محور اقتصاد و منابع برای گام ۱۳|
+|[WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md)|نگاشت draft فارسی‌محور قراردادها و adapterها برای گام ۱۳|
 
 -----
 

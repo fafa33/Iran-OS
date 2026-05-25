@@ -25,6 +25,8 @@
 
 چهارمین نگاشت تفصیلی workstream «اقتصاد و منابع» در [WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md](WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md) ثبت شده است.
 
+پنجمین نگاشت تفصیلی workstream «قراردادها و adapterها» در [WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md](WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md) ثبت شده است.
+
 ## ۲. حدود و non-claim
 
 این سند مستندات‌محور است و هیچ قرارداد، test، معماری، threshold، timeout، ثابت مشروطه‌ای، اختیار Kernel، اختیار اوراکل، اختیار freeze، یا رفتار اجرایی `Fargard7PolicyAdapter` را تغییر نمی‌دهد.
