@@ -511,3 +511,33 @@ At opening:
 - Formal verification is not complete.
 - Release approval is not granted or implied.
 - No contract, source, or test changes are introduced.
+
+## 24. Evidence Packet Sweep Rollup Checkpoint
+
+This checkpoint records the Step-12 evidence packet sweep after draft evidence/prep packets were created for every `STEP9-BLOCK-*` blocker. The sweep makes the evidence-acquisition workflow easier to review, but it does not accept evidence, does not provide reviewer signoff, does not close any blocker, does not claim production readiness, does not claim release approval, does not claim external audit completion, does not claim formal verification completion, and does not mark Step-12 complete.
+
+All corresponding GitHub Issues are open, and issue comments have been added with the draft packet links. Those comments are tracker references only; they do not mark evidence accepted and do not close blockers.
+
+| Blocker id | Topic | Issue URL | Packet path | Packet status | Accepted evidence | Reviewer signoff | Blocker status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `STEP9-BLOCK-001` | External audit | https://github.com/fafa33/Iran-OS/issues/12 | `docs/reports/STEP12_EXTERNAL_AUDIT_PREP_PACKET.md` | Draft | Not claimed | Pending | Pending/open |
+| `STEP9-BLOCK-002` | Formal verification | https://github.com/fafa33/Iran-OS/issues/13 | `docs/reports/STEP12_FORMAL_VERIFICATION_PREP_PACKET.md` | Draft | Not claimed | Pending | Pending/open |
+| `STEP9-BLOCK-003` | Role custody/key-management | https://github.com/fafa33/Iran-OS/issues/14 | `docs/reports/STEP12_CUSTODY_KEY_MANAGEMENT_EVIDENCE_PACKET.md` | Draft | Not claimed | Pending | Pending/open |
+| `STEP9-BLOCK-004` | Oracle operations | https://github.com/fafa33/Iran-OS/issues/15 | `docs/reports/STEP12_ORACLE_OPERATIONS_EVIDENCE_PACKET.md` | Draft | Not claimed | Pending | Pending/open |
+| `STEP9-BLOCK-005` | Deployment dry-run/manifest | https://github.com/fafa33/Iran-OS/issues/17 | `docs/reports/STEP12_DEPLOYMENT_DRY_RUN_EVIDENCE_PACKET.md` | Draft | Not claimed | Pending | Pending/open |
+| `STEP9-BLOCK-006` | Release signoff | https://github.com/fafa33/Iran-OS/issues/19 | `docs/reports/STEP12_RELEASE_SIGNOFF_PREP_PACKET.md` | Draft | Not claimed | Pending | Pending/open |
+| `STEP9-BLOCK-007` | Oracle operations runbook | https://github.com/fafa33/Iran-OS/issues/16 | `docs/reports/STEP12_ORACLE_OPERATIONS_EVIDENCE_PACKET.md` | Draft | Not claimed | Pending | Pending/open |
+| `STEP9-BLOCK-008` | Non-claim preservation | https://github.com/fafa33/Iran-OS/issues/18 | `docs/reports/STEP12_NON_CLAIM_PRESERVATION_EVIDENCE_PACKET.md` | Draft | Not claimed | Pending | Pending/open |
+
+Sweep status:
+
+- `STEP9-BLOCK-001` through `STEP9-BLOCK-008` now have draft evidence/prep packets recorded.
+- `STEP9-BLOCK-001` through `STEP9-BLOCK-008` have corresponding GitHub evidence/signoff Issues open.
+- Draft packet links have been added to the corresponding issue comments.
+- All evidence remains draft/pending.
+- No accepted evidence is claimed.
+- No reviewer signoff is claimed.
+- No `STEP9-BLOCK-*` item is closed.
+- Step-12 remains open and awaiting accepted evidence plus required reviewer signoff.
+
+`Fargard7PolicyAdapter` remains proposal-only and non-executing. Oracle signals remain non-sovereign and cannot autonomously freeze, unfreeze, mint, burn, transfer, spend, classify, subsidize, apply fees, change wages, alter budgets, approve loans, mutate provincial balances, or execute governance.
