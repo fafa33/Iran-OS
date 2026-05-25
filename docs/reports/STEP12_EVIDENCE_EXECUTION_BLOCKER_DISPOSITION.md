@@ -86,7 +86,7 @@ Formal verification, custody, emergency/freeze, deployment dry-run, release sign
 | STEP9-BLOCK-003 | Custody and key-management evidence intake | Custody map, signer list, multisig threshold, key rotation plan, onboarding/offboarding log, compromise response, and reviewer signoff through `STEP9-BLOCK-003-CUSTODY-PACKET-001` signer registry; `STEP9-BLOCK-003-CUSTODY-PACKET-002` role-to-custodian and quorum map; `STEP9-BLOCK-003-CUSTODY-PACKET-003` rotation, onboarding/offboarding, and compromised-key procedure evidence. | Custody packet not provided; pending custody packet. No accepted custody evidence is recorded. | Pending; blocker remains open; production readiness is not claimed. | Governance operations lead and release council representative or governance reviewer. | Open |
 | STEP9-BLOCK-004 | Oracle operations evidence intake | Feeder registry, quorum config, freshness and staleness config, deviation handling, incident runbook, monitoring evidence, and reviewer signoff. | Oracle operations packet not provided; pending oracle ops packet. No accepted oracle operations evidence or required reviewer signoff is recorded. | Disposition reviewed as pending; blocker remains open; oracle signals remain non-sovereign; production readiness is not claimed. | Oracle operations lead and governance reviewer. | Open |
 | STEP9-BLOCK-005 | Deployment dry-run and manifest evidence intake | Deployment manifest, artifact hashes, constructor arguments, dependency address book, initial role assignments, dry-run logs, gas estimates, post-run verification, and reviewer signoff through `STEP9-BLOCK-005-DEPLOYMENT-PACKET-001` deployment manifest; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-002` dry-run logs and gas estimates; `STEP9-BLOCK-005-DEPLOYMENT-PACKET-003` post-run role, dependency, and authority-boundary verification. | Deployment dry-run packet not provided; pending deployment packet. No accepted deployment evidence or required reviewer signoff is recorded. | Disposition reviewed as pending; blocker remains open; missing manifest or unverifiable dry-run state cannot be risk-accepted for release readiness; production readiness and release approval are not claimed. | Deployment coordinator and engineering maintainer or deployment reviewer. | Open |
-| STEP9-BLOCK-006 | Release signoff evidence intake | `STEP9-BLOCK-006-RELEASE-PACKET-001` upstream blocker disposition summary; `STEP9-BLOCK-006-RELEASE-PACKET-002` release package hash and signer approvals; `STEP9-BLOCK-006-RELEASE-PACKET-003` release council go/no-go minutes. | No accepted release signoff packet recorded at opening. | Pending; not accepted; release approval is not granted or implied. | Release council. | Open |
+| STEP9-BLOCK-006 | Release signoff evidence intake | Upstream blocker disposition summary, release package hash, signer approvals, and release council go/no-go minutes through `STEP9-BLOCK-006-RELEASE-PACKET-001` upstream blocker disposition summary; `STEP9-BLOCK-006-RELEASE-PACKET-002` release package hash and signer approvals; `STEP9-BLOCK-006-RELEASE-PACKET-003` release council go/no-go minutes. | Release signoff packet not provided; pending release packet. No accepted release signoff evidence or required release council approval is recorded. | Pending; blocker remains open; release approval is not granted or implied; production readiness is not claimed. | Release council. | Open |
 | STEP9-BLOCK-007 | Oracle operations evidence intake | `STEP9-BLOCK-007-ORACLE-PACKET-001` feeder registry and data-source attestations; `STEP9-BLOCK-007-ORACLE-PACKET-002` feeder onboarding, suspension, stale-data, and invalidation procedures; `STEP9-BLOCK-007-ORACLE-PACKET-003` deviation review, liveness monitoring, and signal-only governance review. | No accepted oracle operations packet recorded at opening. | Pending; not accepted; oracle signals remain non-sovereign. | Oracle operations lead and governance reviewer. | Open |
 | STEP9-BLOCK-008 | Non-claim preservation control | `STEP9-BLOCK-008-NONCLAIM-PACKET-001` current roadmap and blocker register non-claim check; `STEP9-BLOCK-008-NONCLAIM-PACKET-002` release packet and handoff non-claim excerpt; `STEP9-BLOCK-008-NONCLAIM-PACKET-003` governance reviewer confirmation. | Non-claim preservation evidence recorded from the roadmap and Step-8 through Step-12 documentation. No reviewer acceptance or closure packet is recorded. | Evidence recorded; pending reviewer acceptance; production readiness remains a non-claim and cannot be risk-accepted away. | Release coordinator and governance reviewer. | Open |
 
@@ -325,7 +325,32 @@ Disposition: `pending`. `STEP9-BLOCK-005` remains open because accepted evidence
 
 This disposition review does not claim production readiness, does not claim release approval, does not close `STEP9-BLOCK-005`, and does not close any other blocker by implication. `STEP9-BLOCK-004` remains pending/open where referenced, oracle signals remain non-sovereign, and `Fargard7PolicyAdapter` remains proposal-only and non-executing.
 
-## 16. Opening Status
+## 16. Release Signoff Evidence Intake
+
+`STEP9-BLOCK-006` has a release signoff evidence intake record, but the required release packet has not been provided.
+
+Required release packet:
+
+- Upstream blocker disposition summary for every required production-readiness blocker.
+- Release package hash.
+- Signer approvals.
+- Release council go/no-go minutes.
+- Reviewer signoff from the release council.
+
+Current evidence:
+
+- Release signoff packet not provided.
+- No upstream blocker disposition summary is recorded as accepted.
+- No release package hash is recorded.
+- No signer approvals are recorded.
+- No release council go/no-go minutes are recorded.
+- No release council approval or reviewer signoff is recorded.
+
+Disposition: pending. `STEP9-BLOCK-006` remains open until required release evidence is submitted, reviewed, and accepted by the release council. Tests and repository documentation alone do not close the release signoff blocker and do not substitute for upstream blocker disposition, release package hashes, signer approvals, release council minutes, or release council signoff.
+
+This intake record does not claim production readiness, does not claim release approval, does not close `STEP9-BLOCK-006`, and does not close any other blocker by implication. `STEP9-BLOCK-004` and `STEP9-BLOCK-005` remain pending/open, oracle signals remain non-sovereign, and `Fargard7PolicyAdapter` remains proposal-only and non-executing.
+
+## 17. Opening Status
 
 Step-12 is open as a docs-only evidence execution and blocker disposition phase.
 
