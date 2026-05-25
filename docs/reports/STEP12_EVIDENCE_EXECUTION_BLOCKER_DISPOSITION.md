@@ -453,7 +453,31 @@ Disposition: `pending`. `STEP9-BLOCK-008` remains open because required reviewer
 
 This disposition review does not claim production readiness, does not claim external audit completion, does not claim formal verification completion, does not claim release approval, does not close `STEP9-BLOCK-008`, and does not close any other blocker by implication. `STEP9-BLOCK-004`, `STEP9-BLOCK-005`, `STEP9-BLOCK-006`, and `STEP9-BLOCK-007` remain pending/open, oracle signals remain non-sovereign, and `Fargard7PolicyAdapter` remains proposal-only and non-executing.
 
-## 21. Opening Status
+## 21. Blocker Disposition Rollup Checkpoint
+
+This checkpoint rolls up the Step-12 evidence execution and blocker disposition state after the non-claim preservation blocker disposition review.
+
+Recorded evidence and disposition status:
+
+- `STEP9-BLOCK-001` through `STEP9-BLOCK-008` all have evidence intake or evidence status recorded in this report.
+- `STEP9-BLOCK-004` through `STEP9-BLOCK-008` have explicit blocker disposition reviews.
+- `STEP9-BLOCK-001` remains pending/open based on the register and external audit intake disposition text; no accepted audit evidence or required signoff is recorded.
+- `STEP9-BLOCK-002` remains pending/open based on the register and formal verification intake disposition text; no accepted proof evidence or required signoff is recorded.
+- `STEP9-BLOCK-003` remains pending/open based on the register and role custody intake disposition text; no accepted custody evidence or required signoff is recorded.
+- `STEP9-BLOCK-004` remains pending/open after disposition review; no accepted oracle operations evidence or required signoff is recorded.
+- `STEP9-BLOCK-005` remains pending/open after disposition review; no accepted deployment dry-run or manifest evidence or required signoff is recorded.
+- `STEP9-BLOCK-006` remains pending/open after disposition review; no accepted release signoff packet or release council approval is recorded.
+- `STEP9-BLOCK-007` remains pending/open after disposition review; no accepted oracle operations runbook evidence or required signoff is recorded.
+- `STEP9-BLOCK-008` remains pending/open after disposition review; no required reviewer acceptance or signoff is recorded.
+- No `STEP9-BLOCK-*` item is closed.
+
+This rollup checkpoint is not a production-readiness claim, release-approval claim, external-audit-completion claim, or formal-verification-completion claim. It does not close any blocker, does not mark Step-12 complete, and does not authorize release or deployment.
+
+`Fargard7PolicyAdapter` remains proposal-only and non-executing. Oracle signals remain non-sovereign and cannot autonomously freeze, unfreeze, mint, burn, transfer, spend, classify, subsidize, apply fees, change wages, alter budgets, approve loans, mutate provincial balances, or execute governance.
+
+Step-12 remains open as an evidence execution and blocker disposition phase.
+
+## 22. Opening Status
 
 Step-12 is open as a docs-only evidence execution and blocker disposition phase.
 
