@@ -142,6 +142,7 @@ English remains valid for technical evidence, audit, formal verification, securi
   - Step-12 remains open; all Step-12 evidence/prep packets remain draft/pending.
   - Intake plan opened for small Persian-first reviewable mapping workstreams: [WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md](WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md).
   - First detailed workstream mapping opened for foundational principles and the charter: [WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md](WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md).
+  - Second detailed workstream mapping opened for governance structure: [WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md](WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md).
   - No evidence is accepted by this mapping; no production blocker is closed.
   - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete.
   - `Fargard7PolicyAdapter` remains proposal-only/non-executing and oracle signals remain non-sovereign.
