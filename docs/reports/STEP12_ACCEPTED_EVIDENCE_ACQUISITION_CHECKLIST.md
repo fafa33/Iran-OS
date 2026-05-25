@@ -45,7 +45,22 @@ Recommended evidence acquisition order:
 - Documentation alone does not replace required external reports, proof artifacts, custody records, operational packets, dry-run logs, release council minutes, or reviewer signoff.
 - No blocker is closed by implication from this checklist.
 
-## 5. Current Non-Claims
+## 5. GitHub Evidence Issue Tracker
+
+The following GitHub Issues track draft evidence/signoff submissions for the pending Step-12 blockers. The issue links do not mark evidence as accepted and do not close any blocker.
+
+| Blocker id | Topic | GitHub issue URL | Current status | Blocker closure | Accepted evidence |
+| --- | --- | --- | --- | --- | --- |
+| `STEP9-BLOCK-001` | External audit | https://github.com/fafa33/Iran-OS/issues/12 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-002` | Formal verification | https://github.com/fafa33/Iran-OS/issues/13 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-003` | Role custody/key-management | https://github.com/fafa33/Iran-OS/issues/14 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-004` | Oracle operations | https://github.com/fafa33/Iran-OS/issues/15 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-005` | Deployment dry-run/manifest | https://github.com/fafa33/Iran-OS/issues/17 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-006` | Release signoff | https://github.com/fafa33/Iran-OS/issues/19 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-007` | Oracle operations runbook | https://github.com/fafa33/Iran-OS/issues/16 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-008` | Non-claim preservation | https://github.com/fafa33/Iran-OS/issues/18 | Draft evidence issue open | Not claimed | Not claimed |
+
+## 6. Current Non-Claims
 
 - IranOS is not production ready.
 - External audit is not complete.

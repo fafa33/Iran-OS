@@ -52,7 +52,24 @@ These labels are recommended for GitHub issue triage. This document does not con
 7. `STEP9-BLOCK-008` non-claim preservation.
 8. `STEP9-BLOCK-006` release signoff last.
 
-## 5. Current Non-Claims
+## 5. Evidence Issue Tracker
+
+The following GitHub Issues track Step-12 draft evidence/signoff submissions. These links do not mark evidence as accepted, do not close blockers, and do not imply production readiness, release approval, completed external audit, or completed formal verification.
+
+| Blocker id | Topic | GitHub issue URL | Current status | Blocker closure | Accepted evidence |
+| --- | --- | --- | --- | --- | --- |
+| `STEP9-BLOCK-001` | External audit | https://github.com/fafa33/Iran-OS/issues/12 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-002` | Formal verification | https://github.com/fafa33/Iran-OS/issues/13 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-003` | Role custody/key-management | https://github.com/fafa33/Iran-OS/issues/14 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-004` | Oracle operations | https://github.com/fafa33/Iran-OS/issues/15 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-005` | Deployment dry-run/manifest | https://github.com/fafa33/Iran-OS/issues/17 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-006` | Release signoff | https://github.com/fafa33/Iran-OS/issues/19 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-007` | Oracle operations runbook | https://github.com/fafa33/Iran-OS/issues/16 | Draft evidence issue open | Not claimed | Not claimed |
+| `STEP9-BLOCK-008` | Non-claim preservation | https://github.com/fafa33/Iran-OS/issues/18 | Draft evidence issue open | Not claimed | Not claimed |
+
+All `STEP9-BLOCK-*` blockers remain pending/open until required evidence is accepted and required reviewer/signoff is attached or clearly linked.
+
+## 6. Current Non-Claims
 
 - Iran-OS is not production ready.
 - External audit is not complete.
