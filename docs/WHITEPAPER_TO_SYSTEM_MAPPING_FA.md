@@ -31,6 +31,8 @@
 
 هفتمین نگاشت تفصیلی workstream «evidence / audit / signoff» در [WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md](WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md) ثبت شده است.
 
+هشتمین نگاشت تفصیلی workstream «مشارکت عمومی فارسی‌زبان» در [WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md](WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md) ثبت شده است.
+
 ## ۲. حدود و non-claim
 
 این سند مستندات‌محور است و هیچ قرارداد، test، معماری، threshold، timeout، ثابت مشروطه‌ای، اختیار Kernel، اختیار اوراکل، اختیار freeze، یا رفتار اجرایی `Fargard7PolicyAdapter` را تغییر نمی‌دهد.
