@@ -68,6 +68,8 @@
 
 این ترتیب الزام‌آور نیست، اما از ادعاهای کلی به سمت نگاشت‌های قابل بررسی و سپس evidence/signoff حرکت می‌کند.
 
+چک‌لیست بازبینی ۸ workstream نگاشت‌شده در `docs/WHITEPAPER_MAPPING_REVIEW_CHECKLIST_FA.md` ثبت شده است. این چک‌لیست برای review است و هیچ evidence، signoff، audit، formal verification، release یا blocker closure را complete یا accepted اعلام نمی‌کند.
+
 ### چک‌پوینت rollup workstreamها
 
 در وضعیت فعلی، هر ۸ workstream این intake plan دارای نگاشت draft اولیه است. این وضعیت فقط نشان می‌دهد تقسیم کار اولیه به فایل‌های قابل review تبدیل شده است؛ گام ۱۳ را کامل نمی‌کند، گام ۱۲ را نمی‌بندد، هیچ blockerای را نمی‌بندد، هیچ evidenceای را accepted نمی‌کند و هیچ reviewer signoffای را ادعا نمی‌کند.

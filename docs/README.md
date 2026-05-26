@@ -16,6 +16,7 @@
 |[contributing-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/contributing-fa.md)|راهنمای مشارکت — نحوه مشارکت فنی        |
 |[WHITEPAPER_TO_SYSTEM_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_TO_SYSTEM_MAPPING_FA.md)|نگاشت فارسی‌محور سپیدنامه به ماژول‌ها، وضعیت اجرا، evidence/test، issue، blocker و signoff|
 |[WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md)|برنامه فارسی‌محور دریافت و تقسیم کار گام ۱۳ برای نگاشت‌های کوچک و قابل بازبینی|
+|[WHITEPAPER_MAPPING_REVIEW_CHECKLIST_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_MAPPING_REVIEW_CHECKLIST_FA.md)|چک‌لیست فارسی‌محور بازبینی ۸ workstream نگاشت‌شده در گام ۱۳|
 |[WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md)|نگاشت draft فارسی‌محور اصول بنیادین و منشور برای گام ۱۳|
 |[WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md)|نگاشت draft فارسی‌محور ساختار حکمرانی برای گام ۱۳|
 |[WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md)|نگاشت draft فارسی‌محور رفاه و عدالت برای گام ۱۳|
