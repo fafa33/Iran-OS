@@ -7,6 +7,8 @@
 **وضعیت:** باز؛ نگاشت قابل review، نه تکمیل گام ۱۳  
 **زبان:** فارسی‌محور، با برچسب‌های کوتاه انگلیسی فقط برای ارجاع فنی مانند `evidence`، `signoff`، `release council`، `governance reviewer`، `multisig` و نام فایل‌ها
 
+یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_GOVERNANCE_STRUCTURE_REVIEW_FA.md](WHITEPAPER_GOVERNANCE_STRUCTURE_REVIEW_FA.md) ثبت شده است.
+
 ## ۱. هدف
 
 این سند دومین نگاشت تفصیلی گام ۱۳ است و فقط workstream «ساختار حکمرانی» را پوشش می‌دهد. هدف آن اتصال مفاهیم حکمرانی سپیدنامه و اسناد repo به مسیر ردیابی زیر است:

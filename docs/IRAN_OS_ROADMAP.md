@@ -156,6 +156,7 @@ English remains valid for technical evidence, audit, formal verification, securi
   - Phase-one checkpoint recorded: Step-13 now has eight draft workstream mappings, a workstream rollup, a review checklist, and a Persian community summary.
   - Next Step-13 direction: review and deepen each mapping, collect reviewer comments, connect gaps to issues/evidence, and prepare future closure criteria without closing Step-13 now.
   - Review/deepening phase started with the foundational principles mapping review note: [WHITEPAPER_FOUNDATIONAL_PRINCIPLES_REVIEW_FA.md](WHITEPAPER_FOUNDATIONAL_PRINCIPLES_REVIEW_FA.md).
+  - Governance structure mapping review note added for release council, governance reviewer, custody, signer, quorum, evidence, and signoff gaps: [WHITEPAPER_GOVERNANCE_STRUCTURE_REVIEW_FA.md](WHITEPAPER_GOVERNANCE_STRUCTURE_REVIEW_FA.md).
   - Step-13 remains open and Step-12 remains open.
   - No evidence is accepted by this mapping; no production blocker is closed.
   - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete.
