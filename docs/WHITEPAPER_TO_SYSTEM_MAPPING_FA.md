@@ -33,6 +33,23 @@
 
 هشتمین نگاشت تفصیلی workstream «مشارکت عمومی فارسی‌زبان» در [WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md](WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md) ثبت شده است.
 
+### چک‌پوینت rollup نگاشت workstreamها
+
+در این چک‌پوینت، هر ۸ workstream برنامه intake گام ۱۳ دارای نگاشت draft اولیه است. این rollup فقط وضعیت ردیابی را ثبت می‌کند و به معنی تکمیل نگاشت سپیدنامه به سیستم نیست.
+
+گام ۱۳ همچنان باز است. گام ۱۲ همچنان باز است. این چک‌پوینت هیچ آمادگی تولید، تأیید انتشار، تکمیل حسابرسی بیرونی، تکمیل formal verification، بسته‌شدن blocker، پذیرفته‌شدن evidence یا reviewer signoff ادعا نمی‌کند. `Fargard7PolicyAdapter` همچنان proposal-only/non-executing است و سیگنال‌های اوراکل همچنان non-sovereign و signal-only هستند.
+
+| workstream | mapping file | status | next action |
+| --- | --- | --- | --- |
+| اصول بنیادین و منشور | [WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md](WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md) | draft mapping | تکمیل بندبه‌بند و دریافت review بدون claim evidence/signoff |
+| ساختار حکمرانی | [WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md](WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md) | draft mapping | تکمیل traceability حکمرانی و اتصال به issueهای custody/release/governance |
+| رفاه و عدالت | [WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md](WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md) | draft mapping | تفکیک شکاف‌های اجرایی، حقوقی، رفاهی و evidence موردنیاز |
+| اقتصاد و منابع | [WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md](WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md) | draft mapping | تکمیل نگاشت داده/بودجه/منابع بدون ادعای feasibility یا funding |
+| قراردادها و adapterها | [WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md](WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md) | draft mapping | ادامه‌ی audit/proof targeting و حفظ adapter non-execution |
+| اوراکل و سیگنال‌ها | [WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md](WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md) | draft mapping | تکمیل oracle ops/runbook traceability و حفظ signal-only boundary |
+| `evidence / audit / signoff` | [WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md](WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md) | draft mapping | اتصال هر ادعا به evidence، blocker، reviewer و signoff لازم |
+| مشارکت عمومی فارسی‌زبان | [WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md](WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md) | draft mapping | هدایت مشارکت فارسی به issueها و PRهای کوچک بدون claim closure |
+
 ## ۲. حدود و non-claim
 
 این سند مستندات‌محور است و هیچ قرارداد، test، معماری، threshold، timeout، ثابت مشروطه‌ای، اختیار Kernel، اختیار اوراکل، اختیار freeze، یا رفتار اجرایی `Fargard7PolicyAdapter` را تغییر نمی‌دهد.

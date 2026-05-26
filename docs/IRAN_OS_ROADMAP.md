@@ -149,6 +149,9 @@ English remains valid for technical evidence, audit, formal verification, securi
   - Sixth detailed workstream mapping opened for oracle and signals: [WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md](WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md).
   - Seventh detailed workstream mapping opened for evidence, audit, and signoff: [WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md](WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md).
   - Eighth detailed workstream mapping opened for Persian public participation: [WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md](WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md).
+  - Workstream rollup checkpoint: all eight planned Step-13 intake workstreams now have initial draft mappings; this is not completion of the whitepaper-to-system mapping.
+  - Rollup checkpoint table recorded in [WHITEPAPER_TO_SYSTEM_MAPPING_FA.md](WHITEPAPER_TO_SYSTEM_MAPPING_FA.md) and [WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md](WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md).
+  - Step-13 remains open and Step-12 remains open.
   - No evidence is accepted by this mapping; no production blocker is closed.
   - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete.
   - `Fargard7PolicyAdapter` remains proposal-only/non-executing and oracle signals remain non-sovereign.

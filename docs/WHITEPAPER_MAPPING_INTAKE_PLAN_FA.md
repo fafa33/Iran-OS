@@ -68,6 +68,21 @@
 
 این ترتیب الزام‌آور نیست، اما از ادعاهای کلی به سمت نگاشت‌های قابل بررسی و سپس evidence/signoff حرکت می‌کند.
 
+### چک‌پوینت rollup workstreamها
+
+در وضعیت فعلی، هر ۸ workstream این intake plan دارای نگاشت draft اولیه است. این وضعیت فقط نشان می‌دهد تقسیم کار اولیه به فایل‌های قابل review تبدیل شده است؛ گام ۱۳ را کامل نمی‌کند، گام ۱۲ را نمی‌بندد، هیچ blockerای را نمی‌بندد، هیچ evidenceای را accepted نمی‌کند و هیچ reviewer signoffای را ادعا نمی‌کند.
+
+| workstream | mapping file | status | next action |
+| --- | --- | --- | --- |
+| اصول بنیادین و منشور | `docs/WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md` | draft mapping | تکمیل بندبه‌بند و review فارسی/فنی |
+| ساختار حکمرانی | `docs/WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md` | draft mapping | تکمیل traceability governance/custody/release |
+| رفاه و عدالت | `docs/WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md` | draft mapping | تکمیل شکاف‌های حقوقی، رفاهی و اجرایی |
+| اقتصاد و منابع | `docs/WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md` | draft mapping | تکمیل resource-to-evidence بدون claim مالی |
+| قراردادها و adapterها | `docs/WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md` | draft mapping | حفظ adapter proposal-only/non-executing و تکمیل audit/proof targets |
+| اوراکل و سیگنال‌ها | `docs/WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md` | draft mapping | حفظ oracle signal-only/non-sovereign و تکمیل ops/runbook مسیرها |
+| `evidence / audit / signoff` | `docs/WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md` | draft mapping | تکمیل evidence/signoff مسیرها بدون claim پذیرش |
+| مشارکت عمومی فارسی‌زبان | `docs/WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md` | draft mapping | هدایت مشارکت عمومی به issueها و PRهای کوچک |
+
 ## ۶. معیار پذیرش برای هر بخش نگاشت
 
 هر بخش پیشنهادی زمانی آماده review است که:
