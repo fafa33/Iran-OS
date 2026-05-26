@@ -111,6 +111,8 @@ Please do not submit PRs or Issues that claim blocker closure, production readin
 
 نگاشت فارسی‌محور سپیدنامه به سیستم برای گام ۱۳: [`docs/WHITEPAPER_TO_SYSTEM_MAPPING_FA.md`](docs/WHITEPAPER_TO_SYSTEM_MAPPING_FA.md)
 
+خلاصه عمومی فارسی برای مشارکت در گام ۱۳: [`docs/WHITEPAPER_MAPPING_COMMUNITY_SUMMARY_FA.md`](docs/WHITEPAPER_MAPPING_COMMUNITY_SUMMARY_FA.md)
+
 مشارکت‌های مربوط به شواهد باید از طریق GitHub Issues یا Pull Requests و با شناسه‌ی مربوط `STEP9-BLOCK-*` ثبت شوند:
 
 - `STEP9-BLOCK-001`: شواهد حسابرسی بیرونی و تأیید حسابرس/بازبین.

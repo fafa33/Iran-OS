@@ -19,6 +19,8 @@
 
 چک‌لیست بازبینی نگاشت‌های گام ۱۳ در [WHITEPAPER_MAPPING_REVIEW_CHECKLIST_FA.md](WHITEPAPER_MAPPING_REVIEW_CHECKLIST_FA.md) ثبت شده است.
 
+خلاصه عمومی فارسی‌محور برای مشارکت‌کنندگان و بازبین‌ها در [WHITEPAPER_MAPPING_COMMUNITY_SUMMARY_FA.md](WHITEPAPER_MAPPING_COMMUNITY_SUMMARY_FA.md) ثبت شده است.
+
 نخستین نگاشت تفصیلی workstream «اصول بنیادین و منشور» در [WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md](WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md) ثبت شده است.
 
 دومین نگاشت تفصیلی workstream «ساختار حکمرانی» در [WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md](WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md) ثبت شده است.
