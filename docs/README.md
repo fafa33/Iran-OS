@@ -22,6 +22,7 @@
 |[WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md)|نگاشت draft فارسی‌محور اقتصاد و منابع برای گام ۱۳|
 |[WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md)|نگاشت draft فارسی‌محور قراردادها و adapterها برای گام ۱۳|
 |[WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md)|نگاشت draft فارسی‌محور اوراکل و سیگنال‌ها برای گام ۱۳|
+|[WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md)|نگاشت draft فارسی‌محور evidence، audit و signoff برای گام ۱۳|
 
 -----
 
