@@ -7,6 +7,8 @@
 **وضعیت:** باز؛ نگاشت قابل review، نه تکمیل گام ۱۳  
 **زبان:** فارسی‌محور، با برچسب‌های کوتاه انگلیسی فقط برای ارجاع فنی مانند `evidence`، `audit`، `formal verification`، `signoff`، `blocker`، `release` و نام فایل‌ها
 
+یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_REVIEW_FA.md](WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_REVIEW_FA.md) ثبت شده است.
+
 ## ۱. هدف
 
 این سند هفتمین نگاشت تفصیلی گام ۱۳ است و فقط workstream «evidence / audit / signoff» را پوشش می‌دهد. هدف آن اتصال ادعاهای سپیدنامه و نگاشت‌های گام ۱۳ به مسیر پذیرش evidence، audit، formal verification، custody، deployment، release و signoff در repo است:

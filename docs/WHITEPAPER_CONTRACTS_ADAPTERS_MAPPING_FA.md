@@ -7,6 +7,8 @@
 **وضعیت:** باز؛ نگاشت قابل review، نه تکمیل گام ۱۳  
 **زبان:** فارسی‌محور، با برچسب‌های کوتاه انگلیسی فقط برای ارجاع فنی مانند `contracts`، `adapter`، `evidence`، `signoff`، `deployment manifest` و نام فایل‌ها
 
+یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_CONTRACTS_ADAPTERS_REVIEW_FA.md](WHITEPAPER_CONTRACTS_ADAPTERS_REVIEW_FA.md) ثبت شده است.
+
 ## ۱. هدف
 
 این سند پنجمین نگاشت تفصیلی گام ۱۳ است و فقط workstream «قراردادها و adapterها» را پوشش می‌دهد. هدف آن اتصال مفاهیم قراردادی و adapterی سپیدنامه/اسناد فنی به مسیر ردیابی repo است:

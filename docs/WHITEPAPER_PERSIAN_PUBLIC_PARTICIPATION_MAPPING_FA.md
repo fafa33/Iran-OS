@@ -7,6 +7,8 @@
 **وضعیت:** باز؛ نگاشت قابل review، نه تکمیل گام ۱۳  
 **زبان:** فارسی‌محور، با برچسب‌های کوتاه انگلیسی فقط برای ارجاع فنی مانند `issue`، `pull request`، `evidence`، `audit`، `formal verification`، `signoff` و نام فایل‌ها
 
+یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_REVIEW_FA.md](WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_REVIEW_FA.md) ثبت شده است.
+
 ## ۱. هدف
 
 این سند هشتمین نگاشت تفصیلی گام ۱۳ است و فقط workstream «مشارکت عمومی فارسی‌زبان» را پوشش می‌دهد. هدف آن اتصال مشارکت عمومی، بازبینی فارسی، مستندسازی، outreach و مسیرهای GitHub به ردیابی سیستم است:

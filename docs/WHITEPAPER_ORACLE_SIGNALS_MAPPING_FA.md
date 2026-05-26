@@ -7,6 +7,8 @@
 **وضعیت:** باز؛ نگاشت قابل review، نه تکمیل گام ۱۳  
 **زبان:** فارسی‌محور، با برچسب‌های کوتاه انگلیسی فقط برای ارجاع فنی مانند `oracle`، `signal-only`، `feeder`، `runbook`، `evidence`، `signoff` و نام فایل‌ها
 
+یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_ORACLE_SIGNALS_REVIEW_FA.md](WHITEPAPER_ORACLE_SIGNALS_REVIEW_FA.md) ثبت شده است.
+
 ## ۱. هدف
 
 این سند ششمین نگاشت تفصیلی گام ۱۳ است و فقط workstream «اوراکل و سیگنال‌ها» را پوشش می‌دهد. هدف آن اتصال مفاهیم داده، شاخص، feeder، freshness، deviation، confidence، API3، PriceOracle و ProductionOracle به مسیر ردیابی repo است:
