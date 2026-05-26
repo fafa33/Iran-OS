@@ -54,6 +54,19 @@
 | `evidence / audit / signoff` | [WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md](WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md) | draft mapping | اتصال هر ادعا به evidence، blocker، reviewer و signoff لازم |
 | مشارکت عمومی فارسی‌زبان | [WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md](WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md) | draft mapping | هدایت مشارکت فارسی به issueها و PRهای کوچک بدون claim closure |
 
+### چک‌پوینت فاز یک گام ۱۳
+
+فاز یک گام ۱۳ اکنون دارای ۸ نگاشت draft برای workstreamها، rollup نگاشت workstreamها، چک‌لیست بازبینی، و خلاصه عمومی فارسی‌محور برای مشارکت‌کنندگان و بازبین‌ها است. این چک‌پوینت به معنی تکمیل گام ۱۳ یا تکمیل نگاشت سپیدنامه به سیستم نیست.
+
+گام ۱۳ همچنان باز است و وارد فاز بازبینی و تعمیق می‌شود. گام ۱۲ همچنان باز است. این چک‌پوینت هیچ آمادگی تولید، تأیید انتشار، تکمیل حسابرسی بیرونی، تکمیل formal verification، بسته‌شدن blocker، پذیرفته‌شدن evidence یا reviewer signoff ادعا نمی‌کند. `Fargard7PolicyAdapter` همچنان proposal-only/non-executing است و سیگنال‌های اوراکل همچنان non-sovereign و signal-only هستند.
+
+| next-phase item | توضیح | وضعیت |
+| --- | --- | --- |
+| review/deepen each mapping | بازبینی و تعمیق هر یک از ۸ نگاشت draft بدون ادعای تکمیل | pending |
+| collect reviewer comments | گردآوری نظر بازبین‌های فنی، حکمرانی، حقوقی، اقتصادی، audit، formal verification و جامعه فارسی‌زبان | pending |
+| connect gaps to issues/evidence | اتصال شکاف‌های هر نگاشت به issueهای #12 تا #19 و evidence/signoff موردنیاز | pending |
+| prepare future Step 13 closure criteria | آماده‌سازی معیارهای احتمالی بسته‌شدن آینده‌ی گام ۱۳ بدون بستن آن در این چک‌پوینت | pending |
+
 ## ۲. حدود و non-claim
 
 این سند مستندات‌محور است و هیچ قرارداد، test، معماری، threshold، timeout، ثابت مشروطه‌ای، اختیار Kernel، اختیار اوراکل، اختیار freeze، یا رفتار اجرایی `Fargard7PolicyAdapter` را تغییر نمی‌دهد.

@@ -153,6 +153,8 @@ English remains valid for technical evidence, audit, formal verification, securi
   - Rollup checkpoint table recorded in [WHITEPAPER_TO_SYSTEM_MAPPING_FA.md](WHITEPAPER_TO_SYSTEM_MAPPING_FA.md) and [WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md](WHITEPAPER_MAPPING_INTAKE_PLAN_FA.md).
   - Review checklist opened for all eight mapped Step-13 workstreams: [WHITEPAPER_MAPPING_REVIEW_CHECKLIST_FA.md](WHITEPAPER_MAPPING_REVIEW_CHECKLIST_FA.md).
   - Persian community-facing Step-13 summary opened for contributors and reviewers: [WHITEPAPER_MAPPING_COMMUNITY_SUMMARY_FA.md](WHITEPAPER_MAPPING_COMMUNITY_SUMMARY_FA.md).
+  - Phase-one checkpoint recorded: Step-13 now has eight draft workstream mappings, a workstream rollup, a review checklist, and a Persian community summary.
+  - Next Step-13 direction: review and deepen each mapping, collect reviewer comments, connect gaps to issues/evidence, and prepare future closure criteria without closing Step-13 now.
   - Step-13 remains open and Step-12 remains open.
   - No evidence is accepted by this mapping; no production blocker is closed.
   - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete.

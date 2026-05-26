@@ -85,6 +85,17 @@
 | `evidence / audit / signoff` | `docs/WHITEPAPER_EVIDENCE_AUDIT_SIGNOFF_MAPPING_FA.md` | draft mapping | تکمیل evidence/signoff مسیرها بدون claim پذیرش |
 | مشارکت عمومی فارسی‌زبان | `docs/WHITEPAPER_PERSIAN_PUBLIC_PARTICIPATION_MAPPING_FA.md` | draft mapping | هدایت مشارکت عمومی به issueها و PRهای کوچک |
 
+### چک‌پوینت فاز یک
+
+فاز یک گام ۱۳ اکنون شامل ۸ نگاشت draft، rollup workstreamها، چک‌لیست بازبینی، و خلاصه عمومی فارسی‌محور است. این وضعیت به معنی تکمیل گام ۱۳ نیست و فقط ورود به فاز بازبینی و تعمیق را ثبت می‌کند. گام ۱۲ باز می‌ماند؛ هیچ blocker، evidence، signoff، audit، formal verification، release یا production claim ایجاد نمی‌شود.
+
+| اقدام فاز بعد | هدف | وضعیت |
+| --- | --- | --- |
+| review/deepen each mapping | تعمیق هر نگاشت draft با بازبینی تخصصی | pending |
+| collect reviewer comments | ثبت نظر بازبین‌ها بدون ادعای signoff | pending |
+| connect gaps to issues/evidence | اتصال شکاف‌ها به issueها و evidence/signoff لازم | pending |
+| prepare future Step 13 closure criteria | آماده‌سازی معیارهای آینده بدون بستن گام ۱۳ | pending |
+
 ## ۶. معیار پذیرش برای هر بخش نگاشت
 
 هر بخش پیشنهادی زمانی آماده review است که:
