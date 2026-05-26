@@ -6,6 +6,8 @@
 **وضعیت:** draft mapping؛ باز و نیازمند بازبینی  
 **زبان:** فارسی‌محور، با ارجاع‌های کوتاه انگلیسی فقط برای نام فایل‌ها، `evidence`، `audit`، `signoff`، issue و blocker
 
+یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_FOUNDATIONAL_PRINCIPLES_REVIEW_FA.md](WHITEPAPER_FOUNDATIONAL_PRINCIPLES_REVIEW_FA.md) ثبت شده است.
+
 ## ۱. هدف
 
 این سند نخستین نگاشت تفصیلی گام ۱۳ برای workstream «اصول بنیادین و منشور» است. هدف آن اتصال اصول بنیادین سپیدنامه و منشور به جایگاه‌های قابل ردیابی در repo است، بدون اینکه تکمیل اجرا، پذیرش evidence، signoff، آمادگی تولید یا تأیید انتشار ادعا شود.

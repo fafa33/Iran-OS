@@ -155,6 +155,7 @@ English remains valid for technical evidence, audit, formal verification, securi
   - Persian community-facing Step-13 summary opened for contributors and reviewers: [WHITEPAPER_MAPPING_COMMUNITY_SUMMARY_FA.md](WHITEPAPER_MAPPING_COMMUNITY_SUMMARY_FA.md).
   - Phase-one checkpoint recorded: Step-13 now has eight draft workstream mappings, a workstream rollup, a review checklist, and a Persian community summary.
   - Next Step-13 direction: review and deepen each mapping, collect reviewer comments, connect gaps to issues/evidence, and prepare future closure criteria without closing Step-13 now.
+  - Review/deepening phase started with the foundational principles mapping review note: [WHITEPAPER_FOUNDATIONAL_PRINCIPLES_REVIEW_FA.md](WHITEPAPER_FOUNDATIONAL_PRINCIPLES_REVIEW_FA.md).
   - Step-13 remains open and Step-12 remains open.
   - No evidence is accepted by this mapping; no production blocker is closed.
   - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete.
