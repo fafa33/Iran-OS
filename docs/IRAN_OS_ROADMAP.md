@@ -146,6 +146,7 @@ English remains valid for technical evidence, audit, formal verification, securi
   - Third detailed workstream mapping opened for welfare and justice: [WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md](WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md).
   - Fourth detailed workstream mapping opened for economy and resources: [WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md](WHITEPAPER_ECONOMY_RESOURCES_MAPPING_FA.md).
   - Fifth detailed workstream mapping opened for contracts and adapters: [WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md](WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md).
+  - Sixth detailed workstream mapping opened for oracle and signals: [WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md](WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md).
   - No evidence is accepted by this mapping; no production blocker is closed.
   - Production readiness is not claimed; external audit is not complete; formal verification is not complete; release approval is not complete.
   - `Fargard7PolicyAdapter` remains proposal-only/non-executing and oracle signals remain non-sovereign.

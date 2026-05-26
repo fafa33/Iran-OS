@@ -27,6 +27,8 @@
 
 پنجمین نگاشت تفصیلی workstream «قراردادها و adapterها» در [WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md](WHITEPAPER_CONTRACTS_ADAPTERS_MAPPING_FA.md) ثبت شده است.
 
+ششمین نگاشت تفصیلی workstream «اوراکل و سیگنال‌ها» در [WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md](WHITEPAPER_ORACLE_SIGNALS_MAPPING_FA.md) ثبت شده است.
+
 ## ۲. حدود و non-claim
 
 این سند مستندات‌محور است و هیچ قرارداد، test، معماری، threshold، timeout، ثابت مشروطه‌ای، اختیار Kernel، اختیار اوراکل، اختیار freeze، یا رفتار اجرایی `Fargard7PolicyAdapter` را تغییر نمی‌دهد.
