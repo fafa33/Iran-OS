@@ -72,9 +72,9 @@
 
 اگر شواهد شما هنوز draft یا در حال بررسی است، همان را صریح بنویسید. شواهد draft ارزشمند است، اما blocker را نمی‌بندد.
 
-## پیام آماده برای ارسال به افراد یا گروه‌های فارسی‌زبان
+## پیام برای افراد یا گروه‌های فارسی‌زبان
 
-سلام،
+درود بر شما،
 
 پروژه‌ی Iran-OS وارد گام ۱۲ شده: مرحله‌ی گردآوری شواهد و بازبینی برای blockerهای تولید، audit، formal verification، custody، oracle operations، deployment، release signoff و non-claim preservation.
 
