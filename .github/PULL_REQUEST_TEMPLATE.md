@@ -1,3 +1,5 @@
+<div dir="rtl">
+  
 # چک‌لیست Pull Request / Pull Request Checklist
 
 ## خلاصه تغییر / Summary
@@ -77,3 +79,5 @@ Test result / notes:
 
 هر نکته‌ای که بازبین باید با دقت بیشتری بررسی کند اینجا بنویسید.  
 Add anything reviewers should pay special attention to.
+
+</div>
