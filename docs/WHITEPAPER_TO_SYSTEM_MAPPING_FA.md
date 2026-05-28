@@ -29,6 +29,7 @@
 - جدول اتصال workstreamهای گام ۱۳ به issueهای #12 تا #19: [WHITEPAPER_STEP13_ISSUE_LINKAGE_FA.md](WHITEPAPER_STEP13_ISSUE_LINKAGE_FA.md)
 - رجیستر شکاف‌های گام ۱۳: [WHITEPAPER_STEP13_GAP_REGISTER_FA.md](WHITEPAPER_STEP13_GAP_REGISTER_FA.md)
 - معیارهای آینده برای بررسی بسته‌شدن گام ۱۳: [WHITEPAPER_STEP13_CLOSURE_CRITERIA_FA.md](WHITEPAPER_STEP13_CLOSURE_CRITERIA_FA.md)
+- تحویل فنی گام ۱۳ برای اوراکل‌ها، نگهداشت کلید و چندامضایی: [WHITEPAPER_STEP13_ORACLE_CUSTODY_HANDOFF_FA.md](WHITEPAPER_STEP13_ORACLE_CUSTODY_HANDOFF_FA.md)
 
 این اسناد کمکی فقط برای فهم، ردیابی، بازبینی و مشارکت هستند. آن‌ها گام ۱۲ یا گام ۱۳ را نمی‌بندند و هیچ ادعایی درباره آمادگی تولید، audit کامل، formal verification کامل، بسته‌شدن blocker، پذیرفته‌شدن evidence یا reviewer signoff ایجاد نمی‌کنند.
 
