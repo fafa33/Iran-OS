@@ -26,7 +26,7 @@ No AI review may convert a misunderstood concept into a project defect.
 - سپیدنامه اصلی ایران‌اواس؛
 - منشور رفاه و عدالت / پیمان ملی مشروطه سکولار؛
 - FAQها و کیت‌های توضیحی پروژه؛
-- توضیحات رسمی/مستندشده درباره مفاهیمی مثل ماشه هوشمند، لایه صفر، خزانه، خزنده، AI review، no-downstream-execution و rule-based execution؛
+- توضیحات رسمی/مستندشده درباره مفاهیمی مثل ماشه هوشمند، لایه صفر، هسته سخت، no-admin، خزانه، خزنده، AI review، no-downstream-execution و rule-based execution؛
 - اسناد Step 13؛
 - issueهای مرجع مثل issue #18 برای non-claim preservation؛
 - snapshotهای وضعیت فعلی governance.
@@ -59,15 +59,39 @@ AIهای review هیچ اختیار downstream execution ندارند.
 
 اگر reviewer این تمایز را بررسی نکرده باشد، finding مربوط به تناقض AI/no-downstream-execution معتبر نیست.
 
-## ۵. لایه صفر و bootstrapping
+## ۵. لایه صفر، هسته سخت، no-admin و bootstrapping
 
-قبل از هر claim درباره bootstrapping، قدرت نویسنده، یا author sovereignty، reviewer باید بررسی کند آیا لایه صفر به‌عنوان مکانیزم ضدانحصار، ضدارتداد ساختاری و اصل مشروطه‌ای غیرقابل تغییر تعریف شده است یا نه.
+قبل از هر claim درباره bootstrapping، قدرت نویسنده، author sovereignty، نبود admin یا هسته سخت بدون مدیر، reviewer باید توضیح canonical مرتبط را بررسی کند.
 
-قاعده:
+قاعده اول:
+
+```text
+No-admin must not be treated as hidden author sovereignty unless the reviewer first checks the canonical explanation that no-admin can be an anti-capture design, not a concealed administrator.
+```
+
+قاعده دوم:
 
 ```text
 Layer-zero immutability must not be treated as author sovereignty unless the reviewer first checks the canonical explanation of layer-zero as constitutional anti-capture architecture.
 ```
+
+قاعده سوم:
+
+```text
+The author of code or documentation does not become the sovereign authority merely because the initial text or code was authored. Authority must be derived only from valid constitutional, public, human/governance, and founding procedures.
+```
+
+فارسی:
+
+```text
+نبود admin نباید به‌عنوان قدرت پنهان نویسنده یا مدیر مخفی تفسیر شود، مگر اینکه reviewer ابتدا توضیح canonical درباره no-admin به‌عنوان طراحی ضدانحصار و ضدتصاحب را بررسی کرده باشد.
+```
+
+```text
+تغییرناپذیری لایه صفر نباید به‌عنوان حاکمیت نویسنده کد تفسیر شود، مگر اینکه reviewer ابتدا توضیح canonical درباره لایه صفر به‌عنوان معماری مشروطه‌ای ضدتصاحب و ضدارتداد ساختاری را بررسی کرده باشد.
+```
+
+اگر reviewer فقط پس از توضیح مستقیم طراح متوجه شود که no-admin یا لایه صفر به معنی power capture نویسنده نیست، finding او independent نیست و باید به‌عنوان designer-clarified misunderstanding correction برچسب بخورد.
 
 ## ۶. designer clarification و استقلال review
 
@@ -96,6 +120,10 @@ Reviewهای قبلی Gemini و Claude حذف کامل نمی‌شوند، چو�
 - معماری عملیاتی ایران‌اواس؛
 - ماشه هوشمند؛
 - لایه صفر؛
+- هسته سخت؛
+- no-admin؛
+- bootstrapping؛
+- author-power یا author-sovereignty claim؛
 - downstream execution در سطح سیستم؛
 - ادعای defect قطعی پروژه؛
 - accepted evidence؛
@@ -124,6 +152,8 @@ canonical_source_check:
   charter_checked: true_or_false
   step13_sources_checked: true_or_false
   faq_or_kit_checked: true_or_false
+  system_execution_vs_review_ai_distinction_checked: true_or_false
+  no_admin_or_layer_zero_explanation_checked: true_or_false
   relevant_canonical_explanation: "quote-or-section-reference"
   contradiction_claim_allowed: true_or_false
   reason_if_still_unresolved: "required-if-finding-remains"
