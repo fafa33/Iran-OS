@@ -2,6 +2,11 @@
 
 ### ایران‌اواس — IranOS
 
+<div dir="ltr">
+
+[![CI](https://github.com/fafa33/Iran-OS/actions/workflows/ci.yml/badge.svg)](https://github.com/fafa33/Iran-OS/actions/workflows/ci.yml)
+
+</div>
 
 **سیستم‌عامل حکمرانی بلاک‌چین‌محور برای ایران**
 
