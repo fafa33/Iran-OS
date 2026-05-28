@@ -41,6 +41,7 @@
 - جمع‌بندی گردش‌کار درخواست review در گام ۱۳ و گام ۱۲: [WHITEPAPER_STEP13_REVIEW_REQUEST_WORKFLOW_ROLLUP_FA.md](WHITEPAPER_STEP13_REVIEW_REQUEST_WORKFLOW_ROLLUP_FA.md)
 - چک‌پوینت وضعیت فعلی گام ۱۳: [WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md](WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md)
 - جمع‌بندی وضعیت درخواست‌های review گام ۱۳ برای issueهای گام ۱۲: [WHITEPAPER_STEP13_REVIEW_REQUEST_STATUS_ROLLUP_FA.md](WHITEPAPER_STEP13_REVIEW_REQUEST_STATUS_ROLLUP_FA.md)
+- پروتکل مدیریت پاسخ‌های review در گام ۱۳ و گام ۱۲: [WHITEPAPER_STEP13_REVIEW_RESPONSE_HANDLING_PROTOCOL_FA.md](WHITEPAPER_STEP13_REVIEW_RESPONSE_HANDLING_PROTOCOL_FA.md)
 
 این اسناد کمکی فقط برای فهم، ردیابی، بازبینی و مشارکت هستند. آن‌ها گام ۱۲ یا گام ۱۳ را نمی‌بندند و هیچ ادعایی درباره آمادگی تولید، audit کامل، formal verification کامل، بسته‌شدن blocker، پذیرفته‌شدن evidence یا reviewer signoff ایجاد نمی‌کنند.
 
