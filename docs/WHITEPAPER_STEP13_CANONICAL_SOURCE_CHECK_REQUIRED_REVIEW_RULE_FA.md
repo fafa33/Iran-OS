@@ -1,0 +1,140 @@
+<div dir="rtl">
+
+# قاعده اجباری canonical-source check برای reviewهای گام ۱۳
+
+**نام فنی:** Step 13 Canonical Source Check Required Review Rule  
+**نوع سند:** documentation-only / review-protocol-hardening / deprecation-rule  
+**وضعیت:** باز؛ این سند هیچ accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion یا downstream execution ایجاد نمی‌کند.
+
+## ۱. هدف
+
+این سند یک ضعف مهم در reviewهای AI-assisted قبلی را ثبت و اصلاح می‌کند:
+
+```text
+No finding without canonical-source check.
+No contradiction claim without checking the relevant FAQ/kit/source explanation.
+No architecture finding without mapping the finding to Sepidnameh, Charter, Step 13 source text, and relevant FAQ/kit clarification.
+No AI review may convert a misunderstood concept into a project defect.
+```
+
+هدف این سند پاک‌کردن history نیست؛ هدف این است که reviewهای قبلی در جایگاه درست خود باقی بمانند: artifactهای محدود فرایندی و ورودی برای hardening پروتکل review، نه evidence، نه signoff، نه validation و نه defect قطعی پروژه.
+
+## ۲. تعریف canonical source
+
+برای گام ۱۳، canonical source یعنی هر سند یا توضیحی که برای فهم یک مفهوم پروژه مرجع اصلی محسوب می‌شود، از جمله:
+
+- سپیدنامه اصلی ایران‌اواس؛
+- منشور رفاه و عدالت / پیمان ملی مشروطه سکولار؛
+- FAQها و کیت‌های توضیحی پروژه؛
+- توضیحات رسمی/مستندشده درباره مفاهیمی مثل ماشه هوشمند، لایه صفر، خزانه، خزنده، AI review، no-downstream-execution و rule-based execution؛
+- اسناد Step 13؛
+- issueهای مرجع مثل issue #18 برای non-claim preservation؛
+- snapshotهای وضعیت فعلی governance.
+
+## ۳. قاعده اصلی
+
+هر reviewer، چه AI و چه انسان، پیش از ثبت finding باید نشان دهد:
+
+1. sourceهای canonical مرتبط را خوانده است؛
+2. توضیح canonical مرتبط را پیدا کرده است؛
+3. اگر finding با توضیح canonical تعارض دارد، توضیح داده چرا finding هنوز باقی است؛
+4. اگر توضیح canonical finding را حل می‌کند، finding باید withdrawn، downgraded یا به documentation-clarity note تبدیل شود؛
+5. اگر reviewer توضیح canonical را فقط بعد از توضیح طراح فهمیده باشد، خروجی مستقل نیست و باید designer-clarified برچسب بخورد.
+
+## ۴. ماشه هوشمند و no-downstream-execution
+
+قبل از هر claim درباره تضاد downstream execution، reviewer باید این تمایز را بررسی و نقل کند:
+
+```text
+Review AI has no downstream execution authority.
+Iran-OS rule-based/deterministic execution is a separate operational layer that may operate only under pre-approved constitutional/governance rules.
+```
+
+فارسی:
+
+```text
+AIهای review هیچ اختیار downstream execution ندارند.
+اجرای rule-based/deterministic در ایران‌اواس لایه‌ای عملیاتی و جداگانه است که فقط تحت قوانین مشروطه‌ای/حکمرانیِ ازپیش‌تصویب‌شده می‌تواند عمل کند.
+```
+
+اگر reviewer این تمایز را بررسی نکرده باشد، finding مربوط به تناقض AI/no-downstream-execution معتبر نیست.
+
+## ۵. لایه صفر و bootstrapping
+
+قبل از هر claim درباره bootstrapping، قدرت نویسنده، یا author sovereignty، reviewer باید بررسی کند آیا لایه صفر به‌عنوان مکانیزم ضدانحصار، ضدارتداد ساختاری و اصل مشروطه‌ای غیرقابل تغییر تعریف شده است یا نه.
+
+قاعده:
+
+```text
+Layer-zero immutability must not be treated as author sovereignty unless the reviewer first checks the canonical explanation of layer-zero as constitutional anti-capture architecture.
+```
+
+## ۶. designer clarification و استقلال review
+
+اگر AI یا انسان یک مفهوم را از متن canonical نفهمیده و فقط پس از توضیح مستقیم طراح متوجه شده باشد، خروجی او نباید independent review شمرده شود.
+
+برچسب الزامی:
+
+```text
+designer-clarified / not independent / not evidence / not signoff / not consensus
+```
+
+فارسی:
+
+```text
+clarification از سوی طراح دریافت شده؛ مستقل نیست؛ evidence نیست؛ signoff نیست؛ consensus نیست.
+```
+
+## ۷. deprecation کنترل‌شده reviewهای قبلی Gemini و Claude
+
+Reviewهای قبلی Gemini و Claude حذف کامل نمی‌شوند، چون بخشی از traceability فرایندی و نشان‌دهنده hardening روند review هستند.
+
+اما از این پس این reviewها برای موارد زیر deprecated هستند:
+
+- Sepidnameh alignment؛
+- Charter / welfare / justice / constitutional alignment؛
+- معماری عملیاتی ایران‌اواس؛
+- ماشه هوشمند؛
+- لایه صفر؛
+- downstream execution در سطح سیستم؛
+- ادعای defect قطعی پروژه؛
+- accepted evidence؛
+- reviewer signoff؛
+- multi-AI consensus.
+
+برچسب صحیح آن‌ها:
+
+```text
+limited-scope / limited-context / non-canonical-source-checked / process-hardening artifact only / not validation / not defect evidence / not signoff / not consensus
+```
+
+فارسی:
+
+```text
+دامنه محدود؛ زمینه محدود؛ بدون canonical-source check کامل؛ فقط artifact سخت‌سازی فرایند review؛ نه validation؛ نه evidence برای defect؛ نه signoff؛ نه consensus.
+```
+
+## ۸. قاعده citation برای findings آینده
+
+هر finding آینده باید این fields را داشته باشد:
+
+```yaml
+canonical_source_check:
+  sepidnameh_checked: true_or_false
+  charter_checked: true_or_false
+  step13_sources_checked: true_or_false
+  faq_or_kit_checked: true_or_false
+  relevant_canonical_explanation: "quote-or-section-reference"
+  contradiction_claim_allowed: true_or_false
+  reason_if_still_unresolved: "required-if-finding-remains"
+```
+
+اگر این بخش وجود نداشته باشد، finding فقط draft note است و نباید در rollup به‌عنوان review finding قوی ثبت شود.
+
+## ۹. non-claim نهایی
+
+این سند فقط قاعده سخت‌سازی review و deprecation کنترل‌شده reviewهای قبلی است. این سند هیچ review را accepted، signed off، closed، production ready، release approved، audit complete، formally verified، consensus-backed یا authorized for downstream execution اعلام نمی‌کند.
+
+Step 12 باز می‌ماند. Step 13 باز می‌ماند.
+
+</div>
