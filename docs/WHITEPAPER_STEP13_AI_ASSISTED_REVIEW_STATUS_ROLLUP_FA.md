@@ -18,18 +18,14 @@
 | --- | --- |
 | Step 12 | open / pending |
 | Step 13 | open / pending human review |
-| AI-assisted governance protocol | ساخته و به‌روزرسانی شده |
-| AI-assisted internal review plan | ساخته شده |
-| ChatGPT internal pre-review | ساخته شده؛ finding draft / needs-human-review |
-| strict ChatGPT self-review | ساخته شده؛ self-review / finding-draft-only / not independent |
-| temporary non-final safeguard taxonomy | ساخته شده؛ taxonomy-only / no safeguard activated |
-| documentation risk reduction patch | ساخته شده؛ risk-reduction-only / no risk closure |
-| Gemini findings triage | ساخته شده؛ triage-only / no finding accepted as evidence |
-| Gemini documentation hardening patch | ساخته شده؛ hardening-only / no risk closure |
-| independent AI review template | ساخته شده؛ template-only |
-| AI review prompt package | ساخته شده؛ prompt-package-only |
-| human review request for AI safeguards | ساخته و روی issue #18 به‌صورت reference-only دستی لینک شده |
-| multi-AI review کامل | انجام نشده؛ Claude/Codex و human review هنوز ثبت نشده‌اند |
+| ChatGPT pre-review | finding draft / needs-human-review |
+| ChatGPT strict self-review | self-review-only / not independent |
+| Gemini findings | triaged / hardening-informed / no evidence acceptance |
+| Claude findings | partial-scope triage / body text not reviewed by Claude |
+| Gemini hardening patch | documentation-only / no risk closure |
+| Claude hardening patch | documentation-only / no risk closure |
+| current governance state snapshot | ساخته شده؛ snapshot-only / no signoff |
+| multi-AI review کامل | انجام نشده |
 | independent AI consensus/divergence | قابل ادعا نیست |
 | human review واقعی | انجام یا کامل نشده |
 | accepted evidence | وجود ندارد |
@@ -53,10 +49,13 @@
 | `docs/WHITEPAPER_STEP13_DOCUMENTATION_RISK_REDUCTION_PATCH_FA.md` | `9ae8dd324f88dd6daec13b13caed69b3060b14ef` | کاهش ریسک‌های wording/traceability مستنداتی | risk-reduction-only / no risk closure |
 | `docs/WHITEPAPER_STEP13_GEMINI_FINDINGS_TRIAGE_FA.md` | `dcfbfeef4ec3d36886d110de2eb5ad6412025262` | triage کنترل‌شده findings Gemini | triage-only / no evidence acceptance |
 | `docs/WHITEPAPER_STEP13_GEMINI_DOCUMENTATION_HARDENING_PATCH_FA.md` | `037385a20a50be512e498aba895d6c9a07a2bbb1` | hardening مستنداتی بر پایه triage Gemini | hardening-only / no risk closure |
-| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `8ab459343b04189f9a2d7f94207afe0b592e2cf5` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
+| `docs/WHITEPAPER_STEP13_CLAUDE_FINDINGS_TRIAGE_FA.md` | `13baabd2f726e6c857630fdf1c33f56e806ba524` | triage یافته‌های Claude با scope محدود | partial-scope-triage-only / no evidence acceptance |
+| `docs/WHITEPAPER_STEP13_CLAUDE_DOCUMENTATION_HARDENING_PATCH_FA.md` | `3a4a8840cbc0c5c5ec267ad57141db0b997eddfb` | hardening مستنداتی بر پایه triage Claude | hardening-only / no risk closure |
+| `docs/WHITEPAPER_STEP13_CURRENT_GOVERNANCE_STATE_SNAPSHOT_FA.md` | `a8b1ca27ba7b42b70ac8d217cc03def5f2609d80` | snapshot واحد از وضعیت فعلی governance | snapshot-only / no signoff |
 | `docs/WHITEPAPER_STEP13_INDEPENDENT_AI_REVIEW_TEMPLATE_FA.md` | `3e60c353bbfe46fe470597937b8312252e84d7ed` | قالب reviewهای مستقل AI آینده | template-only / no review performed |
 | `docs/WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md` | `4accbb824c2f2ffe3a5eb1137ee8325e08dfdc02` | درخواست review انسانی برای safeguards مربوط به AI | review-request-only / no review completed |
 | `docs/WHITEPAPER_STEP13_AI_REVIEW_PROMPT_PACKAGE_FA.md` | `4128039be9d5ceee3bacba8cfc86067c00202cd9` | بسته prompt برای self-review و reviewهای AI مستقل آینده | prompt-package-only / no review performed |
+| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `7c728ab110e0cce8dbf653c4851d271b6f2902bc` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
 
 ## ۴. وضعیت findings Gemini
 
@@ -64,73 +63,58 @@
 
 این triage به معنی پذیرش کامل Gemini، صحت‌سنجی قطعی، accepted evidence، signoff یا closure نیست.
 
-| Gemini finding | موضوع | پاسخ فعلی | وضعیت |
-| --- | --- | --- | --- |
-| F-13-01 | ابهام واژه `Proof` | proof-boundary اضافه شد | reduced / still needs review |
-| F-13-02 | false consensus از self-review | self-review مستقل شمرده نمی‌شود | visible / not closed |
-| F-13-03 | human non-response و auto-advance | no-auto-advance rule اضافه شد | reduced / still needs review |
-| F-13-04 | ابهام S5/S6 | clarification banner اضافه شد | clarified / still needs review |
-| F-13-05 | hash gap | hash ledger placeholder اضافه شد | partially reduced / hash capture pending |
-| F-13-06 | artifact volume maturity risk | volume-as-traceability rule حفظ شد | reduced / still needs review |
-| F-13-07 | transition/static wording | static documentation-only language rule اضافه شد | reduced / still needs review |
-| F-13-08 | AI off-chain / no operational state change | off-chain/no-state-change constraint اضافه شد | reduced / still needs review |
+## ۵. وضعیت findings Claude
 
-## ۵. مرزهای سخت‌شده بعد از Gemini
+خروجی Claude توسط کاربر ارائه شد و خود Claude صریحاً اعلام کرد که review آن partial-scope است، چون متن کامل ۱۳ artifact در session به Claude داده نشده بود.
 
-### ۵.۱ Proof boundary
+بنابراین یافته‌های Claude فقط risk-detection با scope محدود هستند و full content-level review محسوب نمی‌شوند.
 
-```text
-Proof in this context means documentation-level traceability and reviewability only.
-It does not mean cryptographic proof, mathematical proof, formal verification completion, audit completion, accepted evidence, or reviewer signoff.
-```
+پاسخ مستنداتی انجام‌شده:
 
-### ۵.۲ No-auto-advance
+- package-level non-completion disclaimer
+- AI layers are not collective authority
+- same-source / non-independent label برای ChatGPT initial + self-review
+- rollup is not completion summary
+- pending human review remains open until affirmative human/governance action
+- AI-informed, not AI-authorized wording
+- template independence clarification
+- document hierarchy / precedence note
+- current governance state snapshot requirement و سپس snapshot جداگانه
 
-```text
-Human non-response may trigger visibility, logging, labeling, and escalation only.
-Human non-response must not trigger approval, signoff, accepted evidence, blocker closure, production readiness, release approval, downstream execution, or state advancement.
-```
+هیچ‌کدام risk closure، accepted evidence یا signoff ایجاد نمی‌کنند.
 
-### ۵.۳ S5/S6 clarification
+## ۶. Snapshot وضعیت فعلی governance
 
-```text
-S5/S6 clarification: taxonomy boundary only.
-Not executable in current Step 13.
-No runtime logic, no deployment trigger, no governance action, no state transition, no approval, and no downstream execution is created.
-```
+Snapshot جداگانه ساخته شد تا وضعیت فعلی از چند سند پراکنده حدس زده نشود.
 
-### ۵.۴ Hash placeholder
+وضعیت snapshot:
 
-```yaml
-hash_ledger_placeholder:
-  prompt_hash: "pending"
-  input_artifact_hash: "pending"
-  output_hash: "pending"
-  timestamp_utc: "pending"
-  model_or_tool: "pending"
-  related_issue: "pending"
-  status: "traceability model defined; full hash capture pending"
-```
+- Step 12: open / pending
+- Step 13: open / pending human review
+- accepted evidence: none
+- reviewer signoff: none
+- blocker closure: not claimed
+- production readiness: not claimed
+- release approval: not claimed
+- audit completion: not claimed
+- formal verification completion: not claimed
+- downstream execution: not allowed / not activated
+- sovereign authority: not created
+- multi-AI consensus: not claimed
+- human review: not completed
 
-### ۵.۵ AI off-chain / no operational state change
-
-```text
-AI analysis remains off-chain, non-operational, and documentation-only.
-AI output must not generate operational bytecode, mutate repository state automatically, trigger deployment, change governance state, or execute downstream actions.
-```
-
-## ۶. وضعیت review و consensus
+## ۷. وضعیت review و consensus
 
 در وضعیت فعلی:
 
 - ChatGPT pre-review وجود دارد.
 - ChatGPT strict self-review وجود دارد، اما مستقل شمرده نمی‌شود.
-- Gemini findings triage و Gemini hardening patch وجود دارد.
-- ثبت کامل raw Gemini review انجام نشد، چون ابزار GitHub آن را مسدود کرد.
+- Gemini findings triage و Gemini hardening patch وجود دارد، اما raw Gemini review کامل ثبت نشده است.
+- Claude findings triage و Claude hardening patch وجود دارد، اما Claude review partial-scope است.
 - بنابراین multi-AI consensus هنوز ادعا نمی‌شود.
-- برای consensus/divergence واقعی، حداقل یک review مستقل دیگر یا ثبت قابل اتکاتر Gemini/Claude/Codex لازم است.
+- برای consensus/divergence واقعی، review کامل‌تر با متن کامل documents و/یا human/governance review لازم است.
 
-## ۷. وضعیت claim و authority
+## ۸. وضعیت claim و authority
 
 این rollup اجازه هیچ‌کدام از claimهای زیر را نمی‌دهد:
 
@@ -153,20 +137,20 @@ AI output must not generate operational bytecode, mutate repository state automa
 عبارت امن فعلی:
 
 ```text
-Step 13 documentation package is prepared only for further human/governance review. It includes AI-assisted pre-review, strict non-independent self-review, Gemini findings triage, documentation hardening patches, safeguard taxonomy, review templates, and prompt package. This improves traceability and review preparation only. It does not create accepted evidence, reviewer signoff, blocker closure, production readiness, release approval, audit completion, formal verification completion, multi-AI consensus, downstream execution, or sovereign authority. Step 12 and Step 13 remain open.
+Step 13 documentation package is prepared only for further human/governance review. It includes AI-assisted pre-review, strict non-independent self-review, Gemini and Claude triaged findings, documentation hardening patches, safeguard taxonomy, current governance state snapshot, review templates, and prompt package. This improves traceability and review preparation only. It does not create accepted evidence, reviewer signoff, blocker closure, production readiness, release approval, audit completion, formal verification completion, multi-AI consensus, downstream execution, or sovereign authority. Step 12 and Step 13 remain open.
 ```
 
-## ۸. اولویت‌های بعدی
+## ۹. اولویت‌های بعدی
 
 اولویت‌های بعدی، بدون claim نهایی:
 
-۱. دریافت یا ثبت review مستقل دیگر از Claude/Codex یا تلاش مجدد برای ثبت خلاصه ساختاری Gemini در قالب محدودتر.  
-۲. ساخت rollup مقایسه‌ای multi-AI فقط پس از وجود حداقل دو review مستقل واقعی و قابل ثبت.  
+۱. در صورت نیاز، ارائه متن کامل documents به Claude برای full-content-level pre-review جدید.  
+۲. ساخت rollup مقایسه‌ای فقط به‌عنوان comparison-only و بدون consensus claim، اگر کاربر بخواهد.  
 ۳. دریافت review انسانی روی `WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md`.  
-۴. اگر comment id دستی issue #18 در دسترس شد، ثبت آن در rollup.  
+۴. ثبت timestamped issue-state snapshot برای issueهای #12 تا #19 در صورت نیاز.  
 ۵. حفظ Step 12 و Step 13 در وضعیت open تا evidence و signoff معتبر آینده.
 
-## ۹. non-claim نهایی
+## ۱۰. non-claim نهایی
 
 این سند فقط رول‌آپ وضعیت بازبینی AI-assisted است. این سند هیچ review کامل‌شده، risk closure، accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution، multi-AI consensus یا sovereign authority ایجاد نمی‌کند.
 
