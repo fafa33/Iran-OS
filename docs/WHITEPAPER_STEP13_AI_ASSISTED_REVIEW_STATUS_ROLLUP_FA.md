@@ -24,11 +24,13 @@
 | Claude findings | limited-context / partial-scope triage / body text not reviewed by Claude |
 | Iranian context limitation addendum | ساخته شده؛ context-limitation-only |
 | Iran-context-aware review prompt | ساخته شده؛ prompt-only برای review آینده |
+| full-context review bundle manifest | ساخته شده؛ manifest-only / read-only input specification |
 | Gemini hardening patch | documentation-only / no risk closure |
 | Claude hardening patch | documentation-only / no risk closure |
 | current governance state snapshot | ساخته شده؛ snapshot-only / no signoff |
 | multi-AI review کامل | انجام نشده |
 | Iran-context-complete AI review | هنوز انجام نشده |
+| full-context AI pre-review | هنوز انجام نشده |
 | independent AI consensus/divergence | قابل ادعا نیست |
 | human review واقعی | انجام یا کامل نشده |
 | accepted evidence | وجود ندارد |
@@ -57,16 +59,17 @@
 | `docs/WHITEPAPER_STEP13_CURRENT_GOVERNANCE_STATE_SNAPSHOT_FA.md` | `a8b1ca27ba7b42b70ac8d217cc03def5f2609d80` | snapshot واحد از وضعیت فعلی governance | snapshot-only / no signoff |
 | `docs/WHITEPAPER_STEP13_IRANIAN_CONTEXT_REVIEW_LIMITATION_ADDENDUM_FA.md` | `be533dc6e8f4f2516e19545e5cda750d91a4d49d` | ثبت محدودیت زمینه ایرانی در reviewهای قبلی AI | context-limitation-only / no invalidation |
 | `docs/WHITEPAPER_STEP13_IRAN_CONTEXT_AWARE_AI_REVIEW_PROMPT_FA.md` | `4edc32a286c054af6c6e589b5e154d68d1d60333` | prompt جدید برای review آینده با context جامعه ایران | prompt-only / no review performed |
+| `docs/WHITEPAPER_STEP13_FULL_CONTEXT_REVIEW_BUNDLE_MANIFEST_FA.md` | `7add097ebeaf2350ebd5a3ddbf5b62632dc3f3e4` | manifest ورودی‌های لازم برای full-context read-only review | manifest-only / no review performed |
 | `docs/WHITEPAPER_STEP13_INDEPENDENT_AI_REVIEW_TEMPLATE_FA.md` | `3e60c353bbfe46fe470597937b8312252e84d7ed` | قالب reviewهای مستقل AI آینده | template-only / no review performed |
 | `docs/WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md` | `4accbb824c2f2ffe3a5eb1137ee8325e08dfdc02` | درخواست review انسانی برای safeguards مربوط به AI | review-request-only / no review completed |
 | `docs/WHITEPAPER_STEP13_AI_REVIEW_PROMPT_PACKAGE_FA.md` | `4128039be9d5ceee3bacba8cfc86067c00202cd9` | بسته prompt برای self-review و reviewهای AI مستقل آینده | prompt-package-only / no review performed |
-| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `0e134f53f4099f84df560ae5350ebb5586d582de` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
+| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `f91e3b2d70b86e2fc605940211fab99d19798fc7` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
 
-## ۴. محدودیت زمینه ایرانی در reviewهای Gemini و Claude
+## ۴. محدودیت زمینه ایرانی و full-context
 
-در promptهای اولیه Gemini و Claude، زمینه جامعه ایران، روح سپیدنامه، تجربه تاریخی تمرکز قدرت، سکولاریسم مشروطه، کثرت اجتماعی ایران و حساسیت‌های اعتماد عمومی به‌قدر کافی صریح نشده بود.
+در promptهای اولیه Gemini و Claude، زمینه جامعه ایران، روح سپیدنامه، تجربه تاریخی تمرکز قدرت، سکولاریسم مشروطه، کثرت اجتماعی ایران و حساسیت‌های اعتماد عمومی به‌قدر کافی صریح نشده بود. همچنین هیچ AI یا انسان بدون خواندن اسناد اصلی و context کافی نمی‌تواند review کامل بدهد.
 
-بنابراین reviewهای Gemini و Claude قبلی باید چنین فهمیده شوند:
+بنابراین reviewهای قبلی Gemini و Claude باید چنین فهمیده شوند:
 
 ```text
 limited-context AI-assisted risk notes; useful for generic governance/documentation hardening; not Iran-context-complete; no signoff; no accepted evidence; no consensus.
@@ -74,7 +77,23 @@ limited-context AI-assisted risk notes; useful for generic governance/documentat
 
 این محدودیت باعث بی‌اعتبار شدن reviewهای قبلی نمی‌شود؛ بلکه scope آن‌ها را دقیق‌تر می‌کند. آن‌ها برای hardening عمومی مفیدند، اما برای نتیجه‌گیری فلسفی/اجتماعی/حاکمیتی درباره ایران کافی نیستند.
 
-## ۵. وضعیت prompt جدید context-aware
+## ۵. وضعیت full-context review bundle manifest
+
+یک manifest جدید ساخته شد که مشخص می‌کند reviewer بیرونی، چه AI و چه انسان، برای review معتبرتر باید چه چیزهایی را به‌صورت read-only بخواند:
+
+- متن کامل سپیدنامه اصلی ایران‌اواس؛
+- متن کامل منشور رفاه و عدالت / پیمان ملی مشروطه سکولار؛
+- اسناد Step 13؛
+- وضعیت Step 12؛
+- issueهای #12 تا #19 و issue #18؛
+- آخرین commits مرتبط؛
+- وضعیت blockers؛
+- snapshot وضعیت فعلی governance؛
+- non-claim rules.
+
+این manifest صریح می‌کند که Gemini/Claude/Codex نباید GitHub token، permission، workflow، issue mutation یا commit access داشته باشند. روش مجاز فقط read-only upload/paste bundle است.
+
+## ۶. وضعیت prompt جدید context-aware
 
 یک prompt جدید برای review آینده ساخته شد که صریحاً شامل این زمینه‌هاست:
 
@@ -91,7 +110,7 @@ limited-context AI-assisted risk notes; useful for generic governance/documentat
 
 این prompt هنوز review انجام‌شده نیست.
 
-## ۶. وضعیت findings Gemini و Claude
+## ۷. وضعیت findings Gemini و Claude
 
 Gemini و Claude قبلی:
 
@@ -102,7 +121,7 @@ Gemini و Claude قبلی:
 - not reviewer signoff؛
 - not multi-AI consensus.
 
-## ۷. وضعیت review و consensus
+## ۸. وضعیت review و consensus
 
 در وضعیت فعلی:
 
@@ -111,10 +130,11 @@ Gemini و Claude قبلی:
 - Gemini findings triage و Gemini hardening patch وجود دارد، اما limited-context هستند و raw Gemini review کامل ثبت نشده است.
 - Claude findings triage و Claude hardening patch وجود دارد، اما Claude review partial-scope و limited-context است.
 - Iran-context-aware review هنوز انجام نشده است.
+- full-context AI pre-review هنوز انجام نشده است.
 - بنابراین multi-AI consensus هنوز ادعا نمی‌شود.
-- برای comparison جدی یا نتیجه‌گیری درباره زمینه ایران، review جدید با prompt context-aware لازم است.
+- برای comparison جدی یا نتیجه‌گیری درباره زمینه ایران، review جدید با prompt context-aware و read-only full-context bundle لازم است.
 
-## ۸. وضعیت claim و authority
+## ۹. وضعیت claim و authority
 
 این rollup اجازه هیچ‌کدام از claimهای زیر را نمی‌دهد:
 
@@ -133,28 +153,30 @@ Gemini و Claude قبلی:
 - sovereign authority confirmed
 - multi-AI consensus confirmed
 - Iran-context-complete review confirmed
+- full-context AI review completed
 - risk closure confirmed
 
 عبارت امن فعلی:
 
 ```text
-Step 13 documentation package is prepared only for further human/governance and Iran-context-aware review. It includes AI-assisted pre-review, strict non-independent self-review, limited-context Gemini and Claude triaged findings, documentation hardening patches, safeguard taxonomy, current governance state snapshot, Iranian context limitation addendum, Iran-context-aware review prompt, review templates, and prompt package. This improves traceability and review preparation only. It does not create accepted evidence, reviewer signoff, blocker closure, production readiness, release approval, audit completion, formal verification completion, multi-AI consensus, Iran-context-complete review, downstream execution, or sovereign authority. Step 12 and Step 13 remain open.
+Step 13 documentation package is prepared only for further human/governance, Iran-context-aware, and full-context read-only review. It includes AI-assisted pre-review, strict non-independent self-review, limited-context Gemini and Claude triaged findings, documentation hardening patches, safeguard taxonomy, current governance state snapshot, Iranian context limitation addendum, Iran-context-aware review prompt, full-context review bundle manifest, review templates, and prompt package. This improves traceability and review preparation only. It does not create accepted evidence, reviewer signoff, blocker closure, production readiness, release approval, audit completion, formal verification completion, multi-AI consensus, Iran-context-complete review, full-context AI review completion, downstream execution, or sovereign authority. Step 12 and Step 13 remain open.
 ```
 
-## ۹. اولویت‌های بعدی
+## ۱۰. اولویت‌های بعدی
 
 اولویت‌های بعدی، بدون claim نهایی:
 
-۱. اجرای review جدید Gemini یا Claude با prompt Iran-context-aware و با متن کامل documents.  
-۲. ثبت/triage خروجی جدید به‌عنوان Iran-context-aware AI risk note، نه signoff.  
-۳. پس از review زمینه‌مند، ساخت comparison-only rollup بدون consensus claim، اگر داده کافی وجود داشت.  
-۴. دریافت review انسانی روی `WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md`.  
-۵. ثبت timestamped issue-state snapshot برای issueهای #12 تا #19 در صورت نیاز.  
-۶. حفظ Step 12 و Step 13 در وضعیت open تا evidence و signoff معتبر آینده.
+۱. ساخت یا آماده‌سازی bundle عملی read-only برای Gemini/Claude شامل سپیدنامه، منشور، اسناد Step 13 و snapshotها.  
+۲. اجرای review جدید Gemini یا Claude با prompt Iran-context-aware و bundle کامل read-only.  
+۳. ثبت/triage خروجی جدید به‌عنوان full-context/Iran-context-aware AI risk note، نه signoff.  
+۴. پس از review زمینه‌مند، ساخت comparison-only rollup بدون consensus claim، اگر داده کافی وجود داشت.  
+۵. دریافت review انسانی روی `WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md`.  
+۶. ثبت timestamped issue-state snapshot برای issueهای #12 تا #19 در صورت نیاز.  
+۷. حفظ Step 12 و Step 13 در وضعیت open تا evidence و signoff معتبر آینده.
 
-## ۱۰. non-claim نهایی
+## ۱۱. non-claim نهایی
 
-این سند فقط رول‌آپ وضعیت بازبینی AI-assisted است. این سند هیچ review کامل‌شده، risk closure، accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution، multi-AI consensus، Iran-context-complete review یا sovereign authority ایجاد نمی‌کند.
+این سند فقط رول‌آپ وضعیت بازبینی AI-assisted است. این سند هیچ review کامل‌شده، risk closure، accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution، multi-AI consensus، Iran-context-complete review، full-context AI review completion یا sovereign authority ایجاد نمی‌کند.
 
 Step 12 باز می‌ماند. Step 13 باز می‌ماند.
 
