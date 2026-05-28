@@ -2,5 +2,5 @@
 
 Please choose your language:
 
-- [فارسی](docs/code-of-conduct-fa.md)
-- [English](docs/code-of-conduct-en.md)
+- [فارسی](./docs/code-of-conduct-fa.md)
+- [English](./docs/code-of-conduct-en.md)
