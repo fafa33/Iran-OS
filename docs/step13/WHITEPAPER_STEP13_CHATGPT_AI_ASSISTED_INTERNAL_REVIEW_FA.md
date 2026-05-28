@@ -39,10 +39,10 @@ Related issue(s): #12-#19, with #18 as non-claim preservation reference
 
 این review بر پایه وضعیت و اسناد زیر انجام شده است:
 
-- `docs/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md`
-- `docs/WHITEPAPER_STEP13_AI_ASSISTED_INTERNAL_REVIEW_PLAN_FA.md`
-- `docs/WHITEPAPER_STEP13_REVIEW_RESPONSE_HANDLING_PROTOCOL_FA.md`
-- `docs/WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_AI_ASSISTED_INTERNAL_REVIEW_PLAN_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_REVIEW_RESPONSE_HANDLING_PROTOCOL_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md`
 - issue #18 به‌عنوان محور non-claim preservation
 - issueهای #12 تا #19 به‌عنوان محورهای pending evidence / pending review
 - checkpoint پروژه که می‌گوید `contracts / test / package.json / package-lock.json` در گام‌های اخیر دست‌نخورده مانده‌اند

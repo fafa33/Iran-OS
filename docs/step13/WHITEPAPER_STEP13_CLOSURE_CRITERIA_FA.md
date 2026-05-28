@@ -30,7 +30,7 @@
 | --- | --- | --- |
 | هر ۸ workstream دارای mapping file باشد | done | mappingهای draft برای همه workstreamها ثبت شده‌اند. |
 | هر ۸ workstream دارای review note باشد | done | review-note sweep برای همه workstreamها ثبت شده است. |
-| هر ۸ workstream به issueهای مرتبط #12 تا #19 وصل باشد | done | جدول linkage در `docs/WHITEPAPER_STEP13_ISSUE_LINKAGE_FA.md` ثبت شده است. |
+| هر ۸ workstream به issueهای مرتبط #12 تا #19 وصل باشد | done | جدول linkage در `docs/step13/WHITEPAPER_STEP13_ISSUE_LINKAGE_FA.md` ثبت شده است. |
 | gapهای هر workstream روشن و دسته‌بندی شده باشند | pending | gapها باید به‌صورت دقیق و قابل review ثبت شوند. |
 | reviewer comments یا review records ثبت شده باشند | pending | review note داخلی کافی نیست؛ comment یا record بازبین لازم است. |
 | هیچ gap مرتبط با evidence/signoff بدون issue باقی نماند | pending | هر gap باید به issue مرتبط، evidence موردنیاز یا signoff موردنیاز وصل شود. |

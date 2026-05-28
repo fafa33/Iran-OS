@@ -52,20 +52,20 @@
 
 | artifact | commit | نقش | وضعیت |
 | --- | --- | --- | --- |
-| `docs/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md` | `a2f35fd59477e1f3442a4d730fc1cac70e688fb8` | پروتکل کنترل استفاده از AI در حکمرانی | protocol-only / no signoff |
-| `docs/WHITEPAPER_STEP13_TEMPORARY_NON_FINAL_SAFEGUARD_TAXONOMY_FA.md` | `325ee19f3d8ac6bf0ff1ef8d7f91a60e1d117a1f` | taxonomy مرز safeguardهای موقت و غیرنهایی | taxonomy-only / no safeguard activated |
-| `docs/WHITEPAPER_STEP13_SEPIDNAMEH_REQUIRED_REVIEW_RULE_FA.md` | `bd463472d0f27c94d89697c372d8fbd6f1ff69a2` | قاعده اجباری بودن سپیدنامه برای review معتبر | review-scope-rule / no review performed |
-| `docs/WHITEPAPER_STEP13_SEPIDNAMEH_TECHNICAL_PREAWARENESS_REVIEW_RULE_FA.md` | `fd9e2e24821587069c05df58e1ff828dc901bf65` | قاعده پیش‌آگاهی فنی سپیدنامه برای review معماری | architecture-entry-condition / no review performed |
-| `docs/WHITEPAPER_STEP13_CANONICAL_SOURCE_CHECK_REQUIRED_REVIEW_RULE_FA.md` | `d2cfebc00184b6a52af2471d75548b28235be7d6` | قاعده canonical-source check به‌روزشده با پیش‌آگاهی فنی | review-protocol-hardening / no review performed |
-| `docs/WHITEPAPER_STEP13_SYSTEM_EXECUTION_VS_REVIEW_AI_DISTINCTION_FA.md` | `29c98b36fdc98b07c2174d07b52b9947eba8e935` | تمایز canonical بین AI review و اجرای rule-based سیستم | clarification-only / no execution activated |
-| `docs/WHITEPAPER_STEP13_CANONICAL_REVIEW_INPUT_PATCH_FA.md` | `436ebafcf34025d3283f854b1345da0f23b6526a` | patch ورودی review برای prompt/bundle/template | patch-only / no review performed |
-| `docs/WHITEPAPER_STEP13_README_FA.md` | `2edade31fc6b8119f43b40b52e04144edcd26aa0` | راهنمای ترتیب خواندن با شرط پیش‌آگاهی فنی | reviewer-orientation / no signoff |
-| `docs/WHITEPAPER_STEP13_FULL_CONTEXT_REVIEW_BUNDLE_MANIFEST_FA.md` | `7add097ebeaf2350ebd5a3ddbf5b62632dc3f3e4` | manifest ورودی‌های لازم برای full-context read-only review | manifest-only / no review performed |
-| `docs/WHITEPAPER_STEP13_FULL_CONTEXT_REVIEW_READONLY_BUNDLE_FA.md` | `e4b8c60a0c3f98d3e9b49c226e496612b582e705` | بسته عملی read-only با technical-pre-awareness اجباری | bundle-only / no review performed |
-| `docs/WHITEPAPER_STEP13_CURRENT_GOVERNANCE_STATE_SNAPSHOT_FA.md` | `a8b1ca27ba7b42b70ac8d217cc03def5f2609d80` | snapshot واحد از وضعیت فعلی governance | snapshot-only / no signoff |
-| `docs/WHITEPAPER_STEP13_GEMINI_FINDINGS_TRIAGE_FA.md` | `dcfbfeef4ec3d36886d110de2eb5ad6412025262` | triage کنترل‌شده findings Gemini | deprecated for alignment/validation / process-hardening artifact only |
-| `docs/WHITEPAPER_STEP13_CLAUDE_FINDINGS_TRIAGE_FA.md` | `13baabd2f726e6c857630fdf1c33f56e806ba524` | triage یافته‌های Claude با scope محدود | deprecated for alignment/validation / process-hardening artifact only |
-| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `7bfbf832cf0c21d03aa7e2d9fbdb2785a25b4f47` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
+| `docs/step13/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md` | `a2f35fd59477e1f3442a4d730fc1cac70e688fb8` | پروتکل کنترل استفاده از AI در حکمرانی | protocol-only / no signoff |
+| `docs/step13/WHITEPAPER_STEP13_TEMPORARY_NON_FINAL_SAFEGUARD_TAXONOMY_FA.md` | `325ee19f3d8ac6bf0ff1ef8d7f91a60e1d117a1f` | taxonomy مرز safeguardهای موقت و غیرنهایی | taxonomy-only / no safeguard activated |
+| `docs/step13/WHITEPAPER_STEP13_SEPIDNAMEH_REQUIRED_REVIEW_RULE_FA.md` | `bd463472d0f27c94d89697c372d8fbd6f1ff69a2` | قاعده اجباری بودن سپیدنامه برای review معتبر | review-scope-rule / no review performed |
+| `docs/step13/WHITEPAPER_STEP13_SEPIDNAMEH_TECHNICAL_PREAWARENESS_REVIEW_RULE_FA.md` | `fd9e2e24821587069c05df58e1ff828dc901bf65` | قاعده پیش‌آگاهی فنی سپیدنامه برای review معماری | architecture-entry-condition / no review performed |
+| `docs/step13/WHITEPAPER_STEP13_CANONICAL_SOURCE_CHECK_REQUIRED_REVIEW_RULE_FA.md` | `d2cfebc00184b6a52af2471d75548b28235be7d6` | قاعده canonical-source check به‌روزشده با پیش‌آگاهی فنی | review-protocol-hardening / no review performed |
+| `docs/step13/WHITEPAPER_STEP13_SYSTEM_EXECUTION_VS_REVIEW_AI_DISTINCTION_FA.md` | `29c98b36fdc98b07c2174d07b52b9947eba8e935` | تمایز canonical بین AI review و اجرای rule-based سیستم | clarification-only / no execution activated |
+| `docs/step13/WHITEPAPER_STEP13_CANONICAL_REVIEW_INPUT_PATCH_FA.md` | `436ebafcf34025d3283f854b1345da0f23b6526a` | patch ورودی review برای prompt/bundle/template | patch-only / no review performed |
+| `docs/step13/WHITEPAPER_STEP13_README_FA.md` | `2edade31fc6b8119f43b40b52e04144edcd26aa0` | راهنمای ترتیب خواندن با شرط پیش‌آگاهی فنی | reviewer-orientation / no signoff |
+| `docs/step13/WHITEPAPER_STEP13_FULL_CONTEXT_REVIEW_BUNDLE_MANIFEST_FA.md` | `7add097ebeaf2350ebd5a3ddbf5b62632dc3f3e4` | manifest ورودی‌های لازم برای full-context read-only review | manifest-only / no review performed |
+| `docs/step13/WHITEPAPER_STEP13_FULL_CONTEXT_REVIEW_READONLY_BUNDLE_FA.md` | `e4b8c60a0c3f98d3e9b49c226e496612b582e705` | بسته عملی read-only با technical-pre-awareness اجباری | bundle-only / no review performed |
+| `docs/step13/WHITEPAPER_STEP13_CURRENT_GOVERNANCE_STATE_SNAPSHOT_FA.md` | `a8b1ca27ba7b42b70ac8d217cc03def5f2609d80` | snapshot واحد از وضعیت فعلی governance | snapshot-only / no signoff |
+| `docs/step13/WHITEPAPER_STEP13_GEMINI_FINDINGS_TRIAGE_FA.md` | `dcfbfeef4ec3d36886d110de2eb5ad6412025262` | triage کنترل‌شده findings Gemini | deprecated for alignment/validation / process-hardening artifact only |
+| `docs/step13/WHITEPAPER_STEP13_CLAUDE_FINDINGS_TRIAGE_FA.md` | `13baabd2f726e6c857630fdf1c33f56e806ba524` | triage یافته‌های Claude با scope محدود | deprecated for alignment/validation / process-hardening artifact only |
+| `docs/step13/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `7bfbf832cf0c21d03aa7e2d9fbdb2785a25b4f47` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
 
 ## ۴. شرط پیش‌آگاهی فنی سپیدنامه
 

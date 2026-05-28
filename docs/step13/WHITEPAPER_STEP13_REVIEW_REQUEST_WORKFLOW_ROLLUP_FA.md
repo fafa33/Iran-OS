@@ -32,7 +32,7 @@
 
 قالب مشترک درخواست review آینده در این مسیر قرار دارد:
 
-`docs/WHITEPAPER_STEP13_REVIEW_REQUEST_TEMPLATE_FA.md`
+`docs/step13/WHITEPAPER_STEP13_REVIEW_REQUEST_TEMPLATE_FA.md`
 
 هر درخواست review آینده باید حداقل موارد زیر را روشن کند:
 
@@ -141,7 +141,7 @@
 
 گام بعدی پس از این rollup، ساخت چک‌پوینت وضعیت فعلی Step 13 است:
 
-`docs/WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md`
+`docs/step13/WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md`
 
 آن سند باید وضعیت فعلی اسناد، issueها، commentها، pendingها و non-claimها را بدون بستن Step 13 ثبت کند.
 

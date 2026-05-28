@@ -31,7 +31,7 @@
 
 قالب مشترک evidence آینده در این مسیر قرار دارد:
 
-`docs/WHITEPAPER_STEP13_FUTURE_EVIDENCE_SUBMISSION_TEMPLATE_FA.md`
+`docs/step13/WHITEPAPER_STEP13_FUTURE_EVIDENCE_SUBMISSION_TEMPLATE_FA.md`
 
 هر evidence آینده باید حداقل موارد زیر را روشن کند:
 
@@ -126,7 +126,7 @@
 
 گام بعدی پس از این rollup، ساخت قالب درخواست review است:
 
-`docs/WHITEPAPER_STEP13_REVIEW_REQUEST_TEMPLATE_FA.md`
+`docs/step13/WHITEPAPER_STEP13_REVIEW_REQUEST_TEMPLATE_FA.md`
 
 آن قالب باید به بازبین‌ها کمک کند که بدون ایجاد signoff claim، review scope، نوع تخصص، issue مرتبط، evidence مورد نیاز و non-claim boundary را مشخص کنند.
 

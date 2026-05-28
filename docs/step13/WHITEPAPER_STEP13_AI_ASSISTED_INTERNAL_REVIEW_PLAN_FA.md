@@ -14,7 +14,7 @@
 
 این plan بر پایه سند زیر نوشته شده است:
 
-- `docs/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md`
 
 ## ۲. فلسفه plan
 
@@ -92,12 +92,12 @@ AI در این مدل authority نهایی ندارد. اما ریسک کشف‌
 
 ورودی‌های اولیه پیشنهادی برای review داخلی:
 
-- `docs/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md`
-- `docs/WHITEPAPER_STEP13_REVIEW_RESPONSE_HANDLING_PROTOCOL_FA.md`
-- `docs/WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md`
-- `docs/WHITEPAPER_STEP13_REVIEW_REQUEST_STATUS_ROLLUP_FA.md`
-- `docs/WHITEPAPER_STEP13_REVIEW_REQUEST_WORKFLOW_ROLLUP_FA.md`
-- `docs/WHITEPAPER_STEP13_EVIDENCE_WORKFLOW_ROLLUP_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_REVIEW_RESPONSE_HANDLING_PROTOCOL_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_REVIEW_REQUEST_STATUS_ROLLUP_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_REVIEW_REQUEST_WORKFLOW_ROLLUP_FA.md`
+- `docs/step13/WHITEPAPER_STEP13_EVIDENCE_WORKFLOW_ROLLUP_FA.md`
 - issue #18 به‌عنوان محور non-claim preservation
 - issueهای #12 تا #19 به‌عنوان محورهای evidence/review pending
 
@@ -226,7 +226,7 @@ human_review_required: true
 
 گام بعدی پس از این plan:
 
-- ساخت `docs/WHITEPAPER_STEP13_CHATGPT_AI_ASSISTED_INTERNAL_REVIEW_FA.md`
+- ساخت `docs/step13/WHITEPAPER_STEP13_CHATGPT_AI_ASSISTED_INTERNAL_REVIEW_FA.md`
 - انجام اولین AI-assisted internal pre-review با disclosure کامل مدل
 - نگه‌داشتن خروجی در وضعیت finding draft / needs-human-review
 - لینک‌دادن plan و review آینده به issue #18 فقط به‌عنوان protocol/review-aid، نه evidence accepted یا signoff
