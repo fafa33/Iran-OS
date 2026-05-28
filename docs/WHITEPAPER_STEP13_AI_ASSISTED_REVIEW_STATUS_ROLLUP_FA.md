@@ -21,11 +21,13 @@
 | AI-assisted governance protocol | ساخته و به‌روزرسانی شده |
 | AI-assisted internal review plan | ساخته شده |
 | ChatGPT internal pre-review | ساخته شده؛ finding draft / needs-human-review |
+| strict ChatGPT self-review | ساخته شده؛ self-review / finding-draft-only / not independent |
+| temporary non-final safeguard taxonomy | ساخته شده؛ taxonomy-only / no safeguard activated |
 | independent AI review template | ساخته شده؛ template-only |
 | AI review prompt package | ساخته شده؛ prompt-package-only برای self-review و reviewهای مستقل آینده |
 | human review request for AI safeguards | ساخته و روی issue #18 به‌صورت reference-only دستی لینک شده |
 | multi-AI review کامل | انجام نشده؛ Claude/Gemini/Codex reviewهای مستقل هنوز ثبت نشده‌اند |
-| ChatGPT self-review جدید با prompt package | هنوز انجام نشده |
+| independent AI consensus/divergence | قابل ادعا نیست |
 | human review واقعی | انجام یا کامل نشده |
 | accepted evidence | وجود ندارد |
 | reviewer signoff | وجود ندارد |
@@ -43,7 +45,9 @@
 | `docs/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md` | `a2f35fd59477e1f3442a4d730fc1cac70e688fb8` | پروتکل کنترل استفاده از AI در حکمرانی | protocol-only / no signoff |
 | `docs/WHITEPAPER_STEP13_AI_ASSISTED_INTERNAL_REVIEW_PLAN_FA.md` | `499d1cf6784eb87cc318ff83e44f4bb16a4e3dae` | برنامه اجرای reviewهای AI-assisted | review-plan-only / no review completion |
 | `docs/WHITEPAPER_STEP13_CHATGPT_AI_ASSISTED_INTERNAL_REVIEW_FA.md` | `f12cd922852ec27fe65cfa3b3255ec4fdcfdfd5e` | اولین pre-review داخلی توسط ChatGPT | finding-draft-only / needs-human-review |
-| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `5c17195158e7856ff1a6c9a7dba4c244ad61af0d` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
+| `docs/WHITEPAPER_STEP13_CHATGPT_SELF_REVIEW_STRICT_FA.md` | `d24f050bf167d7ca53ab6c1f9523b45a59f9622c` | self-review سخت‌گیرانه توسط ChatGPT | self-review-only / not independent / no signoff |
+| `docs/WHITEPAPER_STEP13_TEMPORARY_NON_FINAL_SAFEGUARD_TAXONOMY_FA.md` | `325ee19f3d8ac6bf0ff1ef8d7f91a60e1d117a1f` | taxonomy مرز safeguardهای موقت و غیرنهایی | taxonomy-only / no safeguard activated |
+| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `fdb3def2cbda76f278e21cacfbba35e7823d386d` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
 | `docs/WHITEPAPER_STEP13_INDEPENDENT_AI_REVIEW_TEMPLATE_FA.md` | `3e60c353bbfe46fe470597937b8312252e84d7ed` | قالب reviewهای مستقل AI آینده | template-only / no review performed |
 | `docs/WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md` | `4accbb824c2f2ffe3a5eb1137ee8325e08dfdc02` | درخواست review انسانی برای safeguards مربوط به AI | review-request-only / no review completed |
 | `docs/WHITEPAPER_STEP13_AI_REVIEW_PROMPT_PACKAGE_FA.md` | `4128039be9d5ceee3bacba8cfc86067c00202cd9` | بسته prompt برای ChatGPT self-review و reviewهای AI مستقل آینده | prompt-package-only / no review performed |
@@ -61,7 +65,23 @@
 - unresolved AI findings باید visible، traceable، escalatable و در صورت نیاز منشأ safeguard موقت، برگشت‌پذیر و غیرنهایی باشند.
 - هیچ downstream execution بدون gate معتبر، evidence، review و signoff مجاز نیست.
 
-## ۵. خلاصه محتوای review plan و prompt package
+## ۵. خلاصه محتوای safeguard taxonomy
+
+Taxonomy جدید برای کاهش ریسک SR-004 ساخته شده و سطح‌های زیر را تفکیک می‌کند:
+
+| سطح | نام | وضعیت در Step 13 فعلی |
+| --- | --- | --- |
+| S0 | observation-only | مجاز به‌صورت documentation-only |
+| S1 | documentation-only | مجاز به‌صورت documentation-only |
+| S2 | status-label | فقط proposal/status؛ نه approval یا closure |
+| S3 | escalation-only | فقط پیشنهاد escalation |
+| S4 | claim-restriction proposal | فقط proposal-only |
+| S5 | operational safeguard candidate | در Step 13 فعلی مجاز به اجرا نیست |
+| S6 | irreversible/high-impact action | ممنوع در این taxonomy |
+
+این taxonomy صریح می‌کند که AI finding می‌تواند visibility، logging، labeling، review preparation یا escalation proposal ایجاد کند، اما approval، signoff، accepted evidence، closure، production readiness، release approval یا downstream execution ایجاد نمی‌کند.
+
+## ۶. خلاصه محتوای review plan و prompt package
 
 Review plan و prompt package مشخص می‌کنند:
 
@@ -73,7 +93,7 @@ Review plan و prompt package مشخص می‌کنند:
 - خروجی AI نمی‌تواند signoff، accepted evidence، closure، readiness یا approval بسازد.
 - در وضعیت فعلی، چون `contracts / test / package.json / package-lock.json` در گام‌های اخیر دست‌نخورده مانده‌اند، review فوری بر محور documentation/governance است، نه code audit یا formal verification.
 
-## ۶. خلاصه findings در ChatGPT pre-review موجود
+## ۷. خلاصه findings در ChatGPT pre-review موجود
 
 | finding | نوع | شدت | وضعیت |
 | --- | --- | --- | --- |
@@ -88,7 +108,24 @@ Review plan و prompt package مشخص می‌کنند:
 
 این findings فقط pre-review داخلی هستند و هیچ‌کدام accepted evidence، reviewer signoff یا closure محسوب نمی‌شوند.
 
-## ۷. وضعیت template، prompt package و human review request
+## ۸. خلاصه findings در self-review سخت‌گیرانه ChatGPT
+
+| finding | نوع | شدت | وضعیت | پاسخ فعلی |
+| --- | --- | --- | --- | --- |
+| SR-001 خطر برداشت نادرست از عبارت `review-ready` | claim-safety / wording-risk | high | needs-human-review | عبارت امن در rollup تقویت شده |
+| SR-002 خطر self-review bias | governance-risk / review-quality-risk | high | unresolved | self-review مستقل شمرده نمی‌شود |
+| SR-003 خطر authority creep در Human Inaction Safeguard | authority-boundary / human-non-response-risk | high | needs-human-review | taxonomy فقط visibility/logging/escalation را مجاز می‌داند |
+| SR-004 خطر ابهام در temporary safeguard | downstream-risk / safeguard-scope-risk | high | needs-human-review | taxonomy S0-S6 ساخته شد |
+| SR-005 خطر زیاد شدن اسناد بدون accepted review | process-risk / perception-risk | medium | needs-human-review | status table در ابتدای rollup حفظ شده |
+| SR-006 خطر counted-consensus اشتباه | multi-AI-review-risk | high | needs-human-review | self-review برای consensus شمرده نمی‌شود |
+| SR-007 کمبود hash واقعی برای prompt/input/output | traceability-gap | medium | unresolved | full hash capture هنوز pending است |
+| SR-008 دقت wording درباره documentation-only و issue/reference comments | wording-accuracy | low | needs-human-review | wording به documentation-only plus reference/manual comments محدود شد |
+| SR-009 نیاز به ثبت comment id دستی issue #18 در صورت دسترسی | traceability-gap | low | needs-human-review | comment id هنوز pending است |
+| SR-010 نبود review انسانی واقعی | governance-gap | high | unresolved | همچنان برجسته و unresolved است |
+
+self-review سخت‌گیرانه مستقل محسوب نمی‌شود و نباید برای consensus multi-AI شمرده شود.
+
+## ۹. وضعیت template، prompt package و human review request
 
 سه artifact تکمیلی برای آماده‌سازی reviewهای آینده اضافه شده‌اند:
 
@@ -98,9 +135,9 @@ Review plan و prompt package مشخص می‌کنند:
 
 هیچ‌کدام از این artifactها review انجام‌شده، evidence accepted یا signoff ایجاد نمی‌کنند.
 
-## ۸. consensus / divergent / unresolved وضعیت فعلی
+## ۱۰. consensus / divergent / unresolved وضعیت فعلی
 
-در وضعیت فعلی فقط یک AI-assisted review مستقل ثبت شده است: ChatGPT.
+در وضعیت فعلی فقط یک AI-assisted review مستقل از خانواده ChatGPT ثبت شده و یک self-review سخت‌گیرانه نیز افزوده شده است.
 
 بنابراین هنوز نمی‌توان consensus یا divergence واقعی بین AIهای مختلف را ادعا کرد.
 
@@ -108,10 +145,11 @@ Review plan و prompt package مشخص می‌کنند:
 | --- | --- |
 | consensus findings | هنوز قابل ادعا نیست؛ چون review مستقل چند AI ثبت نشده است |
 | divergent findings | هنوز قابل ادعا نیست؛ چون Claude/Gemini/Codex یا ابزارهای دیگر ثبت نشده‌اند |
-| unresolved findings | F-008 و همه findings حساس تا review انسانی معتبر unresolved / needs-human-review باقی می‌مانند |
-| human-escalation-required | Human Inaction Safeguard، safeguard scope و unresolved finding handling نیازمند review انسانی/حاکمیتی هستند |
+| self-review findings | ثبت شده‌اند اما مستقل محسوب نمی‌شوند |
+| unresolved findings | F-008، SR-002، SR-007، SR-010 و همه findings حساس تا review انسانی معتبر unresolved / needs-human-review باقی می‌مانند |
+| human-escalation-required | Human Inaction Safeguard، safeguard scope، hash capture و unresolved finding handling نیازمند review انسانی/حاکمیتی هستند |
 
-## ۹. وضعیت claim و authority
+## ۱۱. وضعیت claim و authority
 
 این rollup اجازه هیچ‌کدام از claimهای زیر را نمی‌دهد:
 
@@ -128,35 +166,36 @@ Review plan و prompt package مشخص می‌کنند:
 - formal verification complete
 - downstream execution allowed
 - sovereign authority confirmed
+- multi-AI consensus confirmed
 
 عبارت امن فعلی:
 
 ```text
-Step 13 documentation and AI-assisted governance protocol package is review-ready, internally pre-reviewed by ChatGPT as an AI-assisted analyzer, status-rolled-up, templated for future independent AI reviews, prepared with an AI review prompt package, and prepared for human review request.
-No accepted evidence, reviewer signoff, blocker closure, production readiness, release approval, audit completion, formal verification completion, or downstream execution is implied.
+Step 13 documentation and AI-assisted governance protocol package is review-ready only for further human/governance review, internally pre-reviewed by ChatGPT, strictly self-reviewed by ChatGPT as a non-independent self-check, status-rolled-up, taxonomy-bounded for temporary non-final safeguards, templated for future independent AI reviews, prepared with an AI review prompt package, and prepared for human review request.
+No accepted evidence, reviewer signoff, blocker closure, production readiness, release approval, audit completion, formal verification completion, multi-AI consensus, or downstream execution is implied.
 Step 12 and Step 13 remain open.
 ```
 
 فارسی:
 
 ```text
-بسته مستندات گام ۱۳ و پروتکل حکمرانی AI-assisted از نظر review داخلی ChatGPT در وضعیت review-ready / AI-assisted-pre-reviewed قرار دارد، rollup وضعیت، template reviewهای مستقل آینده، و prompt package برای self-review و reviewهای AI آینده دارد، و برای review انسانی safeguards آماده شده است؛ اما هیچ accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion یا downstream execution ایجاد نشده است. Step 12 و Step 13 باز می‌مانند.
+بسته مستندات گام ۱۳ و پروتکل حکمرانی AI-assisted فقط برای review انسانی/حاکمیتی بیشتر آماده است، توسط ChatGPT به‌صورت AI-assisted pre-review و self-review سخت‌گیرانه غیرمستقل بررسی شده، rollup وضعیت، taxonomy مرزبندی safeguardهای موقت و غیرنهایی، template reviewهای مستقل آینده و prompt package دارد، و برای review انسانی safeguards آماده شده است؛ اما هیچ accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، consensus چند-AI یا downstream execution ایجاد نشده است. Step 12 و Step 13 باز می‌مانند.
 ```
 
-## ۱۰. اولویت‌های بعدی
+## ۱۲. اولویت‌های بعدی
 
 اولویت‌های بعدی، بدون claim نهایی:
 
-۱. اجرای ChatGPT self-review با استفاده از `WHITEPAPER_STEP13_AI_REVIEW_PROMPT_PACKAGE_FA.md`.  
-۲. دریافت یا ثبت reviewهای مستقل از Claude/Gemini/Codex یا ابزارهای دیگر توسط maintainers، با disclosure کامل.  
-۳. ساخت rollup مقایسه‌ای multi-AI فقط پس از وجود حداقل دو review مستقل.  
-۴. دریافت review انسانی روی `WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md`.  
-۵. اگر reviewer انسانی wording change خواست، اصلاح documentation-only انجام شود.  
+۱. دریافت یا ثبت reviewهای مستقل از Claude/Gemini/Codex یا ابزارهای دیگر توسط maintainers، با disclosure کامل.  
+۲. ساخت rollup مقایسه‌ای multi-AI فقط پس از وجود حداقل دو review مستقل واقعی.  
+۳. دریافت review انسانی روی `WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md`.  
+۴. اگر comment id دستی issue #18 در دسترس شد، ثبت آن در rollup.  
+۵. اضافه‌کردن عبارت `traceability model defined; full prompt/input/output hash capture pending` در اسناد traceability آینده.  
 ۶. حفظ Step 12 و Step 13 در وضعیت open تا evidence و signoff معتبر آینده.
 
-## ۱۱. non-claim نهایی
+## ۱۳. non-claim نهایی
 
-این سند فقط رول‌آپ وضعیت بازبینی AI-assisted است. این سند هیچ review کامل‌شده، accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution یا sovereign authority ایجاد نمی‌کند.
+این سند فقط رول‌آپ وضعیت بازبینی AI-assisted است. این سند هیچ review کامل‌شده، accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution، multi-AI consensus یا sovereign authority ایجاد نمی‌کند.
 
 Step 12 باز می‌ماند. Step 13 باز می‌ماند.
 
