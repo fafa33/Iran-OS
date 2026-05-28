@@ -36,6 +36,7 @@
 - چک‌لیست شواهد گام ۱۳ برای اوراکل‌ها و تجمیع داده: [WHITEPAPER_STEP13_ORACLE_EVIDENCE_CHECKLIST_FA.md](WHITEPAPER_STEP13_ORACLE_EVIDENCE_CHECKLIST_FA.md)
 - جمع‌بندی ردیابی گام ۱۳ برای اوراکل، نگهداشت کلید و چندامضایی: [WHITEPAPER_STEP13_ORACLE_CUSTODY_TRACEABILITY_ROLLUP_FA.md](WHITEPAPER_STEP13_ORACLE_CUSTODY_TRACEABILITY_ROLLUP_FA.md)
 - قالب ثبت evidence آینده برای گام ۱۳ و گام ۱۲: [WHITEPAPER_STEP13_FUTURE_EVIDENCE_SUBMISSION_TEMPLATE_FA.md](WHITEPAPER_STEP13_FUTURE_EVIDENCE_SUBMISSION_TEMPLATE_FA.md)
+- جمع‌بندی گردش‌کار evidence آینده در گام ۱۳ و گام ۱۲: [WHITEPAPER_STEP13_EVIDENCE_WORKFLOW_ROLLUP_FA.md](WHITEPAPER_STEP13_EVIDENCE_WORKFLOW_ROLLUP_FA.md)
 
 این اسناد کمکی فقط برای فهم، ردیابی، بازبینی و مشارکت هستند. آن‌ها گام ۱۲ یا گام ۱۳ را نمی‌بندند و هیچ ادعایی درباره آمادگی تولید، audit کامل، formal verification کامل، بسته‌شدن blocker، پذیرفته‌شدن evidence یا reviewer signoff ایجاد نمی‌کنند.
 
