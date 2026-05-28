@@ -21,6 +21,8 @@
 | AI-assisted governance protocol | ساخته و به‌روزرسانی شده |
 | AI-assisted internal review plan | ساخته شده |
 | ChatGPT internal pre-review | ساخته شده؛ finding draft / needs-human-review |
+| independent AI review template | ساخته شده؛ template-only |
+| human review request for AI safeguards | ساخته و روی issue #18 به‌صورت reference-only دستی لینک شده |
 | multi-AI review کامل | انجام نشده؛ Claude/Gemini/Codex reviewهای مستقل هنوز ثبت نشده‌اند |
 | human review واقعی | انجام یا کامل نشده |
 | accepted evidence | وجود ندارد |
@@ -39,6 +41,9 @@
 | `docs/WHITEPAPER_STEP13_AI_ASSISTED_GOVERNANCE_PROOF_PROTOCOL_FA.md` | `a2f35fd59477e1f3442a4d730fc1cac70e688fb8` | پروتکل کنترل استفاده از AI در حکمرانی | protocol-only / no signoff |
 | `docs/WHITEPAPER_STEP13_AI_ASSISTED_INTERNAL_REVIEW_PLAN_FA.md` | `499d1cf6784eb87cc318ff83e44f4bb16a4e3dae` | برنامه اجرای reviewهای AI-assisted | review-plan-only / no review completion |
 | `docs/WHITEPAPER_STEP13_CHATGPT_AI_ASSISTED_INTERNAL_REVIEW_FA.md` | `f12cd922852ec27fe65cfa3b3255ec4fdcfdfd5e` | اولین pre-review داخلی توسط ChatGPT | finding-draft-only / needs-human-review |
+| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `e3bce941f0f977ba89c3c5669303778aa7320ceb` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
+| `docs/WHITEPAPER_STEP13_INDEPENDENT_AI_REVIEW_TEMPLATE_FA.md` | `3e60c353bbfe46fe470597937b8312252e84d7ed` | قالب reviewهای مستقل AI آینده | template-only / no review performed |
+| `docs/WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md` | `4accbb824c2f2ffe3a5eb1137ee8325e08dfdc02` | درخواست review انسانی برای safeguards مربوط به AI | review-request-only / no review completed |
 
 ## ۴. خلاصه محتوای protocol
 
@@ -78,7 +83,16 @@ Review plan مشخص می‌کند:
 
 این findings فقط pre-review داخلی هستند و هیچ‌کدام accepted evidence، reviewer signoff یا closure محسوب نمی‌شوند.
 
-## ۷. consensus / divergent / unresolved وضعیت فعلی
+## ۷. وضعیت template و human review request
+
+دو artifact تکمیلی برای آماده‌سازی reviewهای آینده اضافه شده‌اند:
+
+- `WHITEPAPER_STEP13_INDEPENDENT_AI_REVIEW_TEMPLATE_FA.md` برای استانداردسازی reviewهای مستقل AI آینده.
+- `WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md` برای آماده‌سازی review انسانی روی AI authority boundary، human non-response safeguard و temporary non-final safeguards.
+
+هیچ‌کدام از این دو artifact review انجام‌شده، evidence accepted یا signoff ایجاد نمی‌کنند.
+
+## ۸. consensus / divergent / unresolved وضعیت فعلی
 
 در وضعیت فعلی فقط یک AI-assisted review مستقل ثبت شده است: ChatGPT.
 
@@ -91,7 +105,7 @@ Review plan مشخص می‌کند:
 | unresolved findings | F-008 و همه findings حساس تا review انسانی معتبر unresolved / needs-human-review باقی می‌مانند |
 | human-escalation-required | Human Inaction Safeguard، safeguard scope و unresolved finding handling نیازمند review انسانی/حاکمیتی هستند |
 
-## ۸. وضعیت claim و authority
+## ۹. وضعیت claim و authority
 
 این rollup اجازه هیچ‌کدام از claimهای زیر را نمی‌دهد:
 
@@ -112,7 +126,7 @@ Review plan مشخص می‌کند:
 عبارت امن فعلی:
 
 ```text
-Step 13 documentation and AI-assisted governance protocol package is review-ready and internally pre-reviewed by ChatGPT as an AI-assisted analyzer.
+Step 13 documentation and AI-assisted governance protocol package is review-ready, internally pre-reviewed by ChatGPT as an AI-assisted analyzer, status-rolled-up, templated for future independent AI reviews, and prepared for human review request.
 No accepted evidence, reviewer signoff, blocker closure, production readiness, release approval, audit completion, formal verification completion, or downstream execution is implied.
 Step 12 and Step 13 remain open.
 ```
@@ -120,21 +134,20 @@ Step 12 and Step 13 remain open.
 فارسی:
 
 ```text
-بسته مستندات گام ۱۳ و پروتکل حکمرانی AI-assisted از نظر review داخلی ChatGPT در وضعیت review-ready / AI-assisted-pre-reviewed قرار دارد، اما هیچ accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion یا downstream execution ایجاد نشده است. Step 12 و Step 13 باز می‌مانند.
+بسته مستندات گام ۱۳ و پروتکل حکمرانی AI-assisted از نظر review داخلی ChatGPT در وضعیت review-ready / AI-assisted-pre-reviewed قرار دارد، rollup وضعیت و template reviewهای مستقل آینده دارد، و برای review انسانی safeguards آماده شده است؛ اما هیچ accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion یا downstream execution ایجاد نشده است. Step 12 و Step 13 باز می‌مانند.
 ```
 
-## ۹. اولویت‌های بعدی
+## ۱۰. اولویت‌های بعدی
 
 اولویت‌های بعدی، بدون claim نهایی:
 
-۱. لینک‌دادن این rollup روی issue #18 به‌عنوان status rollup، نه evidence accepted.  
-۲. ساخت template جدا برای reviewهای AI مستقل آینده، اگر لازم شد.  
-۳. دریافت یا ثبت reviewهای مستقل از Claude/Gemini/Codex یا ابزارهای دیگر توسط maintainers، با disclosure کامل.  
-۴. ساخت rollup مقایسه‌ای multi-AI فقط پس از وجود حداقل دو review مستقل.  
-۵. درخواست review انسانی/حاکمیتی روی Human Inaction Safeguard و precautionary safeguard scope.  
-۶. حفظ Step 12 و Step 13 در وضعیت open تا evidence و signoff معتبر آینده.
+۱. دریافت review انسانی روی `WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md`.  
+۲. دریافت یا ثبت reviewهای مستقل از Claude/Gemini/Codex یا ابزارهای دیگر توسط maintainers، با disclosure کامل.  
+۳. ساخت rollup مقایسه‌ای multi-AI فقط پس از وجود حداقل دو review مستقل.  
+۴. اگر reviewer انسانی wording change خواست، اصلاح documentation-only انجام شود.  
+۵. حفظ Step 12 و Step 13 در وضعیت open تا evidence و signoff معتبر آینده.
 
-## ۱۰. non-claim نهایی
+## ۱۱. non-claim نهایی
 
 این سند فقط رول‌آپ وضعیت بازبینی AI-assisted است. این سند هیچ review کامل‌شده، accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution یا sovereign authority ایجاد نمی‌کند.
 
