@@ -38,6 +38,8 @@
 - قالب ثبت evidence آینده برای گام ۱۳ و گام ۱۲: [WHITEPAPER_STEP13_FUTURE_EVIDENCE_SUBMISSION_TEMPLATE_FA.md](WHITEPAPER_STEP13_FUTURE_EVIDENCE_SUBMISSION_TEMPLATE_FA.md)
 - جمع‌بندی گردش‌کار evidence آینده در گام ۱۳ و گام ۱۲: [WHITEPAPER_STEP13_EVIDENCE_WORKFLOW_ROLLUP_FA.md](WHITEPAPER_STEP13_EVIDENCE_WORKFLOW_ROLLUP_FA.md)
 - قالب درخواست review برای گام ۱۳ و گام ۱۲: [WHITEPAPER_STEP13_REVIEW_REQUEST_TEMPLATE_FA.md](WHITEPAPER_STEP13_REVIEW_REQUEST_TEMPLATE_FA.md)
+- جمع‌بندی گردش‌کار درخواست review در گام ۱۳ و گام ۱۲: [WHITEPAPER_STEP13_REVIEW_REQUEST_WORKFLOW_ROLLUP_FA.md](WHITEPAPER_STEP13_REVIEW_REQUEST_WORKFLOW_ROLLUP_FA.md)
+- چک‌پوینت وضعیت فعلی گام ۱۳: [WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md](WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_FA.md)
 
 این اسناد کمکی فقط برای فهم، ردیابی، بازبینی و مشارکت هستند. آن‌ها گام ۱۲ یا گام ۱۳ را نمی‌بندند و هیچ ادعایی درباره آمادگی تولید، audit کامل، formal verification کامل، بسته‌شدن blocker، پذیرفته‌شدن evidence یا reviewer signoff ایجاد نمی‌کنند.
 
