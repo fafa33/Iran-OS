@@ -20,12 +20,15 @@
 | Step 13 | open / pending human review |
 | ChatGPT pre-review | finding draft / needs-human-review |
 | ChatGPT strict self-review | self-review-only / not independent |
-| Gemini findings | triaged / hardening-informed / no evidence acceptance |
-| Claude findings | partial-scope triage / body text not reviewed by Claude |
+| Gemini findings | limited-context / triaged / hardening-informed / no evidence acceptance |
+| Claude findings | limited-context / partial-scope triage / body text not reviewed by Claude |
+| Iranian context limitation addendum | ساخته شده؛ context-limitation-only |
+| Iran-context-aware review prompt | ساخته شده؛ prompt-only برای review آینده |
 | Gemini hardening patch | documentation-only / no risk closure |
 | Claude hardening patch | documentation-only / no risk closure |
 | current governance state snapshot | ساخته شده؛ snapshot-only / no signoff |
 | multi-AI review کامل | انجام نشده |
+| Iran-context-complete AI review | هنوز انجام نشده |
 | independent AI consensus/divergence | قابل ادعا نیست |
 | human review واقعی | انجام یا کامل نشده |
 | accepted evidence | وجود ندارد |
@@ -47,61 +50,57 @@
 | `docs/WHITEPAPER_STEP13_CHATGPT_SELF_REVIEW_STRICT_FA.md` | `d24f050bf167d7ca53ab6c1f9523b45a59f9622c` | self-review سخت‌گیرانه توسط ChatGPT | self-review-only / not independent / no signoff |
 | `docs/WHITEPAPER_STEP13_TEMPORARY_NON_FINAL_SAFEGUARD_TAXONOMY_FA.md` | `325ee19f3d8ac6bf0ff1ef8d7f91a60e1d117a1f` | taxonomy مرز safeguardهای موقت و غیرنهایی | taxonomy-only / no safeguard activated |
 | `docs/WHITEPAPER_STEP13_DOCUMENTATION_RISK_REDUCTION_PATCH_FA.md` | `9ae8dd324f88dd6daec13b13caed69b3060b14ef` | کاهش ریسک‌های wording/traceability مستنداتی | risk-reduction-only / no risk closure |
-| `docs/WHITEPAPER_STEP13_GEMINI_FINDINGS_TRIAGE_FA.md` | `dcfbfeef4ec3d36886d110de2eb5ad6412025262` | triage کنترل‌شده findings Gemini | triage-only / no evidence acceptance |
+| `docs/WHITEPAPER_STEP13_GEMINI_FINDINGS_TRIAGE_FA.md` | `dcfbfeef4ec3d36886d110de2eb5ad6412025262` | triage کنترل‌شده findings Gemini | limited-context triage-only / no evidence acceptance |
 | `docs/WHITEPAPER_STEP13_GEMINI_DOCUMENTATION_HARDENING_PATCH_FA.md` | `037385a20a50be512e498aba895d6c9a07a2bbb1` | hardening مستنداتی بر پایه triage Gemini | hardening-only / no risk closure |
-| `docs/WHITEPAPER_STEP13_CLAUDE_FINDINGS_TRIAGE_FA.md` | `13baabd2f726e6c857630fdf1c33f56e806ba524` | triage یافته‌های Claude با scope محدود | partial-scope-triage-only / no evidence acceptance |
+| `docs/WHITEPAPER_STEP13_CLAUDE_FINDINGS_TRIAGE_FA.md` | `13baabd2f726e6c857630fdf1c33f56e806ba524` | triage یافته‌های Claude با scope محدود | limited-context / partial-scope-triage-only / no evidence acceptance |
 | `docs/WHITEPAPER_STEP13_CLAUDE_DOCUMENTATION_HARDENING_PATCH_FA.md` | `3a4a8840cbc0c5c5ec267ad57141db0b997eddfb` | hardening مستنداتی بر پایه triage Claude | hardening-only / no risk closure |
 | `docs/WHITEPAPER_STEP13_CURRENT_GOVERNANCE_STATE_SNAPSHOT_FA.md` | `a8b1ca27ba7b42b70ac8d217cc03def5f2609d80` | snapshot واحد از وضعیت فعلی governance | snapshot-only / no signoff |
+| `docs/WHITEPAPER_STEP13_IRANIAN_CONTEXT_REVIEW_LIMITATION_ADDENDUM_FA.md` | `be533dc6e8f4f2516e19545e5cda750d91a4d49d` | ثبت محدودیت زمینه ایرانی در reviewهای قبلی AI | context-limitation-only / no invalidation |
+| `docs/WHITEPAPER_STEP13_IRAN_CONTEXT_AWARE_AI_REVIEW_PROMPT_FA.md` | `4edc32a286c054af6c6e589b5e154d68d1d60333` | prompt جدید برای review آینده با context جامعه ایران | prompt-only / no review performed |
 | `docs/WHITEPAPER_STEP13_INDEPENDENT_AI_REVIEW_TEMPLATE_FA.md` | `3e60c353bbfe46fe470597937b8312252e84d7ed` | قالب reviewهای مستقل AI آینده | template-only / no review performed |
 | `docs/WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md` | `4accbb824c2f2ffe3a5eb1137ee8325e08dfdc02` | درخواست review انسانی برای safeguards مربوط به AI | review-request-only / no review completed |
 | `docs/WHITEPAPER_STEP13_AI_REVIEW_PROMPT_PACKAGE_FA.md` | `4128039be9d5ceee3bacba8cfc86067c00202cd9` | بسته prompt برای self-review و reviewهای AI مستقل آینده | prompt-package-only / no review performed |
-| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `7c728ab110e0cce8dbf653c4851d271b6f2902bc` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
+| `docs/WHITEPAPER_STEP13_AI_ASSISTED_REVIEW_STATUS_ROLLUP_FA.md` | `0e134f53f4099f84df560ae5350ebb5586d582de` | رول‌آپ وضعیت AI-assisted review | status-rollup-only / no signoff |
 
-## ۴. وضعیت findings Gemini
+## ۴. محدودیت زمینه ایرانی در reviewهای Gemini و Claude
 
-خروجی خام Gemini توسط کاربر ارائه شد، اما ثبت کامل متن خام آن توسط ابزار GitHub مسدود شد. به‌جای آن، یافته‌ها به‌صورت کنترل‌شده triage شدند و patch مستنداتی برای موارد معتبر ساخته شد.
+در promptهای اولیه Gemini و Claude، زمینه جامعه ایران، روح سپیدنامه، تجربه تاریخی تمرکز قدرت، سکولاریسم مشروطه، کثرت اجتماعی ایران و حساسیت‌های اعتماد عمومی به‌قدر کافی صریح نشده بود.
 
-این triage به معنی پذیرش کامل Gemini، صحت‌سنجی قطعی، accepted evidence، signoff یا closure نیست.
+بنابراین reviewهای Gemini و Claude قبلی باید چنین فهمیده شوند:
 
-## ۵. وضعیت findings Claude
+```text
+limited-context AI-assisted risk notes; useful for generic governance/documentation hardening; not Iran-context-complete; no signoff; no accepted evidence; no consensus.
+```
 
-خروجی Claude توسط کاربر ارائه شد و خود Claude صریحاً اعلام کرد که review آن partial-scope است، چون متن کامل ۱۳ artifact در session به Claude داده نشده بود.
+این محدودیت باعث بی‌اعتبار شدن reviewهای قبلی نمی‌شود؛ بلکه scope آن‌ها را دقیق‌تر می‌کند. آن‌ها برای hardening عمومی مفیدند، اما برای نتیجه‌گیری فلسفی/اجتماعی/حاکمیتی درباره ایران کافی نیستند.
 
-بنابراین یافته‌های Claude فقط risk-detection با scope محدود هستند و full content-level review محسوب نمی‌شوند.
+## ۵. وضعیت prompt جدید context-aware
 
-پاسخ مستنداتی انجام‌شده:
+یک prompt جدید برای review آینده ساخته شد که صریحاً شامل این زمینه‌هاست:
 
-- package-level non-completion disclaimer
-- AI layers are not collective authority
-- same-source / non-independent label برای ChatGPT initial + self-review
-- rollup is not completion summary
-- pending human review remains open until affirmative human/governance action
-- AI-informed, not AI-authorized wording
-- template independence clarification
-- document hierarchy / precedence note
-- current governance state snapshot requirement و سپس snapshot جداگانه
+- جامعه ایران؛
+- زبان و استدلال عمومی فارسی؛
+- تجربه تاریخی تمرکز قدرت و اقتدار پنهان؛
+- سکولاریسم حقوقی و مشروطه‌گرایی؛
+- کثرت قومی، زبانی، مذهبی، فرهنگی، سیاسی و منطقه‌ای؛
+- بازسازی اعتماد عمومی؛
+- ضدانحصار قدرت؛
+- ضدفساد، auditability، contestability و traceability؛
+- جلوگیری از authority capture توسط نهاد مذهبی، نظامی، حزبی، الیگارشیک، تکنوکراتیک یا AI-based؛
+- حفظ legitimacy از مسیر انسان، قانون، نهاد معتبر و اراده عمومی، نه خروجی AI.
 
-هیچ‌کدام risk closure، accepted evidence یا signoff ایجاد نمی‌کنند.
+این prompt هنوز review انجام‌شده نیست.
 
-## ۶. Snapshot وضعیت فعلی governance
+## ۶. وضعیت findings Gemini و Claude
 
-Snapshot جداگانه ساخته شد تا وضعیت فعلی از چند سند پراکنده حدس زده نشود.
+Gemini و Claude قبلی:
 
-وضعیت snapshot:
-
-- Step 12: open / pending
-- Step 13: open / pending human review
-- accepted evidence: none
-- reviewer signoff: none
-- blocker closure: not claimed
-- production readiness: not claimed
-- release approval: not claimed
-- audit completion: not claimed
-- formal verification completion: not claimed
-- downstream execution: not allowed / not activated
-- sovereign authority: not created
-- multi-AI consensus: not claimed
-- human review: not completed
+- مفید برای کشف overclaim، proof ambiguity، authority inflation، false consensus، hash gap و documentation maturity risk؛
+- مفید برای سخت‌تر کردن no-downstream-execution و no-signoff boundaries؛
+- ناکافی برای داوری کامل درباره سازگاری با سپیدنامه و جامعه ایران؛
+- not accepted evidence؛
+- not reviewer signoff؛
+- not multi-AI consensus.
 
 ## ۷. وضعیت review و consensus
 
@@ -109,10 +108,11 @@ Snapshot جداگانه ساخته شد تا وضعیت فعلی از چند س�
 
 - ChatGPT pre-review وجود دارد.
 - ChatGPT strict self-review وجود دارد، اما مستقل شمرده نمی‌شود.
-- Gemini findings triage و Gemini hardening patch وجود دارد، اما raw Gemini review کامل ثبت نشده است.
-- Claude findings triage و Claude hardening patch وجود دارد، اما Claude review partial-scope است.
+- Gemini findings triage و Gemini hardening patch وجود دارد، اما limited-context هستند و raw Gemini review کامل ثبت نشده است.
+- Claude findings triage و Claude hardening patch وجود دارد، اما Claude review partial-scope و limited-context است.
+- Iran-context-aware review هنوز انجام نشده است.
 - بنابراین multi-AI consensus هنوز ادعا نمی‌شود.
-- برای consensus/divergence واقعی، review کامل‌تر با متن کامل documents و/یا human/governance review لازم است.
+- برای comparison جدی یا نتیجه‌گیری درباره زمینه ایران، review جدید با prompt context-aware لازم است.
 
 ## ۸. وضعیت claim و authority
 
@@ -132,27 +132,29 @@ Snapshot جداگانه ساخته شد تا وضعیت فعلی از چند س�
 - downstream execution allowed
 - sovereign authority confirmed
 - multi-AI consensus confirmed
+- Iran-context-complete review confirmed
 - risk closure confirmed
 
 عبارت امن فعلی:
 
 ```text
-Step 13 documentation package is prepared only for further human/governance review. It includes AI-assisted pre-review, strict non-independent self-review, Gemini and Claude triaged findings, documentation hardening patches, safeguard taxonomy, current governance state snapshot, review templates, and prompt package. This improves traceability and review preparation only. It does not create accepted evidence, reviewer signoff, blocker closure, production readiness, release approval, audit completion, formal verification completion, multi-AI consensus, downstream execution, or sovereign authority. Step 12 and Step 13 remain open.
+Step 13 documentation package is prepared only for further human/governance and Iran-context-aware review. It includes AI-assisted pre-review, strict non-independent self-review, limited-context Gemini and Claude triaged findings, documentation hardening patches, safeguard taxonomy, current governance state snapshot, Iranian context limitation addendum, Iran-context-aware review prompt, review templates, and prompt package. This improves traceability and review preparation only. It does not create accepted evidence, reviewer signoff, blocker closure, production readiness, release approval, audit completion, formal verification completion, multi-AI consensus, Iran-context-complete review, downstream execution, or sovereign authority. Step 12 and Step 13 remain open.
 ```
 
 ## ۹. اولویت‌های بعدی
 
 اولویت‌های بعدی، بدون claim نهایی:
 
-۱. در صورت نیاز، ارائه متن کامل documents به Claude برای full-content-level pre-review جدید.  
-۲. ساخت rollup مقایسه‌ای فقط به‌عنوان comparison-only و بدون consensus claim، اگر کاربر بخواهد.  
-۳. دریافت review انسانی روی `WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md`.  
-۴. ثبت timestamped issue-state snapshot برای issueهای #12 تا #19 در صورت نیاز.  
-۵. حفظ Step 12 و Step 13 در وضعیت open تا evidence و signoff معتبر آینده.
+۱. اجرای review جدید Gemini یا Claude با prompt Iran-context-aware و با متن کامل documents.  
+۲. ثبت/triage خروجی جدید به‌عنوان Iran-context-aware AI risk note، نه signoff.  
+۳. پس از review زمینه‌مند، ساخت comparison-only rollup بدون consensus claim، اگر داده کافی وجود داشت.  
+۴. دریافت review انسانی روی `WHITEPAPER_STEP13_HUMAN_REVIEW_REQUEST_AI_SAFEGUARDS_FA.md`.  
+۵. ثبت timestamped issue-state snapshot برای issueهای #12 تا #19 در صورت نیاز.  
+۶. حفظ Step 12 و Step 13 در وضعیت open تا evidence و signoff معتبر آینده.
 
 ## ۱۰. non-claim نهایی
 
-این سند فقط رول‌آپ وضعیت بازبینی AI-assisted است. این سند هیچ review کامل‌شده، risk closure، accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution، multi-AI consensus یا sovereign authority ایجاد نمی‌کند.
+این سند فقط رول‌آپ وضعیت بازبینی AI-assisted است. این سند هیچ review کامل‌شده، risk closure، accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution، multi-AI consensus، Iran-context-complete review یا sovereign authority ایجاد نمی‌کند.
 
 Step 12 باز می‌ماند. Step 13 باز می‌ماند.
 
