@@ -13,7 +13,7 @@
 ```text
 No finding without canonical-source check.
 No contradiction claim without checking the relevant FAQ/kit/source explanation.
-No architecture finding without mapping the finding to Sepidnameh, Charter, Step 13 source text, and relevant FAQ/kit clarification.
+No architecture finding without mapping the finding to Sepidnameh, Charter, Step 13 source text, relevant FAQ/kit clarification, and Sepidnameh technical pre-awareness.
 No AI review may convert a misunderstood concept into a project defect.
 ```
 
@@ -24,6 +24,8 @@ No AI review may convert a misunderstood concept into a project defect.
 برای گام ۱۳، canonical source یعنی هر سند یا توضیحی که برای فهم یک مفهوم پروژه مرجع اصلی محسوب می‌شود، از جمله:
 
 - سپیدنامه اصلی ایران‌اواس؛
+- بخش «پیش‌آگاهی: ارکان فنی حاکمیت نوین ایران»؛
+- فرابخش «معماری هسته سخت در لایه صفر»؛
 - منشور رفاه و عدالت / پیمان ملی مشروطه سکولار؛
 - FAQها و کیت‌های توضیحی پروژه؛
 - توضیحات رسمی/مستندشده درباره مفاهیمی مثل ماشه هوشمند، لایه صفر، هسته سخت، no-admin، خزانه، خزنده، AI review، no-downstream-execution و rule-based execution؛
@@ -36,12 +38,36 @@ No AI review may convert a misunderstood concept into a project defect.
 هر reviewer، چه AI و چه انسان، پیش از ثبت finding باید نشان دهد:
 
 1. sourceهای canonical مرتبط را خوانده است؛
-2. توضیح canonical مرتبط را پیدا کرده است؛
-3. اگر finding با توضیح canonical تعارض دارد، توضیح داده چرا finding هنوز باقی است؛
-4. اگر توضیح canonical finding را حل می‌کند، finding باید withdrawn، downgraded یا به documentation-clarity note تبدیل شود؛
-5. اگر reviewer توضیح canonical را فقط بعد از توضیح طراح فهمیده باشد، خروجی مستقل نیست و باید designer-clarified برچسب بخورد.
+2. پیش‌آگاهی فنی سپیدنامه را برای هر finding معماری بررسی کرده است؛
+3. توضیح canonical مرتبط را پیدا کرده است؛
+4. اگر finding با توضیح canonical تعارض دارد، توضیح داده چرا finding هنوز باقی است؛
+5. اگر توضیح canonical finding را حل می‌کند، finding باید withdrawn، downgraded یا به documentation-clarity note تبدیل شود؛
+6. اگر reviewer توضیح canonical را فقط بعد از توضیح طراح فهمیده باشد، خروجی مستقل نیست و باید designer-clarified برچسب بخورد.
 
-## ۴. ماشه هوشمند و no-downstream-execution
+## ۴. پیش‌آگاهی فنی سپیدنامه
+
+هیچ finding معماری معتبر نیست مگر اینکه reviewer ابتدا بخش پیش‌آگاهی فنی سپیدنامه را خوانده و اعمال کرده باشد.
+
+Reviewer باید نشان دهد که این عناصر را فهمیده است:
+
+- IranOS به‌عنوان سیستم‌عامل اجرای دستورات حقوقی منشور؛
+- National Value Chain به‌عنوان زیرساخت ثبت تغییرناپذیر قوانین، دارایی‌ها و حقوق؛
+- National Wealth Treasury به‌عنوان دارایی مشترک ملت؛
+- Layer-Zero Kernel و هسته سخت؛
+- سه ستون hard-coded: جایگاه آرتش، فرمول ریاضی ثروت ملی و الگوریتم ماشه؛
+- Smart Trigger به‌عنوان سازوکار خودکار اجرای قاعده منشور، نه AI خودسر؛
+- No Admin Access به‌عنوان حذف دسترسی مدیریتی برای تغییر ستون‌های بنیادین، نه admin پنهان؛
+- ابطال خودکار دستور ناسازگار؛
+- هدف ضدفساد، ضداستبداد فردی و ضددست‌اندازی سیاسی/انسانی.
+
+قاعده:
+
+```text
+No architecture review without Sepidnameh technical pre-awareness.
+No kernel/layer-zero/no-admin/smart-trigger finding without reading and applying the technical pre-awareness section.
+```
+
+## ۵. ماشه هوشمند و no-downstream-execution
 
 قبل از هر claim درباره تضاد downstream execution، reviewer باید این تمایز را بررسی و نقل کند:
 
@@ -50,50 +76,25 @@ Review AI has no downstream execution authority.
 Iran-OS rule-based/deterministic execution is a separate operational layer that may operate only under pre-approved constitutional/governance rules.
 ```
 
-فارسی:
-
-```text
-AIهای review هیچ اختیار downstream execution ندارند.
-اجرای rule-based/deterministic در ایران‌اواس لایه‌ای عملیاتی و جداگانه است که فقط تحت قوانین مشروطه‌ای/حکمرانیِ ازپیش‌تصویب‌شده می‌تواند عمل کند.
-```
-
 اگر reviewer این تمایز را بررسی نکرده باشد، finding مربوط به تناقض AI/no-downstream-execution معتبر نیست.
 
-## ۵. لایه صفر، هسته سخت، no-admin و bootstrapping
+## ۶. لایه صفر، هسته سخت، no-admin و bootstrapping
 
 قبل از هر claim درباره bootstrapping، قدرت نویسنده، author sovereignty، نبود admin یا هسته سخت بدون مدیر، reviewer باید توضیح canonical مرتبط را بررسی کند.
-
-قاعده اول:
 
 ```text
 No-admin must not be treated as hidden author sovereignty unless the reviewer first checks the canonical explanation that no-admin can be an anti-capture design, not a concealed administrator.
 ```
 
-قاعده دوم:
-
 ```text
 Layer-zero immutability must not be treated as author sovereignty unless the reviewer first checks the canonical explanation of layer-zero as constitutional anti-capture architecture.
 ```
-
-قاعده سوم:
 
 ```text
 The author of code or documentation does not become the sovereign authority merely because the initial text or code was authored. Authority must be derived only from valid constitutional, public, human/governance, and founding procedures.
 ```
 
-فارسی:
-
-```text
-نبود admin نباید به‌عنوان قدرت پنهان نویسنده یا مدیر مخفی تفسیر شود، مگر اینکه reviewer ابتدا توضیح canonical درباره no-admin به‌عنوان طراحی ضدانحصار و ضدتصاحب را بررسی کرده باشد.
-```
-
-```text
-تغییرناپذیری لایه صفر نباید به‌عنوان حاکمیت نویسنده کد تفسیر شود، مگر اینکه reviewer ابتدا توضیح canonical درباره لایه صفر به‌عنوان معماری مشروطه‌ای ضدتصاحب و ضدارتداد ساختاری را بررسی کرده باشد.
-```
-
-اگر reviewer فقط پس از توضیح مستقیم طراح متوجه شود که no-admin یا لایه صفر به معنی power capture نویسنده نیست، finding او independent نیست و باید به‌عنوان designer-clarified misunderstanding correction برچسب بخورد.
-
-## ۶. designer clarification و استقلال review
+## ۷. designer clarification و استقلال review
 
 اگر AI یا انسان یک مفهوم را از متن canonical نفهمیده و فقط پس از توضیح مستقیم طراح متوجه شده باشد، خروجی او نباید independent review شمرده شود.
 
@@ -103,13 +104,7 @@ The author of code or documentation does not become the sovereign authority mere
 designer-clarified / not independent / not evidence / not signoff / not consensus
 ```
 
-فارسی:
-
-```text
-clarification از سوی طراح دریافت شده؛ مستقل نیست؛ evidence نیست؛ signoff نیست؛ consensus نیست.
-```
-
-## ۷. deprecation کنترل‌شده reviewهای قبلی Gemini و Claude
+## ۸. deprecation کنترل‌شده reviewهای قبلی Gemini و Claude
 
 Reviewهای قبلی Gemini و Claude حذف کامل نمی‌شوند، چون بخشی از traceability فرایندی و نشان‌دهنده hardening روند review هستند.
 
@@ -118,6 +113,7 @@ Reviewهای قبلی Gemini و Claude حذف کامل نمی‌شوند، چو�
 - Sepidnameh alignment؛
 - Charter / welfare / justice / constitutional alignment؛
 - معماری عملیاتی ایران‌اواس؛
+- پیش‌آگاهی فنی سپیدنامه؛
 - ماشه هوشمند؛
 - لایه صفر؛
 - هسته سخت؛
@@ -136,19 +132,14 @@ Reviewهای قبلی Gemini و Claude حذف کامل نمی‌شوند، چو�
 limited-scope / limited-context / non-canonical-source-checked / process-hardening artifact only / not validation / not defect evidence / not signoff / not consensus
 ```
 
-فارسی:
-
-```text
-دامنه محدود؛ زمینه محدود؛ بدون canonical-source check کامل؛ فقط artifact سخت‌سازی فرایند review؛ نه validation؛ نه evidence برای defect؛ نه signoff؛ نه consensus.
-```
-
-## ۸. قاعده citation برای findings آینده
+## ۹. قاعده citation برای findings آینده
 
 هر finding آینده باید این fields را داشته باشد:
 
 ```yaml
 canonical_source_check:
   sepidnameh_checked: true_or_false
+  sepidnameh_technical_preawareness_checked: true_or_false
   charter_checked: true_or_false
   step13_sources_checked: true_or_false
   faq_or_kit_checked: true_or_false
@@ -161,7 +152,7 @@ canonical_source_check:
 
 اگر این بخش وجود نداشته باشد، finding فقط draft note است و نباید در rollup به‌عنوان review finding قوی ثبت شود.
 
-## ۹. non-claim نهایی
+## ۱۰. non-claim نهایی
 
 این سند فقط قاعده سخت‌سازی review و deprecation کنترل‌شده reviewهای قبلی است. این سند هیچ review را accepted، signed off، closed، production ready، release approved، audit complete، formally verified، consensus-backed یا authorized for downstream execution اعلام نمی‌کند.
 
