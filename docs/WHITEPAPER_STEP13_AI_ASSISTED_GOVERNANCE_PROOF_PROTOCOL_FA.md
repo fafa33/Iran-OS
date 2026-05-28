@@ -12,7 +12,7 @@
 
 هدف سند این نیست که هوش مصنوعی را مرجع حاکمیتی، داور نهایی، audit کامل، formal verification کامل، reviewer signoff، release approval یا مجوز اجرای downstream معرفی کند.
 
-هدف این سند فقط ساخت یک پروتکل پیشنهادی برای استفاده محدود، قابل ردگیری و قابل review از AI در کارهای تحلیلی و آماده‌سازی review است.
+هدف این سند فقط ساخت یک پروتکل پیشنهادی برای استفاده محدود، قابل ردگیری و قابل review از AI در کارهای تحلیلی، آماده‌سازی review، کشف ریسک، آشکارسازی شکاف‌های انسانی/نهادی و نمایش محدود مدل عملیاتی آینده ایران‌اواس است.
 
 ## ۲. اصل پایه: AI sovereign authority نیست
 
@@ -40,8 +40,38 @@ AI فقط می‌تواند در نقش‌های کمکی زیر استفاده 
 - evidence-gap detector
 - proposal generator
 - review preparation assistant
+- escalation signal generator
+- unresolved-risk tracker
 
-## ۳. کارهای مجاز AI
+## ۳. فلسفه استفاده از بازبینی چندگانه هوش مصنوعی
+
+استفاده از چند ابزار هوش مصنوعی در این پروژه برای جایگزین‌کردن داوری انسانی، signoff رسمی، audit کامل، formal verification کامل یا authority حاکمیتی نیست.
+
+فلسفه این استفاده آن است که پروژه از زاویه‌های فکری، تحلیلی و ریسک‌شناختی متفاوت مورد آزمون قرار گیرد. هر سامانه هوش مصنوعی ممکن است روی نوع خاصی از خطا حساس‌تر باشد: یکی روی claim زودرس، یکی روی ناسازگاری متنی، یکی روی evidence gap، یکی روی ریسک فنی، و دیگری روی ابهام حاکمیتی یا اجرایی.
+
+بنابراین reviewهای AI-assisted نقش «پیش‌ران کار انسانی» را دارند: آن‌ها حجم اولیه بررسی، کشف ریسک، استخراج ابهام، مقایسه اسناد، آماده‌سازی سوالات review و پیشنهاد اصلاحات را جلو می‌برند تا بازبین‌های انسانی بتوانند به‌جای شروع از صفر، روی یافته‌های مشخص، اختلاف‌نظرها، evidence gapها و نقاط حساس تمرکز کنند.
+
+در این مدل، انسان حذف نمی‌شود؛ بلکه نقش انسان از جست‌وجوی خام و فرسایشی به داوری، رد، تأیید، اولویت‌بندی، ارجاع و signoff معتبر ارتقا می‌یابد.
+
+خروجی‌های AI فقط ماده خام review هستند. انسان‌ها، بازبین‌های معتبر، auditorها، formal verification reviewerها، governance reviewerها یا multisig/signoff authority باید نتایج این reviewها را بررسی کنند و هر مورد را صریحاً بپذیرند، رد کنند، اصلاح بخواهند یا به evidence بیشتر ارجاع دهند.
+
+اختلاف بین reviewهای AI نیز بخشی از ارزش این فرآیند است. تفاوت نظرها نشان می‌دهد کدام بخش‌ها نیازمند دقت انسانی بیشتر، evidence قوی‌تر یا wording شفاف‌تر هستند. این اختلاف‌ها نه failure محسوب می‌شوند، نه approval، نه accepted evidence و نه signoff.
+
+## ۴. این فرایند به‌عنوان دمو محدود مدل آینده ایران‌اواس
+
+این روش استفاده از AI فقط یک ابزار کمکی برای review گام ۱۳ نیست؛ بلکه یک دمو محدود، غیرحاکمیتی و non-final از منطق عملیاتی آینده ایران‌اواس است.
+
+در مدل ایران‌اواس، تصمیم‌سازی می‌تواند با کمک چند عامل تحلیلی مستقل انجام شود؛ هر عامل مسئله را از زاویه‌ای متفاوت بررسی می‌کند، ریسک‌ها را آشکار می‌سازد، evidence gapها را نشان می‌دهد، ناسازگاری‌ها را پیدا می‌کند و پیشنهادهای قابل بررسی تولید می‌کند.
+
+اما تصمیم نهایی، پذیرش evidence، signoff، release approval، blocker closure یا هر اقدام downstream همچنان نیازمند انسان، review معتبر، gate حاکمیتی، evidence قابل بررسی و ثبت شفاف است.
+
+بنابراین AI در این مدل جایگزین انسان نیست؛ بلکه کار انسانی را جلوتر، دقیق‌تر، قابل مقایسه‌تر و قابل auditتر می‌کند. انسان‌ها به‌جای شروع از نقطه صفر، روی یافته‌ها، اختلاف‌نظرها، هشدارها و پیشنهادهای ثبت‌شده تصمیم می‌گیرند: تأیید، رد، اصلاح، درخواست evidence بیشتر یا ارجاع به review تخصصی.
+
+از این منظر، multi-AI review یک نمونه کوچک از شیوه آینده کشور‌داری در ایران‌اواس است: حکمرانی مبتنی بر چندصدایی تحلیلی، ثبت شفاف، کنترل claim، تفکیک پیشنهاد از تصمیم، و حفظ authority نهایی در دست نهاد انسانی/حقوقی معتبر.
+
+این دمو هیچ sovereign authority، accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion یا downstream execution ایجاد نمی‌کند. این فقط نمایش محدود و مستند از روش کار پیشنهادی است.
+
+## ۵. کارهای مجاز AI
 
 AI فقط می‌تواند خروجی‌های کمکی، غیرنهایی و قابل review تولید کند.
 
@@ -55,10 +85,12 @@ AI فقط می‌تواند خروجی‌های کمکی، غیرنهایی و �
 | review preparation | آماده‌سازی متن review request یا checklist | draft review material |
 | proposal generation | پیشنهاد wording، ساختار، checklist یا protocol | proposal-only output |
 | traceability assistance | کمک به نگاشت issue، سند، commit و evidence | traceability draft |
+| escalation signal | مشخص‌کردن اینکه finding حل‌نشده نیازمند reviewer بالاتر است | escalation recommendation |
+| precautionary safeguard suggestion | پیشنهاد اقدام احتیاطی موقت، برگشت‌پذیر و غیرنهایی | non-final safeguard proposal |
 
 هیچ‌کدام از این خروجی‌ها به‌تنهایی accepted evidence، review completion یا signoff محسوب نمی‌شوند.
 
-## ۴. کارهای ممنوع AI
+## ۶. کارهای ممنوع AI
 
 AI نباید هیچ‌کدام از کارهای زیر را انجام‌شده، معتبر، کامل یا approved اعلام کند:
 
@@ -75,7 +107,35 @@ AI نباید هیچ‌کدام از کارهای زیر را انجام‌شد�
 | multisig participation | AI نمی‌تواند signer، quorum member یا substitute signer باشد. |
 | policy enforcement finality | AI نمی‌تواند policy را بدون gate انسانی و evidence معتبر enforce کند. |
 
-## ۵. مدل ثبت خروجی AI
+## ۷. ثبت نوع و نام هوش مصنوعی استفاده‌شده
+
+هر review، finding، risk note یا proposal که با AI تولید می‌شود باید ابزار یا مدل استفاده‌شده را آشکار کند.
+
+حداقل disclosure لازم:
+
+| فیلد | توضیح |
+| --- | --- |
+| AI tool/model used | نام ابزار یا مدل، مانند `OpenAI ChatGPT — GPT-5.5 Thinking`، در حد اطلاعات موجود |
+| review type | AI-assisted internal pre-review / claim-safety check / consistency check |
+| authority level | non-sovereign / non-binding / proposal-only |
+| output status | finding draft / risk note / consistency observation / proposal |
+| signoff status | no signoff / not requested / pending human review |
+| evidence status | not accepted evidence |
+| downstream execution | not allowed |
+
+نمونه:
+
+```text
+AI tool/model used: OpenAI ChatGPT — GPT-5.5 Thinking
+Review type: AI-assisted internal pre-review
+Authority level: non-sovereign / non-binding / proposal-only
+Output status: finding draft / risk note / consistency check
+Signoff status: no signoff
+Evidence status: not accepted evidence
+Downstream execution: not allowed
+```
+
+## ۸. مدل ثبت خروجی AI
 
 هر خروجی AI که برای review، governance، evidence یا claim-safety استفاده می‌شود باید قابل ردگیری باشد.
 
@@ -97,9 +157,10 @@ AI نباید هیچ‌کدام از کارهای زیر را انجام‌شد�
 | `claim_boundary` | اینکه خروجی چه claimهایی را مجاز نمی‌کند |
 | `downstream_allowed` | باید پیش‌فرض `false` باشد مگر gate معتبر جداگانه وجود داشته باشد |
 | `human_reviewer` | reviewer انسانی، اگر بعداً تعیین شود |
+| `human_decision_status` | accepted / rejected / deferred / unresolved / escalation required |
 | `signoff_status` | pending / not requested / explicitly signed off by authorized reviewer |
 
-## ۶. قالب پیشنهادی ثبت AI output
+## ۹. قالب پیشنهادی ثبت AI output
 
 ```yaml
 ai_output_id: "AI-STEP13-YYYYMMDD-NNN"
@@ -133,12 +194,13 @@ claim_boundary:
   sovereign_authority: false
 downstream_allowed: false
 human_reviewer: "pending"
+human_decision_status: "unresolved"
 signoff_status: "not requested"
 ```
 
 این قالب خودش evidence یا signoff ایجاد نمی‌کند و فقط برای ثبت و review آینده است.
 
-## ۷. کنترل hallucination
+## ۱۰. کنترل hallucination
 
 برای کاهش خطر hallucination، هر خروجی AI باید با این کنترل‌ها بررسی شود:
 
@@ -150,7 +212,7 @@ signoff_status: "not requested"
 ۶. هیچ hallucinated signoff، reviewer identity، acceptance یا closure قابل ثبت نیست.  
 ۷. هر contradiction باید به human reviewer ارجاع شود.
 
-## ۸. کنترل bias، manipulation و overreach
+## ۱۱. کنترل bias، manipulation و overreach
 
 AI ممکن است در wording، اولویت‌دهی، risk scoring یا interpretation دچار bias یا overreach شود.
 
@@ -165,8 +227,10 @@ AI ممکن است در wording، اولویت‌دهی، risk scoring یا inte
 | hidden assumption | الزام explicit assumptions |
 | false consensus | ممنوعیت تبدیل AI output به signoff |
 | authority inflation | تأکید بر non-sovereign بودن AI |
+| human inaction | ثبت unresolved state و escalation path |
+| unexplained human rejection | الزام reasoned rejection و ثبت traceable rationale |
 
-## ۹. کنترل prompt injection
+## ۱۲. کنترل prompt injection
 
 هر ورودی AI که از issue، comment، سند، artifact یا متن external می‌آید باید به‌عنوان untrusted input تلقی شود.
 
@@ -178,7 +242,7 @@ AI ممکن است در wording، اولویت‌دهی، risk scoring یا inte
 ۴. prompt injection نباید باعث تغییر branch، issue state، release state، downstream action یا closure شود.  
 ۵. هر خروجی حساس باید قبل از اجرا با human/multisig gate بررسی شود.
 
-## ۱۰. human / multisig / signoff gate
+## ۱۳. human / multisig / signoff gate
 
 برای هر claim حساس، AI output فقط می‌تواند ماده خام review باشد.
 
@@ -213,7 +277,65 @@ Claimهای حساس که نیازمند human review و signoff معتبر هس
 ۶. signoff صریح و issue-level  
 ۷. ثبت اینکه AI فقط analyzer/reviewer assistant بوده است
 
-## ۱۱. no-downstream-execution rule
+## ۱۴. اصل ضدفلج انسانی / Human Inaction Safeguard
+
+AI جای authority انسانی/حاکمیتی را نمی‌گیرد. اما سکوت، ناتوانی، اهمال یا رد بی‌دلیل انسان هم نباید ریسک کشف‌شده توسط AI را حذف کند.
+
+اگر AI-assisted review یک ریسک، ناسازگاری، evidence gap یا claim-safety concern را ثبت کرد و انسان آن را تأیید یا رد نکرد، نتیجه نباید به approval تبدیل شود، اما finding هم نباید دفن شود.
+
+قاعده پایه:
+
+```text
+AI output + no human decision ≠ approval
+AI output + weak human review ≠ signoff
+AI output + no rejection ≠ acceptance
+Human silence, incapacity, negligence, or unexplained rejection must not erase AI-detected risk.
+```
+
+در چنین وضعیتی باید یکی از وضعیت‌های زیر ثبت شود:
+
+| وضعیت | معنی | اثر مجاز |
+| --- | --- | --- |
+| `unresolved` | finding هنوز حل نشده است | قابل مشاهده و قابل ارجاع باقی می‌ماند |
+| `deferred` | تصمیم به زمان یا evidence بیشتر موکول شده است | نه acceptance، نه rejection |
+| `escalation_required` | reviewer فعلی صلاحیت یا پاسخ کافی ندارد | ارجاع به سطح بالاتر |
+| `authority_gap_detected` | نهاد/بازبین معتبر کافی برای داوری وجود ندارد | claim حساس متوقف می‌ماند |
+| `reasoned_rejection_required` | رد انسانی بدون دلیل کافی است | باید rationale ثبت شود |
+
+## ۱۵. وضعیت finding حل‌نشده و مسیر escalation
+
+یافته‌های حل‌نشده AI باید قابل مشاهده، قابل ردگیری، قابل ارجاع و در صورت نیاز منشأ اقدام احتیاطی غیرنهایی باشند.
+
+مسیر پیشنهادی:
+
+۱. AI finding با hash، timestamp، model، input artifact و issue ثبت شود.  
+۲. reviewer انسانی یا نهادی تعیین شود.  
+۳. reviewer باید یکی از پاسخ‌های مجاز را بدهد: accept، reject، defer، request evidence، escalate.  
+۴. اگر reviewer سکوت کرد یا پاسخ نامعتبر داد، `human_review_gap` ثبت شود.  
+۵. اگر finding حساس است، موضوع به governance reviewer، domain expert، auditor، formal verification reviewer، release council یا multisig review panel ارجاع شود.  
+۶. تا حل موضوع، هیچ acceptance، signoff، blocker closure، release approval یا downstream execution مجاز نیست.  
+۷. finding نباید حذف شود مگر با reasoned resolution قابل ردگیری.
+
+## ۱۶. اقدام احتیاطی موقت، برگشت‌پذیر و غیرنهایی
+
+برای جلوگیری از فلج سیستم یا دفن ریسک، AI-assisted findings می‌توانند در موارد مشخص منشأ safeguard موقت شوند، اما این safeguard نباید به approval یا signoff تبدیل شود.
+
+| سطح ریسک | اقدام مجاز | محدودیت |
+| --- | --- | --- |
+| Low-risk / reversible | اصلاح wording، افزودن note، flag، checklist update | documentation-only و قابل بازگشت |
+| Medium-risk | وضعیت `risk flagged`، `needs review`، claim restriction، evidence request | بدون closure یا readiness |
+| High-risk / irreversible | توقف یا محدودسازی موقت release/downstream تا review معتبر | بدون approval یا اجرای نهایی |
+
+اقدام احتیاطی موقت فقط وقتی مجاز است که:
+
+- scope آن روشن باشد؛
+- reversible یا محدود باشد؛
+- non-final باشد؛
+- reason و AI finding مرتبط ثبت شده باشد؛
+- human/gate review همچنان required بماند؛
+- هیچ claim نهایی ایجاد نکند.
+
+## ۱۷. no-downstream-execution rule
 
 خروجی AI نباید به‌صورت مستقیم یا خودکار به اجرای downstream وصل شود.
 
@@ -233,7 +355,7 @@ Claimهای حساس که نیازمند human review و signoff معتبر هس
 
 هر downstream action فقط با gate معتبر، evidence، review و signoff مجاز آینده قابل بررسی است. این سند چنین gate یا اجازه‌ای ایجاد نمی‌کند.
 
-## ۱۲. نگاشت به issueهای #12 تا #19
+## ۱۸. نگاشت به issueهای #12 تا #19
 
 | issue | نقش AI مجاز | مرز ممنوع |
 | --- | --- | --- |
@@ -246,7 +368,7 @@ Claimهای حساس که نیازمند human review و signoff معتبر هس
 | #18 | claim-safety و non-claim preservation check | بدون signoff یا blocker closure |
 | #19 | release packet readiness-gap detection | بدون release approval یا production readiness |
 
-## ۱۳. رابطه با review response protocol
+## ۱۹. رابطه با review response protocol
 
 اگر reviewer، maintainer یا AI-assisted reviewer خروجی‌ای تولید کرد، آن خروجی باید با پروتکل مدیریت پاسخ‌های review نیز تفسیر شود:
 
@@ -255,8 +377,10 @@ Claimهای حساس که نیازمند human review و signoff معتبر هس
 - needs evidence مساوی accepted evidence نیست.
 - possible signoff مساوی signoff معتبر نیست.
 - explicit signoff نیز فقط با scope، evidence، reviewer identity و issue-level ثبت قابل بررسی است.
+- سکوت reviewer نیز approval نیست.
+- رد بی‌دلیل reviewer نیز resolution معتبر نیست.
 
-## ۱۴. نمونه wording مجاز
+## ۲۰. نمونه wording مجاز
 
 عبارت‌های مجاز برای خروجی AI:
 
@@ -272,7 +396,14 @@ Human review and issue-level signoff are required before any sensitive claim or 
 این خروجی فقط یادداشت کمکی AI-assisted است و هیچ signoff، accepted evidence، blocker closure، production readiness، release approval، audit completion یا formal verification completion ایجاد نمی‌کند. هر claim حساس یا اقدام downstream نیازمند review انسانی و signoff معتبر issue-level است.
 ```
 
-## ۱۵. موارد ممنوع در wording خروجی AI
+نمونه برای finding حل‌نشده:
+
+```text
+This AI-assisted finding remains unresolved.
+It is visible, traceable, and escalatable, but it is not accepted evidence, signoff, blocker closure, readiness, release approval, audit completion, formal verification completion, or downstream authorization.
+```
+
+## ۲۱. موارد ممنوع در wording خروجی AI
 
 AI-assisted output نباید بدون signoff معتبر از عبارت‌های زیر استفاده کند:
 
@@ -294,7 +425,7 @@ AI-assisted output نباید بدون signoff معتبر از عبارت‌ها
 
 اگر این واژه‌ها در draft لازم باشند، باید فقط در قالب negative / non-claim یا future-required استفاده شوند.
 
-## ۱۶. معیارهای استفاده معتبر آینده
+## ۲۲. معیارهای استفاده معتبر آینده
 
 استفاده از AI فقط وقتی برای review آینده قابل اتکا است که:
 
@@ -305,20 +436,23 @@ AI-assisted output نباید بدون signoff معتبر از عبارت‌ها
 ۵. human review لازم مشخص باشد.  
 ۶. downstream execution پیش‌فرض ممنوع باشد.  
 ۷. اگر خروجی برای claim حساس استفاده می‌شود، signoff معتبر جداگانه وجود داشته باشد.  
-۸. اگر ورودی untrusted است، prompt-injection control انجام شده باشد.
+۸. اگر ورودی untrusted است، prompt-injection control انجام شده باشد.  
+۹. اگر انسان تصمیم نداد، وضعیت unresolved/deferred/escalation ثبت شود.  
+۱۰. اگر انسان finding را رد کرد، دلیل رد باید ثبت و قابل review باشد.
 
-## ۱۷. گام بعدی پیشنهادی
+## ۲۳. گام بعدی پیشنهادی
 
 پس از ثبت این سند، مسیرهای مجاز آینده می‌تواند شامل موارد زیر باشد:
 
 - لینک‌دادن این سند روی issue #18 به‌عنوان protocol-only reference.
 - افزودن این سند به rollupهای Step 13، بدون claim جدید.
+- ساخت plan آینده برای اجرای AI-assisted internal review.
 - ساخت template آینده برای ثبت AI output، اگر واقعاً لازم شد.
 - استفاده از این سند برای review comments آینده، نه برای signoff.
 
-## ۱۸. non-claim نهایی
+## ۲۴. non-claim نهایی
 
-این سند فقط یک protocol/proposal برای استفاده کنترل‌شده از AI در حکمرانی است. این سند هیچ accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution یا sovereign authority ایجاد نمی‌کند.
+این سند فقط یک protocol/proposal برای استفاده کنترل‌شده از AI در حکمرانی و یک دمو محدود از منطق عملیاتی آینده ایران‌اواس است. این سند هیچ accepted evidence، reviewer signoff، blocker closure، production readiness، release approval، audit completion، formal verification completion، custody approval، oracle signoff، deployment approval، downstream execution یا sovereign authority ایجاد نمی‌کند.
 
 Step 12 باز می‌ماند. Step 13 باز می‌ماند.
 
