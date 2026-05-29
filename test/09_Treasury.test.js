@@ -131,6 +131,46 @@ expect(await treasury.totalBudgetAllocated()).to.equal(0);
 });
 });
 
+describe("Budget Guard Neutrality", function () {
+it("proposeTransaction on nonexistent lineId reverts and leaves txCount unchanged", async function () {
+const txCountBefore = await treasury.txCount();
+
+// lineId 999 has never been created — isActive == false on the zero-value struct
+await expect(
+  treasury.connect(government).proposeTransaction(
+    recipient.address, ethers.parseUnits("1000000000", 18), 999, "inactive guard"
+  )
+).to.be.revertedWith("Treasury: budget line not active");
+
+// no transaction record created
+expect(await treasury.txCount()).to.equal(txCountBefore);
+const tx_ = await treasury.getTransaction(txCountBefore + 1n);
+expect(tx_.timestamp).to.equal(0n);
+});
+
+it("proposeTransaction against prior fiscal-year line reverts and leaves txCount unchanged", async function () {
+const lineAmount = ethers.parseUnits("10000000000", 18);
+await treasury.connect(parliament).createBudgetLine(0, lineAmount);
+// lineId = 1, fiscalYear = 1404
+
+// advance to fiscal year 1405; prior line now has wrong fiscal year
+await treasury.connect(parliament).startNewFiscalYear(1405);
+
+const txCountBefore = await treasury.txCount();
+
+await expect(
+  treasury.connect(government).proposeTransaction(
+    recipient.address, ethers.parseUnits("1000000000", 18), 1, "wrong year"
+  )
+).to.be.revertedWith("Treasury: wrong fiscal year");
+
+// no transaction record created
+expect(await treasury.txCount()).to.equal(txCountBefore);
+const tx_ = await treasury.getTransaction(txCountBefore + 1n);
+expect(tx_.timestamp).to.equal(0n);
+});
+});
+
 describe("TINV-01 Annual Budget Cap Accumulation", function () {
 it("TINV-01: cumulative createBudgetLine calls can reach 150B cap exactly but not exceed it; totalBudgetAllocated unchanged on failed call", async function () {
 const lineA = ethers.parseUnits("100000000000", 18); // 100B PAH
