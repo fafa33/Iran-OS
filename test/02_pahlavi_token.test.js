@@ -157,6 +157,15 @@ describe("PahlaviToken", function () {
         token.connect(user1).transfer(user2.address, 100n)
       ).not.to.be.reverted;
     });
+
+    it("INV-04: emergency mode blocks mint; supply unchanged", async function () {
+      const supplyBefore = await token.totalSupply();
+      await token.connect(kernel).activateEmergencyMode();
+      await expect(
+        token.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-04 test")
+      ).to.be.revertedWith("PAH: system in emergency mode");
+      expect(await token.totalSupply()).to.equal(supplyBefore);
+    });
   });
 
   // ─────────────────────────────────────────
