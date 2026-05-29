@@ -220,4 +220,29 @@ defense = await budget.getSectorBudget(2);
 expect(defense.spent).to.equal(0);
 });
 });
+
+describe("TINV-09/TINV-10 Sector Arithmetic Invariants", function () {
+it("TINV-09: eight sector ratios sum to exactly 1000", async function () {
+const ratioSum =
+  (await budget.HEALTH_RATIO()) +
+  (await budget.EDUCATION_RATIO()) +
+  (await budget.DEFENSE_RATIO()) +
+  (await budget.INFRASTRUCTURE_RATIO()) +
+  (await budget.WELFARE_RATIO()) +
+  (await budget.JUSTICE_RATIO()) +
+  (await budget.ENVIRONMENT_RATIO()) +
+  (await budget.ADMINISTRATION_RATIO());
+expect(ratioSum).to.equal(1000n);
+});
+
+it("TINV-10: approveBudget distributes exactly TOTAL_BUDGET with no remainder", async function () {
+await budget.connect(parliament).approveBudget(1404);
+let totalAllocated = 0n;
+for (let i = 0; i < 8; i++) {
+  const sector = await budget.getSectorBudget(i);
+  totalAllocated += sector.allocated;
+}
+expect(totalAllocated).to.equal(await budget.TOTAL_BUDGET());
+});
+});
 });
