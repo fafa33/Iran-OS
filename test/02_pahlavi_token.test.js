@@ -251,4 +251,89 @@ describe("PahlaviToken", function () {
       expect(await token.balanceOf(user2.address)).to.equal(initialUser2Balance + mintAmount - burnAmount + transferAmount);
     });
   });
+
+  describe("DG-03 Integration: SWF deposit to reserve recognition to minting capacity", function () {
+    it("authorized reserve-recognition path expands mint capacity and preserves ratio protection", async function () {
+      const signers = await ethers.getSigners();
+      const [sovereign, kernelSigner, councilMember, minter, recipient] = signers;
+
+      const SWF = await ethers.getContractFactory("SovereignWealthFund");
+      const realSwf = await SWF.deploy(sovereign.address, kernelSigner.address);
+      await realSwf.waitForDeployment();
+
+      const COUNCIL_ROLE = await realSwf.COUNCIL_ROLE();
+      await realSwf.connect(sovereign).grantRole(COUNCIL_ROLE, councilMember.address);
+
+      const PAH = await ethers.getContractFactory("PahlaviToken");
+      const pahToken = await PAH.deploy(minter.address, kernelSigner.address, 0n);
+      await pahToken.waitForDeployment();
+
+      const reservesBefore = await pahToken.totalReserves();
+      expect(reservesBefore).to.equal(0n);
+      expect(await pahToken.totalSupply()).to.equal(0n);
+
+      const mintAmount = ethers.parseUnits("100", 18);
+
+      // minting blocked with zero reserves
+      await expect(
+        pahToken.connect(minter).mint(recipient.address, mintAmount, "pre-recognition attempt")
+      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+
+      // SWF deposit: reserve assets enter the sovereign wealth fund via real contract
+      const depositAmount = ethers.parseUnits("1000000", 18);
+      await realSwf.connect(councilMember).depositToL1(depositAmount, "reserve asset deposit");
+
+      const l1 = await realSwf.layerL1();
+      expect(l1.balance).to.equal(depositAmount);
+      expect(await realSwf.totalAssets()).to.equal(depositAmount);
+
+      // totalReserves in PahlaviToken is still zero — SWF deposit does NOT auto-sync
+      expect(await pahToken.totalReserves()).to.equal(0n);
+      await expect(
+        pahToken.connect(minter).mint(recipient.address, mintAmount, "post-deposit pre-recognition attempt")
+      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+
+      // unauthorized address cannot call updateReserves
+      await expect(
+        pahToken.connect(councilMember).updateReserves(depositAmount)
+      ).to.be.reverted;
+      expect(await pahToken.totalReserves()).to.equal(0n);
+
+      // kernel executes authorized reserve recognition
+      await expect(
+        pahToken.connect(kernelSigner).updateReserves(depositAmount)
+      ).to.emit(pahToken, "ReservesUpdated");
+
+      const reservesAfter = await pahToken.totalReserves();
+      expect(reservesAfter).to.equal(depositAmount);
+      expect(reservesAfter).to.be.gt(reservesBefore);
+
+      // mint capacity now available
+      expect(await pahToken.canMint(mintAmount)).to.be.true;
+
+      await expect(
+        pahToken.connect(minter).mint(recipient.address, mintAmount, "authorized mint post-recognition")
+      ).to.emit(pahToken, "PahlaviMinted");
+      expect(await pahToken.balanceOf(recipient.address)).to.equal(mintAmount);
+      expect(await pahToken.totalSupply()).to.equal(mintAmount);
+
+      // reserve ratio protection still enforced:
+      // with reserves=1M and totalSupply=100 after first mint,
+      // max further mintable ≈ (1M*1000/333) - 100 ≈ 3,002,903; attempt 4M fails
+      const oversizeMint = ethers.parseUnits("4000000", 18);
+      await expect(
+        pahToken.connect(minter).mint(recipient.address, oversizeMint, "oversize mint attempt")
+      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+
+      // supply cap protection still enforced
+      await expect(
+        pahToken.connect(minter).mint(recipient.address, ethers.parseUnits("900000000001", 18), "cap breach attempt")
+      ).to.be.revertedWith("PAH: exceeds liquidity cap");
+
+      // state unchanged after rejected mints
+      expect(await pahToken.balanceOf(recipient.address)).to.equal(mintAmount);
+      expect(await pahToken.totalSupply()).to.equal(mintAmount);
+      expect(await pahToken.totalReserves()).to.equal(reservesAfter);
+    });
+  });
 });
