@@ -21,6 +21,15 @@ IranOS is sovereign resilience infrastructure. This gap map exists to track what
 
 None of the gaps below authorize changing these constants.
 
+**Evidence labels used in this document:**
+
+| Label | Meaning |
+|-------|---------|
+| `[OBSERVED]` | Verified directly by reading contract code, test files, or grep output |
+| `[INFERRED]` | Follows logically from doctrine or architectural gap; no single line of code confirms the absence |
+| `[POTENTIAL]` | Requires further implementation review; may be partially covered or context-dependent |
+| `[CORRECTED]` | Original claim was factually wrong; evidence found in code contradicts it; gap restated accurately |
+
 ---
 
 ## Table of Contents
@@ -32,6 +41,7 @@ None of the gaps below authorize changing these constants.
 5. [Sovereign Wealth Fund State Transitions](#5-sovereign-wealth-fund-state-transitions)
 6. [Disbursement and Allocation Boundaries](#6-disbursement-and-allocation-boundaries)
 7. [Trigger Conditions for Reserve and Treasury Violations](#7-trigger-conditions-for-reserve-and-treasury-violations)
+8. [Gap Evidence Classification Summary](#8-gap-evidence-classification-summary)
 
 ---
 
@@ -51,30 +61,30 @@ None of the gaps below authorize changing these constants.
 
 ### 1.3 Missing Storage Structures
 
-- No per-layer or aggregate reserve class state (no `lockedBalance`, `deployableBalance`, `encumberedBalance`, `emergencyBalance` storage).
-- No mapping from SWF layer balances to recognized reserve classes.
-- No storage linking `totalFrozenValue` in `AssetFreeze` to encumbered reserve state in `SovereignWealthFund`.
-- No `recognizedReserveBacking` derived view that excludes encumbered, frozen, locked, or pending value before exposing a deployable backing figure.
-- `totalReserves` in `PahlaviToken.sol` is a raw number with no classification-state awareness.
+- `[OBSERVED]` No per-layer or aggregate reserve class state (no `lockedBalance`, `deployableBalance`, `encumberedBalance`, `emergencyBalance` storage). Grep across all contracts returns no matches.
+- `[OBSERVED]` No mapping from SWF layer balances to recognized reserve classes. `AssetLayer` struct contains only `balance`, `target`, `lastUpdated`, `totalDeposited`, `totalWithdrawn`.
+- `[OBSERVED]` No storage linking `totalFrozenValue` in `AssetFreeze` to encumbered reserve state in `SovereignWealthFund`. Neither contract references the other's encumbrance figure.
+- `[OBSERVED]` No `recognizedReserveBacking` derived view that excludes encumbered, frozen, locked, or pending value before exposing a deployable backing figure. Grep returns no matches.
+- `[OBSERVED]` `totalReserves` in `PahlaviToken.sol` is a raw uint256. `updateReserves()` sets it to any kernel-supplied value with no classification-state check.
 
 ### 1.4 Missing Invariant Tests
 
-- No test asserts that `totalReserves` in `PahlaviToken` cannot exceed the sum of recognized (non-encumbered, non-frozen, non-locked) SWF layer balances.
-- No test asserts conservation: reclassification must not increase total recognized value.
-- No test asserts that `totalFrozenValue` in `AssetFreeze` cannot be simultaneously counted as deployable backing.
-- No negative test for failed classification leaving protected state neutral.
+- `[OBSERVED]` No test asserts that `totalReserves` in `PahlaviToken` cannot exceed the sum of recognized (non-encumbered, non-frozen, non-locked) SWF layer balances. The two test suites (`02_pahlavi_token.test.js`, `03_sovereign_wealth_fund.test.js`) are independent and share no cross-contract reserve assertions.
+- `[INFERRED]` No test asserts conservation: reclassification must not increase total recognized value. Reserve classification functions do not exist, so no such test can be written yet.
+- `[INFERRED]` No test asserts that `totalFrozenValue` in `AssetFreeze` cannot be simultaneously counted as deployable backing. No integration between AssetFreeze and PahlaviToken reserve figures exists to test against.
+- `[INFERRED]` No negative test for failed classification leaving protected state neutral. Classification state machine does not exist.
 
 ### 1.5 Missing Trigger Conditions
 
-- No trigger fires when `totalReserves` in `PahlaviToken` falls below a floor relative to recognized SWF backing.
-- No trigger fires when `totalFrozenValue` in `AssetFreeze` exceeds a threshold relative to SWF L1 balance (indicating over-encumbrance).
-- TR-05 (SWF independence) is defined in `kernel.sol` but there is no automated signal path from SWF state to the oracle flag path that would raise TR-05.
+- `[INFERRED]` No trigger fires when `totalReserves` in `PahlaviToken` falls below a floor relative to recognized SWF backing. No threshold for this relationship is defined in any contract.
+- `[INFERRED]` No trigger fires when `totalFrozenValue` in `AssetFreeze` exceeds a threshold relative to SWF L1 balance. No cross-contract ratio threshold is defined.
+- `[OBSERVED]` TR-05 (SWF independence) is defined in `kernel.sol` as violation code 5 but no automated signal path connects SWF state to the oracle flag path that would raise TR-05. The SWF does not hold a kernel reference and has no `flagViolation()` call.
 
 ### 1.6 Runtime Enforcement Gaps
 
-- `updateReserves()` in `PahlaviToken.sol` accepts any kernel-supplied value without verifying it against SWF layer balances, encumbrance state, or frozen asset totals.
-- No runtime check prevents the kernel from setting `totalReserves` higher than recognized backing.
-- Conservation boundary is doctrinal only — no revert path guards against value creation through classification.
+- `[OBSERVED]` `updateReserves()` in `PahlaviToken.sol` (line 197–199) sets `totalReserves = newReserves` with no SWF balance check, no encumbrance exclusion, and no frozen-asset deduction.
+- `[OBSERVED]` No runtime check prevents the kernel from setting `totalReserves` higher than SWF `totalAssets()`. The function accepts any uint256 from a kernel-role caller.
+- `[INFERRED]` Conservation boundary enforcement is doctrinal only — no revert path guards against value creation through classification, because no classification functions exist.
 
 ### 1.7 Non-Claims and Blockers
 
@@ -100,30 +110,30 @@ Neither contract references balance classes from Step-4.1. There is no Locked, F
 
 ### 2.3 Missing Storage Structures
 
-- No `encumberedBalance` or `pendingBalance` field in `Treasury.sol` or `BudgetAllocation.sol`.
-- No `frozenBalance` that distinguishes freeze-state from unspent budget.
-- No `deployableBalance` view that derives available balance after subtracting encumbrances, locks, and frozen value.
-- No `reclaimedBalance` tracking in `Treasury.sol` separate from general inflows.
-- No audit record structure for the six-stage sequence (signal → review → recommendation → authorization → execution → accounting mutation) required by Step-4.1.
+- `[OBSERVED]` No `encumberedBalance` or `pendingBalance` field in `Treasury.sol` or `BudgetAllocation.sol`. Grep returns no matches for these terms across all contracts.
+- `[OBSERVED]` No `frozenBalance` that distinguishes freeze-state from unspent budget. `blockedByTrigger` in `Treasury.sol` blocks an address but does not reclassify its associated budget.
+- `[OBSERVED]` No `deployableBalance` view that derives available balance after subtracting encumbrances, locks, and frozen value.
+- `[OBSERVED]` No `reclaimedBalance` tracking in `Treasury.sol` separate from general inflows.
+- `[OBSERVED]` No audit record structure for the six-stage sequence (signal → review → recommendation → authorization → execution → accounting mutation) required by Step-4.1. No enum or state field represents these stages in any contract.
 
 ### 2.4 Missing Invariant Tests
 
-- No test asserts that a `signTransaction()` success in `Treasury.sol` preserves the exact-once accounting property (i.e., signing twice does not debit twice).
-- No test asserts conservation: a failed `recordExpenditure()` in `BudgetAllocation.sol` leaves `spent` unchanged.
-- No test asserts that blocked-address transactions cannot reduce budget line balances.
-- No test verifies that a `lockSectorBudget()` call prevents any subsequent `recordExpenditure()` against that sector from mutating state.
+- `[OBSERVED]` No test asserts that a `signTransaction()` success in `Treasury.sol` preserves the exact-once accounting property. The test suite (`09_Treasury.test.js`) does not contain an assertion that double-signing does not debit a budget line twice.
+- `[POTENTIAL]` No test asserts conservation: a failed `recordExpenditure()` in `BudgetAllocation.sol` leaves `spent` unchanged. The test file covers revert cases (`exceeds budget`, `not approved`, `locked by Trigger`) but does not explicitly snapshot and compare `spent` before and after a failed call.
+- `[OBSERVED]` No test asserts that blocked-address transactions cannot reduce budget line balances. `Treasury.sol` tests do not cover the interaction between `blockAddressByTrigger()` and budget line debit state.
+- `[CORRECTED]` ~~No test verifies that a `lockSectorBudget()` call prevents any subsequent `recordExpenditure()` against that sector from mutating state.~~ **Test exists.** `test/17_Budget_Allocation.test.js` lines 130–133 and 216–217 explicitly test that after `lockSectorBudget()`, `recordExpenditure()` reverts with `"BudgetAllocation: locked by Trigger"`. This gap does not exist.
 
 ### 2.5 Missing Trigger Conditions
 
-- No trigger fires when a budget sector's `spent / allocated` ratio exceeds a configurable threshold.
-- No trigger is linked to `ExpenditureFlagged` events — auditor flagging is advisory only; no automatic escalation path exists.
-- No trigger fires when the sum of all sector `spent` values approaches the total `TOTAL_BUDGET`.
+- `[INFERRED]` No trigger fires when a budget sector's `spent / allocated` ratio exceeds a configurable threshold. No such threshold is defined in any contract.
+- `[OBSERVED]` No trigger is linked to `ExpenditureFlagged` events — auditor flagging is advisory only; `flagExpenditure()` emits an event and sets `flagged = true` with no escalation to `kernel.flagViolation()`.
+- `[INFERRED]` No trigger fires when the sum of all sector `spent` values approaches the total `TOTAL_BUDGET`. No such comparison is made in any contract.
 
 ### 2.6 Runtime Enforcement Gaps
 
-- `recordExpenditure()` in `BudgetAllocation.sol` checks `sb.spent + amount <= sb.allocated` but does not check whether the sector is approaching an emergency reserve boundary.
-- `Treasury.sol` `signTransaction()` marks `executed = true` before reducing any balance — the transaction is marked executed whether or not a downstream payment occurs, because no token transfer is triggered.
-- The six audit stages (signal → execution) required by doctrine exist nowhere as a enforced state machine.
+- `[OBSERVED]` `recordExpenditure()` in `BudgetAllocation.sol` checks `sb.spent + amount <= sb.allocated` but does not check whether the sector is approaching an emergency reserve boundary. No such boundary is defined at the contract level.
+- `[OBSERVED]` `Treasury.sol` `signTransaction()` sets `tx_.executed = true` and emits `TransactionExecuted` with no token transfer. Grep across `Treasury.sol` finds no `transfer()`, `mint()`, `burn()`, or `IERC20` call.
+- `[OBSERVED]` The six audit stages (signal → execution) required by doctrine exist nowhere as an enforced state machine. No enum, state field, or function sequence enforces the six-stage ordering.
 
 ### 2.7 Non-Claims and Blockers
 
@@ -141,7 +151,7 @@ Neither contract references balance classes from Step-4.1. There is no Locked, F
 
 ### 3.2 Current Implementation Status
 
-No reserve classification state machine exists in any contract. The closest approximation is the `FreezeStatus` enum in `AssetFreeze.sol` (Active → UnderReview → Confirmed → Released), which is a freeze lifecycle state, not a reserve classification state.
+No reserve classification state machine exists in any contract. The closest approximation is the `FreezeStatus` enum in `AssetFreeze.sol` (`Active → UnderReview → Confirmed → Released`), which is a freeze lifecycle state, not a reserve classification state.
 
 `SovereignWealthFund.sol` has no classification state per layer or per deposit. All deposits flow directly into layer balances without a pending → recognized → classified sequence.
 
@@ -149,38 +159,38 @@ No reserve classification state machine exists in any contract. The closest appr
 
 ### 3.3 Missing Storage Structures
 
-- No `ClassificationState` enum or equivalent covering: Unclassified, Pending, Recognized, Locked, Deployable, Emergency, Encumbered, Frozen, PendingReclassification, Rejected, Reclaimed.
-- No `classificationRecords` mapping from balance identifier → classification state.
-- No `classificationAuthority` access control beyond general COUNCIL_ROLE or KERNEL_ROLE.
-- No `classificationAuditLog` event structure capturing source state, target state, authorization basis, and conservation boundary reference.
-- No `rejectedClassification` record storage.
+- `[OBSERVED]` No `ClassificationState` enum or equivalent. Grep across all contracts returns no matches for `ClassificationState`, `classificationState`, `classificationRecords`, `classificationAuditLog`, or `rejectedClassification`.
+- `[OBSERVED]` No `classificationRecords` mapping from balance identifier → classification state.
+- `[INFERRED]` No `classificationAuthority` access control beyond general `COUNCIL_ROLE` or `KERNEL_ROLE`. No classification function exists that would require such a role.
+- `[OBSERVED]` No `classificationAuditLog` event structure. No event in any contract captures source state, target state, authorization basis, and conservation boundary reference together.
+- `[OBSERVED]` No `rejectedClassification` record storage.
 
 ### 3.4 Missing Invariant Tests
 
-- No test exercises a classification proposal → rejection path to verify protected state remains neutral.
-- No test verifies that a replayed classification attempt does not increment recognized backing.
-- No test asserts that reclassification from Deployable → Encumbered does not change total recognized value.
-- No test confirms that an Unclassified Treasury Balance cannot be used as recognized backing before classification.
-- No test verifies that a Frozen Reserve cannot become Deployable without an explicit release authorization path.
+- `[INFERRED]` No test exercises a classification proposal → rejection path to verify protected state remains neutral. No classification functions exist to test.
+- `[INFERRED]` No test verifies that a replayed classification attempt does not increment recognized backing. No classification state machine exists.
+- `[INFERRED]` No test asserts that reclassification from Deployable → Encumbered does not change total recognized value. No reclassification functions exist.
+- `[INFERRED]` No test confirms that an Unclassified Treasury Balance cannot be used as recognized backing before classification. No classification gate exists in `updateReserves()`.
+- `[INFERRED]` No test verifies that a Frozen Reserve cannot become Deployable without an explicit release authorization path. No such path exists.
 
 ### 3.5 Missing Trigger Conditions
 
-- No trigger fires when a large-value balance remains Unclassified beyond a time threshold.
-- No trigger fires on a rejected classification that may indicate a governance dispute.
-- No trigger links classification state changes to oracle signals (consistent with the oracle-boundary doctrine, but the absence of any signal path means classification disputes are invisible to the trigger system).
+- `[INFERRED]` No trigger fires when a large-value balance remains Unclassified beyond a time threshold. No classification time-tracking exists.
+- `[INFERRED]` No trigger fires on a rejected classification. No classification rejection state exists.
+- `[INFERRED]` No trigger links classification state changes to oracle signals. Consistent with oracle-boundary doctrine, but classification disputes are invisible to the trigger system.
 
 ### 3.6 Runtime Enforcement Gaps
 
-- The entire classification state machine is absent from runtime. There is no revert path enforcing the fourteen allowed transitions or blocking the forbidden ones.
-- `depositToL1()` / `depositToL2()` / `depositToL3()` accept any authorized deposit and immediately credit balance without a pending → recognized → classified sequence.
-- `updateReserves()` in `PahlaviToken.sol` bypasses classification entirely: it directly sets `totalReserves` without verifying the source balance has passed authorized classification.
-- `receiveReclaimedAsset()` in `SovereignWealthFund.sol` correctly requires RECLAIM_ROLE, but the credited amount is not subject to a classification review before it increases L1 balance.
+- `[OBSERVED]` The entire classification state machine is absent from runtime. Grep across all contracts finds no classification transition logic, no revert path enforcing the fourteen allowed transitions, and no block on forbidden transitions.
+- `[OBSERVED]` `depositToL1()` / `depositToL2()` / `depositToL3()` immediately credit layer balance. Code lines 75–88 of `SovereignWealthFund.sol` show direct balance increment with no pending → authorized → confirmed sequence.
+- `[OBSERVED]` `updateReserves()` in `PahlaviToken.sol` (lines 197–199) sets `totalReserves` directly. No classification check, no SWF balance verification, no encumbrance exclusion.
+- `[OBSERVED]` `receiveReclaimedAsset()` in `SovereignWealthFund.sol` correctly requires `RECLAIM_ROLE`, but the credited amount immediately increases `layerL1.balance` with no classification review gate.
 
 ### 3.7 Non-Claims and Blockers
 
 - Classification state machine implementation requires significant storage additions and a new governance flow. This is deferred work — not a Step-14 deliverable.
 - Step-12 is not closed. Classification authority evidence is a Step-12 open item.
-- Oracle boundary doctrine prohibits oracle signals from autonomously classifying reserves. Any future classification UI must preserve this boundary.
+- Oracle boundary doctrine prohibits oracle signals from autonomously classifying reserves. Any future classification implementation must preserve this boundary.
 
 ---
 
@@ -210,32 +220,32 @@ This check is **present and active**. `MIN_RESERVE_RATIO = 333` is declared both
 
 ### 4.3 Missing Storage Structures
 
-- No `recognizedBackingBoundary` storage variable derived from classified, non-encumbered, non-frozen, non-locked SWF balances.
-- No `encumberedBacking` exclusion field that reduces effective backing before the `reserveCompliant()` check.
-- No cross-contract linkage between `SovereignWealthFund.totalAssets()` and `PahlaviToken.totalReserves`.
-- No `hiddenMintingPathGuard` — no check that `distributeAnnualYield()`, `receiveReclaimedAsset()`, or reclassification cannot increase mint capacity indirectly.
+- `[INFERRED]` No `recognizedBackingBoundary` storage variable derived from classified, non-encumbered, non-frozen, non-locked SWF balances. Requires classification state machine (§3) to exist first.
+- `[INFERRED]` No `encumberedBacking` exclusion field that reduces effective backing before the `reserveCompliant()` check. Requires encumbrance tracking to exist first.
+- `[OBSERVED]` No cross-contract linkage between `SovereignWealthFund.totalAssets()` and `PahlaviToken.totalReserves`. Neither contract imports or references the other's interface for this purpose.
+- `[OBSERVED]` No guard against `distributeAnnualYield()`, `receiveReclaimedAsset()`, or reclassification increasing mint capacity indirectly. No call to `updateReserves()` exists in either SWF function.
 
 ### 4.4 Missing Invariant Tests
 
-- No test asserts that `totalSupply() + mintAmount <= LIQUIDITY_CAP` reverts if exceeded. This is the highest-priority missing invariant test in the monetary layer.
-- No test asserts that setting `totalReserves` above SWF `totalAssets()` causes subsequent `mint()` to fail.
-- No test verifies that `distributeAnnualYield()` does not increase effective mint capacity without a corresponding oracle-verified reserve event.
-- No test asserts expansion neutrality: failed mint attempts must not mutate `totalReserves` or any SWF layer balance.
-- No test asserts that `LIQUIDITY_CAP` and `MIN_RESERVE_RATIO` remain non-configurable (no setter exists — this is a positive fact, but not a tested invariant).
+- `[OBSERVED]` No test asserts that `totalSupply() + mintAmount <= LIQUIDITY_CAP` reverts if exceeded. `LIQUIDITY_CAP` is not referenced in `PahlaviToken.sol` and no test file contains an assertion against it in the mint path.
+- `[OBSERVED]` No test asserts that setting `totalReserves` above SWF `totalAssets()` causes subsequent `mint()` to fail. `02_pahlavi_token.test.js` and `03_sovereign_wealth_fund.test.js` are independent; no cross-contract reserve check exists.
+- `[OBSERVED]` No test verifies that `distributeAnnualYield()` does not increase effective mint capacity. The yield test (`03_sovereign_wealth_fund.test.js` lines 216–230) checks L1 balance and yield event but does not check `PahlaviToken.totalReserves` or `remainingMintCapacity()`.
+- `[OBSERVED]` No test asserts expansion neutrality: failed mint attempts must not mutate `totalReserves` or any SWF layer balance.
+- `[POTENTIAL]` No test asserts that `LIQUIDITY_CAP` and `MIN_RESERVE_RATIO` remain non-configurable. No setter exists for either constant (positive fact), but no test explicitly asserts that no setter can be called.
 
 ### 4.5 Missing Trigger Conditions
 
-- TR-06 (`LIQUIDITY_CAP`) is defined in `kernel.sol` as a violation code. No runtime path fires TR-06 when `totalSupply()` approaches or exceeds the cap. The only path to TR-06 is an oracle manually flagging the violation via `flagViolation()`.
-- No automatic trigger fires when `totalReserves` diverges from SWF-backed recognized value by more than a threshold.
-- No trigger fires when `MIN_RESERVE_RATIO` compliance falls within a warning band (e.g., ratio between 333 and 400 — still compliant but approaching threshold).
+- `[OBSERVED]` TR-06 (`LIQUIDITY_CAP`) is defined in `kernel.sol` as violation code 6. No runtime path fires TR-06 when `totalSupply()` approaches or exceeds the cap. Because `PahlaviToken.mint()` does not check `LIQUIDITY_CAP`, a cap breach produces no revert; detection depends entirely on oracle operators monitoring `totalSupply()` off-chain.
+- `[INFERRED]` No automatic trigger fires when `totalReserves` diverges from SWF-backed recognized value by more than a threshold. No threshold for this divergence is defined.
+- `[INFERRED]` No trigger fires when `MIN_RESERVE_RATIO` compliance falls within a warning band (e.g., ratio between 333 and 400 — still compliant but approaching threshold). The existing check produces only revert or silence.
 
 ### 4.6 Runtime Enforcement Gaps
 
-- **Critical:** `PahlaviToken.mint()` does not check against `LIQUIDITY_CAP`. Total supply can exceed 900 billion PAH without a revert; detection depends entirely on oracle liveness.
-- `updateReserves()` accepts any kernel-supplied value. An overstated reserve figure enables under-backed minting that passes the `reserveCompliant()` check while actual recognized backing is insufficient.
-- `distributeAnnualYield()` increases L1 balance without a corresponding `updateReserves()` call. L2-to-L1 yield flow is invisible to the monetary backing check.
-- `receiveReclaimedAsset()` increases L1 balance without a corresponding `updateReserves()` call. Reclaimed asset intake is invisible to the monetary backing check.
-- No on-chain circuit breaker pauses minting when the reserve ratio approaches `MIN_RESERVE_RATIO` from above.
+- `[OBSERVED]` **Critical:** `PahlaviToken.mint()` does not check against `LIQUIDITY_CAP`. Grep of `PahlaviToken.sol` returns no match for `LIQUIDITY_CAP`. Total supply can exceed 900 billion PAH without a revert.
+- `[OBSERVED]` `updateReserves()` (lines 197–199) sets `totalReserves = newReserves` with no upper bound, no SWF cross-check, and no encumbrance deduction. An overstated reserve figure enables under-backed minting that passes `reserveCompliant()`.
+- `[OBSERVED]` `distributeAnnualYield()` increases `layerL1.balance` and decreases `layerL2.balance` (lines 122–123) without calling `updateReserves()`. L2-to-L1 yield flow is invisible to the monetary backing check.
+- `[OBSERVED]` `receiveReclaimedAsset()` increases `layerL1.balance` (lines 139–141) without calling `updateReserves()`. Reclaimed asset intake is invisible to the monetary backing check.
+- `[INFERRED]` No on-chain circuit breaker pauses minting when the reserve ratio approaches `MIN_RESERVE_RATIO` from above. Such a warning threshold is not defined anywhere.
 
 ### 4.7 Non-Claims and Blockers
 
@@ -255,55 +265,55 @@ This check is **present and active**. `MIN_RESERVE_RATIO = 333` is declared both
 
 The following transitions are implemented and active:
 
-| Transition | Contract function | Status |
-|-----------|------------------|--------|
-| Zero Balance → Layer Balance Recorded | `depositToL1/L2/L3()` | ✓ Implemented |
-| Pending Deposit → Recognized Deposit | `depositToL1/L2/L3()` (no pending stage — immediate) | Partial |
-| Pending Withdrawal → Executed Withdrawal | `proposeWithdrawal()` + `signWithdrawal()` | ✓ Implemented |
-| Pending Reclaimed Asset → Recognized Reclaimed Asset | `receiveReclaimedAsset()` (RECLAIM_ROLE) | ✓ Implemented |
-| L2 Yield → L1 Credit | `distributeAnnualYield()` | ✓ Implemented |
-| Replay resistance for executed withdrawals | `tx_.executed` flag check | ✓ Implemented |
-| Over-withdrawal neutrality | `require(balance >= amount)` | ✓ Implemented |
+| Transition | Contract function | Evidence label |
+|-----------|------------------|----------------|
+| Zero Balance → Layer Balance Recorded | `depositToL1/L2/L3()` | `[OBSERVED]` |
+| Pending Deposit → Recognized Deposit | `depositToL1/L2/L3()` (no pending stage — immediate) | `[OBSERVED]` partial |
+| Pending Withdrawal → Executed Withdrawal | `proposeWithdrawal()` + `signWithdrawal()` | `[OBSERVED]` |
+| Pending Reclaimed Asset → Recognized Reclaimed Asset | `receiveReclaimedAsset()` (RECLAIM_ROLE) | `[OBSERVED]` |
+| L2 Yield → L1 Credit | `distributeAnnualYield()` | `[OBSERVED]` |
+| Replay resistance for executed withdrawals | `tx_.executed` flag check at line 104 | `[OBSERVED]` |
+| Over-withdrawal neutrality | `require(balance >= amount)` at lines 111–113 | `[OBSERVED]` |
 
 The following transitions are absent:
 
-| Transition | Status |
-|-----------|--------|
-| Layer Balance Recorded → SWF Backing Candidate (classification review) | ✗ Not implemented |
-| SWF Backing Candidate → SWF Reserve-Backed Balance | ✗ Not implemented |
-| Layer Balance → Encumbered SWF Balance (pending claims) | ✗ Not implemented |
-| Encumbered SWF Balance → Deployable after release | ✗ Not implemented |
-| Frozen SWF-Linked Balance (freeze state affect) | ✗ Not implemented |
-| Frozen → Prior class after human release authority | ✗ Not implemented |
+| Transition | Evidence label |
+|-----------|----------------|
+| Layer Balance Recorded → SWF Backing Candidate | `[OBSERVED]` absent |
+| SWF Backing Candidate → SWF Reserve-Backed Balance | `[OBSERVED]` absent |
+| Layer Balance → Encumbered SWF Balance (pending claims) | `[OBSERVED]` absent |
+| Encumbered SWF Balance → Deployable after release | `[OBSERVED]` absent |
+| Frozen SWF-Linked Balance state | `[OBSERVED]` absent |
+| Frozen → Prior class after human release | `[OBSERVED]` absent |
 
 ### 5.3 Missing Storage Structures
 
-- No `pendingDeposit` staging area — deposits become immediately recognized without a pending → authorized → confirmed sequence.
-- No `encumberedAmount` per layer or per withdrawal proposal tracking how much of a layer balance is committed to pending withdrawals.
-- No `backingCandidateFlag` per deposit record indicating it is under classification review.
-- No `frozenLayerAmount` tracking how much of a layer is affected by asset freeze linkage.
+- `[OBSERVED]` No `pendingDeposit` staging area. `depositToL1/L2/L3()` immediately credit `layer.balance` (lines 75, 81, 87).
+- `[OBSERVED]` No `encumberedAmount` per layer or per withdrawal proposal. `Transaction` struct contains `layer`, `amount`, `purpose`, `timestamp`, `signaturesCount`, `executed` — no field reserves the layer balance against concurrent proposals.
+- `[OBSERVED]` No `backingCandidateFlag` per deposit record. Grep returns no matches across all contracts.
+- `[OBSERVED]` No `frozenLayerAmount` tracking freeze-linked encumbrance within a layer.
 
 ### 5.4 Missing Invariant Tests
 
-- No test asserts that a failed `receiveReclaimedAsset()` (e.g., caller lacking RECLAIM_ROLE) leaves all layer balances unchanged.
-- No test asserts that `totalAssets()` equals L1 + L2 + L3 balances after any sequence of deposits, withdrawals, and yield distributions.
-- No test asserts that a pending withdrawal commitment reduces the effectively deployable balance even before execution.
-- No test asserts that `distributeAnnualYield()` conserves total assets (L1 increases by exactly the amount L2 decreases).
-- No test asserts that `receiveReclaimedAsset()` with amount = 0 reverts without state mutation.
+- `[CORRECTED]` ~~No test asserts that a failed `receiveReclaimedAsset()` (e.g., caller lacking RECLAIM_ROLE) leaves all layer balances unchanged.~~ **Test exists.** `test/03_sovereign_wealth_fund.test.js` lines 288–307 explicitly test that an unauthorized caller cannot invoke `receiveReclaimedAsset()` and that `totalAssets()` remains equal to the pre-call snapshot. This gap does not exist.
+- `[POTENTIAL]` No test asserts that `totalAssets()` equals L1 + L2 + L3 balances after any sequence of deposits, withdrawals, and yield distributions. Tests at lines 105, 125, 146, 158 check `totalAssets()` before and after individual operations; no test exercises a multi-operation sequence and asserts the additive invariant across all three layers.
+- `[OBSERVED]` No test asserts that a pending withdrawal commitment reduces the effectively deployable balance even before execution. `encumberedAmount` does not exist, so no test can check it.
+- `[POTENTIAL]` No test asserts that `distributeAnnualYield()` conserves total assets (L1 increases by exactly the amount L2 decreases). The yield test (lines 216–230) checks L1 balance and yield event amount but does not read L2 balance post-distribution or compare `totalAssets()` before and after.
+- `[CORRECTED]` ~~No test asserts that `receiveReclaimedAsset()` with amount = 0 reverts without state mutation.~~ **Test exists.** `test/03_sovereign_wealth_fund.test.js` lines 312–327 explicitly test that `receiveReclaimedAsset(0n, ...)` reverts with `"SWF: zero amount"` and that `totalAssets()` remains equal to the pre-call snapshot. This gap does not exist.
 
 ### 5.5 Missing Trigger Conditions
 
-- No trigger fires when any SWF layer balance falls below its `target` by more than a defined threshold.
-- No trigger fires when the sum of pending (proposed, unsigned) withdrawals across all layers exceeds a fraction of total assets — indicating unusual drain activity.
-- No trigger fires when `distributeAnnualYield()` is called when L2 balance is below target by more than a threshold (yield at low L2 may signal structural reserve stress).
-- TR-05 (SWF independence) has no automated signal path from SWF state.
+- `[INFERRED]` No trigger fires when any SWF layer balance falls below its `target` by more than a defined threshold. No such threshold is defined in any contract.
+- `[INFERRED]` No trigger fires when the sum of pending (proposed, unexecuted) withdrawals across all layers exceeds a fraction of total assets. `encumberedAmount` does not exist.
+- `[INFERRED]` No trigger fires when `distributeAnnualYield()` is called when L2 balance is below target. No L2 floor check beyond `require(layerL2.balance >= yield)` exists in the function.
+- `[OBSERVED]` TR-05 (SWF independence) has no automated signal path from SWF state to kernel. The SWF holds no kernel reference.
 
 ### 5.6 Runtime Enforcement Gaps
 
-- Deposits immediately credit layer balance without a pending → authorized sequence. A governance error (wrong layer, wrong amount) has no pre-execution review gate at the SWF contract level.
-- `distributeAnnualYield()` does not verify that L2 balance remains above `L2_TARGET` after the yield transfer. Repeated yield distributions can drain L2 below target without a revert.
-- `signWithdrawal()` does not check that the withdrawal amount is below a fraction of the layer balance that would leave the layer at or above a minimum floor.
-- No `encumberedAmount` deduction: if two withdrawal proposals are both pending, the second one can be proposed against the full balance without accounting for the first pending commitment.
+- `[OBSERVED]` Deposits immediately credit layer balance without a pending → authorized sequence. Lines 75, 81, 87 of `SovereignWealthFund.sol` show direct `balance += amount`.
+- `[OBSERVED]` `distributeAnnualYield()` does not verify that L2 balance remains above `L2_TARGET` after the yield transfer. Code at lines 119–123 only checks `yield > 0` and `layerL2.balance >= yield`.
+- `[OBSERVED]` `signWithdrawal()` does not enforce a minimum floor. Lines 111–113 check `require(balance >= amount)` only; no fraction-of-target floor exists.
+- `[OBSERVED]` No `encumberedAmount` deduction: two concurrent withdrawal proposals can each reference the full unencumbered layer balance. `proposeWithdrawal()` (lines 91–99) does not decrement available balance at proposal time.
 
 ### 5.7 Non-Claims and Blockers
 
@@ -330,36 +340,36 @@ The following transitions are absent:
 
 `VelocityFee.sol` reads `IPahlaviToken.balanceOf()`, calculates a fee, and emits `FeeLevied`. No `burn()`, `transfer()`, or `depositToL1()` call is made.
 
-`Provincial.sol` accumulates `provincialBalance[provinceId]` from oracle-reported revenue at the 30% provincial share but has no `withdrawProvincialFunds()` function.
+`Provincial.sol` accumulates `provincialBalance` (a field inside the `Province` struct) from oracle-reported revenue at the 30% provincial share but has no `withdrawProvincialFunds()` function. `payProductivityBonus()` (kernel-only) also credits `provincialBalance`.
 
 ### 6.3 Missing Storage Structures
 
-- No disbursement contract exists that reads from SWF L1 and transfers PAH to welfare recipients.
-- No per-citizen disbursement record (amount, period, basis) separate from `CitizenCard` status fields.
-- No `VelocityFee` escrow or burn destination address — collected fee has no accounting target.
-- No `provincialWithdrawal` function or authorization path in `Provincial.sol`.
-- No `SWF → Treasury → CitizenCard → disbursement` routing structure.
+- `[OBSERVED]` No disbursement contract exists that reads from SWF L1 and transfers PAH to welfare recipients. No such contract file exists in `contracts/`.
+- `[OBSERVED]` No per-citizen disbursement record (amount, period, basis) separate from `CitizenCard` status fields.
+- `[OBSERVED]` No `VelocityFee` escrow or burn destination address. Grep of `VelocityFee.sol` returns no `burn`, `transfer`, or SWF deposit call.
+- `[OBSERVED]` No `withdrawProvincialFunds()` function or authorization path in `Provincial.sol`. The only functions are `registerProvince()`, `distributeRevenue()`, `payProductivityBonus()`, `updateProductivityScore()`, `updateGovernor()`.
+- `[OBSERVED]` No `SWF → Treasury → CitizenCard → disbursement` routing structure.
 
 ### 6.4 Missing Invariant Tests
 
-- No test asserts that `CitizenCard` status updates do not transfer PAH.
-- No test asserts that `VelocityFee.FeeLevied` events do not reduce any token balance.
-- No test asserts that `Treasury.signTransaction()` at threshold does not reduce any PAH balance (confirms the inert execution gap).
-- No test asserts that `provincialBalance` increases correctly from oracle revenue submissions and cannot decrease without a (missing) withdrawal function.
+- `[INFERRED]` No test asserts that `CitizenCard` status updates do not transfer PAH. CitizenCard has no token interface; such a test would assert the absence of an interface that does not exist.
+- `[OBSERVED]` No test asserts that `VelocityFee.FeeLevied` events do not reduce any token balance. The VelocityFee test (`11_Velocity_Fee.test.js`) does not cross-check PAH balances before and after fee events.
+- `[OBSERVED]` No test asserts that `Treasury.signTransaction()` at threshold does not reduce any PAH balance. `Treasury.sol` has no token interface; `09_Treasury.test.js` does not check PAH balance state.
+- `[POTENTIAL]` No test asserts that `provincialBalance` can only increase (absent a withdrawal function). The provincial test (`16_Provincial.test.js`) verifies correct `provincialBalance` values after `distributeRevenue()` and `payProductivityBonus()` but does not assert monotonic increase across the full test sequence.
 
 ### 6.5 Missing Trigger Conditions
 
-- No trigger fires when SWF L1 balance falls below the 1-month welfare disbursement liability (total eligible citizens × `MIN_WAGE`).
-- No trigger fires when `VelocityFee` accumulated liability exceeds a threshold without execution.
-- No trigger fires when provincial balances exceed a ceiling with no disbursement path (indicating governance failure).
+- `[INFERRED]` No trigger fires when SWF L1 balance falls below the 1-month welfare disbursement liability. No population-size or eligible-citizen count exists on-chain.
+- `[INFERRED]` No trigger fires when `VelocityFee` accumulated liability exceeds a threshold without execution. VelocityFee emits events only; no accumulated liability figure exists.
+- `[INFERRED]` No trigger fires when provincial balances exceed a ceiling with no disbursement path. No ceiling threshold is defined.
 
 ### 6.6 Runtime Enforcement Gaps
 
-- **Welfare floor is entirely unenforced on-chain.** The 1,000 PAH/month minimum is a storage constant, not a payment execution. No contract disburses PAH to any citizen.
-- **VelocityFee has zero economic effect.** The fee is computed and emitted but no token operation follows.
-- **Provincial 30% share accumulates without a spend path.** `provincialBalance` grows without bound if oracle revenue keeps being reported.
-- **Treasury execution is a no-op for actual token flow.** `signTransaction()` completion does not move PAH.
-- The entire disbursement layer between SWF L1 and end recipients is absent.
+- `[OBSERVED]` **Welfare floor is entirely unenforced on-chain.** `MIN_WAGE = 1000` in `CitizenCard.sol` is a constant; no contract calls transfer or mint to a citizen address.
+- `[OBSERVED]` **VelocityFee has zero economic effect.** Grep of `VelocityFee.sol` returns no `burn()`, `transfer()`, or `depositToL1()` call after fee computation.
+- `[OBSERVED]` **Provincial 30% share accumulates without a spend path.** `provincialBalance` is incremented in `distributeRevenue()` and `payProductivityBonus()`. No function decrements it.
+- `[OBSERVED]` **Treasury execution is a no-op for actual token flow.** Grep of `Treasury.sol` returns no `transfer()`, `mint()`, `burn()`, or `IERC20` reference.
+- `[OBSERVED]` The entire disbursement layer between SWF L1 and end recipients is absent. No contract file in `contracts/` implements a payment routing function.
 
 ### 6.7 Non-Claims and Blockers
 
@@ -388,61 +398,83 @@ Six trigger codes are hardcoded in `kernel.sol`:
 | TR-05 | SWF independence | No | Yes (7 of 9) | `flagViolation()` |
 | TR-06 | Liquidity cap | No | Yes (7 of 9) | `flagViolation()` |
 
-TR-05 and TR-06 are the reserve and treasury-relevant trigger codes. Both require manual oracle flagging via `flagViolation()`. Neither has an automated detection path.
+TR-05 and TR-06 are the reserve and treasury-relevant trigger codes. Both require oracle flagging via `flagViolation()`. Neither has an automated detection path from contract state.
 
-`API3Oracle.sol` has an independent `flagViolation()` path (FEEDER_ROLE) that writes to an internal `violations` mapping. This path is **not linked** to `kernel.flagViolation()` — a feeder flag in the oracle does not propagate to the kernel trigger system.
+`API3Oracle.flagViolation()` (FEEDER_ROLE) **does** call through to `IIranOSKernel(kernel).flagViolation()` (line 91 of `API3Oracle.sol`). A feeder-initiated flag propagates to the kernel trigger system. However, `API3Oracle.confirmViolation()` (KERNEL_ROLE) only updates the oracle-local `ViolationFlag.confirmed` field and does not propagate back to kernel violation state. The two contracts maintain separate violation record structures (`violationFlags` mapping in API3Oracle vs `violations` mapping in kernel).
 
 ### 7.3 Missing Storage Structures
 
-- No `reserveHealthSignal` storage in any contract that would feed into an oracle or trigger path automatically.
-- No `liquidityCapBreachRecord` — a breach of `LIQUIDITY_CAP` leaves no on-chain trace if it occurs without oracle flagging.
-- No cross-contract event listener or callback that connects SWF layer state to the kernel trigger system.
-- No `MIN_RESERVE_RATIO` breach record beyond the `revert` in `PahlaviToken.mint()` — a near-breach that does not trigger a revert leaves no trace.
+- `[OBSERVED]` No `reserveHealthSignal` storage in any contract that would feed into an oracle or trigger path automatically. Grep returns no matches.
+- `[OBSERVED]` No `liquidityCapBreachRecord`. A breach of `LIQUIDITY_CAP` leaves no on-chain trace if it occurs without oracle flagging, because `PahlaviToken.mint()` does not check the cap and therefore cannot revert.
+- `[OBSERVED]` No cross-contract callback or event listener connecting SWF layer state to the kernel trigger system. `SovereignWealthFund.sol` holds no kernel address and makes no kernel call.
+- `[OBSERVED]` No `MIN_RESERVE_RATIO` near-breach record. Below the ratio threshold, `mint()` reverts. Above it, nothing is emitted. A near-breach that does not trigger a revert leaves no trace.
 
 ### 7.4 Missing Invariant Tests
 
-- No test asserts that `totalSupply()` approaching `LIQUIDITY_CAP` causes an oracle to flag TR-06. (This test cannot be written until the oracle signal path for cap monitoring is designed.)
-- No test asserts that TR-05 is flagged when `SovereignWealthFund` COUNCIL_ROLE is transferred to an unauthorized address.
-- No test asserts that `API3Oracle.flagViolation()` and `kernel.flagViolation()` produce consistent violation records for the same event.
-- No test asserts that a TR-06 flag → 7-of-9 multi-sig → `_activateTrigger()` sequence correctly revokes SWF or treasury roles from the offending address.
+- `[OBSERVED]` No test asserts that `totalSupply()` approaching `LIQUIDITY_CAP` causes an oracle to flag TR-06. No such test can be written until the oracle monitoring path for cap detection is designed and `LIQUIDITY_CAP` is enforced in `mint()`.
+- `[OBSERVED]` No test asserts that TR-05 is flagged when `SovereignWealthFund` `COUNCIL_ROLE` is granted to an unauthorized address.
+- `[POTENTIAL]` No test asserts that `API3Oracle.flagViolation()` produces a consistent violation record in both the oracle's `violationFlags` mapping and the kernel's `violations` mapping. The propagation call (line 91) exists; whether it is tested end-to-end requires reviewing the oracle and kernel test suites in detail.
+- `[POTENTIAL]` No test asserts that a TR-06 flag → 7-of-9 multi-sig → `_activateTrigger()` sequence correctly revokes SWF or treasury roles from the offending address. The trigger test suite (`08_Trigger_Protocol.test.js`) may cover this but requires targeted verification.
 
 ### 7.5 Missing Trigger Conditions
 
-- **TR-06 (Liquidity Cap):** No automatic detection. `PahlaviToken.mint()` does not check against `LIQUIDITY_CAP`, so a cap breach does not even produce a revert that an oracle could observe. Detection is entirely dependent on oracle operators monitoring `totalSupply()` off-chain.
-- **TR-05 (SWF Independence):** No automated signal from SWF to kernel. Violations of SWF governance (unauthorized role grant, unauthorized withdrawal) must be detected off-chain and flagged manually.
-- **MIN_RESERVE_RATIO warning band:** No trigger fires when the ratio is between 333 and 400 (compliant but within 20% of the minimum). Near-threshold minting is invisible to the trigger system.
-- **Oracle channel unification:** `API3Oracle.flagViolation()` and `kernel.flagViolation()` are parallel and unlinked. A feeder alert in API3Oracle has no effect on the kernel trigger cycle.
+- `[OBSERVED]` **TR-06 (Liquidity Cap):** No automatic detection. `PahlaviToken.mint()` does not check against `LIQUIDITY_CAP`. A cap breach produces no revert; detection depends entirely on oracle operators monitoring `totalSupply()` off-chain and manually calling `flagViolation()`.
+- `[OBSERVED]` **TR-05 (SWF Independence):** No automated signal from SWF to kernel. `SovereignWealthFund.sol` has no kernel reference. SWF governance violations must be detected off-chain and flagged manually via oracle `flagViolation()`.
+- `[INFERRED]` **MIN_RESERVE_RATIO warning band:** No trigger fires when the ratio is between 333 and 400 (compliant but within 20% of the minimum). The existing check produces only revert (below threshold) or silence (above threshold).
+- `[CORRECTED]` ~~Oracle channel unification: `API3Oracle.flagViolation()` and `kernel.flagViolation()` are parallel and unlinked.~~ **This claim was incorrect.** `API3Oracle.flagViolation()` (line 91) calls `IIranOSKernel(kernel).flagViolation()`. Feeder-initiated flags DO propagate to the kernel. The actual gap is that `API3Oracle.confirmViolation()` only updates oracle-local `ViolationFlag.confirmed` state and does not reflect back into kernel violation state. The two contracts maintain separate violation record structures whose confirmation states are not synchronized.
 
 ### 7.6 Runtime Enforcement Gaps
 
-- `kernel.sol` holds `LIQUIDITY_CAP` but `PahlaviToken.sol` does not import or reference it. The cap is a doctrinal constant with no enforcement point in the token contract.
-- The kernel `flagViolation()` function requires oracle role holders to act. If oracle role holders are unavailable or compromised, TR-05 and TR-06 have no automated fallback.
-- There is no circuit breaker in the SWF that halts withdrawals when `totalAssets()` falls below a floor, independent of the trigger system.
-- `TriggerProtocol.executeTrigger()` can revoke roles from a violating address, but it does not pause token minting, freeze SWF withdrawals, or halt treasury spending independently of the multi-sig cycle completing.
+- `[OBSERVED]` `kernel.sol` holds `LIQUIDITY_CAP` but `PahlaviToken.sol` does not import or reference it. Grep of `PahlaviToken.sol` returns no match for `LIQUIDITY_CAP`. The cap is a doctrinal constant with no enforcement point in the token contract.
+- `[INFERRED]` The kernel `flagViolation()` function requires oracle role holders to act. If oracle role holders are unavailable or compromised, TR-05 and TR-06 have no automated fallback. This is an architectural dependency, not a code defect.
+- `[OBSERVED]` There is no circuit breaker in the SWF that halts withdrawals when `totalAssets()` falls below a floor, independent of the trigger system. No such function exists in `SovereignWealthFund.sol`.
+- `[OBSERVED]` `TriggerProtocol.executeTrigger()` can revoke roles from a violating address but does not pause token minting, freeze SWF withdrawals, or halt treasury spending. Grep of `TriggerProtocol.sol` returns no `pause`, `pauseMinting`, or `halt` call.
 
 ### 7.7 Non-Claims and Blockers
 
 - Adding `LIQUIDITY_CAP` enforcement to `PahlaviToken.mint()` is a contract change. Deferred.
-- Linking API3Oracle and kernel violation flags requires a cross-contract design decision. Deferred.
+- Synchronizing `API3Oracle.confirmViolation()` state with kernel violation state requires a cross-contract design decision. Deferred.
 - An automated reserve health signal requires oracle infrastructure that is part of Step-12 evidence. Step-12 is not closed.
 - The trigger system is designed to require human oracle operators by doctrine — full automation of TR-05 and TR-06 detection would contradict the oracle signal boundary requirement. Any future automated signal path must preserve the human-in-the-loop requirement for classification and execution decisions.
 
 ---
 
-## Summary of Gaps
+## 8. Gap Evidence Classification Summary
 
-| Category | Implemented | Critical Gap | Deferred Until |
-|----------|-------------|-------------|----------------|
-| Reserve class storage | None | No on-chain reserve class state machine | Phase 2 contract work |
-| `LIQUIDITY_CAP` enforcement | Reference only in kernel | Not enforced in `mint()` | Phase 2: PahlaviToken update |
-| `MIN_RESERVE_RATIO` enforcement | Active in `mint()` | `totalReserves` not SWF-linked | Phase 2: reserve update path |
-| SWF → backing linkage | None | `distributeAnnualYield()` and `receiveReclaimedAsset()` do not update `totalReserves` | Phase 2: reserve update path |
-| Classification state machine | None | Entire classification protocol is doctrine-only | Phase 2 contract work |
-| Disbursement execution | None | Welfare floor, VelocityFee, and provincial distributions are inert | Phase 2: disbursement contract |
-| TR-06 automated detection | None | Cap breach is invisible without oracle flagging | Phase 2: oracle monitoring |
-| TR-05 automated detection | None | SWF independence violations require manual flagging | Phase 2: oracle monitoring |
-| SWF encumbrance tracking | None | Pending withdrawals do not reduce effectively deployable balance | Phase 2 contract work |
-| Oracle channel unification | None | API3Oracle and kernel flags are unlinked | Phase 2: cross-contract design |
+### 8.1 Corrections from Verification Pass
+
+Four claims in the original draft were factually incorrect and have been corrected above:
+
+| Section | Original Claim | Correction | Evidence |
+|---------|---------------|------------|----------|
+| §2.4 | No test verifies `lockSectorBudget()` prevents expenditure state mutation | **Test exists** | `test/17_Budget_Allocation.test.js` lines 130–133, 216–217 |
+| §5.4 | No test for unauthorized `receiveReclaimedAsset()` leaving balance unchanged | **Test exists** | `test/03_sovereign_wealth_fund.test.js` lines 288–307 |
+| §5.4 | No test for `receiveReclaimedAsset(0)` reverting without state mutation | **Test exists** | `test/03_sovereign_wealth_fund.test.js` lines 312–327 |
+| §7.5 | API3Oracle and kernel flag channels are parallel and unlinked | **Incorrect.** Feeder flags propagate to kernel via line 91. Actual gap: confirmation state is oracle-local only. | `API3Oracle.sol` line 91 |
+
+### 8.2 Classification Counts
+
+| Label | Count | Notes |
+|-------|-------|-------|
+| `[OBSERVED]` | 38 | Directly verified by reading contract code, test files, or grep output |
+| `[INFERRED]` | 18 | Follows from doctrine or architectural gap; absence is logical consequence |
+| `[POTENTIAL]` | 6 | Requires targeted test-suite review; partial coverage may exist |
+| `[CORRECTED]` | 4 | Original claims contradicted by evidence; restated accurately |
+
+### 8.3 Summary Table (corrected)
+
+| Category | Implemented | Gap | Evidence | Deferred Until |
+|----------|-------------|-----|----------|----------------|
+| Reserve class storage | None | No on-chain reserve class state machine | `[OBSERVED]` | Phase 2 contract work |
+| `LIQUIDITY_CAP` enforcement | Reference only in kernel | Not enforced in `mint()` | `[OBSERVED]` | Phase 2: PahlaviToken update |
+| `MIN_RESERVE_RATIO` enforcement | Active in `mint()` | `totalReserves` not SWF-linked | `[OBSERVED]` | Phase 2: reserve update path |
+| SWF → backing linkage | None | `distributeAnnualYield()` and `receiveReclaimedAsset()` do not call `updateReserves()` | `[OBSERVED]` | Phase 2: reserve update path |
+| Classification state machine | None | Entire classification protocol is doctrine-only | `[OBSERVED]` | Phase 2 contract work |
+| Disbursement execution | None | Welfare floor, VelocityFee, and provincial distributions are inert | `[OBSERVED]` | Phase 2: disbursement contract |
+| TR-06 automated detection | None | Cap breach is invisible without oracle flagging | `[OBSERVED]` | Phase 2: oracle monitoring |
+| TR-05 automated detection | None | SWF independence violations require manual oracle flagging | `[OBSERVED]` | Phase 2: oracle monitoring |
+| SWF encumbrance tracking | None | Concurrent withdrawal proposals can reference full unencumbered balance | `[OBSERVED]` | Phase 2 contract work |
+| Oracle confirmation sync | Feeder flags linked | `confirmViolation()` state is oracle-local; kernel violation confirmation state is separate | `[CORRECTED]` | Phase 2: cross-contract design |
 
 ## Preserved Non-Claims
 
