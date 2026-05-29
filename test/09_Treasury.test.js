@@ -131,6 +131,38 @@ expect(await treasury.totalBudgetAllocated()).to.equal(0);
 });
 });
 
+describe("TINV-04 Budget Line Exhaustion Boundary", function () {
+it("TINV-04: spending a line to exact allocation passes; 1 wei over reverts and leaves line.spent unchanged", async function () {
+const lineAmount = ethers.parseUnits("10000000000", 18);
+await treasury.connect(parliament).createBudgetLine(0, lineAmount);
+
+// propose the full allocation at once
+await treasury.connect(government).proposeTransaction(
+  recipient.address, lineAmount, 1, "TINV-04 full spend"
+);
+// txId = 1, signaturesCount = 1; need 2 more AUDITOR sigs to execute
+
+await treasury.connect(kernel).grantRole(AUDITOR_ROLE, swf.address);
+
+await treasury.connect(auditor).signTransaction(1); // signaturesCount = 2
+await treasury.connect(swf).signTransaction(1);     // signaturesCount = 3 → executes; line.spent = lineAmount
+
+const line = await treasury.getBudgetLine(1);
+expect(line.spent).to.equal(lineAmount);            // line is fully spent
+
+// any further spend — even 1 wei — must revert at proposal time
+await expect(
+  treasury.connect(government).proposeTransaction(
+    recipient.address, 1n, 1, "TINV-04 overdraw attempt"
+  )
+).to.be.revertedWith("Treasury: exceeds budget line");
+
+// line.spent unchanged after failed overdraw attempt
+const lineAfter = await treasury.getBudgetLine(1);
+expect(lineAfter.spent).to.equal(lineAmount);
+});
+});
+
 describe("TINV-05 Blocked Recipient State-Neutrality", function () {
 it("TINV-05: signTransaction revert on blocked recipient leaves signaturesCount, executed, auditor sig, and budget line spent unchanged", async function () {
 const lineAmount = ethers.parseUnits("10000000000", 18);
