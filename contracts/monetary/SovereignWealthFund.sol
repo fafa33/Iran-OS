@@ -119,7 +119,7 @@ contract SovereignWealthFund is AccessControl, ReentrancyGuard {
         uint256 yield = (layerL2.balance * ANNUAL_YIELD) / 1000;
         require(yield > 0, "SWF: no yield");
         require(layerL2.balance >= yield, "SWF: insufficient L2");
-        layerL2.balance -= yield; layerL1.balance += yield; layerL1.totalDeposited += yield;
+        layerL2.balance -= yield; layerL2.totalWithdrawn += yield; layerL1.balance += yield; layerL1.totalDeposited += yield;
         emit AnnualYieldDistributed(yield, block.timestamp);
     }
 
