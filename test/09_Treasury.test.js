@@ -130,4 +130,35 @@ await treasury.connect(parliament).startNewFiscalYear(1405);
 expect(await treasury.totalBudgetAllocated()).to.equal(0);
 });
 });
+
+describe("TINV-05 Blocked Recipient State-Neutrality", function () {
+it("TINV-05: signTransaction revert on blocked recipient leaves signaturesCount, executed, auditor sig, and budget line spent unchanged", async function () {
+const lineAmount = ethers.parseUnits("10000000000", 18);
+await treasury.connect(parliament).createBudgetLine(0, lineAmount);
+// lineId = 1 (first line in fresh deployment)
+
+const txAmount = ethers.parseUnits("1000000000", 18);
+await treasury.connect(government).proposeTransaction(
+  recipient.address, txAmount, 1, "TINV-05 proposal"
+);
+// txId = 1 (first tx in fresh deployment); signaturesCount = 1 (proposer)
+
+// block the recipient after proposal
+await treasury.connect(kernel).blockAddressByTrigger(recipient.address);
+
+// auditor attempts to sign — must revert because recipient is now blocked
+await expect(
+  treasury.connect(auditor).signTransaction(1)
+).to.be.revertedWith("Treasury: recipient blocked");
+
+// state-neutrality assertions
+const tx_ = await treasury.getTransaction(1);
+expect(tx_.signaturesCount).to.equal(1);     // proposer sig only, auditor not added
+expect(tx_.executed).to.be.false;            // not executed
+expect(await treasury.txSignatures(1, auditor.address)).to.be.false;  // auditor sig not stored
+
+const line = await treasury.getBudgetLine(1);
+expect(line.spent).to.equal(0n);             // budget line not debited
+});
+});
 });
