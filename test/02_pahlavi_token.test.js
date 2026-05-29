@@ -336,4 +336,48 @@ describe("PahlaviToken", function () {
       expect(await pahToken.totalReserves()).to.equal(reservesAfter);
     });
   });
+
+  describe("INV-05/INV-06 Monetary Expansion Boundary Invariants", function () {
+    const MAX_SUPPLY_AMOUNT = ethers.parseUnits("900000000000", 18);
+
+    it("INV-05a: mint leaving reserve ratio exactly 333 succeeds", async function () {
+      // reserves=333e18, mintAmount=1000e18 → ratio = floor(333000/1000) = 333 — floor boundary
+      const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+      const t = await PahlaviToken.deploy(swf.address, kernel.address, ethers.parseUnits("333", 18));
+      await t.waitForDeployment();
+      await expect(
+        t.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-05a floor")
+      ).to.not.be.reverted;
+      expect(await t.totalSupply()).to.equal(ethers.parseUnits("1000", 18));
+    });
+
+    it("INV-05b: mint leaving reserve ratio 332 reverts; supply unchanged", async function () {
+      // reserves=333e18, mintAmount=1001e18 → ratio = floor(333000/1001) = 332 < 333 — one PAH past floor
+      const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+      const t = await PahlaviToken.deploy(swf.address, kernel.address, ethers.parseUnits("333", 18));
+      await t.waitForDeployment();
+      await expect(
+        t.connect(swf).mint(user1.address, ethers.parseUnits("1001", 18), "INV-05b")
+      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+      expect(await t.totalSupply()).to.equal(0n);
+      expect(await t.totalReserves()).to.equal(ethers.parseUnits("333", 18));
+    });
+
+    it("INV-06a: mint bringing supply to exactly MAX_SUPPLY succeeds", async function () {
+      // reserves=300B, supply=0: ratio = floor(300B*1000/900B) = 333 — passes at cap boundary
+      await expect(
+        token.connect(swf).mint(user1.address, MAX_SUPPLY_AMOUNT, "INV-06a cap")
+      ).to.not.be.reverted;
+      expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT);
+    });
+
+    it("INV-06b: mint exceeding MAX_SUPPLY reverts; supply unchanged", async function () {
+      await token.connect(swf).mint(user1.address, MAX_SUPPLY_AMOUNT, "INV-06b setup");
+      expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT);
+      await expect(
+        token.connect(swf).mint(user1.address, 1n, "INV-06b overflow")
+      ).to.be.revertedWith("PAH: exceeds liquidity cap");
+      expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT);
+    });
+  });
 });
