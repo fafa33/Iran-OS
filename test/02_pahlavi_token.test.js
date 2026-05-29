@@ -388,5 +388,18 @@ describe("PahlaviToken", function () {
       ).to.be.revertedWith("PAH: exceeds liquidity cap");
       expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT);
     });
+
+    it("INV-03: updateReserves does not mint tokens; MAX_SUPPLY gate still blocks after reserves maximised", async function () {
+      // updateReserves() alone never changes totalSupply
+      await token.connect(kernel).updateReserves(MAX_SUPPLY_AMOUNT);
+      expect(await token.totalReserves()).to.equal(MAX_SUPPLY_AMOUNT);
+      expect(await token.totalSupply()).to.equal(0n);
+      // with reserves == MAX_SUPPLY, ratio would be 1000 for any compliant mint,
+      // but the cap guard (newSupply <= MAX_SUPPLY) must still block a 1-wei overflow
+      await expect(
+        token.connect(swf).mint(user1.address, MAX_SUPPLY_AMOUNT + 1n, "INV-03 bypass attempt")
+      ).to.be.revertedWith("PAH: exceeds liquidity cap");
+      expect(await token.totalSupply()).to.equal(0n);
+    });
   });
 });
