@@ -225,6 +225,26 @@ describe("AssetFreeze", function () {
       expect(asset.transferredToSWF).to.equal(false);
       expect(await freezeNoRole.totalFrozenValue()).to.equal(assetValue);
     });
+
+    it("CLC-02: transferToSWF on non-confirmed asset reverts; SWF layerL1, totalAssets, and txCount unchanged", async function () {
+      // asset is frozen but NOT confirmed (status = Active) — guard fires before any SWF call
+      const unconfirmedId = ethers.keccak256(ethers.toUtf8Bytes("clc02_asset"));
+      await freeze.connect(crawler).freezeAsset(unconfirmedId, owner.address, "ملک", assetValue, "CLC-02 test");
+
+      const l1Before          = await swf.layerL1();
+      const totalAssetsBefore = await swf.totalAssets();
+      const txCountBefore     = await swf.txCount();
+
+      await expect(
+        freeze.connect(council1).transferToSWF(unconfirmedId)
+      ).to.be.revertedWith("AssetFreeze: not confirmed");
+
+      const l1After = await swf.layerL1();
+      expect(l1After.balance).to.equal(l1Before.balance);
+      expect(l1After.totalDeposited).to.equal(l1Before.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalAssetsBefore);
+      expect(await swf.txCount()).to.equal(txCountBefore);
+    });
   });
 
   // ─────────────────────────────────────────
