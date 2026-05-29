@@ -162,6 +162,76 @@ expect(line.spent).to.equal(0n);             // budget line not debited
 });
 });
 
+describe("TINV-06 Executed Transaction Re-execution Block", function () {
+it("TINV-06: signTransaction on executed transaction reverts and leaves executed flag and budget line spent unchanged", async function () {
+const lineAmount = ethers.parseUnits("10000000000", 18);
+await treasury.connect(parliament).createBudgetLine(0, lineAmount);
+
+const txAmount = ethers.parseUnits("1000000000", 18);
+await treasury.connect(government).proposeTransaction(
+  recipient.address, txAmount, 1, "TINV-06 proposal"
+);
+// signaturesCount = 1 (proposer); need 2 more AUDITOR sigs to reach MULTISIG_THRESHOLD=3
+
+await treasury.connect(kernel).grantRole(AUDITOR_ROLE, swf.address);
+
+await treasury.connect(auditor).signTransaction(1); // signaturesCount = 2
+await treasury.connect(swf).signTransaction(1);     // signaturesCount = 3 → executes
+
+const tx_ = await treasury.getTransaction(1);
+expect(tx_.executed).to.be.true;
+expect(tx_.signaturesCount).to.equal(3);
+
+const line = await treasury.getBudgetLine(1);
+expect(line.spent).to.equal(txAmount);
+const spentAfterExec = line.spent;
+
+// executed check fires before duplicate-sig check — auditor already signed but
+// the "executed" guard is evaluated first in signTransaction()
+await expect(
+  treasury.connect(auditor).signTransaction(1)
+).to.be.revertedWith("Treasury: executed");
+
+// state unchanged after failed re-sign
+const tx2 = await treasury.getTransaction(1);
+expect(tx2.executed).to.be.true;
+expect(tx2.signaturesCount).to.equal(3);
+const line2 = await treasury.getBudgetLine(1);
+expect(line2.spent).to.equal(spentAfterExec);
+});
+});
+
+describe("TINV-07 Rejected Transaction Sign Block", function () {
+it("TINV-07: signTransaction on rejected transaction reverts and leaves rejected flag and signaturesCount unchanged", async function () {
+const lineAmount = ethers.parseUnits("10000000000", 18);
+await treasury.connect(parliament).createBudgetLine(0, lineAmount);
+
+const txAmount = ethers.parseUnits("1000000000", 18);
+await treasury.connect(government).proposeTransaction(
+  recipient.address, txAmount, 1, "TINV-07 proposal"
+);
+// signaturesCount = 1
+
+await treasury.connect(kernel).rejectTransaction(1, "TINV-07 kernel rejection");
+
+const tx_ = await treasury.getTransaction(1);
+expect(tx_.rejected).to.be.true;
+const sigCountBefore = tx_.signaturesCount;
+
+// auditor attempts to sign a rejected tx — must revert
+await expect(
+  treasury.connect(auditor).signTransaction(1)
+).to.be.revertedWith("Treasury: rejected");
+
+// state unchanged after failed sign
+const tx2 = await treasury.getTransaction(1);
+expect(tx2.rejected).to.be.true;
+expect(tx2.signaturesCount).to.equal(sigCountBefore);
+const line = await treasury.getBudgetLine(1);
+expect(line.spent).to.equal(0n);
+});
+});
+
 describe("TINV-08 Trigger Block Proposal Neutrality", function () {
 it("TINV-08: proposeTransaction revert on blocked recipient leaves txCount and budget line unchanged", async function () {
 const lineAmount = ethers.parseUnits("10000000000", 18);
