@@ -103,7 +103,10 @@ describe("PahlaviToken", function () {
     });
 
     it("SWF می‌تواند پهلوی بسوزاند", async function () {
-      const burnAmount = ethers.parseUnits("1000", 18);
+      const burnAmount     = ethers.parseUnits("1000", 18);
+      const supplyBefore   = await token.totalSupply();
+      const reservesBefore = await token.totalReserves();
+
       await expect(
         token.connect(swf).burn(user1.address, burnAmount, "بازپس‌گیری")
       ).to.emit(token, "PahlaviBurned");
@@ -111,6 +114,8 @@ describe("PahlaviToken", function () {
       expect(await token.balanceOf(user1.address)).to.equal(
         ethers.parseUnits("9000", 18)
       );
+      expect(await token.totalSupply()).to.equal(supplyBefore - burnAmount);
+      expect(await token.totalReserves()).to.equal(reservesBefore);
     });
 
     it("غیر‌BURNER نمی‌تواند بسوزاند", async function () {
