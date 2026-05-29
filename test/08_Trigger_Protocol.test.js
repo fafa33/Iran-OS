@@ -2067,4 +2067,63 @@ expect(exec.offender).to.equal(ethers.ZeroAddress);
 expect(exec.violationCode).to.equal(0);
 });
 });
+
+describe("TG-01 Design Gap and Option D Remedy", function () {
+it("TG-01: executeTrigger does not propagate to Treasury; explicit kernel call (Option D) is required to block offender", async function () {
+// Deploy Treasury with kernel EOA — kernel gets KERNEL_ROLE + DEFAULT_ADMIN_ROLE
+const Treasury = await ethers.getContractFactory("Treasury");
+const tg01Treasury = await Treasury.deploy(kernel.address);
+await tg01Treasury.waitForDeployment();
+
+// Deploy TriggerProtocol wired to the same Treasury
+const Trigger = await ethers.getContractFactory("TriggerProtocol");
+const tg01Trigger = await Trigger.deploy(kernel.address, await tg01Treasury.getAddress(), swf.address);
+await tg01Trigger.waitForDeployment();
+
+const PARLIAMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("PARLIAMENT_ROLE"));
+const GOVERNMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("GOVERNMENT_ROLE"));
+
+// Kernel self-grants PARLIAMENT_ROLE (kernel has DEFAULT_ADMIN_ROLE from Treasury constructor)
+await tg01Treasury.connect(kernel).grantRole(PARLIAMENT_ROLE, kernel.address);
+// Grant user1 GOVERNMENT_ROLE — user1 will propose; attacker (the blocked official) is the recipient
+await tg01Treasury.connect(kernel).grantRole(GOVERNMENT_ROLE, user1.address);
+
+// Create a valid budget line so proposeTransaction has a target
+const lineAmount = ethers.parseUnits("10000000000", 18);
+await tg01Treasury.connect(kernel).createBudgetLine(0, lineAmount);
+
+// Kernel executes trigger against attacker (simulates constitutional violation response)
+await tg01Trigger.connect(kernel).executeTrigger(1, attacker.address, 1, ethers.ZeroAddress);
+
+// A. TriggerProtocol internal state reflects blocking
+expect(await tg01Trigger.isTreasuryBlocked(attacker.address)).to.be.true;
+
+// B. TG-01 gap: Treasury.isBlocked is still false — executeTrigger does NOT propagate
+// proposeTransaction's notBlocked(recipient) modifier checks Treasury.blockedByTrigger,
+// not TriggerProtocol.blockedFromTreasury — the two mappings are independent
+expect(await tg01Treasury.isBlocked(attacker.address)).to.be.false;
+
+// C. Gap consequence: attacker can still RECEIVE Treasury funds — notBlocked(recipient) passes
+const txAmount = ethers.parseUnits("1000000000", 18);
+await expect(
+  tg01Treasury.connect(user1).proposeTransaction(attacker.address, txAmount, 1, "TG-01 gap consequence")
+).to.emit(tg01Treasury, "TransactionProposed");
+expect(await tg01Treasury.txCount()).to.equal(1n);
+
+// D. Option D remedy: kernel explicitly calls Treasury.blockAddressByTrigger (requires KERNEL_ROLE)
+await tg01Treasury.connect(kernel).blockAddressByTrigger(attacker.address);
+
+// E. After Option D, Treasury now recognises the block
+expect(await tg01Treasury.isBlocked(attacker.address)).to.be.true;
+
+// F. Subsequent proposeTransaction with attacker as recipient reverts
+const txCountBefore = await tg01Treasury.txCount();
+await expect(
+  tg01Treasury.connect(user1).proposeTransaction(attacker.address, txAmount, 1, "TG-01 post-remedy")
+).to.be.revertedWith("Treasury: address blocked by Trigger Protocol");
+
+// G. State-neutral after failed proposal
+expect(await tg01Treasury.txCount()).to.equal(txCountBefore);
+});
+});
 });
