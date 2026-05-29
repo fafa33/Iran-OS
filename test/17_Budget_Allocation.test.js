@@ -246,6 +246,38 @@ expect(totalAllocated).to.equal(await budget.TOTAL_BUDGET());
 });
 });
 
+describe("TINV-02 Spent Accounting Invariants", function () {
+it("TINV-02: sectorBudgets[s].spent equals exact cumulative sum of expenditures; unrelated sector unchanged", async function () {
+await budget.connect(parliament).approveBudget(1404);
+
+const spend1 = ethers.parseUnits("1000000000", 18);  // 1B PAH
+const spend2 = ethers.parseUnits("2000000000", 18);  // 2B PAH
+const spend3 = ethers.parseUnits("500000000",  18);  // 0.5B PAH
+
+// record three expenditures against Health (sector 0)
+await budget.connect(government).recordExpenditure(0, spend1, "TINV-02 s1");
+const afterS1 = await budget.getSectorBudget(0);
+expect(afterS1.spent).to.equal(spend1);
+
+await budget.connect(government).recordExpenditure(0, spend2, "TINV-02 s2");
+const afterS2 = await budget.getSectorBudget(0);
+expect(afterS2.spent).to.equal(spend1 + spend2);
+
+await budget.connect(government).recordExpenditure(0, spend3, "TINV-02 s3");
+const afterS3 = await budget.getSectorBudget(0);
+expect(afterS3.spent).to.equal(spend1 + spend2 + spend3);
+
+// Health allocated unchanged; remaining = allocated - spent
+const healthAlloc = afterS3.allocated;
+expect(healthAlloc - afterS3.spent).to.equal(healthAlloc - (spend1 + spend2 + spend3));
+
+// unrelated sector (Defense = 2) remains untouched
+const defense = await budget.getSectorBudget(2);
+expect(defense.spent).to.equal(0n);
+expect(defense.allocated).to.equal((await budget.TOTAL_BUDGET() * 150n) / 1000n);
+});
+});
+
 describe("P-01 State-Neutrality Invariants", function () {
 it("P-01: recordExpenditure revert on not-approved budget leaves spent and expenditureCount unchanged", async function () {
   expect(await budget.budgetApproved()).to.be.false;
