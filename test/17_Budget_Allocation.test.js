@@ -245,4 +245,27 @@ for (let i = 0; i < 8; i++) {
 expect(totalAllocated).to.equal(await budget.TOTAL_BUDGET());
 });
 });
+
+describe("P-01 State-Neutrality Invariants", function () {
+it("P-01: recordExpenditure revert on not-approved budget leaves spent and expenditureCount unchanged", async function () {
+  expect(await budget.budgetApproved()).to.be.false;
+
+  const sectorBefore = await budget.getSectorBudget(0);
+  const countBefore  = await budget.expenditureCount();
+
+  await expect(
+    budget.connect(government).recordExpenditure(0, ethers.parseUnits("1000", 18), "P-01 test")
+  ).to.be.revertedWith("BudgetAllocation: not approved");
+
+  const sectorAfter = await budget.getSectorBudget(0);
+  const countAfter  = await budget.expenditureCount();
+  const expRecord   = await budget.expenditures(1);
+
+  expect(sectorAfter.spent).to.equal(sectorBefore.spent);
+  expect(sectorAfter.spent).to.equal(0n);
+  expect(countAfter).to.equal(countBefore);
+  expect(countAfter).to.equal(0n);
+  expect(expRecord.timestamp).to.equal(0n);
+});
+});
 });
