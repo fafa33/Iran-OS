@@ -219,4 +219,36 @@ describe("API3Oracle", function () {
       expect(await kernel.violationCount()).to.equal(0n);
     });
   });
+
+  describe("CLC-03 data staleness guard", function () {
+    it("flagViolation reverts when PAH_USD_KEY feed is older than MAX_DATA_AGE", async function () {
+      const maxDataAge = await api3Oracle.MAX_DATA_AGE();
+      await network.provider.send("evm_increaseTime", [Number(maxDataAge) + 1]);
+      await network.provider.send("evm_mine", []);
+
+      await expect(
+        api3Oracle.connect(feeder).flagViolation(offender.address, 4, "نقض حقوق بنیادین")
+      ).to.be.revertedWith("API3Oracle: stale data feed");
+
+      expect(await api3Oracle.violationFlagCount()).to.equal(0n);
+      expect(await kernel.violationCount()).to.equal(0n);
+    });
+
+    it("flagViolation succeeds after feeder refreshes PAH_USD_KEY within MAX_DATA_AGE", async function () {
+      const maxDataAge = await api3Oracle.MAX_DATA_AGE();
+      await network.provider.send("evm_increaseTime", [Number(maxDataAge) + 1]);
+      await network.provider.send("evm_mine", []);
+
+      const PAH_USD_KEY = await api3Oracle.PAH_USD_KEY();
+      await api3Oracle.connect(feeder).updateData(PAH_USD_KEY, 1, 1n * BigInt(1e18), 1000);
+
+      const tx = await api3Oracle.connect(feeder).flagViolation(offender.address, 4, "نقض حقوق بنیادین");
+      await expect(tx).to.emit(api3Oracle, "ViolationFlagged");
+      expect(await api3Oracle.violationFlagCount()).to.equal(1n);
+    });
+
+    it("MAX_DATA_AGE constant equals 1 hour", async function () {
+      expect(await api3Oracle.MAX_DATA_AGE()).to.equal(3600n);
+    });
+  });
 });

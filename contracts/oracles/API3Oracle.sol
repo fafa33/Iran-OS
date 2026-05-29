@@ -26,6 +26,8 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
     uint8 public constant DATA_MILITARY   = 5;
     uint8 public constant DATA_WELFARE    = 6;
 
+    uint256 public constant MAX_DATA_AGE = 1 hours;
+
     struct DataPoint {
         uint8   dataType;
         bytes32 key;
@@ -84,6 +86,10 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
     function flagViolation(address offender, uint8 violationCode, string calldata reason) external onlyFeeder nonReentrant returns (uint256 flagId) {
         require(offender != address(0), "API3Oracle: invalid offender");
         require(violationCode >= 1 && violationCode <= 6, "API3Oracle: invalid code");
+        require(
+            block.timestamp - dataPoints[PAH_USD_KEY].timestamp <= MAX_DATA_AGE,
+            "API3Oracle: stale data feed"
+        );
         violationFlagCount++;
         flagId = violationFlagCount;
         violationFlags[flagId] = ViolationFlag({ offender: offender, violationCode: violationCode, reason: reason, timestamp: block.timestamp, confirmed: false });
