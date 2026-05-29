@@ -228,6 +228,26 @@ describe("SovereignWealthFund", function () {
       const l1 = await swf.layerL1();
       expect(l1.balance).to.equal(expectedYield);
     });
+
+    it("distributeAnnualYield conserves totalAssets and debits L2 by exact yield amount", async function () {
+      const l2Deposit = ethers.parseUnits("1000000", 18);
+      await swf.connect(council1).depositToL2(l2Deposit, "دارایی مولد");
+
+      const expectedYield = (l2Deposit * 150n) / 1000n;
+      const preL1 = await swf.layerL1();
+      const preL2 = await swf.layerL2();
+      const preTotalAssets = await swf.totalAssets();
+
+      await swf.connect(council1).distributeAnnualYield();
+
+      const postL1 = await swf.layerL1();
+      const postL2 = await swf.layerL2();
+
+      expect(postL1.balance).to.equal(preL1.balance + expectedYield);
+      expect(postL2.balance).to.equal(preL2.balance - expectedYield);
+      expect(postL2.totalWithdrawn).to.equal(preL2.totalWithdrawn);
+      expect(await swf.totalAssets()).to.equal(preTotalAssets);
+    });
   });
 
   // ─────────────────────────────────────────
