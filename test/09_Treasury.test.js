@@ -161,4 +161,36 @@ const line = await treasury.getBudgetLine(1);
 expect(line.spent).to.equal(0n);             // budget line not debited
 });
 });
+
+describe("TINV-08 Trigger Block Proposal Neutrality", function () {
+it("TINV-08: proposeTransaction revert on blocked recipient leaves txCount and budget line unchanged", async function () {
+const lineAmount = ethers.parseUnits("10000000000", 18);
+await treasury.connect(parliament).createBudgetLine(0, lineAmount);
+// lineId = 1; txCount = 0 at this point
+
+// block recipient BEFORE any proposal
+await treasury.connect(kernel).blockAddressByTrigger(recipient.address);
+expect(await treasury.isBlocked(recipient.address)).to.be.true;
+
+const txCountBefore = await treasury.txCount();
+const lineBefore    = await treasury.getBudgetLine(1);
+
+// propose to blocked recipient — must revert
+await expect(
+  treasury.connect(government).proposeTransaction(
+    recipient.address, ethers.parseUnits("1000000000", 18), 1, "TINV-08 attempt"
+  )
+).to.be.revertedWith("Treasury: address blocked by Trigger Protocol");
+
+// state-neutrality: no transaction record created
+expect(await treasury.txCount()).to.equal(txCountBefore);
+const tx_ = await treasury.getTransaction(txCountBefore + 1n);
+expect(tx_.timestamp).to.equal(0n);          // slot empty — tx was never written
+
+// budget line unchanged
+const lineAfter = await treasury.getBudgetLine(1);
+expect(lineAfter.spent).to.equal(lineBefore.spent);
+expect(lineAfter.allocated).to.equal(lineBefore.allocated);
+});
+});
 });
