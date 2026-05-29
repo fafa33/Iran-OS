@@ -352,5 +352,37 @@ describe("SovereignWealthFund", function () {
     it("layerFillRatio با لایه نامعتبر صفر برمی‌گرداند", async function () {
       expect(await swf.layerFillRatio(9)).to.equal(0n);
     });
+
+    it("totalAssets equals sum of three layer balances after deposit-withdrawal-yield sequence", async function () {
+      const a1 = ethers.parseUnits("500", 18);
+      const a2 = ethers.parseUnits("1000", 18);
+      const a3 = ethers.parseUnits("2000", 18);
+      const withdrawAmount = ethers.parseUnits("100", 18);
+
+      await swf.connect(council1).depositToL1(a1, "l1");
+      await swf.connect(council1).depositToL2(a2, "l2");
+      await swf.connect(council1).depositToL3(a3, "l3");
+
+      let l1 = await swf.layerL1();
+      let l2 = await swf.layerL2();
+      let l3 = await swf.layerL3();
+      expect(await swf.totalAssets()).to.equal(l1.balance + l2.balance + l3.balance);
+
+      await swf.connect(council1).proposeWithdrawal(1, withdrawAmount, "test withdrawal");
+      await swf.connect(council2).signWithdrawal(1n);
+      await swf.connect(council3).signWithdrawal(1n);
+
+      l1 = await swf.layerL1();
+      l2 = await swf.layerL2();
+      l3 = await swf.layerL3();
+      expect(await swf.totalAssets()).to.equal(l1.balance + l2.balance + l3.balance);
+
+      await swf.connect(council1).distributeAnnualYield();
+
+      l1 = await swf.layerL1();
+      l2 = await swf.layerL2();
+      l3 = await swf.layerL3();
+      expect(await swf.totalAssets()).to.equal(l1.balance + l2.balance + l3.balance);
+    });
   });
 });
