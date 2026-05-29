@@ -227,16 +227,28 @@ No pre-reservation mechanism. `layerX.balance` alone does not signal "effective 
 
 **P2** — observability and monitoring gap. No safety failure.
 
+### DG-04 Design Decision Record
+
+DG-04 is accepted as a **design constraint**. The current semantics are intentional and the execution-time balance check is the authoritative safety guarantee. The following properties hold by design:
+
+**Pending withdrawals do not reserve balance.** Between `proposeWithdrawal()` and the threshold signature in `signWithdrawal()`, `layerX.balance` is not decremented. The pending amount exists only in `transactions[txId].amount` with `executed == false`. `layerX.balance` therefore reflects the full layer balance including any amounts earmarked by unexecuted proposals.
+
+**Execution-time checks prevent double-spend.** `signWithdrawal()` enforces `require(layerX.balance >= tx_.amount)` at the moment the threshold is crossed and execution occurs. If a prior proposal already consumed the balance, the second execution reverts cleanly. No value is lost; no balance is corrupted.
+
+**Available balance requires pending proposal review.** `layerX.balance` alone does not represent the freely deployable balance when pending proposals exist. Any monitoring system, dashboard, or external integrator that needs the effective available balance must read `layerX.balance` and subtract the sum of `transactions[txId].amount` for all `txId` where `executed == false` and `layer == X`.
+
+**No contract change is warranted.** Adding pre-reservation at proposal time would alter the semantics of `layerX.balance`, require restoration logic on rejection, and introduce new edge cases in the multi-sig path. The execution-time guard is sufficient and correct. The observability gap is addressed by this documentation record.
+
 ---
 
 ## Summary Table
 
-| Gap | Classification | Artifact | Priority | Step |
+| Gap | Classification | Artifact | Priority | Resolution |
 |---|---|---|---|---|
-| DG-01 | CONFIRMED GAP | Contract | P1 | Trigger path → SWF role revocation |
-| DG-02 | CONFIRMED GAP | Accounting rule | P2 | `distributeAnnualYield()` + `totalWithdrawn` |
-| DG-03 | DESIGN CONSTRAINT | Test only | P2 | SWF deposit → `updateReserves()` → `mint()` integration |
-| DG-04 | DESIGN CONSTRAINT | Accounting rule (design decision) | P2 | Pending withdrawal pre-reservation |
+| DG-01 | CONFIRMED GAP | Contract | P1 | Open — requires human governance review |
+| DG-02 | CONFIRMED GAP | Accounting rule | P2 | Resolved — commit `029bf7c` |
+| DG-03 | DESIGN CONSTRAINT | Test only | P2 | Resolved — commit `7f14a0c` |
+| DG-04 | DESIGN CONSTRAINT | Documentation | P2 | Closed — design decision recorded above |
 
 ---
 
@@ -244,28 +256,28 @@ No pre-reservation mechanism. `layerX.balance` alone does not signal "effective 
 
 The following sequencing is recommended for future work items. It does not authorize any implementation. It records the ordered rationale only.
 
-### Sequence 1 — DG-03 (Test Only, First)
+### Sequence 1 — DG-03 (Test Only, First) — RESOLVED
 
-DG-03 requires no contract change. An integration test deploying real `SovereignWealthFund` and `PahlaviToken` together and exercising the SWF-deposit → `updateReserves()` → `mint()` path can be written and committed without touching any contract. This is the lowest-risk item and the fastest to close. It also establishes a real integration baseline for future DG-01 and DG-02 work.
+DG-03 resolved in Step-23 (commit `7f14a0c`). Integration test added to `test/02_pahlavi_token.test.js` confirming the SWF-deposit → `updateReserves()` → `mint()` path end-to-end.
 
-### Sequence 2 — DG-02 (Accounting Fix, Second)
+### Sequence 2 — DG-02 (Accounting Fix, Second) — RESOLVED
 
-DG-02 is a single-line contract change to `distributeAnnualYield()` plus a corresponding test update. It is isolated to one function in one contract. It does not affect `totalAssets()`, `MIN_RESERVE_RATIO`, or `LIQUIDITY_CAP`. Once the DG-03 integration baseline exists, DG-02 can be applied and its accounting correctness can be confirmed across both unit and integration tests.
+DG-02 resolved in Step-24 (commit `029bf7c`). `layerL2.totalWithdrawn += yield` added to `distributeAnnualYield()`. The bookkeeping identity `balance == totalDeposited - totalWithdrawn` now holds for L2 across all operations.
 
-### Sequence 3 — DG-04 (Design / Documentation Decision, Third)
+### Sequence 3 — DG-04 (Design / Documentation Decision, Third) — CLOSED
 
-DG-04 does not have a clear-cut fix: adding pre-reservation at proposal time would change the semantics of `layerX.balance` and affect how callers read available balance. This requires a deliberate design decision — either accept current behavior with documentation, or implement pre-reservation with full implications analyzed. No safety failure exists. A documentation clarification or explicit design decision record should precede any contract change attempt.
+DG-04 closed as a design constraint. Current execution-time guard is authoritative. Semantics documented in the design decision record above. No contract change warranted.
 
-### Sequence 4 — DG-01 (Authority Design Review, Last)
+### Sequence 4 — DG-01 (Authority Design Review, Last) — OPEN
 
-DG-01 is the highest-priority gap but the most architecturally significant to remediate. Adding SWF role revocation to the trigger path requires:
+DG-01 remains open. Adding SWF role revocation to the trigger path requires:
 
 - A new interface for SWF role revocation callable from `TriggerProtocol` or `Kernel`.
 - A decision about which contract holds the call site.
 - An assessment of whether calling SWF from inside `_activateTrigger()` or `executeTrigger()` introduces new reentrancy or authority risks.
 - Human review and governance sign-off given the constitutional significance of the trigger path.
 
-DG-01 should proceed only after DG-02 and DG-03 are resolved and after a human governance review of the proposed authority boundary change.
+DG-01 should not proceed without human governance review of the proposed authority boundary change.
 
 ---
 
@@ -273,7 +285,7 @@ DG-01 should proceed only after DG-02 and DG-03 are resolved and after a human g
 
 This document does not claim:
 
-- That DG-01 through DG-04 are fixed or remediated.
+- That DG-01 is fixed or remediated (DG-02, DG-03, DG-04 resolved as noted above).
 - That the system is ready for production deployment.
 - That Step-12 or Step-13 are closed.
 - That any threshold, timeout, or constitutional constant has changed.
@@ -287,5 +299,5 @@ Step-22 is an audit record only. It establishes the factual state of each gap as
 
 *Step-22 — DG Pre-Implementation Audit*
 *Branch: `claude/step15-potential-gaps-cUVbj`*
-*Reference commit: `07b317f`*
+*Reference commit: `07b317f`; updated through `029bf7c`*
 *Date: 2026-05-29*
