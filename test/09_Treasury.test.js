@@ -131,6 +131,28 @@ expect(await treasury.totalBudgetAllocated()).to.equal(0);
 });
 });
 
+describe("TINV-01 Annual Budget Cap Accumulation", function () {
+it("TINV-01: cumulative createBudgetLine calls can reach 150B cap exactly but not exceed it; totalBudgetAllocated unchanged on failed call", async function () {
+const lineA = ethers.parseUnits("100000000000", 18); // 100B PAH
+const lineB = ethers.parseUnits("50000000000",  18); // 50B PAH — reaches cap exactly
+const ANNUAL_CAP = ethers.parseUnits("150000000000", 18);
+
+await treasury.connect(parliament).createBudgetLine(0, lineA);
+expect(await treasury.totalBudgetAllocated()).to.equal(lineA);
+
+await treasury.connect(parliament).createBudgetLine(1, lineB);
+expect(await treasury.totalBudgetAllocated()).to.equal(ANNUAL_CAP);
+
+// 1 wei over the cap — must revert
+await expect(
+  treasury.connect(parliament).createBudgetLine(2, 1n)
+).to.be.revertedWith("Treasury: exceeds 150B cap");
+
+// totalBudgetAllocated unchanged after failed call
+expect(await treasury.totalBudgetAllocated()).to.equal(ANNUAL_CAP);
+});
+});
+
 describe("TINV-04 Budget Line Exhaustion Boundary", function () {
 it("TINV-04: spending a line to exact allocation passes; 1 wei over reverts and leaves line.spent unchanged", async function () {
 const lineAmount = ethers.parseUnits("10000000000", 18);
