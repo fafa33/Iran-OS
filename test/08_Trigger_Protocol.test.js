@@ -1990,6 +1990,73 @@ expect(await realSwf.totalAssets()).to.equal(totalAssetsSnapshot);
 expect(await kernelContract.LIQUIDITY_CAP()).to.equal(liquidityCapSnapshot);
 expect(await kernelContract.MIN_RESERVE_RATIO()).to.equal(reserveRatioSnapshot);
 });
+
+it("trigger activation revokes offender kernel role and preserves SWF COUNCIL_ROLE as design-boundary fact", async function () {
+const signers = await ethers.getSigners();
+const [sovereign, court, oracle, swfOwner, offender] = signers;
+const extraCourts = signers.slice(5, 11);
+
+const Kernel = await ethers.getContractFactory("IranOS_Kernel");
+const kernelContract = await Kernel.deploy(
+sovereign.address,
+court.address,
+oracle.address,
+swfOwner.address
+);
+await kernelContract.waitForDeployment();
+
+const SWF = await ethers.getContractFactory("SovereignWealthFund");
+const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddress());
+await realSwf.waitForDeployment();
+
+const Treasury = await ethers.getContractFactory("Treasury");
+const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+await realTreasury.waitForDeployment();
+
+const Trigger = await ethers.getContractFactory("TriggerProtocol");
+const realTrigger = await Trigger.deploy(
+await kernelContract.getAddress(),
+await realTreasury.getAddress(),
+await realSwf.getAddress()
+);
+await realTrigger.waitForDeployment();
+
+await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
+
+const COURT_ROLE = await kernelContract.COURT_ROLE();
+const COUNCIL_ROLE = await realSwf.COUNCIL_ROLE();
+
+await kernelContract.connect(sovereign).grantOfficialAccess(offender.address, COURT_ROLE);
+await realSwf.connect(swfOwner).grantRole(COUNCIL_ROLE, offender.address);
+
+for (const extraCourt of extraCourts) {
+await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
+}
+
+expect(await kernelContract.hasRole(COURT_ROLE, offender.address)).to.be.true;
+expect(await realSwf.hasRole(COUNCIL_ROLE, offender.address)).to.be.true;
+expect((await kernelContract.officialAccess(offender.address)).isActive).to.be.true;
+
+await kernelContract.connect(oracle).flagViolation(4, offender.address, "P-07 authority boundary test");
+
+const violationId = 1n;
+const courtSigners = [court, ...extraCourts];
+for (let i = 0; i < 6; i++) {
+await kernelContract.connect(courtSigners[i]).signViolation(violationId);
+}
+await kernelContract.connect(courtSigners[6]).signViolation(violationId);
+
+const terminalRecord = await kernelContract.violations(violationId);
+expect(terminalRecord.triggered).to.be.true;
+expect(await kernelContract.triggerActivationCount()).to.equal(1);
+
+// Part A: kernel COURT_ROLE revoked from offender after trigger activation
+expect(await kernelContract.hasRole(COURT_ROLE, offender.address)).to.be.false;
+expect((await kernelContract.officialAccess(offender.address)).isActive).to.be.false;
+
+// Part B: SWF COUNCIL_ROLE is NOT revoked — design boundary (executeTrigger only blocks treasury)
+expect(await realSwf.hasRole(COUNCIL_ROLE, offender.address)).to.be.true;
+});
 });
 
 describe("Execution Not Found", function () {
