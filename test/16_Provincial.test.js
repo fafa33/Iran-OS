@@ -223,6 +223,40 @@ it("preserves provincial boundaries across unauthorized and authorized revenue p
 });
 });
 
+describe("provincialBalance monotonic invariant", function () {
+it("provincialBalance never decreases across revenue, rejected bonus, and authorized bonus operations", async function () {
+  await provincial.connect(kernel).registerProvince("مازندران", governor.address, devAccount.address);
+  const provinceId = 1;
+  const revenue = ethers.parseUnits("1000000", 18);
+  const bonus = ethers.parseUnits("25000", 18);
+
+  let prevBalance = 0n;
+
+  await provincial.connect(oracle).distributeRevenue(provinceId, revenue);
+  let province = await provincial.getProvince(provinceId);
+  expect(province.provincialBalance).to.be.gte(prevBalance);
+  prevBalance = province.provincialBalance;
+
+  await expect(
+    provincial.connect(kernel).payProductivityBonus(provinceId, bonus)
+  ).to.be.revertedWith("Provincial: score too low");
+  province = await provincial.getProvince(provinceId);
+  expect(province.provincialBalance).to.be.gte(prevBalance);
+  expect(province.provincialBalance).to.equal(prevBalance);
+  prevBalance = province.provincialBalance;
+
+  await provincial.connect(oracle).updateProductivityScore(provinceId, 71);
+  await provincial.connect(kernel).payProductivityBonus(provinceId, bonus);
+  province = await provincial.getProvince(provinceId);
+  expect(province.provincialBalance).to.be.gte(prevBalance);
+  prevBalance = province.provincialBalance;
+
+  await provincial.connect(oracle).distributeRevenue(provinceId, revenue);
+  province = await provincial.getProvince(provinceId);
+  expect(province.provincialBalance).to.be.gte(prevBalance);
+});
+});
+
 describe("Governor Update", function () {
 let newGovernor;
 
