@@ -401,5 +401,32 @@ describe("PahlaviToken", function () {
       ).to.be.revertedWith("PAH: exceeds liquidity cap");
       expect(await token.totalSupply()).to.equal(0n);
     });
+
+    it("INV-02: reserve ratio floor enforced across multi-step mint; blocked step leaves supply unchanged", async function () {
+      // fresh token: reserves=1000e18 for precise boundary arithmetic
+      // max compliant supply = floor(1000*1000/333) = 3003e18 (ratio=333 exactly)
+      const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+      const t = await PahlaviToken.deploy(swf.address, kernel.address, ethers.parseUnits("1000", 18));
+      await t.waitForDeployment();
+
+      // step 1 — ratio = floor(1000000/1000) = 1000 ≥ 333
+      await t.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-02 s1");
+      expect(await t.totalSupply()).to.equal(ethers.parseUnits("1000", 18));
+
+      // step 2 — ratio = floor(1000000/2000) = 500 ≥ 333
+      await t.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-02 s2");
+      expect(await t.totalSupply()).to.equal(ethers.parseUnits("2000", 18));
+
+      // step 3 — ratio = floor(1000000/3003) = 333 — exactly at floor boundary
+      await t.connect(swf).mint(user1.address, ethers.parseUnits("1003", 18), "INV-02 s3");
+      const supplyAtFloor = await t.totalSupply();
+      expect(supplyAtFloor).to.equal(ethers.parseUnits("3003", 18));
+
+      // step 4 attempt — ratio = floor(1000000/3004) = 332 < 333 — must revert
+      await expect(
+        t.connect(swf).mint(user1.address, ethers.parseUnits("1", 18), "INV-02 s4 blocked")
+      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+      expect(await t.totalSupply()).to.equal(supplyAtFloor);
+    });
   });
 });
