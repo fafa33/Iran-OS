@@ -245,7 +245,7 @@ describe("SovereignWealthFund", function () {
 
       expect(postL1.balance).to.equal(preL1.balance + expectedYield);
       expect(postL2.balance).to.equal(preL2.balance - expectedYield);
-      expect(postL2.totalWithdrawn).to.equal(preL2.totalWithdrawn);
+      expect(postL2.totalWithdrawn).to.equal(preL2.totalWithdrawn + expectedYield);
       expect(await swf.totalAssets()).to.equal(preTotalAssets);
     });
   });
