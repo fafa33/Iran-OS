@@ -58,6 +58,15 @@ OpenZeppelin `AccessControl` به عنوان پایه. آیا الگوی اعط�
 **۱۱. فرصت‌های راستی‌آزمایی رسمی**
 کدام invariantها — مانند `signaturesCount < MULTISIG_THRESHOLD` یا `totalSupply <= LIQUIDITY_CAP` — برای formal verification با ابزارهایی مانند Certora، Halmos یا K-framework مناسب‌ترند؟
 
+**۱۲. مرز اعتماد AssetFreeze — بررسی مستقل**
+`AssetFreeze.sol` یک مرز اعتماد مستقل است که نیاز به threat modeling جداگانه دارد. این بخش مربوط به بازبینی امنیتی است، نه تأیید امنیت:
+
+- چه کسی `CRAWLER_ROLE` را اعطا می‌کند و مسیر اعطای این نقش از چه نقاط کنترلی می‌گذرد؟
+- آیا مسیر اعطای `CRAWLER_ROLE` می‌تواند مورد سوءاستفاده قرار گیرد تا دارایی‌هایی خارج از محدوده قانونی freeze شوند؟
+- آیا آغاز freeze توسط `CRAWLER_ROLE` می‌تواند replay، abuse یا سانسور انتخابی دارایی ایجاد کند؟
+- آزادسازی فقط توسط `KERNEL_ROLE` ممکن است — آیا این تمرکز یک‌طرفه می‌تواند منجر به deadlock یا توقف دائمی دارایی شود؟
+- آیا مسیر وضعیت `Active → UnderReview → Confirmed → (TransferredToSWF | Released)` در برابر اجرای تکراری، ورود به حالت میانی نامعتبر یا شکست جزئی مقاوم است؟
+
 ---
 
 ## چه نوع بازبینی مورد نیاز است
