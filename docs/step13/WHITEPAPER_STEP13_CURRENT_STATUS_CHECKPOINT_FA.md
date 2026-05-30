@@ -127,6 +127,7 @@
 | WS-2 ساختار حکمرانی | `WHITEPAPER_STEP13_WS2_GOVERNANCE_STRUCTURE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review انسانی/حکمرانی | 1 COMPLETE / 11 PARTIAL / 2 GAP |
 | WS-4 اقتصاد و منابع ملی | `WHITEPAPER_STEP13_WS4_ECONOMY_AND_NATIONAL_RESOURCES_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review مالی/اقتصادی/حقوقی | 5 COMPLETE / 8 PARTIAL / 1 GAP (TG-01) |
 | WS-5 قراردادها و ماژول‌های runtime | `WHITEPAPER_STEP13_WS5_CONTRACTS_RUNTIME_MODULES_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review فنی/حقوقی/حکمرانی | 2 COMPLETE / 23 PARTIAL / 1 GAP (TG-01) |
+| WS-3 رفاه و عدالت | `WHITEPAPER_STEP13_WS3_WELFARE_AND_JUSTICE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review حقوقی/اقتصادی/حکمرانی | 2 COMPLETE / 11 PARTIAL / 1 GAP (ZK Proof) |
 | WS-6 اوراکل و سیگنال‌ها | `WHITEPAPER_STEP13_WS6_ORACLE_AND_SIGNAL_ARCHITECTURE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review فنی/oracle/حکمرانی | 2 COMPLETE / 13 PARTIAL / 2 GAP (Airnode، TG-01) |
 
 این بازبینی‌ها AI-assisted و documentation-only هستند. هیچ‌کدام human review، governance review، signoff، evidence accepted، یا blocker closure نیستند. گام ۱۲ و گام ۱۳ همچنان باز هستند.
