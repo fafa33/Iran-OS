@@ -47,6 +47,8 @@
 
 نخستین نگاشت تفصیلی workstream «اصول بنیادین و منشور» در [WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md](WHITEPAPER_FOUNDATIONAL_PRINCIPLES_MAPPING_FA.md) ثبت شده است.
 
+بازبینی ردیابی تفصیلی workstream ۱ پس از CLC-06/DOC-01/DOC-02 در [step13/WHITEPAPER_STEP13_WS1_FOUNDATIONAL_PRINCIPLES_TRACEABILITY_REVIEW_FA.md](step13/WHITEPAPER_STEP13_WS1_FOUNDATIONAL_PRINCIPLES_TRACEABILITY_REVIEW_FA.md) ثبت شده است.
+
 دومین نگاشت تفصیلی workstream «ساختار حکمرانی» در [WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md](WHITEPAPER_GOVERNANCE_STRUCTURE_MAPPING_FA.md) ثبت شده است.
 
 سومین نگاشت تفصیلی workstream «رفاه و عدالت» در [WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md](WHITEPAPER_WELFARE_JUSTICE_MAPPING_FA.md) ثبت شده است.
