@@ -9,6 +9,8 @@
 
 یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_CONTRACTS_ADAPTERS_REVIEW_FA.md](WHITEPAPER_CONTRACTS_ADAPTERS_REVIEW_FA.md) ثبت شده است.
 
+بازبینی ردیابی تفصیلی workstream ۵ (پایه commit `8626a82`) در [docs/step13/WHITEPAPER_STEP13_WS5_CONTRACTS_RUNTIME_MODULES_TRACEABILITY_REVIEW_FA.md](step13/WHITEPAPER_STEP13_WS5_CONTRACTS_RUNTIME_MODULES_TRACEABILITY_REVIEW_FA.md) ثبت شده است. این بازبینی AI-assisted و documentation-only است و نیازمند review فنی/حقوقی/حکمرانی مستقل است.
+
 ## ۱. هدف
 
 این سند پنجمین نگاشت تفصیلی گام ۱۳ است و فقط workstream «قراردادها و adapterها» را پوشش می‌دهد. هدف آن اتصال مفاهیم قراردادی و adapterی سپیدنامه/اسناد فنی به مسیر ردیابی repo است:
