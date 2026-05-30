@@ -9,6 +9,8 @@
 
 یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_ORACLE_SIGNALS_REVIEW_FA.md](WHITEPAPER_ORACLE_SIGNALS_REVIEW_FA.md) ثبت شده است.
 
+بازبینی ردیابی تفصیلی workstream ۶ (معماری اوراکل و سیگنال) در [docs/step13/WHITEPAPER_STEP13_WS6_ORACLE_AND_SIGNAL_ARCHITECTURE_TRACEABILITY_REVIEW_FA.md](step13/WHITEPAPER_STEP13_WS6_ORACLE_AND_SIGNAL_ARCHITECTURE_TRACEABILITY_REVIEW_FA.md) ثبت شده است. این بازبینی AI-assisted و documentation-only است و نیازمند review فنی/oracle/حکمرانی مستقل است.
+
 ## ۱. هدف
 
 این سند ششمین نگاشت تفصیلی گام ۱۳ است و فقط workstream «اوراکل و سیگنال‌ها» را پوشش می‌دهد. هدف آن اتصال مفاهیم داده، شاخص، feeder، freshness، deviation، confidence، API3، PriceOracle و ProductionOracle به مسیر ردیابی repo است:
