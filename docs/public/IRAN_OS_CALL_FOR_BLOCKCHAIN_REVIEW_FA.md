@@ -40,7 +40,7 @@ Iran-OS یک قرارداد منفرد نیست. یک سیستم چندقرار�
 - `contracts/core/TriggerProtocol.sol` — لایه اجرا
 - `contracts/core/ConstitutionGuard.sol` — دروازه‌بان قانون
 - `contracts/monetary/SovereignWealthFund.sol` — صندوق ثروت سه‌لایه
-- `contracts/monetary/PahlaviToken.so` — توکن ملی (توجه: پسوند `.so` به جای `.sol` — فایل Solidity است)
+- `contracts/monetary/PahlaviToken.so` — توکن ملی (توجه: پسوند `.so` به جای `.sol` — فایل Solidity است و توسط Hardhat و Foundry به‌صورت پیش‌فرض کامپایل نمی‌شود و نیاز به پیکربندی دستی دارد)
 - `contracts/governance/Provincial.sol` — حکمرانی استانی
 - `contracts/welfare/CitizenCard.sol` — کارت رفاه شهروندی
 - `contracts/oracles/API3Oracle.sol` — اوراکل داده
@@ -66,13 +66,16 @@ Iran-OS یک قرارداد منفرد نیست. یک سیستم چندقرار�
 طبق طراحی، Kernel هیچ proxy upgrade pattern ندارد. اگر باگی غیرامنیتی در سایر قراردادها کشف شود، مسیر اصلاح چیست؟ آیا این مسیر مستند است؟
 
 **۱۱. ذخیره‌سازی biometricToAddress در CitizenCard**
-`mapping(bytes32 => address) public biometricToAddress` داده بیومتریک را on-chain ذخیره می‌کند. آیا این رویکرد در مقیاس ملی (۸۰+ میلیون شهروند) از نظر storage و gas پایدار است؟
+`mapping(bytes32 => address) public biometricToAddress` داده بیومتریک را on-chain ذخیره می‌کند. نگرانی اصلی storage یا gas نیست — EVM mapping اسپارس است. نگرانی واقعی این است: داده بیومتریک on-chain **عمومی و دائمی** است. اگر hash‌ها leak شوند، بازسازی شوند یا تابع hash در آینده ضعیف تشخیص داده شود، هویت ۸۰ میلیون شهروند برای همیشه در معرض خطر قرار می‌گیرد. آیا این رویکرد از نظر حریم خصوصی قابل دفاع است؟ آیا تابع hash انتخاب‌شده برای این مقیاس کافی است؟
 
 **۱۲. منطق تخصیص ۳۰/۷۰ و bonus استانی در Provincial.sol**
 فرمول درآمد: ۳۰٪ استانی، ۷۰٪ خزانه ملی. استان‌هایی با `productivityScore > 70` واجد شرایط bonus هستند. آیا منطق محاسبه درصد و معیار واجد شرایط بودن در تمام حالات ورودی به‌درستی عمل می‌کند؟
 
 **۱۳. مسیر استقرار: hardhat.config.js در برابر Foundry**
 `hardhat.config.js` در مخزن موجود است. Foundry نیز در stack ذکر شده. کدام ابزار برای استقرار واقعی استفاده خواهد شد؟ آیا هر دو مسیر تست شده‌اند؟
+
+**۱۴. شبکه هدف، deployment script و وضعیت testnet**
+این اولین سوال هر blockchain architect است: قراردادها برای کدام شبکه نوشته شده‌اند؟ سپیدنامه از ZK-Rollup صحبت می‌کند — اما کدام chain مشخص؟ آیا deployment script وجود دارد؟ آیا constructor arguments هر قرارداد مستند شده‌اند؟ آیا حتی یک قرارداد روی testnet deploy و تست شده؟
 
 ---
 
