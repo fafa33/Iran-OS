@@ -399,6 +399,77 @@ describe("IranOS_Kernel", function () {
   });
 
   // ─────────────────────────────────────────
+  // CLC-06: اجرای قفل اضطراری
+  // ─────────────────────────────────────────
+
+  describe("CLC-06 emergency lock enforcement", function () {
+    beforeEach(async function () {
+      // فعال‌سازی قفل اضطراری از طریق TR-01
+      await kernel.connect(oracle).flagViolation(1, stranger.address, "TR-01 test");
+      expect(await kernel.emergencyLockActive()).to.be.true;
+    });
+
+    it("grantOfficialAccess reverts during active emergency lock", async function () {
+      const GUARDIAN = await kernel.GUARDIAN_ROLE();
+      await expect(
+        kernel.connect(sovereign).grantOfficialAccess(guardian.address, GUARDIAN)
+      ).to.be.revertedWith("Kernel: system is under emergency lock");
+    });
+
+    it("setTriggerProtocol reverts during active emergency lock", async function () {
+      await expect(
+        kernel.connect(sovereign).setTriggerProtocol(guardian.address)
+      ).to.be.revertedWith("Kernel: system is under emergency lock");
+    });
+
+    it("setSovereignWealthFund reverts during active emergency lock", async function () {
+      await expect(
+        kernel.connect(sovereign).setSovereignWealthFund(guardian.address)
+      ).to.be.revertedWith("Kernel: system is under emergency lock");
+    });
+
+    it("flagViolation remains callable during active emergency lock", async function () {
+      await expect(
+        kernel.connect(oracle).flagViolation(4, guardian.address, "TR-04 during lock")
+      ).to.emit(kernel, "ViolationFlagged");
+      expect(await kernel.violationCount()).to.equal(2n);
+    });
+
+    it("signViolation remains callable during active emergency lock", async function () {
+      const signers = await ethers.getSigners();
+      const extraCourts = signers.slice(6, 13);
+      const COURT_ROLE = await kernel.COURT_ROLE();
+      // دادگاه را قبل از قفل اضطراری ثبت کنید
+      // اعطای نقش نیاز به قفل نبودن دارد — در beforeEach والد انجام می‌شود
+      // پس از قفل، صرفاً امضا ممکن است
+
+      // ثبت تخلف TR-04 (بدون قفل) — پیش از این تست
+      // چون در beforeEach قفل فعال است، violationId=1 ثبت شده
+      // می‌توان violationId=1 را که در beforeEach ثبت شد امضا کرد
+      await expect(
+        kernel.connect(court).signViolation(1)
+      ).to.emit(kernel, "ViolationSigned");
+    });
+
+    it("deactivateEmergencyLock remains callable during active emergency lock", async function () {
+      await expect(
+        kernel.connect(court).deactivateEmergencyLock()
+      ).to.emit(kernel, "EmergencyLockDeactivated");
+      expect(await kernel.emergencyLockActive()).to.be.false;
+    });
+
+    it("authority setters work normally after lock is deactivated", async function () {
+      await kernel.connect(court).deactivateEmergencyLock();
+      expect(await kernel.emergencyLockActive()).to.be.false;
+
+      const GUARDIAN = await kernel.GUARDIAN_ROLE();
+      await expect(
+        kernel.connect(sovereign).grantOfficialAccess(guardian.address, GUARDIAN)
+      ).to.emit(kernel, "AccessGranted");
+    });
+  });
+
+  // ─────────────────────────────────────────
   // اطلاعات سیستم
   // ─────────────────────────────────────────
 

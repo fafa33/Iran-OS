@@ -385,6 +385,7 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
     function grantOfficialAccess(address official, bytes32 role)
         external
         onlySovereign
+        notLocked
         nonReentrant
     {
         require(official != address(0), "Kernel: invalid address");
@@ -449,6 +450,7 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
     function setTriggerProtocol(address _triggerProtocol)
         external
         onlySovereign
+        notLocked
         nonReentrant
     {
         require(_triggerProtocol != address(0), "Kernel: invalid address");
@@ -464,6 +466,7 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
     function setSovereignWealthFund(address _swf)
         external
         onlySovereign
+        notLocked
         nonReentrant
     {
         require(_swf != address(0), "Kernel: invalid address");

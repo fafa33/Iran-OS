@@ -176,7 +176,7 @@ The following states apply within each reserve class. States are accounting labe
 | State | Description | Contract evidence |
 |---|---|---|
 | `NORMAL` | No emergency lock; trigger not active | `emergencyLockActive == false` |
-| `EMERGENCY_LOCK` | TR-01/02/03 flagged; system locked | `emergencyLockActive == true`; `notLocked()` modifier blocks kernel actions |
+| `EMERGENCY_LOCK` | TR-01/02/03 flagged; system locked | `emergencyLockActive == true`; `notLocked()` blocks `grantOfficialAccess()`, `setTriggerProtocol()`, `setSovereignWealthFund()` — CLC-06 |
 | `TRIGGER_ACTIVATED` | 7-of-9 confirmed; offender access revoked; TriggerProtocol executed | `violations[id].triggered == true`; `triggerActivationCount` incremented |
 | `TREASURY_BLOCKED` | Offender address blocked in Treasury | `Treasury.blockedByTrigger[offender] == true` |
 
@@ -413,7 +413,7 @@ Enforcement candidates are runtime guards already implemented in contracts. They
 | RC-E-08 | `PahlaviToken.sol` | `notInEmergency()` on `transfer` and `transferFrom` | Token-level emergency state |
 | RC-E-09 | `kernel.sol` | `require(code >= 1 && code <= 6)` in `flagViolation()` | Valid violation code range |
 | RC-E-10 | `kernel.sol` | `require(!record.triggered)` in `signViolation()` and `_activateTrigger()` | INV-10 (trigger finality) |
-| RC-E-11 | `kernel.sol` | `notLocked()` modifier blocking operations during emergency | Kernel-level emergency state |
+| RC-E-11 | `kernel.sol` | `notLocked()` on `grantOfficialAccess()`, `setTriggerProtocol()`, `setSovereignWealthFund()` — CLC-06 remediated | Kernel-level emergency state |
 | RC-E-12 | `SovereignWealthFund.sol` | `onlyRole(RECLAIM_ROLE)` in `receiveReclaimedAsset()` | INV-08 (reclaim authority) |
 | RC-E-13 | `Treasury.sol` | `notBlocked()` modifier checking `blockedByTrigger` | Post-trigger treasury exclusion |
 
