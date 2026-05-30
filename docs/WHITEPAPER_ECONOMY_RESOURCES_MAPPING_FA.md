@@ -9,6 +9,8 @@
 
 یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_ECONOMY_RESOURCES_REVIEW_FA.md](WHITEPAPER_ECONOMY_RESOURCES_REVIEW_FA.md) ثبت شده است.
 
+بازبینی ردیابی تفصیلی workstream ۴ (پایه commit `de2e429`) در [docs/step13/WHITEPAPER_STEP13_WS4_ECONOMY_AND_NATIONAL_RESOURCES_TRACEABILITY_REVIEW_FA.md](step13/WHITEPAPER_STEP13_WS4_ECONOMY_AND_NATIONAL_RESOURCES_TRACEABILITY_REVIEW_FA.md) ثبت شده است. این بازبینی AI-assisted و documentation-only است و نیازمند review مالی/اقتصادی/حقوقی مستقل است.
+
 ## ۱. هدف
 
 این سند چهارمین نگاشت تفصیلی گام ۱۳ است و فقط workstream «اقتصاد و منابع» را پوشش می‌دهد. هدف آن اتصال مفاهیم اقتصادی، خزانه‌ای، بودجه‌ای و منبعی منشور/سپیدنامه به مسیر ردیابی repo است:
