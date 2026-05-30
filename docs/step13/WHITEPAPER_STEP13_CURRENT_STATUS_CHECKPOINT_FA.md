@@ -119,10 +119,22 @@
 
 ---
 
-## ۷. گام بعدی پیشنهادی گام ۱۳
+## ۷. بازبینی‌های ردیابی workstream انجام‌شده
 
-- یک workstream را انتخاب و نگاشت draft آن را تعمیق کنید.
-- شکاف‌های شناسایی‌شده در آن workstream را به issueهای #12 تا #19 وصل کنید.
+| workstream | سند بازبینی | وضعیت |
+| --- | --- | --- |
+| WS-1 اصول بنیادین | `WHITEPAPER_STEP13_WS1_FOUNDATIONAL_PRINCIPLES_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review انسانی |
+| WS-2 ساختار حکمرانی | `WHITEPAPER_STEP13_WS2_GOVERNANCE_STRUCTURE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review انسانی/حکمرانی |
+
+این بازبینی‌ها AI-assisted و documentation-only هستند. هیچ‌کدام human review، governance review، signoff، evidence accepted، یا blocker closure نیستند. گام ۱۲ و گام ۱۳ همچنان باز هستند.
+
+---
+
+## ۸. گام بعدی پیشنهادی گام ۱۳
+
+- workstreamهای بعدی (رفاه/عدالت، اقتصاد/منابع، قراردادها/adapterها، اوراکل/سیگنال‌ها، evidence/audit/signoff) را به‌ترتیب بازبینی کنید.
+- هر بازبینی را به issueهای #12 تا #19 وصل کنید.
+- نتیجه WS-1 و WS-2 را برای human/governance review ارسال کنید.
 - گام ۱۳ را نبندید.
 - قراردادها یا testها را تغییر ندهید.
 

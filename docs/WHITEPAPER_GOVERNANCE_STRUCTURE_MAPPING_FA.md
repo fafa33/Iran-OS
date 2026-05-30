@@ -9,6 +9,8 @@
 
 یادداشت بازبینی و تعمیق این نگاشت در [WHITEPAPER_GOVERNANCE_STRUCTURE_REVIEW_FA.md](WHITEPAPER_GOVERNANCE_STRUCTURE_REVIEW_FA.md) ثبت شده است.
 
+بازبینی ردیابی تفصیلی workstream ۲ (پایه commit `6c4202d`) در [docs/step13/WHITEPAPER_STEP13_WS2_GOVERNANCE_STRUCTURE_TRACEABILITY_REVIEW_FA.md](step13/WHITEPAPER_STEP13_WS2_GOVERNANCE_STRUCTURE_TRACEABILITY_REVIEW_FA.md) ثبت شده است. این بازبینی AI-assisted و documentation-only است و نیازمند review انسانی/حکمرانی است.
+
 ## ۱. هدف
 
 این سند دومین نگاشت تفصیلی گام ۱۳ است و فقط workstream «ساختار حکمرانی» را پوشش می‌دهد. هدف آن اتصال مفاهیم حکمرانی سپیدنامه و اسناد repo به مسیر ردیابی زیر است:
