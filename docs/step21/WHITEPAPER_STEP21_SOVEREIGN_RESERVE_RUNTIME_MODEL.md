@@ -415,7 +415,7 @@ Enforcement candidates are runtime guards already implemented in contracts. They
 | RC-E-10 | `kernel.sol` | `require(!record.triggered)` in `signViolation()` and `_activateTrigger()` | INV-10 (trigger finality) |
 | RC-E-11 | `kernel.sol` | `notLocked()` on `grantOfficialAccess()`, `setTriggerProtocol()`, `setSovereignWealthFund()` — CLC-06 remediated | Kernel-level emergency state |
 | RC-E-12 | `SovereignWealthFund.sol` | `onlyRole(RECLAIM_ROLE)` in `receiveReclaimedAsset()` | INV-08 (reclaim authority) |
-| RC-E-13 | `Treasury.sol` | `notBlocked()` modifier checking `blockedByTrigger` | Post-trigger treasury exclusion |
+| RC-E-13 | `Treasury.sol` | `notBlocked()` modifier checking `blockedByTrigger` — guard is implemented; **manual-only activation**: `blockedByTrigger[offender]` is set only when `Treasury.blockAddressByTrigger()` is called by an address with `KERNEL_ROLE`; no automated TriggerProtocol path currently sets it; see TG-01 / Step37 / Step38 | Post-trigger treasury exclusion (manual path only) |
 
 ---
 
@@ -438,7 +438,7 @@ Implementation mapping candidates identify where doctrine-derived rules are alre
 | IM-05 | 3-of-N multi-sig withdrawal | IMPLEMENTED | `MULTISIG_REQUIRED = 3` in SWF |
 | IM-06 | 7-of-9 trigger threshold | IMPLEMENTED | `MULTISIG_THRESHOLD = 7` in Kernel |
 | IM-07 | Reclaim path authority guard | IMPLEMENTED | RECLAIM_ROLE in `receiveReclaimedAsset()` |
-| IM-08 | Treasury block on trigger | IMPLEMENTED | `blockAddressByTrigger()` in TriggerProtocol→Treasury |
+| IM-08 | Treasury block on trigger | DOCUMENTED GAP (TG-01) | `TriggerProtocol.executeTrigger()` does NOT call `Treasury.blockAddressByTrigger()`; `treasury` address is stored in TriggerProtocol but unused in execution path; Step37 (TG-01 integration boundary rollup) documents the missing cross-contract call; Step38 (kernel passthrough decision) explicitly rejects automatic Treasury blocking due to revert-risk in `_activateTrigger()` — no contract change authorized |
 | IM-09 | Kernel role revocation on trigger | IMPLEMENTED | `_revokeOfficialAccess()` in Kernel; tested in Step-20 |
 | IM-10 | `layerL2.totalWithdrawn` update on yield | GAP | `distributeAnnualYield()` does not update `layerL2.totalWithdrawn` (DG-02) |
 | IM-11 | SWF COUNCIL_ROLE revocation on trigger | GAP | TriggerProtocol does not call SWF role revocation (DG-01) |
