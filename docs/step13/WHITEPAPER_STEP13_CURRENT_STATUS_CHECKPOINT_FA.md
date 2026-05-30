@@ -139,15 +139,23 @@
 
 ## ۸. گام بعدی پیشنهادی گام ۱۳
 
-- workstreamهای بعدی (رفاه/عدالت، اقتصاد/منابع، قراردادها/adapterها، اوراکل/سیگنال‌ها، evidence/audit/signoff) را به‌ترتیب بازبینی کنید.
-- هر بازبینی را به issueهای #12 تا #19 وصل کنید.
-- نتیجه WS-1 و WS-2 را برای human/governance review ارسال کنید.
+- بسته review انسانی آماده است: `WHITEPAPER_STEP13_HUMAN_REVIEW_PREPARATION_PACKAGE_FA.md`
+- بسته آماده‌سازی برای human reviewer، governance reviewer، audit coordinator، formal verification reviewer، custody reviewer، oracle ops reviewer، و release council
 - گام ۱۳ را نبندید.
 - قراردادها یا testها را تغییر ندهید.
 
+## ۸-الف. وضعیت بسته‌های تکمیل‌شده در گام ۱۳
+
+| سند | وضعیت |
+| --- | --- |
+| `WHITEPAPER_STEP13_FINAL_ROLLUP_REVIEW_FA.md` | ایجاد شد — مجموع: 17 COMPLETE / 94 PARTIAL / 13 GAP |
+| `WHITEPAPER_STEP13_HUMAN_REVIEW_PREPARATION_PACKAGE_FA.md` | ایجاد شد — بسته آماده‌سازی review انسانی (۲۰ بخش) |
+| **Step 12** | **باز** — هیچ evidence پذیرفته نشده، هیچ blocker بسته نشده |
+| **Step 13** | **باز** — هیچ review انسانی، هیچ signoff، هیچ blocker closure |
+
 ---
 
-## ۸. non-claim نهایی
+## ۹. non-claim نهایی
 
 این سند فقط چک‌پوینت وضعیت فعلی است. هیچ review کامل‌شده، هیچ evidence پذیرفته‌شده، هیچ reviewer signoff، هیچ blocker closure، هیچ production readiness، هیچ release approval، هیچ audit completion یا formal verification completion ادعا نشده است. گام ۱۲ و گام ۱۳ همچنان باز هستند.
 
