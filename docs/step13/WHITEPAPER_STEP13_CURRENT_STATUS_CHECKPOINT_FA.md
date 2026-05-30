@@ -131,6 +131,7 @@
 | WS-7 evidence / audit / signoff | `WHITEPAPER_STEP13_WS7_EVIDENCE_AUDIT_SIGNOFF_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review انسانی مستقل | 0 COMPLETE / 9 PARTIAL / 3 GAP (Deployment، Release، هیچ accepted evidence) |
 | WS-6 اوراکل و سیگنال‌ها | `WHITEPAPER_STEP13_WS6_ORACLE_AND_SIGNAL_ARCHITECTURE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review فنی/oracle/حکمرانی | 2 COMPLETE / 13 PARTIAL / 2 GAP (Airnode، TG-01) |
 | WS-8 مشارکت عمومی فارسی‌زبان | `WHITEPAPER_STEP13_WS8_PUBLIC_PARTICIPATION_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review حکمرانی/حقوقی/قانون اساسی | 2 COMPLETE / 9 PARTIAL / 2 GAP (feedback عمومی، voter registry) |
+| **Final Rollup** | `WHITEPAPER_STEP13_FINAL_ROLLUP_REVIEW_FA.md` | خلاصه کلی WS-1 تا WS-8 — documentation-only | **مجموع: 17 COMPLETE / 94 PARTIAL / 13 GAP** |
 
 این بازبینی‌ها AI-assisted و documentation-only هستند. هیچ‌کدام human review، governance review، signoff، evidence accepted، یا blocker closure نیستند. گام ۱۲ و گام ۱۳ همچنان باز هستند.
 
