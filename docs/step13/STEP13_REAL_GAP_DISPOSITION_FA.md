@@ -3,11 +3,12 @@
 # بررسی تکلیف شکاف‌های واقعی — Step 13
 ## Real Gap Disposition Review
 
-**نسخه:** ۱.۱.۰  
+**نسخه:** ۱.۲.۰  
 **تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
 **مرتبط با:** [Issue #35](https://github.com/fafa33/Iran-OS/issues/35)  
 **منبع:** `docs/step13/WHITEPAPER_STEP13_CROSS_FARGARD_FIDELITY_REVIEW_FA.md`  
-**چک‌پوینت:** `docs/step13/STEP13_REMEDIATION_CHECKPOINT_FA.md`
+**چک‌پوینت:** `docs/step13/STEP13_REMEDIATION_CHECKPOINT_FA.md`  
+**تصمیم G-03:** `docs/step13/G03_ZK_FINAL_DEFER_DECISION_FA.md`
 
 ---
 
@@ -66,11 +67,13 @@
 **وضعیت:**  
 `JurySelection.sol` فقط `zkProof.length > 0` بررسی می‌کند. هیچ verifier روی‌زنجیر وجود ندارد.
 
-**تکلیف پیشنهادی:** Defer  
-تأیید ZK کامل (Groth16/Plonk) نیاز به زیرساخت Circom/SnarkJS دارد. این پیچیدگی مناسب مرحله‌ای جدا است.  
-اقدام فوری: مستندسازی صریح که `zkProof` در نسخه فعلی تأیید نمی‌شود.
+**تکلیف نهایی:** Defer — **تصمیم ثبت‌شده**  
+گزینه الف (تعویق) انتخاب شد. گزینه ب (رابط + ساختگی) و گزینه ج (ZK واقعی) رد شدند.  
+دلیل: بدون circuit spec، بدون سیستم اثبات انتخاب‌شده، بدون trusted setup، بدون چرخه حسابرسی جداگانه.
 
-**اقدام بعدی:** ایجاد issue با برچسب `core` برای ZK verifier integration.
+**مرجع تصمیم:** `docs/step13/G03_ZK_FINAL_DEFER_DECISION_FA.md`
+
+**اقدام بعدی:** ایجاد GitHub issue با برچسب `core` — پس از تصمیم استراتژیک درباره سیستم اثبات.
 
 ---
 
