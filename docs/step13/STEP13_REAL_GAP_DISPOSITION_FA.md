@@ -29,7 +29,7 @@
 | **TG-01** | مسدودسازی خودکار خزانه‌داری | Runtime | ~~Fix~~ **IMPLEMENTED** | ~~Critical~~ **Done** | ~~وفاداری قانون اساسی A~~ **PR #36 — commit `48f5ffa`** |
 | **G-03** | تأییدکننده ZK روی‌زنجیر | Runtime | Defer | High | وفاداری قانون اساسی A |
 | **G-02** | یکپارچه‌سازی Airnode RRP | Integration | External evidence | High | آمادگی تولید |
-| **G-11** | مانیفست استقرار | Deployment | Document | High | آمادگی تولید + بررسی خارجی |
+| **G-11** | مانیفست استقرار | Deployment | ~~Document~~ **ADDRESSED** | ~~High~~ **Done** | ~~آمادگی تولید + بررسی خارجی~~ **`DEPLOYMENT_MANIFEST_PROTOCOL.md`** |
 | **COURT-01** | در دسترس بودن COURT_ROLE | Governance | ~~Document~~ **ADDRESSED** | ~~Medium~~ **Done** | ~~آمادگی تولید~~ **`COURT_ROLE_ASSIGNMENT_PROTOCOL.md`** |
 | **VS-01** | پیوند VotingSystem ↔ CitizenCard | Integration | Defer | Medium | هیچ (در این مرحله) |
 
@@ -90,16 +90,20 @@
 
 ### G-11 — مانیفست استقرار
 **دسته:** Deployment  
-**اولویت:** High  
-**مانع:** آمادگی تولید + بررسی خارجی
+**اولویت:** ~~High~~ **ADDRESSED (مستندسازی)**  
+**مانع:** ~~آمادگی تولید + بررسی خارجی~~ **مستند شده**
 
-**وضعیت:**  
-هیچ `hardhat.config.js`، `foundry.toml`، یا اسکریپت استقرار قابل تکرار در مخزن وجود ندارد.
+**وضعیت — پس از ایجاد مانیفست:**  
+`docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` ایجاد شد. این سند شامل:
+- نقشه وابستگی سازنده‌ها (Layer 0/1/2/3)
+- ترتیب اجباری استقرار ۱۶ قرارداد
+- ترتیب سیم‌کشی نقش‌ها (گروه‌های A تا E)
+- چک‌لیست‌های پیش، حین، و پس از استقرار
+- الزامات قابلیت تکرار
 
-**تکلیف پیشنهادی:** Document  
-پیش از هر استقرار: ایجاد `hardhat.config.js` و اسکریپت‌های `deploy/` حداقلی. بدون این فایل‌ها بررسی خارجی ناقص است.
+**باقی‌مانده G-11 فنی:** اسکریپت‌های `deploy/` هنوز ایجاد نشده‌اند. این مرحله بعدی G-11 است.
 
-**اقدام بعدی:** ایجاد issue با برچسب `core` برای deployment manifest.
+**اقدام بعدی:** ایجاد اسکریپت‌های `deploy/01_kernel.js` تا `deploy/08_verify.js` — کد است نه docs.
 
 ---
 
@@ -142,7 +146,7 @@
 
 | اولویت | شکاف | اقدام | نوع | وضعیت |
 |--------|-------|-------|-----|--------|
-| ۱ | **G-11** مانیفست استقرار | ایجاد `hardhat.config.js` + اسکریپت deploy | Deployment | باز |
+| ۱ | ~~**G-11** مانیفست استقرار~~ | ~~ایجاد `hardhat.config.js` + اسکریپت deploy~~ | ~~Deployment~~ | **ADDRESSED (docs) — اسکریپت‌های deploy/ باقی‌مانده** |
 | ۲ | ~~**TG-01** مستندسازی تأخیر~~ | ~~ایجاد issue core برای step38~~ | ~~Documentation~~ | **DONE — PR #36** |
 | ۳ | **G-02** پروتکل Airnode | ایجاد `AIRNODE_INTEGRATION_PROTOCOL.md` | Documentation | باز |
 | ۴ | ~~**COURT-01** پروتکل تعیین قضات~~ | ~~ایجاد `COURT_ROLE_ASSIGNMENT_PROTOCOL.md`~~ | ~~Documentation~~ | **DONE** |
@@ -165,11 +169,12 @@
 ### خلاصه اولویت‌بندی
 
 ```
-Critical → DONE:   TG-01 (PR #36 — commit 48f5ffa)
-High → Document:   G-11 (فوری — باز), G-02 (فوری — باز)
-High → Defer:      G-03 (مرحله بعدی — باز)
-Medium → DONE:     COURT-01 (COURT_ROLE_ASSIGNMENT_PROTOCOL.md)
-Medium → Defer:    VS-01 (معوق)
+Critical → DONE:        TG-01 (PR #36 — commit 48f5ffa)
+High → ADDRESSED(docs): G-11 (DEPLOYMENT_MANIFEST_PROTOCOL.md — اسکریپت‌های deploy/ باقی‌مانده)
+High → Document:        G-02 (فوری — باز)
+High → Defer:           G-03 (مرحله بعدی — باز)
+Medium → DONE:          COURT-01 (COURT_ROLE_ASSIGNMENT_PROTOCOL.md)
+Medium → Defer:         VS-01 (معوق)
 ```
 
 ---
