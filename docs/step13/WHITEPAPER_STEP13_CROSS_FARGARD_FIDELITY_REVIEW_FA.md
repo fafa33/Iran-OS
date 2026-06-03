@@ -4,7 +4,7 @@
 ## Cross-Fargard Constitutional Traceability Review (AI-Assisted)
 
 **نسخه:** ۱.۰.۰  
-**تاریخ:** ۲۵۸۵ شاهنشاهی / ۲۰۲۶ میلادی  
+**تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
 **شاخه:** `claude/iran-os-public-intro-GGT2H`  
 **مخزن:** `fafa33/Iran-OS`
 
