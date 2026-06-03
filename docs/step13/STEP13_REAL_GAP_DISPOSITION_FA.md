@@ -4,7 +4,7 @@
 ## Real Gap Disposition Review
 
 **نسخه:** ۱.۰.۰  
-**تاریخ:** ۱۴۰۵-۰۳-۱۳  
+**تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
 **مرتبط با:** [Issue #35](https://github.com/fafa33/Iran-OS/issues/35)  
 **منبع:** `docs/step13/WHITEPAPER_STEP13_CROSS_FARGARD_FIDELITY_REVIEW_FA.md`
 
