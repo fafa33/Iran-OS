@@ -85,9 +85,10 @@ Step 13 (بررسی وفاداری بین‌فرگردی) شش شکاف واقع
 ## ۳. شکاف‌های معوق
 
 ### G-03 — تأییدکننده ZK روی‌زنجیر
-**دلیل تعویق:** زیرساخت Circom/SnarkJS نیاز به مرحله جداگانه دارد.  
+**دلیل تعویق:** بدون circuit spec، بدون سیستم اثبات انتخاب‌شده (Groth16/PLONK/Noir)، بدون trusted setup، بدون چرخه حسابرسی جداگانه.  
 **وضعیت فعلی:** `JurySelection.sol` فقط `zkProof.length > 0` بررسی می‌کند. هیچ verifier روی‌زنجیر وجود ندارد.  
-**اقدام بعدی:** issue با برچسب `core` — پس از تعریف زیرساخت ZK.
+**تصمیم ثبت‌شده:** گزینه الف (تعویق) — مرجع: `docs/step13/G03_ZK_FINAL_DEFER_DECISION_FA.md`  
+**اقدام بعدی:** ایجاد GitHub issue با برچسب `core` — پس از تصمیم استراتژیک درباره سیستم اثبات.
 
 ### VS-01 — پیوند VotingSystem ↔ CitizenCard
 **دلیل تعویق:** پیش از نهایی شدن ElectionProtocol (لایه ۵/۷) پیاده‌سازی خطرناک است.  
@@ -106,6 +107,7 @@ Step 13 (بررسی وفاداری بین‌فرگردی) شش شکاف واقع
 | [#40](https://github.com/fafa33/Iran-OS/pull/40) | G-02: پروتکل Airnode RRP | docs | ادغام‌شده |
 | [#41](https://github.com/fafa33/Iran-OS/pull/41) | یکسان‌سازی فرمت تاریخ | docs | ادغام‌شده |
 | [#42](https://github.com/fafa33/Iran-OS/pull/42) | چک‌پوینت رفع شکاف‌های Step 13 | docs | ادغام‌شده |
+| [#43](https://github.com/fafa33/Iran-OS/pull/43) | گزارش وضعیت نهایی Step 13 | docs | ادغام‌شده |
 
 ---
 
