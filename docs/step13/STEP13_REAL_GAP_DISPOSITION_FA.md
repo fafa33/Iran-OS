@@ -30,7 +30,7 @@
 | **G-03** | تأییدکننده ZK روی‌زنجیر | Runtime | Defer | High | وفاداری قانون اساسی A |
 | **G-02** | یکپارچه‌سازی Airnode RRP | Integration | External evidence | High | آمادگی تولید |
 | **G-11** | مانیفست استقرار | Deployment | Document | High | آمادگی تولید + بررسی خارجی |
-| **COURT-01** | در دسترس بودن COURT_ROLE | Governance | Document | Medium | آمادگی تولید |
+| **COURT-01** | در دسترس بودن COURT_ROLE | Governance | ~~Document~~ **ADDRESSED** | ~~Medium~~ **Done** | ~~آمادگی تولید~~ **`COURT_ROLE_ASSIGNMENT_PROTOCOL.md`** |
 | **VS-01** | پیوند VotingSystem ↔ CitizenCard | Integration | Defer | Medium | هیچ (در این مرحله) |
 
 ---
@@ -105,16 +105,19 @@
 
 ### COURT-01 — در دسترس بودن COURT_ROLE
 **دسته:** Governance  
-**اولویت:** Medium  
-**مانع:** آمادگی تولید
+**اولویت:** ~~Medium~~ **ADDRESSED**  
+**مانع:** ~~آمادگی تولید~~ **برطرف‌شده**
 
-**وضعیت:**  
-`COURT_ROLE` در `kernel.sol` تعریف شده اما هیچ پروتکلی برای تعیین آدرس‌های دادگاه روی‌زنجیر وجود ندارد. `deactivateEmergencyLock()` عملاً قابل فراخوانی نیست.
+**وضعیت — پس از ایجاد پروتکل:**  
+`docs/deployment/COURT_ROLE_ASSIGNMENT_PROTOCOL.md` ایجاد شد. این سند:
+- الزام ۹ عضو `COURT_ROLE` پیش از mainnet را مستند کرد
+- محدودیت بحرانی `notLocked` را توضیح داد (اگر TR-01/02/03 زودتر از ثبت ۹ عضو رخ دهد، مسیر ماشه برای همیشه مسدود می‌شود)
+- ترتیب اجباری استقرار را تعریف کرد: تکمیل دادگاه → setTriggerProtocol → ORACLE_ROLE
+- معیارهای انتخاب off-chain قضات را مستند کرد
+- چک‌لیست ۹ `hasRole` برای تأیید پیش از استقرار ایجاد کرد
+- `ROLE_WIRING_CHECKLIST.md` با بخش COURT-01 به‌روز شد
 
-**تکلیف پیشنهادی:** Document  
-این شکاف حاکمیتی است نه کدی. نیاز به پروتکل تعیین قضات دادگاه قانون اساسی که پیش از استقرار مستند شود.
-
-**اقدام بعدی:** ایجاد `docs/deployment/COURT_ROLE_ASSIGNMENT_PROTOCOL.md`.
+**اقدام بعدی:** ندارد — مستند شده.
 
 ---
 
@@ -142,7 +145,7 @@
 | ۱ | **G-11** مانیفست استقرار | ایجاد `hardhat.config.js` + اسکریپت deploy | Deployment | باز |
 | ۲ | ~~**TG-01** مستندسازی تأخیر~~ | ~~ایجاد issue core برای step38~~ | ~~Documentation~~ | **DONE — PR #36** |
 | ۳ | **G-02** پروتکل Airnode | ایجاد `AIRNODE_INTEGRATION_PROTOCOL.md` | Documentation | باز |
-| ۴ | **COURT-01** پروتکل تعیین قضات | ایجاد `COURT_ROLE_ASSIGNMENT_PROTOCOL.md` | Documentation | باز — **بعدی** |
+| ۴ | ~~**COURT-01** پروتکل تعیین قضات~~ | ~~ایجاد `COURT_ROLE_ASSIGNMENT_PROTOCOL.md`~~ | ~~Documentation~~ | **DONE** |
 
 ### مرحله بعدی (پیش از استقرار تستنت)
 
@@ -163,9 +166,9 @@
 
 ```
 Critical → DONE:   TG-01 (PR #36 — commit 48f5ffa)
-High → Document:   G-11 (فوری), G-02 (فوری)
-High → Defer:      G-03 (مرحله بعدی)
-Medium → Document: COURT-01 (فوری — بعدی باز)
+High → Document:   G-11 (فوری — باز), G-02 (فوری — باز)
+High → Defer:      G-03 (مرحله بعدی — باز)
+Medium → DONE:     COURT-01 (COURT_ROLE_ASSIGNMENT_PROTOCOL.md)
 Medium → Defer:    VS-01 (معوق)
 ```
 
