@@ -28,7 +28,7 @@
 |--------|--------|-------|-----------|--------|-------|
 | **TG-01** | مسدودسازی خودکار خزانه‌داری | Runtime | ~~Fix~~ **IMPLEMENTED** | ~~Critical~~ **Done** | ~~وفاداری قانون اساسی A~~ **PR #36 — commit `48f5ffa`** |
 | **G-03** | تأییدکننده ZK روی‌زنجیر | Runtime | Defer | High | وفاداری قانون اساسی A |
-| **G-02** | یکپارچه‌سازی Airnode RRP | Integration | External evidence | High | آمادگی تولید |
+| **G-02** | یکپارچه‌سازی Airnode RRP | Integration | ~~External evidence~~ **ADDRESSED** | ~~High~~ **Done** | ~~آمادگی تولید~~ **`AIRNODE_INTEGRATION_PROTOCOL.md`** |
 | **G-11** | مانیفست استقرار | Deployment | ~~Document~~ **ADDRESSED** | ~~High~~ **Done** | ~~آمادگی تولید + بررسی خارجی~~ **`DEPLOYMENT_MANIFEST_PROTOCOL.md`** |
 | **COURT-01** | در دسترس بودن COURT_ROLE | Governance | ~~Document~~ **ADDRESSED** | ~~Medium~~ **Done** | ~~آمادگی تولید~~ **`COURT_ROLE_ASSIGNMENT_PROTOCOL.md`** |
 | **VS-01** | پیوند VotingSystem ↔ CitizenCard | Integration | Defer | Medium | هیچ (در این مرحله) |
@@ -75,16 +75,23 @@
 
 ### G-02 — یکپارچه‌سازی Airnode RRP
 **دسته:** Integration  
-**اولویت:** High  
-**مانع:** آمادگی تولید
+**اولویت:** ~~High~~ **ADDRESSED (مستندسازی)**  
+**مانع:** ~~آمادگی تولید~~ **مستند شده**
 
-**وضعیت:**  
-`API3Oracle.sol` موجود است اما هیچ پیکربندی Airnode RRP، فایل `config.json`، یا اسکریپت deploy در مخزن وجود ندارد.
+**وضعیت — پس از ایجاد پروتکل:**  
+`docs/oracle/AIRNODE_INTEGRATION_PROTOCOL.md` ایجاد شد. این سند شامل:
+- ارزیابی وضعیت فعلی: `API3Oracle.sol` موجود و تست‌شده؛ config.json/feeder registry/runbook غایب
+- معماری Airnode RRP در IranOS (نمودار جریان داده، جدول انواع داده)
+- الزامات config.json بدون secrets (skeleton ساختار)
+- الزامات OIS specification
+- حداقل ۲ feeder مستقل برای `PAH_USD_KEY`، بازه به‌روزرسانی ۳۰ دقیقه
+- SLA عملیات oracle (جدول per data type)
+- راهنمای staleness runbook
+- پیش‌نیازها و توالی استقرار
+- الزامات مانیتورینگ و هشدار
+- فرضیات امنیتی
 
-**تکلیف پیشنهادی:** External evidence  
-پیکربندی Airnode شامل کلیدهای API3 است که نباید در مخزن عمومی باشد. مستندسازی پروتکل اتصال و الزامات محیطی کافی است.
-
-**اقدام بعدی:** ایجاد `docs/deployment/AIRNODE_INTEGRATION_PROTOCOL.md`.
+**اقدام بعدی:** ندارد — مستند شده.
 
 ---
 
@@ -148,7 +155,7 @@
 |--------|-------|-------|-----|--------|
 | ۱ | ~~**G-11** مانیفست استقرار~~ | ~~ایجاد `hardhat.config.js` + اسکریپت deploy~~ | ~~Deployment~~ | **ADDRESSED (docs) — اسکریپت‌های deploy/ باقی‌مانده** |
 | ۲ | ~~**TG-01** مستندسازی تأخیر~~ | ~~ایجاد issue core برای step38~~ | ~~Documentation~~ | **DONE — PR #36** |
-| ۳ | **G-02** پروتکل Airnode | ایجاد `AIRNODE_INTEGRATION_PROTOCOL.md` | Documentation | باز |
+| ۳ | ~~**G-02** پروتکل Airnode~~ | ~~ایجاد `AIRNODE_INTEGRATION_PROTOCOL.md`~~ | ~~Documentation~~ | **DONE** |
 | ۴ | ~~**COURT-01** پروتکل تعیین قضات~~ | ~~ایجاد `COURT_ROLE_ASSIGNMENT_PROTOCOL.md`~~ | ~~Documentation~~ | **DONE** |
 
 ### مرحله بعدی (پیش از استقرار تستنت)
@@ -171,7 +178,7 @@
 ```
 Critical → DONE:        TG-01 (PR #36 — commit 48f5ffa)
 High → ADDRESSED(docs): G-11 (DEPLOYMENT_MANIFEST_PROTOCOL.md — اسکریپت‌های deploy/ باقی‌مانده)
-High → Document:        G-02 (فوری — باز)
+High → ADDRESSED(docs): G-02 (AIRNODE_INTEGRATION_PROTOCOL.md)
 High → Defer:           G-03 (مرحله بعدی — باز)
 Medium → DONE:          COURT-01 (COURT_ROLE_ASSIGNMENT_PROTOCOL.md)
 Medium → Defer:         VS-01 (معوق)
