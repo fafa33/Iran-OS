@@ -3,6 +3,10 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+interface ITreasury {
+    function blockAddressByTrigger(address target) external;
+}
+
 /**
  * @title TriggerProtocol
  * @dev پروتکل ماشه — لایه اجرایی مکانیسم برخورد خودکار با تخلف از منشور
@@ -60,6 +64,7 @@ contract TriggerProtocol is ReentrancyGuard {
         executionCount++;
         executionId = executionCount;
         blockedFromTreasury[offender] = true;
+        ITreasury(treasury).blockAddressByTrigger(offender);
         emit TreasuryAccessBlocked(offender, block.timestamp);
         signatureRevoked[offender] = true;
         emit SignatureRevoked(offender, block.timestamp);

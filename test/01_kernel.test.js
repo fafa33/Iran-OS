@@ -20,12 +20,23 @@ describe("IranOS_Kernel", function () {
       swf.address
     );
 
+    // Treasury واقعی برای TG-01: executeTrigger باید blockAddressByTrigger را فراخوانی کند
+    const TreasuryFactory = await ethers.getContractFactory("Treasury");
+    const kernelTreasury = await TreasuryFactory.deploy(sovereign.address);
+    await kernelTreasury.waitForDeployment();
+
     // سپس TriggerProtocol با آدرس واقعی Kernel مستقر می‌شود
     const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
     triggerProtocol = await TriggerProtocol.deploy(
-      await kernel.getAddress(), // kernel — آدرس واقعی
-      stranger.address,          // treasury (مثال)
+      await kernel.getAddress(),
+      await kernelTreasury.getAddress(),
       swf.address
+    );
+
+    // TG-01: اعطای KERNEL_ROLE به TriggerProtocol روی Treasury
+    await kernelTreasury.connect(sovereign).grantRole(
+      await kernelTreasury.KERNEL_ROLE(),
+      await triggerProtocol.getAddress()
     );
 
     // اتصال TriggerProtocol به Kernel

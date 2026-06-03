@@ -93,12 +93,17 @@ describe("API3Oracle", function () {
       const extraCourts = signers.slice(6, 12);
       const COURT_ROLE = await kernel.COURT_ROLE();
 
+      // TG-01: deploy real Treasury and grant KERNEL_ROLE to TriggerProtocol
+      const TreasuryFactory = await ethers.getContractFactory("Treasury");
+      const tpTreasury = await TreasuryFactory.deploy(sovereign.address);
+      await tpTreasury.waitForDeployment();
       const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
       const triggerProtocol = await TriggerProtocol.deploy(
         await kernel.getAddress(),
-        stranger.address,
+        await tpTreasury.getAddress(),
         swf.address
       );
+      await tpTreasury.connect(sovereign).grantRole(await tpTreasury.KERNEL_ROLE(), await triggerProtocol.getAddress());
       await kernel.connect(sovereign).setTriggerProtocol(await triggerProtocol.getAddress());
 
       for (const extraCourt of extraCourts) {
@@ -169,12 +174,17 @@ describe("API3Oracle", function () {
       const extraCourts = signers.slice(6, 13);
       const COURT_ROLE = await kernel.COURT_ROLE();
 
+      // TG-01: deploy real Treasury and grant KERNEL_ROLE to TriggerProtocol
+      const TreasuryFactory2 = await ethers.getContractFactory("Treasury");
+      const tpTreasury2 = await TreasuryFactory2.deploy(sovereign.address);
+      await tpTreasury2.waitForDeployment();
       const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
       const triggerProtocol = await TriggerProtocol.deploy(
         await kernel.getAddress(),
-        stranger.address,
+        await tpTreasury2.getAddress(),
         swf.address
       );
+      await tpTreasury2.connect(sovereign).grantRole(await tpTreasury2.KERNEL_ROLE(), await triggerProtocol.getAddress());
       await kernel.connect(sovereign).setTriggerProtocol(await triggerProtocol.getAddress());
 
       for (const extraCourt of extraCourts) {
