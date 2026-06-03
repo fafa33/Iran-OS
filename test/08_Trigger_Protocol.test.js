@@ -12,10 +12,14 @@ const { ethers } = require("hardhat");
   let attacker, replacement, user1, user2;
 
 beforeEach(async function () {
-[kernel, treasury, swf, attacker, replacement, user1, user2] = await ethers.getSigners();
+[kernel, , swf, attacker, replacement, user1, user2] = await ethers.getSigners();
+const TreasuryFactory = await ethers.getContractFactory("Treasury");
+treasury = await TreasuryFactory.deploy(kernel.address);
+await treasury.waitForDeployment();
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
-trigger = await Trigger.deploy(kernel.address, treasury.address, swf.address);
+trigger = await Trigger.deploy(kernel.address, await treasury.getAddress(), swf.address);
 await trigger.waitForDeployment();
+await treasury.connect(kernel).grantRole(await treasury.KERNEL_ROLE(), await trigger.getAddress());
 });
 
 describe("Deployment", function () {
@@ -23,7 +27,7 @@ it("باید kernel درست ثبت شود", async function () {
 expect(await trigger.kernel()).to.equal(kernel.address);
 });
 it("باید treasury درست ثبت شود", async function () {
-expect(await trigger.treasury()).to.equal(treasury.address);
+expect(await trigger.treasury()).to.equal(await treasury.getAddress());
 });
 it("باید تعداد اجراها صفر باشد", async function () {
 expect(await trigger.executionCount()).to.equal(0);
@@ -193,7 +197,7 @@ expectExecutionRecord(await trigger.executions(1), firstSnapshot);
 expectExecutionRecord(await trigger.executions(2), secondSnapshot);
 });
 
-it("execution records do not authorize external Treasury blocking", async function () {
+it("executeTrigger propagates Treasury block when TriggerProtocol holds KERNEL_ROLE", async function () {
 const Treasury = await ethers.getContractFactory("Treasury");
 const externalTreasury = await Treasury.deploy(kernel.address);
 await externalTreasury.waitForDeployment();
@@ -201,6 +205,9 @@ await externalTreasury.waitForDeployment();
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
 const triggerWithTreasury = await Trigger.deploy(kernel.address, await externalTreasury.getAddress(), swf.address);
 await triggerWithTreasury.waitForDeployment();
+
+// TG-01: grant KERNEL_ROLE to TriggerProtocol so executeTrigger can call blockAddressByTrigger
+await externalTreasury.connect(kernel).grantRole(await externalTreasury.KERNEL_ROLE(), await triggerWithTreasury.getAddress());
 
 const startingBudgetAllocated = await externalTreasury.totalBudgetAllocated();
 const startingFiscalYear = await externalTreasury.currentFiscalYear();
@@ -214,7 +221,8 @@ expect(exec.violationCode).to.equal(1);
 expect(exec.treasuryBlocked).to.be.true;
 expect(await triggerWithTreasury.isTreasuryBlocked(attacker.address)).to.be.true;
 
-expect(await externalTreasury.isBlocked(attacker.address)).to.be.false;
+// TG-01: executeTrigger now propagates to real Treasury
+expect(await externalTreasury.isBlocked(attacker.address)).to.be.true;
 expect(await externalTreasury.totalBudgetAllocated()).to.equal(startingBudgetAllocated);
 expect(await externalTreasury.currentFiscalYear()).to.equal(startingFiscalYear);
 });
@@ -700,6 +708,13 @@ for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
 
+const kernelContractAddr0 = await kernelContract.getAddress();
+await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr0]);
+await ethers.provider.send("hardhat_setBalance", [kernelContractAddr0, "0x1000000000000000000"]);
+const kernelAsSigner0 = await ethers.getSigner(kernelContractAddr0);
+await realTreasury.connect(kernelAsSigner0).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
+await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr0]);
+
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "trigger lifecycle integrity audit");
 
 const violationId = 1n;
@@ -766,7 +781,7 @@ expect(terminalExecution.publicNotified).to.be.true;
 expect(await realTrigger.isTreasuryBlocked(offender.address)).to.be.true;
 expect(await realTrigger.isSignatureRevoked(offender.address)).to.be.true;
 
-expect(terminalTreasuryBlocked).to.equal(preTerminalTreasuryBlocked);
+expect(terminalTreasuryBlocked).to.be.true; // TG-01: blocked on terminal trigger
 expect(terminalTreasuryBudgetAllocated).to.equal(preTerminalTreasuryBudgetAllocated);
 expect(terminalTreasuryFiscalYear).to.equal(preTerminalTreasuryFiscalYear);
 expect(terminalTreasuryTxCount).to.equal(preTerminalTreasuryTxCount);
@@ -878,6 +893,13 @@ const initialSwfL1 = await realSwf.layerL1();
 const initialSwfTotalAssets = await realSwf.totalAssets();
 const initialSwfTxCount = await realSwf.txCount();
 
+const kernelContractAddr1 = await kernelContract.getAddress();
+await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr1]);
+await ethers.provider.send("hardhat_setBalance", [kernelContractAddr1, "0x1000000000000000000"]);
+const kernelAsSigner1 = await ethers.getSigner(kernelContractAddr1);
+await realTreasury.connect(kernelAsSigner1).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
+await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr1]);
+
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "reserve invariant lifecycle audit");
 
 const violationId = 1n;
@@ -939,7 +961,7 @@ expect(terminalExecution.signatureRevoked).to.be.true;
 expect(terminalExecution.publicNotified).to.be.true;
 expect(terminalReserveRatio).to.equal(initialReserveRatio);
 expect(terminalLiquidityCap).to.equal(initialLiquidityCap);
-expect(terminalTreasuryBlocked).to.equal(initialTreasuryBlocked);
+expect(terminalTreasuryBlocked).to.be.true; // TG-01: blocked on terminal trigger
 expect(terminalTreasuryBudgetAllocated).to.equal(initialTreasuryBudgetAllocated);
 expect(terminalTreasuryFiscalYear).to.equal(initialTreasuryFiscalYear);
 expect(terminalTreasuryTxCount).to.equal(initialTreasuryTxCount);
@@ -1025,6 +1047,13 @@ for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
 
+const kernelContractAddr2 = await kernelContract.getAddress();
+await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr2]);
+await ethers.provider.send("hardhat_setBalance", [kernelContractAddr2, "0x1000000000000000000"]);
+const kernelAsSigner2 = await ethers.getSigner(kernelContractAddr2);
+await realTreasury.connect(kernelAsSigner2).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
+await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr2]);
+
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "terminal immutability audit");
 
 const violationId = 1n;
@@ -1092,7 +1121,7 @@ expect(terminalExecution.signatureRevoked).to.be.true;
 expect(terminalExecution.publicNotified).to.be.true;
 expect(terminalActivationCount).to.equal(preTerminalActivationCount + 1n);
 expect(terminalExecutionCount).to.equal(preTerminalExecutionCount + 1n);
-expect(terminalTreasuryBlocked).to.equal(preTerminalTreasuryBlocked);
+expect(terminalTreasuryBlocked).to.be.true; // TG-01: blocked on terminal trigger
 expect(terminalTreasuryBudgetAllocated).to.equal(preTerminalTreasuryBudgetAllocated);
 expect(terminalTreasuryFiscalYear).to.equal(preTerminalTreasuryFiscalYear);
 expect(terminalTreasuryTxCount).to.equal(preTerminalTreasuryTxCount);
@@ -1205,6 +1234,13 @@ await kernelContract.connect(sovereign).grantOfficialAccess(offender.address, GU
 for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
+
+const kernelContractAddr3 = await kernelContract.getAddress();
+await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr3]);
+await ethers.provider.send("hardhat_setBalance", [kernelContractAddr3, "0x1000000000000000000"]);
+const kernelAsSigner3 = await ethers.getSigner(kernelContractAddr3);
+await realTreasury.connect(kernelAsSigner3).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
+await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr3]);
 
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "deterministic execution audit");
 
@@ -1348,6 +1384,13 @@ for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
 
+const kernelContractAddr4 = await kernelContract.getAddress();
+await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr4]);
+await ethers.provider.send("hardhat_setBalance", [kernelContractAddr4, "0x1000000000000000000"]);
+const kernelAsSigner4 = await ethers.getSigner(kernelContractAddr4);
+await realTreasury.connect(kernelAsSigner4).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
+await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr4]);
+
 await kernelContract.connect(oracle).flagViolation(4, offenderOne.address, "first isolated trigger");
 await kernelContract.connect(oracle).flagViolation(4, offenderTwo.address, "second isolated trigger");
 
@@ -1425,8 +1468,8 @@ expect(await realTrigger.isSignatureRevoked(offenderOne.address)).to.be.true;
 expect(await realTrigger.isTreasuryBlocked(offenderTwo.address)).to.be.false;
 expect(await realTrigger.isSignatureRevoked(offenderTwo.address)).to.be.false;
 expect(await realTrigger.getInterimReplacement(offenderTwo.address)).to.equal(ethers.ZeroAddress);
-expect(await realTreasury.isBlocked(offenderOne.address)).to.equal(preTerminalTreasuryOneBlocked);
-expect(await realTreasury.isBlocked(offenderTwo.address)).to.equal(preTerminalTreasuryTwoBlocked);
+expect(await realTreasury.isBlocked(offenderOne.address)).to.be.true; // TG-01: terminal trigger blocks Treasury
+expect(await realTreasury.isBlocked(offenderTwo.address)).to.equal(preTerminalTreasuryTwoBlocked); // non-terminal: unchanged
 expect(await realTreasury.totalBudgetAllocated()).to.equal(preTerminalTreasuryBudgetAllocated);
 expect(await realTreasury.currentFiscalYear()).to.equal(preTerminalTreasuryFiscalYear);
 expect(await realTreasury.txCount()).to.equal(preTerminalTreasuryTxCount);
@@ -1480,6 +1523,13 @@ await kernelContract.connect(sovereign).grantOfficialAccess(offenderTwo.address,
 for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
+
+const kernelContractAddr5 = await kernelContract.getAddress();
+await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr5]);
+await ethers.provider.send("hardhat_setBalance", [kernelContractAddr5, "0x1000000000000000000"]);
+const kernelAsSigner5 = await ethers.getSigner(kernelContractAddr5);
+await realTreasury.connect(kernelAsSigner5).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
+await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr5]);
 
 await kernelContract.connect(oracle).flagViolation(4, offenderOne.address, "concurrent terminal trigger");
 await kernelContract.connect(oracle).flagViolation(4, offenderTwo.address, "concurrent non-terminal trigger");
@@ -1562,8 +1612,8 @@ expect(await realTrigger.isSignatureRevoked(offenderOne.address)).to.be.true;
 expect(await realTrigger.isTreasuryBlocked(offenderTwo.address)).to.be.false;
 expect(await realTrigger.isSignatureRevoked(offenderTwo.address)).to.be.false;
 expect(await realTrigger.getInterimReplacement(offenderTwo.address)).to.equal(ethers.ZeroAddress);
-expect(await realTreasury.isBlocked(offenderOne.address)).to.equal(preTreasuryOneBlocked);
-expect(await realTreasury.isBlocked(offenderTwo.address)).to.equal(preTreasuryTwoBlocked);
+expect(await realTreasury.isBlocked(offenderOne.address)).to.be.true; // TG-01: terminal trigger blocks Treasury
+expect(await realTreasury.isBlocked(offenderTwo.address)).to.equal(preTreasuryTwoBlocked); // non-terminal: unchanged
 expect(await realTreasury.totalBudgetAllocated()).to.equal(preTreasuryBudgetAllocated);
 expect(await realTreasury.currentFiscalYear()).to.equal(preTreasuryFiscalYear);
 expect(await realTreasury.txCount()).to.equal(preTreasuryTxCount);
@@ -1614,6 +1664,14 @@ const COURT_ROLE = await kernelContract.COURT_ROLE();
 for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
+
+// TG-01: grant KERNEL_ROLE to TriggerProtocol BEFORE snapshot so matrix is consistent pre/post trigger
+const kernelContractAddrEsc = await kernelContract.getAddress();
+await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddrEsc]);
+await ethers.provider.send("hardhat_setBalance", [kernelContractAddrEsc, "0x1000000000000000000"]);
+const kernelAsSignerEsc = await ethers.getSigner(kernelContractAddrEsc);
+await realTreasury.connect(kernelAsSignerEsc).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
+await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddrEsc]);
 
 const kernelRoles = [
 await kernelContract.SOVEREIGN_ROLE(),
@@ -1774,7 +1832,7 @@ await expectRoleMatrixUnchanged(realSwf, swfRoles, swfRoleSnapshot);
 expect(await kernelContract.emergencyLockActive()).to.equal(preEmergencyLock);
 expect(await kernelContract.triggerActivationCount()).to.equal(preActivationCount + 1n);
 expect(await realTrigger.executionCount()).to.equal(preExecutionCount + 1n);
-expect(await realTreasury.isBlocked(offender.address)).to.equal(preTreasuryBlocked);
+expect(await realTreasury.isBlocked(offender.address)).to.be.true; // TG-01: terminal trigger blocks Treasury
 expect(await realTreasury.totalBudgetAllocated()).to.equal(preTreasuryBudgetAllocated);
 expect(await realTreasury.currentFiscalYear()).to.equal(preTreasuryFiscalYear);
 expect(await realTreasury.txCount()).to.equal(preTreasuryTxCount);
@@ -1921,6 +1979,13 @@ for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
 
+const kernelContractAddr7 = await kernelContract.getAddress();
+await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr7]);
+await ethers.provider.send("hardhat_setBalance", [kernelContractAddr7, "0x1000000000000000000"]);
+const kernelAsSigner7 = await ethers.getSigner(kernelContractAddr7);
+await realTreasury.connect(kernelAsSigner7).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
+await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr7]);
+
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "trigger replay audit");
 const violationId = 1n;
 const courtSigners = [court, ...extraCourts];
@@ -2037,6 +2102,13 @@ expect(await kernelContract.hasRole(COURT_ROLE, offender.address)).to.be.true;
 expect(await realSwf.hasRole(COUNCIL_ROLE, offender.address)).to.be.true;
 expect((await kernelContract.officialAccess(offender.address)).isActive).to.be.true;
 
+const kernelContractAddr8 = await kernelContract.getAddress();
+await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr8]);
+await ethers.provider.send("hardhat_setBalance", [kernelContractAddr8, "0x1000000000000000000"]);
+const kernelAsSigner8 = await ethers.getSigner(kernelContractAddr8);
+await realTreasury.connect(kernelAsSigner8).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
+await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr8]);
+
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "P-07 authority boundary test");
 
 const violationId = 1n;
@@ -2068,8 +2140,8 @@ expect(exec.violationCode).to.equal(0);
 });
 });
 
-describe("TG-01 Design Gap and Option D Remedy", function () {
-it("TG-01: executeTrigger does not propagate to Treasury; explicit kernel call (Option D) is required to block offender", async function () {
+describe("TG-01 Treasury Auto-Block", function () {
+it("TG-01: executeTrigger automatically propagates Treasury block in the same transaction", async function () {
 // Deploy Treasury with kernel EOA — kernel gets KERNEL_ROLE + DEFAULT_ADMIN_ROLE
 const Treasury = await ethers.getContractFactory("Treasury");
 const tg01Treasury = await Treasury.deploy(kernel.address);
@@ -2080,17 +2152,21 @@ const Trigger = await ethers.getContractFactory("TriggerProtocol");
 const tg01Trigger = await Trigger.deploy(kernel.address, await tg01Treasury.getAddress(), swf.address);
 await tg01Trigger.waitForDeployment();
 
+// TG-01 authorization: grant KERNEL_ROLE to TriggerProtocol on Treasury
+await tg01Treasury.connect(kernel).grantRole(await tg01Treasury.KERNEL_ROLE(), await tg01Trigger.getAddress());
+
 const PARLIAMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("PARLIAMENT_ROLE"));
 const GOVERNMENT_ROLE = ethers.keccak256(ethers.toUtf8Bytes("GOVERNMENT_ROLE"));
 
-// Kernel self-grants PARLIAMENT_ROLE (kernel has DEFAULT_ADMIN_ROLE from Treasury constructor)
 await tg01Treasury.connect(kernel).grantRole(PARLIAMENT_ROLE, kernel.address);
-// Grant user1 GOVERNMENT_ROLE — user1 will propose; attacker (the blocked official) is the recipient
 await tg01Treasury.connect(kernel).grantRole(GOVERNMENT_ROLE, user1.address);
 
-// Create a valid budget line so proposeTransaction has a target
 const lineAmount = ethers.parseUnits("10000000000", 18);
 await tg01Treasury.connect(kernel).createBudgetLine(0, lineAmount);
+
+const budgetAllocatedBefore = await tg01Treasury.totalBudgetAllocated();
+const txCountBefore = await tg01Treasury.txCount();
+const fiscalYearBefore = await tg01Treasury.currentFiscalYear();
 
 // Kernel executes trigger against attacker (simulates constitutional violation response)
 await tg01Trigger.connect(kernel).executeTrigger(1, attacker.address, 1, ethers.ZeroAddress);
@@ -2098,31 +2174,25 @@ await tg01Trigger.connect(kernel).executeTrigger(1, attacker.address, 1, ethers.
 // A. TriggerProtocol internal state reflects blocking
 expect(await tg01Trigger.isTreasuryBlocked(attacker.address)).to.be.true;
 
-// B. TG-01 gap: Treasury.isBlocked is still false — executeTrigger does NOT propagate
-// proposeTransaction's notBlocked(recipient) modifier checks Treasury.blockedByTrigger,
-// not TriggerProtocol.blockedFromTreasury — the two mappings are independent
-expect(await tg01Treasury.isBlocked(attacker.address)).to.be.false;
-
-// C. Gap consequence: attacker can still RECEIVE Treasury funds — notBlocked(recipient) passes
-const txAmount = ethers.parseUnits("1000000000", 18);
-await expect(
-  tg01Treasury.connect(user1).proposeTransaction(attacker.address, txAmount, 1, "TG-01 gap consequence")
-).to.emit(tg01Treasury, "TransactionProposed");
-expect(await tg01Treasury.txCount()).to.equal(1n);
-
-// D. Option D remedy: kernel explicitly calls Treasury.blockAddressByTrigger (requires KERNEL_ROLE)
-await tg01Treasury.connect(kernel).blockAddressByTrigger(attacker.address);
-
-// E. After Option D, Treasury now recognises the block
+// B. TG-01: Treasury.isBlocked is now true — executeTrigger propagates in the same transaction
 expect(await tg01Treasury.isBlocked(attacker.address)).to.be.true;
 
-// F. Subsequent proposeTransaction with attacker as recipient reverts
-const txCountBefore = await tg01Treasury.txCount();
+// C. Treasury now rejects transactions where the blocked address is the recipient
+const txAmount = ethers.parseUnits("1000000000", 18);
 await expect(
-  tg01Treasury.connect(user1).proposeTransaction(attacker.address, txAmount, 1, "TG-01 post-remedy")
+  tg01Treasury.connect(user1).proposeTransaction(attacker.address, txAmount, 1, "TG-01 blocked recipient")
 ).to.be.revertedWith("Treasury: address blocked by Trigger Protocol");
 
-// G. State-neutral after failed proposal
+// D. Treasury budget accounting is unchanged — block did not mutate budget fields
+expect(await tg01Treasury.txCount()).to.equal(txCountBefore);
+expect(await tg01Treasury.totalBudgetAllocated()).to.equal(budgetAllocatedBefore);
+expect(await tg01Treasury.currentFiscalYear()).to.equal(fiscalYearBefore);
+
+// E. Replay: calling executeTrigger again as non-kernel reverts; Treasury state unchanged
+await expect(
+  tg01Trigger.connect(attacker).executeTrigger(1, attacker.address, 1, ethers.ZeroAddress)
+).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+expect(await tg01Treasury.isBlocked(attacker.address)).to.be.true;
 expect(await tg01Treasury.txCount()).to.equal(txCountBefore);
 });
 });
