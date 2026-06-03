@@ -26,7 +26,7 @@
 
 | شناسه | عنوان | دسته | اقدام لازم | اولویت | مانع |
 |--------|--------|-------|-----------|--------|-------|
-| **TG-01** | مسدودسازی خودکار خزانه‌داری | Runtime | Fix | Critical | وفاداری قانون اساسی A |
+| **TG-01** | مسدودسازی خودکار خزانه‌داری | Runtime | ~~Fix~~ **IMPLEMENTED** | ~~Critical~~ **Done** | ~~وفاداری قانون اساسی A~~ **PR #36 — commit `48f5ffa`** |
 | **G-03** | تأییدکننده ZK روی‌زنجیر | Runtime | Defer | High | وفاداری قانون اساسی A |
 | **G-02** | یکپارچه‌سازی Airnode RRP | Integration | External evidence | High | آمادگی تولید |
 | **G-11** | مانیفست استقرار | Deployment | Document | High | آمادگی تولید + بررسی خارجی |
@@ -39,17 +39,21 @@
 
 ### TG-01 — مسدودسازی خودکار خزانه‌داری
 **دسته:** Runtime  
-**اولویت:** Critical  
-**مانع:** وفاداری قانون اساسی A (فرگرد ۱۳، بند ۸۱)
+**اولویت:** ~~Critical~~ **IMPLEMENTED**  
+**مانع:** ~~وفاداری قانون اساسی A (فرگرد ۱۳، بند ۸۱)~~ **برطرف‌شده**
 
-**وضعیت:**  
-`TriggerProtocol.executeTrigger()` هرگز `Treasury.blockAddressByTrigger()` را فراخوانی نمی‌کند. منشور صریحاً "خودکار" می‌گوید.
+**وضعیت — پس از ادغام PR #36 (commit `48f5ffa`):**  
+`TriggerProtocol.executeTrigger()` اکنون `Treasury.blockAddressByTrigger(offender)` را از طریق رابط `ITreasury` در همان تراکنش فراخوانی می‌کند. الزام "خودکار" منشور (فرگرد ۱۳، بند ۸۱) برآورده شده است.
 
-**تکلیف پیشنهادی:** Fix  
-پیاده‌سازی فراخوانی خودکار در `TriggerProtocol.sol` — عمداً به step38 موکول شده.  
-تا پیش از step38: مستندسازی صریح این تأخیر به عنوان تعهد باز لایه ۱.
+**خلاصه پیاده‌سازی:**
+- رابط `ITreasury` به `TriggerProtocol.sol` اضافه شد
+- فراخوانی `blockAddressByTrigger()` فقط در مسیر terminal trigger (≥۷ امضا)
+- oracle-only و pre-terminal خزانه‌داری را مسدود نمی‌کنند
+- ۴۹۹/۴۹۹ تست passing
 
-**اقدام بعدی:** ایجاد issue مجزا با برچسب `core` برای step38.
+**الزام استقرار:** پس از deploy، `KERNEL_ROLE` روی Treasury باید به `TriggerProtocol` اعطا شود. بدون این grant، `executeTrigger()` revert خواهد کرد.
+
+**اقدام بعدی:** ندارد — پیاده‌سازی‌شده.
 
 ---
 
@@ -133,19 +137,19 @@
 
 ### فوری (پیش از هر بررسی خارجی)
 
-| اولویت | شکاف | اقدام | نوع |
-|--------|-------|-------|-----|
-| ۱ | **G-11** مانیفست استقرار | ایجاد `hardhat.config.js` + اسکریپت deploy | Deployment |
-| ۲ | **TG-01** مستندسازی تأخیر | ایجاد issue core برای step38 | Documentation |
-| ۳ | **G-02** پروتکل Airnode | ایجاد `AIRNODE_INTEGRATION_PROTOCOL.md` | Documentation |
-| ۴ | **COURT-01** پروتکل تعیین قضات | ایجاد `COURT_ROLE_ASSIGNMENT_PROTOCOL.md` | Documentation |
+| اولویت | شکاف | اقدام | نوع | وضعیت |
+|--------|-------|-------|-----|--------|
+| ۱ | **G-11** مانیفست استقرار | ایجاد `hardhat.config.js` + اسکریپت deploy | Deployment | باز |
+| ۲ | ~~**TG-01** مستندسازی تأخیر~~ | ~~ایجاد issue core برای step38~~ | ~~Documentation~~ | **DONE — PR #36** |
+| ۳ | **G-02** پروتکل Airnode | ایجاد `AIRNODE_INTEGRATION_PROTOCOL.md` | Documentation | باز |
+| ۴ | **COURT-01** پروتکل تعیین قضات | ایجاد `COURT_ROLE_ASSIGNMENT_PROTOCOL.md` | Documentation | باز — **بعدی** |
 
 ### مرحله بعدی (پیش از استقرار تستنت)
 
-| اولویت | شکاف | اقدام | نوع |
-|--------|-------|-------|-----|
-| ۵ | **TG-01** پیاده‌سازی | `executeTrigger()` → `Treasury.blockAddressByTrigger()` در step38 | Fix |
-| ۶ | **G-03** ZK verifier | ایجاد issue core برای ZK integration | Defer/Plan |
+| اولویت | شکاف | اقدام | نوع | وضعیت |
+|--------|-------|-------|-----|--------|
+| ۵ | ~~**TG-01** پیاده‌سازی~~ | ~~`executeTrigger()` → `Treasury.blockAddressByTrigger()`~~ | ~~Fix~~ | **DONE — PR #36 — commit `48f5ffa`** |
+| ۶ | **G-03** ZK verifier | ایجاد issue core برای ZK integration | Defer/Plan | باز |
 
 ### معوق (پس از تعریف مجلس مؤسسان)
 
@@ -158,10 +162,10 @@
 ### خلاصه اولویت‌بندی
 
 ```
-Critical → Fix:    TG-01 (step38)
+Critical → DONE:   TG-01 (PR #36 — commit 48f5ffa)
 High → Document:   G-11 (فوری), G-02 (فوری)
 High → Defer:      G-03 (مرحله بعدی)
-Medium → Document: COURT-01 (فوری)
+Medium → Document: COURT-01 (فوری — بعدی باز)
 Medium → Defer:    VS-01 (معوق)
 ```
 

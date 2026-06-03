@@ -1,11 +1,11 @@
 <div dir="rtl">
 
-# چک‌پوینت وضعیت فعلی گام ۱۳ — به‌روزرسانی پس از CLC-06 و DOC-01/DOC-02
+# چک‌پوینت وضعیت فعلی گام ۱۳ — به‌روزرسانی پس از TG-01
 
-**نام فنی:** Step 13 Current Status Checkpoint (post-CLC-06 update)
+**نام فنی:** Step 13 Current Status Checkpoint (post-TG-01 merge)
 **نوع سند:** documentation-only / current status checkpoint
 **وضعیت:** باز؛ این سند Step 13 یا Step 12 را نمی‌بندد.
-**نسخه:** ۲ — پس از ادغام شاخه `claude/iran-os-step-40-gaps-WDCng` در main
+**نسخه:** ۳ — پس از ادغام PR #36 (TG-01 Treasury Auto-Block) در main
 
 ---
 
@@ -14,7 +14,7 @@
 | پارامتر | مقدار |
 | --- | --- |
 | شاخه | `main` |
-| آخرین commit | `66e8cdf` — docs(step21): correct IM-08 and RC-E-13 runtime claims |
+| آخرین commit | `48f5ffa` — Merge pull request #36 (TG-01 Treasury Auto-Block) |
 | تعداد testها | ۴۹۹ |
 | نتیجه testها | ۴۹۹ passing |
 | وضعیت git | clean — up to date with origin/main |
@@ -116,6 +116,7 @@
 | DOC-01 | اصلاح RC-E-11 در step21 — فهرست توابع مسدودشده با ارجاع به CLC-06 | corrected — commit `66e8cdf` |
 | DOC-02 / IM-08 | تغییر برچسب IM-08 از IMPLEMENTED به DOCUMENTED GAP (TG-01) — `TriggerProtocol.executeTrigger()` فراخوانی `Treasury.blockAddressByTrigger()` را انجام نمی‌دهد؛ step37/step38 حد این شکاف را ثبت کرده‌اند | corrected — commit `66e8cdf` |
 | RC-E-13 | annotation مسیر manual-only فعال‌سازی `notBlocked()` در Treasury؛ مسیر خودکار TriggerProtocol وجود ندارد؛ ارجاع به TG-01/Step37/Step38 | annotated — commit `66e8cdf` |
+| **TG-01** | **پیاده‌سازی مسدودسازی خودکار خزانه‌داری — `TriggerProtocol.executeTrigger()` اکنون `Treasury.blockAddressByTrigger(offender)` را در همان تراکنش از طریق رابط `ITreasury` فراخوانی می‌کند؛ فقط مسیر terminal trigger — نه oracle-only، نه pre-terminal** | **implemented — PR #36 — commit `48f5ffa`** |
 
 ---
 
@@ -125,13 +126,13 @@
 | --- | --- | --- |
 | WS-1 اصول بنیادین | `WHITEPAPER_STEP13_WS1_FOUNDATIONAL_PRINCIPLES_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review انسانی | 3 COMPLETE / 10 PARTIAL / 1 GAP |
 | WS-2 ساختار حکمرانی | `WHITEPAPER_STEP13_WS2_GOVERNANCE_STRUCTURE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review انسانی/حکمرانی | 1 COMPLETE / 11 PARTIAL / 2 GAP |
-| WS-4 اقتصاد و منابع ملی | `WHITEPAPER_STEP13_WS4_ECONOMY_AND_NATIONAL_RESOURCES_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review مالی/اقتصادی/حقوقی | 5 COMPLETE / 8 PARTIAL / 1 GAP (TG-01) |
-| WS-5 قراردادها و ماژول‌های runtime | `WHITEPAPER_STEP13_WS5_CONTRACTS_RUNTIME_MODULES_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review فنی/حقوقی/حکمرانی | 2 COMPLETE / 23 PARTIAL / 1 GAP (TG-01) |
+| WS-4 اقتصاد و منابع ملی | `WHITEPAPER_STEP13_WS4_ECONOMY_AND_NATIONAL_RESOURCES_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review مالی/اقتصادی/حقوقی | 5 COMPLETE / 8 PARTIAL / 0 GAP (TG-01 remediated — PR #36) |
+| WS-5 قراردادها و ماژول‌های runtime | `WHITEPAPER_STEP13_WS5_CONTRACTS_RUNTIME_MODULES_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review فنی/حقوقی/حکمرانی | 2 COMPLETE / 23 PARTIAL / 0 GAP (TG-01 remediated — PR #36) |
 | WS-3 رفاه و عدالت | `WHITEPAPER_STEP13_WS3_WELFARE_AND_JUSTICE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review حقوقی/اقتصادی/حکمرانی | 2 COMPLETE / 11 PARTIAL / 1 GAP (ZK Proof) |
 | WS-7 evidence / audit / signoff | `WHITEPAPER_STEP13_WS7_EVIDENCE_AUDIT_SIGNOFF_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review انسانی مستقل | 0 COMPLETE / 9 PARTIAL / 3 GAP (Deployment، Release، هیچ accepted evidence) |
 | WS-6 اوراکل و سیگنال‌ها | `WHITEPAPER_STEP13_WS6_ORACLE_AND_SIGNAL_ARCHITECTURE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review فنی/oracle/حکمرانی | 2 COMPLETE / 13 PARTIAL / 2 GAP (Airnode، TG-01) |
 | WS-8 مشارکت عمومی فارسی‌زبان | `WHITEPAPER_STEP13_WS8_PUBLIC_PARTICIPATION_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review حکمرانی/حقوقی/قانون اساسی | 2 COMPLETE / 9 PARTIAL / 2 GAP (feedback عمومی، voter registry) |
-| **Final Rollup** | `WHITEPAPER_STEP13_FINAL_ROLLUP_REVIEW_FA.md` | خلاصه کلی WS-1 تا WS-8 — documentation-only | **مجموع: 17 COMPLETE / 94 PARTIAL / 13 GAP** |
+| **Final Rollup** | `WHITEPAPER_STEP13_FINAL_ROLLUP_REVIEW_FA.md` | خلاصه کلی WS-1 تا WS-8 — documentation-only | **مجموع: 17 COMPLETE / 94 PARTIAL / 11 GAP (TG-01 remediated)** |
 
 این بازبینی‌ها AI-assisted و documentation-only هستند. هیچ‌کدام human review، governance review، signoff، evidence accepted، یا blocker closure نیستند. گام ۱۲ و گام ۱۳ همچنان باز هستند.
 
@@ -155,7 +156,47 @@
 
 ---
 
-## ۹. non-claim نهایی
+## ۹. چک‌پوینت پس از ادغام TG-01 (PR #36)
+
+### وضعیت TG-01
+
+| پارامتر | مقدار |
+| --- | --- |
+| شناسه | TG-01 — مسدودسازی خودکار خزانه‌داری |
+| وضعیت | **پیاده‌سازی‌شده روی main** |
+| PR | #36 (ادغام‌شده) |
+| commit | `48f5ffa` |
+| تعداد testها | ۴۹۹ / ۴۹۹ passing |
+
+### خلاصه پیاده‌سازی
+
+- `TriggerProtocol.executeTrigger()` اکنون از طریق رابط `ITreasury` تابع `Treasury.blockAddressByTrigger(offender)` را در **همان تراکنش** فراخوانی می‌کند.
+- مسدودسازی فقط در مسیر terminal trigger (پس از ۷ امضا) اتفاق می‌افتد.
+- سیگنال oracle به‌تنهایی و حالات pre-terminal (کمتر از ۷ امضا) خزانه‌داری را مسدود نمی‌کنند.
+- replay پس از فعال‌شدن trigger با خطای `"Kernel: trigger already activated"` رد می‌شود.
+- invariantهای حسابداری SWF و Treasury پس از terminal trigger دست‌نخورده باقی می‌مانند.
+
+### الزام استقرار — KERNEL_ROLE
+
+> **⚠️ الزام استقرار اجباری:**  
+> پس از deploy کردن `Treasury` و `TriggerProtocol`، باید `KERNEL_ROLE` روی Treasury به `TriggerProtocol` اعطا شود.  
+> در غیر این صورت فراخوانی `blockAddressByTrigger()` در `executeTrigger()` با خطای `"AccessControl: account ... is missing role ..."` revert می‌کند.  
+> این grant باید پیش از اولین فعال‌سازی trigger انجام شده باشد.
+>
+> ```
+> treasury.grantRole(treasury.KERNEL_ROLE(), address(triggerProtocol));
+> ```
+
+### شکاف باز بعدی — COURT-01
+
+شکاف واقعی باز بعدی به ترتیب اولویت: **COURT-01** — در دسترس بودن COURT_ROLE.  
+`deactivateEmergencyLock()` عملاً قابل فراخوانی نیست چون هیچ پروتکلی برای تعیین آدرس‌های دادگاه روی‌زنجیر وجود ندارد.
+
+گام ۱۳ **همچنان باز است** تا شکاف‌های باقی‌مانده بررسی و حل‌وفصل شوند.
+
+---
+
+## ۱۰. non-claim نهایی
 
 این سند فقط چک‌پوینت وضعیت فعلی است. هیچ review کامل‌شده، هیچ evidence پذیرفته‌شده، هیچ reviewer signoff، هیچ blocker closure، هیچ production readiness، هیچ release approval، هیچ audit completion یا formal verification completion ادعا نشده است. گام ۱۲ و گام ۱۳ همچنان باز هستند.
 
