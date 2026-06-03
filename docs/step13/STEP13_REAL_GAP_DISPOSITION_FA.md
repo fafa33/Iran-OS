@@ -3,10 +3,11 @@
 # بررسی تکلیف شکاف‌های واقعی — Step 13
 ## Real Gap Disposition Review
 
-**نسخه:** ۱.۰.۰  
+**نسخه:** ۱.۱.۰  
 **تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
 **مرتبط با:** [Issue #35](https://github.com/fafa33/Iran-OS/issues/35)  
-**منبع:** `docs/step13/WHITEPAPER_STEP13_CROSS_FARGARD_FIDELITY_REVIEW_FA.md`
+**منبع:** `docs/step13/WHITEPAPER_STEP13_CROSS_FARGARD_FIDELITY_REVIEW_FA.md`  
+**چک‌پوینت:** `docs/step13/STEP13_REMEDIATION_CHECKPOINT_FA.md`
 
 ---
 
