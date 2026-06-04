@@ -468,6 +468,42 @@ body {
 }
 .income-sum-lbl { font-size:12px; color:var(--text2); }
 .income-sum-val { font-size:20px; font-weight:700; color:var(--green-lt); }
+
+/* ────── PHASE 3A: KERNEL EXPANSION ────── */
+.oracle-row {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.oracle-row:last-child { border-bottom:none; }
+.oracle-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.oracle-name { flex:1; font-size:13px; text-align:right; }
+.oracle-type { font-size:10px; color:var(--text3); font-family:monospace; }
+.oracle-ts   { font-size:11px; color:var(--text2); white-space:nowrap; }
+
+.lock-status-row {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 0; border-bottom:1px solid var(--border);
+}
+.lock-status-lbl { font-size:13px; color:var(--text2); }
+.lock-status-val { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; }
+
+.trigger-history-empty {
+  text-align:center; padding:20px 16px;
+}
+.trigger-history-empty .th-icon { font-size:28px; margin-bottom:8px; }
+.trigger-history-empty .th-title { font-size:13px; font-weight:600; color:var(--ok); margin-bottom:4px; }
+.trigger-history-empty .th-days  { font-size:11px; color:var(--text3); }
+
+.sys-health-grid {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+.sys-health-tile {
+  background:var(--elevated); border:1px solid var(--border);
+  border-radius:10px; padding:10px 8px; text-align:center;
+}
+.sys-health-val { font-size:13px; font-weight:700; color:var(--text); font-family:monospace; }
+.sys-health-lbl { font-size:9px; color:var(--text3); margin-top:3px; }
 </style>
 </head>
 <body>
@@ -1081,6 +1117,83 @@ body {
       <div class="sig-info">۰/۷ امضا برای فعال‌سازی ماشه</div>
       <div class="trigger-note">پس از ۷ امضای دادگاه عالی، ماشه به‌طور خودکار فعال می‌شود.<br>مهلت: ۷۲ ساعت پس از ثبت تخلف.</div>
     </div>
+
+    <!-- ── قفل اضطراری ── -->
+    <div class="section-title" style="margin-top:20px">قفل اضطراری</div>
+    <div class="monetary-card" style="padding:0 16px">
+      <div class="lock-status-row">
+        <div class="lock-status-lbl">emergencyLockActive</div>
+        <div class="lock-status-val">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--text3)"></div>
+          <span style="color:var(--text2)">غیرفعال</span>
+        </div>
+      </div>
+      <div class="lock-status-row" style="border:none">
+        <div class="lock-status-lbl">آخرین فعال‌سازی</div>
+        <div class="lock-status-val" style="color:var(--text3);font-weight:400">هرگز</div>
+      </div>
+    </div>
+
+    <!-- ── تاریخچه ماشه ── -->
+    <div class="section-title" style="margin-top:20px">تاریخچه تخلفات</div>
+    <div class="trigger-card">
+      <div class="trigger-history-empty">
+        <div class="th-icon">🛡️</div>
+        <div class="th-title">هیچ تخلفی ثبت نشده است</div>
+        <div class="th-days">سیستم از ۴۲ روز پیش فعال است — بدون تخلف</div>
+      </div>
+    </div>
+
+    <!-- ── وضعیت اوراکل‌ها ── -->
+    <div class="section-title" style="margin-top:20px">اوراکل‌های API3</div>
+    <div class="monetary-card" style="padding:0 16px">
+      <div class="oracle-row">
+        <div class="oracle-ts">۳ د پیش</div>
+        <div class="oracle-name">قیمت <span class="oracle-type">PRICE</span></div>
+        <div class="oracle-dot" style="background:var(--ok)"></div>
+      </div>
+      <div class="oracle-row">
+        <div class="oracle-ts">۱۲ د پیش</div>
+        <div class="oracle-name">تولید <span class="oracle-type">PRODUCTION</span></div>
+        <div class="oracle-dot" style="background:var(--ok)"></div>
+      </div>
+      <div class="oracle-row">
+        <div class="oracle-ts">۵ د پیش</div>
+        <div class="oracle-name">حاکمیت <span class="oracle-type">GOVERNANCE</span></div>
+        <div class="oracle-dot" style="background:var(--ok)"></div>
+      </div>
+      <div class="oracle-row">
+        <div class="oracle-ts">۸ د پیش</div>
+        <div class="oracle-name">قضایی <span class="oracle-type">JUDICIAL</span></div>
+        <div class="oracle-dot" style="background:var(--ok)"></div>
+      </div>
+      <div class="oracle-row">
+        <div class="oracle-ts">۲ د پیش</div>
+        <div class="oracle-name">رفاه <span class="oracle-type">WELFARE</span></div>
+        <div class="oracle-dot" style="background:var(--ok)"></div>
+      </div>
+    </div>
+
+    <!-- ── سلامت سیستم ── -->
+    <div class="section-title" style="margin-top:20px">سلامت سیستم‌عامل</div>
+    <div class="sys-health-grid">
+      <div class="sys-health-tile">
+        <div class="sys-health-val">۱٬۲۴۷</div>
+        <div class="sys-health-lbl">گره‌های فعال</div>
+      </div>
+      <div class="sys-health-tile">
+        <div class="sys-health-val">۱۲.۳s</div>
+        <div class="sys-health-lbl">میانگین بلاک</div>
+      </div>
+      <div class="sys-health-tile">
+        <div class="sys-health-val">۴۲ روز</div>
+        <div class="sys-health-lbl">آپتایم</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:10px">
+      داده‌های نمایشی — سیستم‌عامل به شبکه واقعی متصل نیست
+    </div>
+
   </div>
 
   <!-- ════ TAB BAR ════ -->
