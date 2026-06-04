@@ -1,0 +1,61 @@
+name: Feature Request
+description: Propose a new feature or improvement for IranOS.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **IranOS is not production-ready.** Feature requests are evaluated against the constitution (*Charter of Welfare and Justice*) and the technical whitepaper. Proposals that conflict with constitutional red lines (TR-01 to TR-06) or lower the MULTISIG_THRESHOLD will not be accepted.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What gap or limitation motivates it?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the proposed feature or change.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other approaches were considered, and why were they rejected?
+    validations:
+      required: false
+
+  - type: textarea
+    id: charter_impact
+    attributes:
+      label: Charter / Whitepaper Impact
+      description: |
+        Which section of the constitution or whitepaper does this relate to?
+        Does this proposal conflict with any constitutional red line (TR-01 to TR-06)?
+        Does it change MULTISIG_THRESHOLD, COUNCIL_THRESHOLD, or remove a nonReentrant guard?
+      placeholder: |
+        - Fargard / Section:
+        - Constitutional conflict: None / Yes (explain)
+        - MULTISIG_THRESHOLD change: No / Yes (explain)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: non_claim
+    attributes:
+      label: Non-Claim Confirmation
+      options:
+        - label: This proposal does not claim production readiness, release approval, completed audit, or completed formal verification.
+          required: true
+        - label: This proposal does not lower MULTISIG_THRESHOLD, COUNCIL_THRESHOLD, or remove a nonReentrant guard.
+          required: true
+        - label: This proposal does not introduce admin backdoors or upgrade proxies on the Kernel.
+          required: true
