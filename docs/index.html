@@ -505,6 +505,77 @@ body {
   margin-bottom:16px;
 }
 
+/* ────── PHASE 3C: JUSTICE / TRANSPARENCY / RECLAIM ────── */
+.complaint-note {
+  font-size:11px; color:var(--text3); text-align:right;
+  padding:8px 12px; margin-bottom:14px;
+  background:rgba(201,168,76,0.06); border-right:2px solid var(--gold-dim);
+  border-radius:6px; line-height:18px;
+}
+.form-select {
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:12px 14px; color:var(--text); font-size:14px; font-family:inherit;
+  width:100%; appearance:none; -webkit-appearance:none; direction:rtl;
+}
+.form-select:focus { outline:none; border-color:var(--gold); }
+.form-textarea {
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:12px 14px; color:var(--text); font-size:14px; font-family:inherit;
+  width:100%; resize:none; direction:rtl; line-height:22px;
+}
+.form-textarea:focus { outline:none; border-color:var(--gold); }
+.case-empty { text-align:center; padding:20px 0; }
+.case-empty-icon  { font-size:26px; margin-bottom:8px; }
+.case-empty-title { font-size:13px; color:var(--text2); }
+
+.treasury-bar-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:16px; margin-bottom:12px;
+}
+.treasury-bar-hdr { display:flex; justify-content:space-between; margin-bottom:10px; }
+.treasury-bar-lbl { font-size:13px; color:var(--text2); }
+.treasury-bar-val { font-size:13px; font-weight:700; }
+
+.expenditure-row {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.expenditure-row:last-child { border-bottom:none; }
+.expenditure-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.expenditure-info { flex:1; text-align:right; }
+.expenditure-name { font-size:13px; }
+.expenditure-meta { font-size:10px; color:var(--text3); margin-top:2px; }
+.expenditure-amt  { font-size:13px; font-weight:700; color:var(--gold); white-space:nowrap; }
+
+.crawler-status-card {
+  background:linear-gradient(135deg,#0D1A0D,#0D1117 60%,#0D0D1A);
+  border:1px solid var(--ok); border-radius:14px;
+  padding:16px; margin-bottom:14px;
+  display:flex; align-items:center; gap:12px;
+}
+.crawler-dot { width:12px; height:12px; border-radius:50%; background:var(--ok); flex-shrink:0; animation:pulse 2s infinite; }
+.crawler-info { flex:1; text-align:right; }
+.crawler-title { font-size:13px; font-weight:700; color:var(--ok); }
+.crawler-sub   { font-size:11px; color:var(--text2); margin-top:2px; }
+
+.frozen-stat-row { display:flex; gap:8px; margin-bottom:14px; }
+.frozen-stat {
+  flex:1; background:var(--elevated); border:1px solid var(--border);
+  border-radius:10px; padding:10px 8px; text-align:center;
+}
+.frozen-stat-val { font-size:14px; font-weight:700; }
+.frozen-stat-lbl { font-size:9px; color:var(--text3); margin-top:3px; }
+
+.reclaim-row {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.reclaim-row:last-child { border-bottom:none; }
+.reclaim-info { flex:1; text-align:right; }
+.reclaim-name { font-size:13px; }
+.reclaim-meta { font-size:10px; color:var(--text3); margin-top:2px; }
+.reclaim-amt  { font-size:13px; font-weight:700; color:var(--green-lt); white-space:nowrap; }
+
 /* ────── PHASE 3A: KERNEL EXPANSION ────── */
 .oracle-row {
   display:flex; align-items:center; gap:10px;
@@ -1327,42 +1398,256 @@ body {
     </div>
   </div>
 
-  <!-- ════ SCREEN: TRANSPARENCY (placeholder) ════ -->
+  <!-- ════ SCREEN: TRANSPARENCY ════ -->
   <div class="screen" id="screen-transparency">
     <button class="back-btn" onclick="showTab('mellat')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
       بازگشت به ملت
     </button>
-    <div style="text-align:center;padding:40px 0;color:var(--text3)">
-      <div style="font-size:32px;margin-bottom:12px">💎</div>
-      <div style="font-size:14px;color:var(--text2);margin-bottom:6px">شفافیت ملی</div>
-      <div style="font-size:12px">فاز ۳C — در دست اجرا</div>
+
+    <div class="section-title">خزانه ملی — بودجه ۲۵۸۵</div>
+    <div class="treasury-bar-card">
+      <div class="treasury-bar-hdr">
+        <div class="treasury-bar-lbl">بودجه مصوب</div>
+        <div class="treasury-bar-val">₱ ۱۵۰B</div>
+      </div>
+      <div class="progress-bar-bg" style="height:10px;border-radius:5px">
+        <div class="progress-bar-fill" style="width:15.6%;height:100%;border-radius:5px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:8px">
+        <div style="font-size:11px;color:var(--text2)">هزینه‌شده: ₱ ۲۳.۴B</div>
+        <div style="font-size:11px;color:var(--ok)">۱۵.۶٪</div>
+      </div>
+    </div>
+
+    <div class="section-title">صندوق ثروت ملی — وضعیت کامل</div>
+    <div class="monetary-card">
+      <div class="mon-row">
+        <div class="mon-lbl">L1 — نقد &nbsp;<span style="font-size:10px;color:var(--text3)">هدف $۳۰۰B</span></div>
+        <div class="mon-val" style="color:var(--green-lt)">$۲۹۸B &nbsp;✓</div>
+      </div>
+      <div class="mon-row">
+        <div class="mon-lbl">L2 — مولد &nbsp;<span style="font-size:10px;color:var(--text3)">سود ۱۵٪</span></div>
+        <div class="mon-val" style="color:var(--gold)">$۳۰۰B &nbsp;✓</div>
+      </div>
+      <div class="mon-row">
+        <div class="mon-lbl">L3 — گرو &nbsp;<span style="font-size:10px;color:var(--text3)">هدف $۲T</span></div>
+        <div class="mon-val" style="color:var(--text2)">$۲T &nbsp;✓</div>
+      </div>
+      <div class="mon-row">
+        <div class="mon-lbl">نسبت پشتوانه نقد</div>
+        <div class="mon-val" style="color:var(--ok)">۳۳.۱٪</div>
+      </div>
+      <div class="mon-row" style="border:none">
+        <div class="mon-lbl">سود سالانه L2 → L1</div>
+        <div class="mon-val" style="color:var(--gold)">$۴۵B / سال</div>
+      </div>
+    </div>
+
+    <div class="section-title">هزینه‌های کلان اخیر</div>
+    <div class="card" style="padding:12px 16px">
+      <div class="expenditure-row">
+        <div class="expenditure-amt">₱ ۱.۲B</div>
+        <div class="expenditure-info">
+          <div class="expenditure-name">تجهیز بیمارستان‌های دولتی</div>
+          <div class="expenditure-meta">۵ فروردین ۲۵۸۵ &nbsp;·&nbsp; تأیید مجلس</div>
+        </div>
+        <div class="expenditure-dot" style="background:var(--ok)"></div>
+      </div>
+      <div class="expenditure-row">
+        <div class="expenditure-amt">₱ ۸۰۰M</div>
+        <div class="expenditure-info">
+          <div class="expenditure-name">نوسازی زیرساخت راه‌آهن</div>
+          <div class="expenditure-meta">۳ فروردین ۲۵۸۵ &nbsp;·&nbsp; تأیید مجلس</div>
+        </div>
+        <div class="expenditure-dot" style="background:var(--ok)"></div>
+      </div>
+      <div class="expenditure-row">
+        <div class="expenditure-amt">₱ ۴۵۰M</div>
+        <div class="expenditure-info">
+          <div class="expenditure-name">پروژه آب‌رسانی سیستان</div>
+          <div class="expenditure-meta">۲۸ اسفند ۲۵۸۴ &nbsp;·&nbsp; تأیید مجلس</div>
+        </div>
+        <div class="expenditure-dot" style="background:var(--ok)"></div>
+      </div>
+    </div>
+
+    <div class="section-title">دفتر کل عمومی</div>
+    <div class="alert-banner-ok" style="margin-bottom:0">
+      <div class="alert-icon">🔗</div>
+      <div class="alert-text">
+        <div class="alert-title" style="color:var(--text)">تمام تراکنش‌های نهادی در بلاک‌چین ملی ثبت می‌شوند</div>
+        <div class="alert-sub">قابل حسابرسی توسط هر شهروند — مطابق دکترین شفافیت شیشه‌ای</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:10px">
+      داده‌های نمایشی — این بخش به سیستم واقعی متصل نیست
     </div>
   </div>
 
-  <!-- ════ SCREEN: JUSTICE (placeholder) ════ -->
+  <!-- ════ SCREEN: JUSTICE ════ -->
   <div class="screen" id="screen-justice">
     <button class="back-btn" onclick="showTab('mellat')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
       بازگشت به ملت
     </button>
-    <div style="text-align:center;padding:40px 0;color:var(--text3)">
-      <div style="font-size:32px;margin-bottom:12px">⚖️</div>
-      <div style="font-size:14px;color:var(--text2);margin-bottom:6px">دادگستری</div>
-      <div style="font-size:12px">فاز ۳C — در دست اجرا</div>
+
+    <div class="section-title">وضعیت API قضایی</div>
+    <div class="kernel-health-bar" style="margin-bottom:14px">
+      <div style="text-align:right;flex:1">
+        <div class="kernel-health-title">API قضایی واحد — فعال</div>
+        <div class="kernel-health-sub">تنها درگاه رسمی صدور احکام &nbsp;·&nbsp; ZK-Rollup لایه ۲</div>
+      </div>
+      <div class="kernel-health-dot"></div>
+    </div>
+
+    <div class="section-title">ثبت شکایت</div>
+    <div class="complaint-note">
+      این فرم نمایشی است. در سیستم واقعی، هر شکایت با امضای دیجیتال شهروند در بلاک‌چین ثبت می‌شود.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div>
+        <div class="form-label">نوع تخلف</div>
+        <select class="form-select" disabled>
+          <option>تخلف مالی / اختلاس</option>
+          <option>نقض حقوق بنیادین</option>
+          <option>سوء استفاده از قدرت</option>
+          <option>تخلف زیست‌محیطی</option>
+        </select>
+      </div>
+      <div>
+        <div class="form-label">نهاد مربوطه</div>
+        <select class="form-select" disabled>
+          <option>دولت مرکزی</option>
+          <option>انجمن استانی</option>
+          <option>نهاد قضایی</option>
+          <option>بخش خصوصی</option>
+        </select>
+      </div>
+      <div>
+        <div class="form-label">شرح تخلف</div>
+        <textarea class="form-textarea" rows="3" placeholder="شرح مختصر تخلف..." disabled></textarea>
+      </div>
+      <button class="send-btn" style="opacity:.45;cursor:not-allowed" disabled>
+        ✍️ امضای دیجیتال و ثبت شکایت
+      </button>
+    </div>
+
+    <div class="section-title" style="margin-top:20px">پرونده‌های من</div>
+    <div class="trigger-card">
+      <div class="case-empty">
+        <div class="case-empty-icon">📂</div>
+        <div class="case-empty-title">هیچ پرونده‌ای در جریان نیست</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:4px">اطلاع‌رسانی دادگاه</div>
+    <div class="alert-banner-ok">
+      <div class="alert-icon">🔔</div>
+      <div class="alert-text">
+        <div class="alert-title" style="color:var(--text)">هیچ احضاریه یا حکمی ثبت نشده</div>
+        <div class="alert-sub">احکام دیجیتال از طریق API قضایی واحد ابلاغ می‌شوند</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:10px">
+      داده‌های نمایشی — این بخش به سیستم واقعی متصل نیست
     </div>
   </div>
 
-  <!-- ════ SCREEN: RECLAIM (placeholder) ════ -->
+  <!-- ════ SCREEN: RECLAIM ════ -->
   <div class="screen" id="screen-reclaim">
     <button class="back-btn" onclick="showTab('mellat')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
       بازگشت به ملت
     </button>
-    <div style="text-align:center;padding:40px 0;color:var(--text3)">
-      <div style="font-size:32px;margin-bottom:12px">🔍</div>
-      <div style="font-size:14px;color:var(--text2);margin-bottom:6px">بازپس‌گیری</div>
-      <div style="font-size:12px">فاز ۳C — در دست اجرا</div>
+
+    <div class="section-title">خزنده شبکه (Sovereign Crawler)</div>
+    <div class="crawler-status-card">
+      <div class="crawler-dot"></div>
+      <div class="crawler-info">
+        <div class="crawler-title">هوش مصنوعی توزیع‌شده — فعال</div>
+        <div class="crawler-sub">آخرین اسکن: ۱۲ دقیقه پیش &nbsp;·&nbsp; ۱,۲۴۷ گره نخبگانی</div>
+      </div>
+    </div>
+
+    <div class="section-title">آمار بازپس‌گیری</div>
+    <div class="frozen-stat-row">
+      <div class="frozen-stat">
+        <div class="frozen-stat-val" style="color:var(--warn)">۱٬۲۴۷</div>
+        <div class="frozen-stat-lbl">دارایی منجمد</div>
+      </div>
+      <div class="frozen-stat">
+        <div class="frozen-stat-val" style="color:var(--gold)">$۱۸۴B</div>
+        <div class="frozen-stat-lbl">ارزش منجمد</div>
+      </div>
+      <div class="frozen-stat">
+        <div class="frozen-stat-val" style="color:var(--ok)">$۲۹۱B</div>
+        <div class="frozen-stat-lbl">منتقل به SWF</div>
+      </div>
+    </div>
+    <div class="frozen-stat-row">
+      <div class="frozen-stat">
+        <div class="frozen-stat-val" style="color:var(--text2)">۸۳</div>
+        <div class="frozen-stat-lbl">در دست بررسی</div>
+      </div>
+      <div class="frozen-stat">
+        <div class="frozen-stat-val" style="color:var(--ok)">۱۲</div>
+        <div class="frozen-stat-lbl">مالکیت اثبات</div>
+      </div>
+      <div class="frozen-stat">
+        <div class="frozen-stat-val" style="color:var(--text3)">۷۲h</div>
+        <div class="frozen-stat-lbl">زمان شناسایی</div>
+      </div>
+    </div>
+
+    <div class="section-title">آخرین انتقال‌ها به SWF</div>
+    <div class="card" style="padding:12px 16px">
+      <div class="reclaim-row">
+        <div class="reclaim-amt">$۴.۲B</div>
+        <div class="reclaim-info">
+          <div class="reclaim-name">هلدینگ X — شرکت پوششی</div>
+          <div class="reclaim-meta">۲ فروردین ۲۵۸۵ &nbsp;·&nbsp; منتقل به L1</div>
+        </div>
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0"></div>
+      </div>
+      <div class="reclaim-row">
+        <div class="reclaim-amt">$۱.۸B</div>
+        <div class="reclaim-info">
+          <div class="reclaim-name">بنیاد Y — حساب برون‌مرزی</div>
+          <div class="reclaim-meta">۲۸ اسفند ۲۵۸۴ &nbsp;·&nbsp; منتقل به L1</div>
+        </div>
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0"></div>
+      </div>
+      <div class="reclaim-row">
+        <div class="reclaim-amt">$۸۰۰M</div>
+        <div class="reclaim-info">
+          <div class="reclaim-name">کارتل Z — دارایی صنعتی</div>
+          <div class="reclaim-meta">۲۵ اسفند ۲۵۸۴ &nbsp;·&nbsp; در بررسی شورا</div>
+        </div>
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--warn);flex-shrink:0"></div>
+      </div>
+    </div>
+
+    <div class="section-title">گزارش دارایی مشکوک</div>
+    <div class="complaint-note">
+      اطلاعات شما به صورت ناشناس و رمزگذاری‌شده به خزنده شبکه ارسال می‌شود. این فرم نمایشی است.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div>
+        <div class="form-label">نوع دارایی مشکوک</div>
+        <select class="form-select" disabled>
+          <option>حساب بانکی</option>
+          <option>ملک و مستغلات</option>
+          <option>شرکت پوششی</option>
+          <option>دارایی خارج از کشور</option>
+        </select>
+      </div>
+      <button class="send-btn" style="opacity:.45;cursor:not-allowed" disabled>
+        🔍 ارسال گزارش ناشناس
+      </button>
+    </div>
+    <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:14px">
+      داده‌های نمایشی — این بخش به سیستم واقعی متصل نیست
     </div>
   </div>
 
