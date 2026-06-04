@@ -112,6 +112,7 @@ body {
 .balance-label { font-size:13px; color:var(--text2); margin-bottom:10px; text-align:center; }
 .balance-amount { font-size:52px; font-weight:700; color:var(--gold); text-align:center; line-height:1.1; }
 .balance-symbol { font-size:30px; margin-bottom:8px; }
+.balance-sare { font-size:30px; margin-bottom:8px; }
 .balance-sare { font-size:16px; color:var(--text2); margin-bottom:10px; }
 
 .action-row { display:flex; gap:8px; margin-top:20px; }
@@ -178,7 +179,7 @@ body {
 .tab-btn {
   flex:1; padding:10px; border-radius:8px; border:none;
   background:var(--surface); color:var(--text2); cursor:pointer;
-  font-size:14px; font-family:inherit;
+  font-size:13px; font-family:inherit;
 }
 .tab-btn.active { background:var(--gold); color:var(--bg); font-weight:700; }
 
@@ -317,6 +318,156 @@ body {
   opacity:0; transition:opacity .3s; pointer-events:none;
 }
 .toast.show { opacity:1; }
+
+/* ────── PHASE 1: NATIONAL DASHBOARD ────── */
+.demo-badge {
+  display:inline-block; background:rgba(210,153,34,0.15);
+  border:1px solid var(--gold-dim); border-radius:6px;
+  font-size:10px; color:var(--warn); padding:2px 8px; margin-bottom:10px;
+}
+.demo-watermark {
+  position:fixed; bottom:76px; left:10px;
+  background:rgba(13,17,23,0.85);
+  border:1px solid var(--gold-dim); border-radius:5px;
+  font-size:9px; color:var(--gold-dim);
+  padding:2px 7px; z-index:9; pointer-events:none;
+  letter-spacing:.4px;
+}
+.kernel-health-bar {
+  background:var(--surface); border:1px solid var(--ok);
+  border-radius:14px; padding:14px 16px; margin-bottom:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.kernel-health-dot { width:10px; height:10px; border-radius:50%; background:var(--ok); flex-shrink:0; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+.kernel-health-info { flex:1; text-align:right; }
+.kernel-health-title { font-size:13px; font-weight:700; color:var(--ok); }
+.kernel-health-sub { font-size:11px; color:var(--text3); margin-top:2px; font-family:monospace; }
+.kernel-health-block { font-size:12px; color:var(--text2); font-family:monospace; }
+
+.alert-banner {
+  background:rgba(192,57,43,0.12); border:1px solid var(--alert);
+  border-radius:12px; padding:12px 14px; margin-bottom:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.alert-banner-ok {
+  background:rgba(35,134,54,0.1); border:1px solid var(--ok);
+  border-radius:12px; padding:12px 14px; margin-bottom:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.alert-icon { font-size:18px; flex-shrink:0; }
+.alert-text { flex:1; text-align:right; }
+.alert-title { font-size:13px; font-weight:600; }
+.alert-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+
+.swf-summary-grid {
+  display:grid; grid-template-columns:1fr 1fr 1fr;
+  gap:8px; margin-bottom:4px;
+}
+.swf-tile {
+  background:var(--elevated); border:1px solid var(--border);
+  border-radius:12px; padding:12px 8px; text-align:center;
+}
+.swf-tile-lbl { font-size:9px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.swf-tile-val { font-size:13px; font-weight:700; color:var(--gold); }
+.swf-tile-sub { font-size:9px; color:var(--text2); margin-top:3px; }
+.swf-progress-row { display:flex; align-items:center; gap:8px; margin-top:6px; }
+.swf-progress-lbl { font-size:10px; color:var(--text3); width:14px; flex-shrink:0; }
+.swf-bar-bg { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+.swf-bar-fill { height:100%; border-radius:2px; }
+
+.province-row-card {
+  background:var(--elevated); border:1px solid var(--border);
+  border-radius:12px; padding:14px; margin-bottom:8px;
+  display:flex; align-items:center; gap:10px;
+}
+.province-info { flex:1; text-align:right; }
+.province-name { font-size:14px; font-weight:600; }
+.province-sub  { font-size:11px; color:var(--text2); margin-top:2px; }
+.province-score { text-align:center; }
+.province-score-val { font-size:18px; font-weight:700; color:var(--warn); }
+.province-score-lbl { font-size:9px; color:var(--text3); }
+
+.emp-status-card {
+  background:var(--elevated); border:1px solid var(--border);
+  border-radius:12px; padding:14px 16px; margin-bottom:8px;
+  display:flex; align-items:center; gap:12px;
+}
+.emp-icon { font-size:22px; }
+.emp-info { flex:1; text-align:right; }
+.emp-title { font-size:14px; font-weight:600; }
+.emp-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+.emp-chip { font-size:11px; font-weight:700; padding:4px 10px; border-radius:10px; }
+
+.event-row {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:12px 0; border-bottom:1px solid var(--border);
+}
+.event-dot { width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+.event-info { flex:1; text-align:right; }
+.event-title { font-size:13px; }
+.event-date { font-size:11px; color:var(--text3); margin-top:3px; }
+
+/* ────── PHASE 1: IDENTITY ENHANCEMENTS ────── */
+.identity-section-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:16px; margin-bottom:12px;
+}
+.identity-row {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.identity-row:last-child { border-bottom:none; padding-bottom:0; }
+.identity-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.identity-info { flex:1; text-align:right; }
+.identity-lbl { font-size:13px; font-weight:600; }
+.identity-sub { font-size:11px; color:var(--text2); margin-top:2px; font-family:monospace; }
+.identity-status { font-size:12px; font-weight:600; }
+
+.zkp-card {
+  background:linear-gradient(135deg, #0D1A2A, #0D1117 50%, #1A0D1A);
+  border:1px solid #2A3A4A; border-radius:14px;
+  padding:16px; margin-bottom:12px;
+}
+.zkp-title { font-size:13px; font-weight:700; color:var(--gold); margin-bottom:12px; }
+.zkp-proof-row {
+  display:flex; align-items:center; gap:8px;
+  padding:8px 0; border-bottom:1px solid rgba(48,54,61,0.6);
+}
+.zkp-proof-row:last-child { border-bottom:none; }
+.zkp-proof-icon { font-size:14px; flex-shrink:0; }
+.zkp-proof-info { flex:1; text-align:right; }
+.zkp-proof-lbl { font-size:12px; }
+.zkp-proof-date { font-size:10px; color:var(--text3); margin-top:1px; }
+.zkp-proof-status { font-size:11px; }
+
+/* ────── PHASE 1: WALLET ENHANCEMENTS ────── */
+.wallet-tabs { display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; scrollbar-width:none; }
+.wallet-tabs::-webkit-scrollbar { display:none; }
+.wallet-tab-btn {
+  white-space:nowrap; padding:9px 14px; border-radius:8px; border:none;
+  background:var(--surface); color:var(--text2); cursor:pointer;
+  font-size:12px; font-family:inherit; flex-shrink:0;
+}
+.wallet-tab-btn.active { background:var(--gold); color:var(--bg); font-weight:700; }
+
+.income-row {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 0; border-bottom:1px solid var(--border);
+}
+.income-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.income-info { flex:1; text-align:right; }
+.income-label { font-size:13px; font-weight:600; }
+.income-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+.income-amount { font-size:14px; font-weight:700; }
+
+.income-summary {
+  background:var(--elevated); border:1px solid var(--border);
+  border-radius:12px; padding:14px; margin-bottom:14px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.income-sum-lbl { font-size:12px; color:var(--text2); }
+.income-sum-val { font-size:20px; font-weight:700; color:var(--green-lt); }
 </style>
 </head>
 <body>
@@ -387,7 +538,7 @@ body {
   <div class="splash-sub">سیستم‌عامل حاکمیتی ایران</div>
   <div class="splash-divider"></div>
   <div class="splash-motto">قانون اساسی، کد است.<br>کد، قانون اساسی است.</div>
-  <div class="splash-ver">نسخه ۱.۰ — فروردین ۱۴۰۵</div>
+  <div class="splash-ver">نسخه ۱.۰ نمایشی — فروردین ۲۵۸۵</div>
 </div>
 
 <!-- ══════════════ APP SHELL ══════════════ -->
@@ -404,8 +555,118 @@ body {
     </div>
   </div>
 
-  <!-- ════ SCREEN: DASHBOARD ════ -->
+  <!-- ════ SCREEN: NATIONAL DASHBOARD ════ -->
   <div class="screen active" id="screen-home">
+
+    <!-- سلامت هسته -->
+    <div class="section-title">وضعیت هسته (Kernel)</div>
+    <div class="kernel-health-bar">
+      <div style="text-align:right;flex:1">
+        <div class="kernel-health-title">سیستم‌عامل ایران‌اواس — فعال</div>
+        <div class="kernel-health-sub">Block #۱۸,۴۲۰,۰۰۱ &nbsp;·&nbsp; ۱۴ ث پیش</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">گره‌های فعال: ۱,۲۴۷ &nbsp;·&nbsp; اوراکل‌ها: ۵/۵ متصل</div>
+      </div>
+      <div class="kernel-health-dot"></div>
+    </div>
+
+    <!-- هشدارهای ملی -->
+    <div class="section-title">هشدارهای ملی</div>
+    <div class="alert-banner-ok">
+      <div class="alert-icon">🛡️</div>
+      <div class="alert-text">
+        <div class="alert-title" style="color:var(--ok)">هیچ هشدار فعالی وجود ندارد</div>
+        <div class="alert-sub">TR-01 تا TR-06 — همه در وضعیت عادی</div>
+      </div>
+    </div>
+
+    <!-- خلاصه صندوق ثروت ملی -->
+    <div class="section-title" style="margin-top:4px">صندوق ثروت ملی (SWF)</div>
+    <div class="card card-gold" style="padding:16px;">
+      <div class="swf-summary-grid">
+        <div class="swf-tile">
+          <div class="swf-tile-lbl">L1 — نقد</div>
+          <div class="swf-tile-val">$۲۹۸B</div>
+          <div class="swf-tile-sub">هدف: $۳۰۰B</div>
+        </div>
+        <div class="swf-tile" style="border-color:var(--gold-dim)">
+          <div class="swf-tile-lbl">L2 — مولد</div>
+          <div class="swf-tile-val">$۳۰۰B</div>
+          <div class="swf-tile-sub">سود: ۱۵٪/سال ✓</div>
+        </div>
+        <div class="swf-tile">
+          <div class="swf-tile-lbl">L3 — گرو</div>
+          <div class="swf-tile-val">$۲T</div>
+          <div class="swf-tile-sub">وثیقه ملی ✓</div>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="swf-progress-row">
+          <div class="swf-progress-lbl" style="color:var(--green-lt);font-size:10px;font-weight:700">L1</div>
+          <div class="swf-bar-bg"><div class="swf-bar-fill" style="width:99.3%;background:var(--green-lt)"></div></div>
+          <div style="font-size:10px;color:var(--text2);width:36px;text-align:left">۹۹.۳٪</div>
+        </div>
+        <div class="swf-progress-row" style="margin-top:4px">
+          <div class="swf-progress-lbl" style="color:var(--gold);font-size:10px;font-weight:700">L2</div>
+          <div class="swf-bar-bg"><div class="swf-bar-fill" style="width:100%;background:var(--gold)"></div></div>
+          <div style="font-size:10px;color:var(--text2);width:36px;text-align:left">۱۰۰٪</div>
+        </div>
+        <div class="swf-progress-row" style="margin-top:4px">
+          <div class="swf-progress-lbl" style="color:var(--text2);font-size:10px;font-weight:700">L3</div>
+          <div class="swf-bar-bg"><div class="swf-bar-fill" style="width:100%;background:var(--text2)"></div></div>
+          <div style="font-size:10px;color:var(--text2);width:36px;text-align:left">۱۰۰٪</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:10px">نسبت پشتوانه نقد: ۳۳.۱٪ &nbsp;·&nbsp; سقف نقدینگی: ₱ ۹۰۰B</div>
+    </div>
+
+    <!-- خلاصه استانی -->
+    <div class="section-title">استان من</div>
+    <div class="province-row-card">
+      <div class="province-score">
+        <div class="province-score-val">۷۸</div>
+        <div class="province-score-lbl">بهره‌وری</div>
+      </div>
+      <div class="province-info">
+        <div class="province-name">استان تهران</div>
+        <div class="province-sub">سهم استانی: ₱ ۱۲.۴B &nbsp;·&nbsp; مصرف: ۶۵٪</div>
+        <div style="font-size:10px;color:var(--ok);margin-top:3px">✓ واجد دریافت پاداش بهره‌وری</div>
+      </div>
+    </div>
+
+    <!-- وضعیت اشتغال -->
+    <div class="section-title">وضعیت اشتغال و رفاه</div>
+    <div class="emp-status-card">
+      <div class="emp-icon">💼</div>
+      <div class="emp-info">
+        <div class="emp-title">شاغل — بخش خصوصی</div>
+        <div class="emp-sub">از: فروردین ۲۵۸۲ &nbsp;·&nbsp; حداقل حقوق: ₱ ۱,۰۰۰/ماه</div>
+      </div>
+      <div class="emp-chip" style="background:#23863622;color:var(--ok);border:1px solid var(--ok)">شاغل</div>
+    </div>
+
+    <!-- مزایای رفاهی -->
+    <div style="margin-bottom:16px">
+      <div class="section-title">مزایای رفاهی فعال</div>
+      <div class="welfare-row">
+        <div class="welfare-tile">
+          <span style="font-size:20px">❤️</span>
+          <div class="welfare-value" style="color:var(--green-lt)">₱ ۵۰۰</div>
+          <div class="welfare-lbl">اعتبار سلامت</div>
+        </div>
+        <div class="welfare-tile">
+          <span style="font-size:20px">💊</span>
+          <div class="welfare-value" style="color:var(--gold)">سره ۱۰۰</div>
+          <div class="welfare-lbl">سهمیه دارو</div>
+        </div>
+        <div class="welfare-tile">
+          <span style="font-size:20px">🛡️</span>
+          <div class="welfare-value" style="color:var(--ok)">فعال</div>
+          <div class="welfare-lbl">بیمه بیکاری</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- موجودی کیف‌پول -->
     <div class="card" style="text-align:center;">
       <div class="balance-label">موجودی کیف‌پول</div>
       <div class="balance-amount">₱ ۱٬۲۵۰<span class="balance-sare">.۴۷ سره</span></div>
@@ -429,54 +690,67 @@ body {
       </div>
     </div>
 
-    <div style="margin-bottom:16px">
-      <div class="section-title">مزایای رفاهی</div>
-      <div class="welfare-row">
-        <div class="welfare-tile">
-          <span style="font-size:20px">❤️</span>
-          <div class="welfare-value" style="color:var(--green-lt)">₱ ۵۰۰</div>
-          <div class="welfare-lbl">اعتبار سلامت</div>
+    <!-- رویدادهای ملی اخیر -->
+    <div class="section-title">رویدادهای ملی اخیر</div>
+    <div class="card" style="padding:12px 16px;">
+      <div class="event-row">
+        <div class="event-info">
+          <div class="event-title">لایحه بودجه ۲۵۸۶ در مجلس شورای ملی تصویب شد</div>
+          <div class="event-date">۱ فروردین ۲۵۸۵ &nbsp;·&nbsp; بلاک #۱۸,۴۱۸,۷۲۲</div>
         </div>
-        <div class="welfare-tile">
-          <span style="font-size:20px">💊</span>
-          <div class="welfare-value" style="color:var(--gold)">سره ۱۰۰</div>
-          <div class="welfare-lbl">سهمیه دارو</div>
+        <div class="event-dot" style="background:var(--ok)"></div>
+      </div>
+      <div class="event-row">
+        <div class="event-info">
+          <div class="event-title">انتخابات انجمن استانی تهران — ثبت‌نام آغاز شد</div>
+          <div class="event-date">۲۸ اسفند ۲۵۸۴ &nbsp;·&nbsp; سررسید: ۱۵ اردیبهشت ۲۵۸۵</div>
         </div>
-        <div class="welfare-tile">
-          <span style="font-size:20px">🔒</span>
-          <div class="welfare-value" style="color:var(--warn)">₱ ۵۰۰</div>
-          <div class="welfare-lbl">استیک فعال</div>
+        <div class="event-dot" style="background:var(--gold)"></div>
+      </div>
+      <div class="event-row">
+        <div class="event-info">
+          <div class="event-title">خزنده شبکه ۱۲ دارایی جدید شناسایی و منجمد کرد</div>
+          <div class="event-date">۲۷ اسفند ۲۵۸۴ &nbsp;·&nbsp; مجموع منجمد: $۱۸۴B</div>
         </div>
+        <div class="event-dot" style="background:var(--warn)"></div>
+      </div>
+      <div class="event-row" style="border-bottom:none">
+        <div class="event-info">
+          <div class="event-title">واریز اعتبار سلامت سالانه شهروندان انجام شد</div>
+          <div class="event-date">۱ فروردین ۲۵۸۵ &nbsp;·&nbsp; ₱ ۵۰۰ به هر شهروند</div>
+        </div>
+        <div class="event-dot" style="background:var(--ok)"></div>
       </div>
     </div>
 
-    <div>
-      <div class="section-title">تراکنش‌های اخیر</div>
-      <div class="tx-row">
-        <div class="tx-icon" style="background:#23863622">⬇️</div>
-        <div class="tx-info"><div class="tx-label">حقوق — فروردین ۱۴۰۵</div><div class="tx-date">۱ فروردین ۱۴۰۵</div></div>
-        <div class="tx-amount" style="color:var(--green-lt)">+₱۱۰۰۰</div>
-      </div>
-      <div class="tx-row">
-        <div class="tx-icon" style="background:#D2992222">🧾</div>
-        <div class="tx-info"><div class="tx-label">قبض برق — اسفند</div><div class="tx-date">۲۸ اسفند ۱۴۰۴</div></div>
-        <div class="tx-amount">−₱۴۵</div>
-      </div>
-      <div class="tx-row">
-        <div class="tx-icon" style="background:#23863622">❤️</div>
-        <div class="tx-info"><div class="tx-label">اعتبار سلامت سالانه</div><div class="tx-date">۱ فروردین ۱۴۰۵</div></div>
-        <div class="tx-amount" style="color:var(--green-lt)">+₱۵۰۰</div>
-      </div>
-      <div class="tx-row">
-        <div class="tx-icon" style="background:#C9A84C22">🔒</div>
-        <div class="tx-info"><div class="tx-label">قفل در صندوق L2</div><div class="tx-date">۱۵ اسفند ۱۴۰۴</div></div>
-        <div class="tx-amount">−₱۵۰۰</div>
-      </div>
+    <!-- تراکنش‌های اخیر -->
+    <div class="section-title">تراکنش‌های اخیر</div>
+    <div class="tx-row">
+      <div class="tx-icon" style="background:#23863622">⬇️</div>
+      <div class="tx-info"><div class="tx-label">حقوق — فروردین ۲۵۸۵</div><div class="tx-date">۱ فروردین ۲۵۸۵</div></div>
+      <div class="tx-amount" style="color:var(--green-lt)">+₱۱۰۰۰</div>
+    </div>
+    <div class="tx-row">
+      <div class="tx-icon" style="background:#D2992222">🧾</div>
+      <div class="tx-info"><div class="tx-label">قبض برق — اسفند</div><div class="tx-date">۲۸ اسفند ۲۵۸۴</div></div>
+      <div class="tx-amount">−₱۴۵</div>
+    </div>
+    <div class="tx-row">
+      <div class="tx-icon" style="background:#23863622">❤️</div>
+      <div class="tx-info"><div class="tx-label">اعتبار سلامت سالانه</div><div class="tx-date">۱ فروردین ۲۵۸۵</div></div>
+      <div class="tx-amount" style="color:var(--green-lt)">+₱۵۰۰</div>
+    </div>
+    <div class="tx-row">
+      <div class="tx-icon" style="background:#C9A84C22">🔒</div>
+      <div class="tx-info"><div class="tx-label">قفل در صندوق L2</div><div class="tx-date">۱۵ اسفند ۲۵۸۴</div></div>
+      <div class="tx-amount">−₱۵۰۰</div>
     </div>
   </div>
 
-  <!-- ════ SCREEN: CITIZEN CARD ════ -->
+  <!-- ════ SCREEN: CITIZEN CARD / DIGITAL IDENTITY ════ -->
   <div class="screen" id="screen-card">
+
+    <!-- کارت شهروندی (بدون تغییر) -->
     <div class="citizen-card">
       <div class="card-flag">
         <div style="background:#1B7340"></div>
@@ -510,9 +784,81 @@ body {
         <span style="font-size:12px;color:var(--text3)">💼</span>
         <span class="card-wallet-addr">0x7f3A...c4B2</span>
       </div>
-      <div class="card-footer">IranOS · Kernel v1.0 · ZKP Verified · Block #18,420,001</div>
+      <div class="card-footer">IranOS · Kernel v1.0 · ZKP Demo · Block #18,420,001</div>
     </div>
 
+    <!-- وضعیت هویت دیجیتال -->
+    <div class="section-title">وضعیت هویت دیجیتال</div>
+    <div class="identity-section-card">
+      <div class="identity-row">
+        <div class="identity-icon" style="background:#23863622">🔬</div>
+        <div class="identity-info">
+          <div class="identity-lbl">بیومتریک</div>
+          <div class="identity-sub">ثبت‌شده — تجدید: ۱ فروردین ۲۵۸۸</div>
+        </div>
+        <div class="identity-status" style="color:var(--ok)">✓ معتبر</div>
+      </div>
+      <div class="identity-row">
+        <div class="identity-icon" style="background:#C9A84C22">✍️</div>
+        <div class="identity-info">
+          <div class="identity-lbl">امضای دیجیتال</div>
+          <div class="identity-sub">کلید: 0x7f3A...c4B2 · Ed25519</div>
+        </div>
+        <div class="identity-status" style="color:var(--ok)">✓ فعال</div>
+      </div>
+      <div class="identity-row">
+        <div class="identity-icon" style="background:#1A0D2A22">🔐</div>
+        <div class="identity-info">
+          <div class="identity-lbl">ZKP پایه</div>
+          <div class="identity-sub">اثبات صادرشده: ۳ مورد فعال</div>
+        </div>
+        <div class="identity-status" style="color:var(--ok)">✓ فعال</div>
+      </div>
+      <div class="identity-row">
+        <div class="identity-icon" style="background:#1A1A0D22">🏛️</div>
+        <div class="identity-info">
+          <div class="identity-lbl">ثبت شهروندی</div>
+          <div class="identity-sub">بلاک ثبت: #۱۸,۰۰۱,۴۴۲ · فروردین ۲۵۸۵</div>
+        </div>
+        <div class="identity-status" style="color:var(--ok)">✓ تأیید</div>
+      </div>
+    </div>
+
+    <!-- اثبات‌های ZKP -->
+    <div class="section-title">اثبات‌های دانایی صفر (ZKP)</div>
+    <div class="zkp-card">
+      <div class="zkp-title">🔒 اثبات‌های فعال — هویت بدون افشای اطلاعات</div>
+      <div class="zkp-proof-row">
+        <div class="zkp-proof-icon">🔞</div>
+        <div class="zkp-proof-info">
+          <div class="zkp-proof-lbl">اثبات سن (بالای ۱۸ سال)</div>
+          <div class="zkp-proof-date">صادرشده: ۱ فروردین ۲۵۸۵ · انقضا: ۱ فروردین ۲۵۸۶</div>
+        </div>
+        <div class="zkp-proof-status" style="color:var(--ok)">✓ معتبر</div>
+      </div>
+      <div class="zkp-proof-row">
+        <div class="zkp-proof-icon">🏙️</div>
+        <div class="zkp-proof-info">
+          <div class="zkp-proof-lbl">اثبات اقامت استان تهران</div>
+          <div class="zkp-proof-date">صادرشده: ۱ فروردین ۲۵۸۵ · انقضا: ۱ فروردین ۲۵۸۶</div>
+        </div>
+        <div class="zkp-proof-status" style="color:var(--ok)">✓ معتبر</div>
+      </div>
+      <div class="zkp-proof-row">
+        <div class="zkp-proof-icon">💼</div>
+        <div class="zkp-proof-info">
+          <div class="zkp-proof-lbl">اثبات وضعیت اشتغال</div>
+          <div class="zkp-proof-date">صادرشده: ۱ اسفند ۲۵۸۴ · انقضا: ۱ اسفند ۲۵۸۵</div>
+        </div>
+        <div class="zkp-proof-status" style="color:var(--ok)">✓ معتبر</div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:12px;line-height:18px">
+        اثبات‌های ZKP هویت شما را بدون افشای اطلاعات شخصی تأیید می‌کنند.<br>
+        این نمایش بر پایه ایده‌های بخش ۲.۳ سپیدنامه ایران‌اواس طراحی شده است.
+      </div>
+    </div>
+
+    <!-- مزایای فعال (بدون تغییر) -->
     <div class="section-title">مزایای فعال</div>
     <div class="benefit-row"><span style="font-size:18px">❤️</span><div class="benefit-lbl">اعتبار سلامت سالانه</div><div class="benefit-val" style="color:var(--green-lt)">₱ ۵۰۰</div></div>
     <div class="benefit-row"><span style="font-size:18px">💊</span><div class="benefit-lbl">سهمیه ماهانه دارو</div><div class="benefit-val" style="color:var(--gold)">سره ۱۰۰</div></div>
@@ -523,22 +869,29 @@ body {
 
   <!-- ════ SCREEN: WALLET ════ -->
   <div class="screen" id="screen-wallet">
-    <div style="text-align:center;padding:28px 0;border-bottom:1px solid var(--border);margin-bottom:16px">
+    <div style="text-align:center;padding:20px 0 16px;border-bottom:1px solid var(--border);margin-bottom:16px">
       <div class="balance-label">موجودی</div>
       <div class="balance-amount">₱ ۱٬۲۵۰</div>
       <div style="font-size:12px;color:var(--text3);font-family:monospace;margin-top:8px">0x7f3A...c4B2</div>
     </div>
-    <div class="tabs">
-      <button class="tab-btn active" id="wt-history" onclick="walletTab('history')">تاریخچه</button>
-      <button class="tab-btn" id="wt-send" onclick="walletTab('send')">ارسال</button>
+
+    <!-- سه تب: تاریخچه، ارسال، حقوق و مزایا -->
+    <div class="wallet-tabs">
+      <button class="wallet-tab-btn active" id="wt-history" onclick="walletTab('history')">تاریخچه</button>
+      <button class="wallet-tab-btn" id="wt-send" onclick="walletTab('send')">ارسال</button>
+      <button class="wallet-tab-btn" id="wt-income" onclick="walletTab('income')">حقوق و مزایا</button>
     </div>
+
+    <!-- تاریخچه -->
     <div id="wallet-history">
-      <div class="tx-row"><div class="tx-icon" style="background:#23863622">⬇️</div><div class="tx-info"><div class="tx-label">حقوق — فروردین ۱۴۰۵</div><div class="tx-date">0xabc...001</div></div><div class="tx-amount" style="color:var(--green-lt)">+₱۱۰۰۰</div></div>
+      <div class="tx-row"><div class="tx-icon" style="background:#23863622">⬇️</div><div class="tx-info"><div class="tx-label">حقوق — فروردین ۲۵۸۵</div><div class="tx-date">0xabc...001</div></div><div class="tx-amount" style="color:var(--green-lt)">+₱۱۰۰۰</div></div>
       <div class="tx-row"><div class="tx-icon" style="background:#D2992222">🧾</div><div class="tx-info"><div class="tx-label">قبض برق</div><div class="tx-date">0xabc...002</div></div><div class="tx-amount">−₱۴۵</div></div>
       <div class="tx-row"><div class="tx-icon" style="background:#23863622">❤️</div><div class="tx-info"><div class="tx-label">اعتبار سلامت</div><div class="tx-date">0xabc...003</div></div><div class="tx-amount" style="color:var(--green-lt)">+₱۵۰۰</div></div>
       <div class="tx-row"><div class="tx-icon" style="background:#C9A84C22">🔒</div><div class="tx-info"><div class="tx-label">قفل در صندوق L2</div><div class="tx-date">0xabc...004</div></div><div class="tx-amount">−₱۵۰۰</div></div>
       <div class="tx-row"><div class="tx-icon" style="background:#B91C1C22">⬆️</div><div class="tx-info"><div class="tx-label">انتقال به مریم رضایی</div><div class="tx-date">0xabc...005</div></div><div class="tx-amount">−₱۲۰۰</div></div>
     </div>
+
+    <!-- ارسال -->
     <div id="wallet-send" style="display:none" class="send-form">
       <div class="form-label">آدرس گیرنده (0x...)</div>
       <input class="form-input" id="recipient" placeholder="0x..." type="text">
@@ -549,6 +902,88 @@ body {
       </div>
       <div class="fee-note">کارمزد شبکه: ۰ PAH (ZK-Rollup)</div>
       <button class="send-btn" onclick="doSend()">⬆ ارسال و امضای دیجیتال</button>
+    </div>
+
+    <!-- حقوق و مزایا -->
+    <div id="wallet-income" style="display:none">
+      <div style="font-size:11px;color:var(--text3);text-align:right;margin-bottom:10px;padding:8px 12px;background:rgba(201,168,76,0.06);border-right:2px solid var(--gold-dim);border-radius:6px;line-height:18px">
+        این بخش سابقه حسابداری دستمزد و مزایاست، نه صدور پول.
+      </div>
+      <div class="income-summary">
+        <div>
+          <div class="income-sum-lbl">جمع ثبت‌شده — فروردین ۲۵۸۵</div>
+          <div class="income-sum-val">+₱ ۱٬۶۰۰</div>
+        </div>
+        <span style="font-size:24px">📊</span>
+      </div>
+
+      <div class="section-title">دستمزد ثبت‌شده</div>
+      <div class="income-row">
+        <div class="income-icon" style="background:#23863622">💼</div>
+        <div class="income-info">
+          <div class="income-label">حقوق ماهانه — فروردین ۲۵۸۵</div>
+          <div class="income-sub">کارفرما: شرکت الف · تأیید: CitizenCard.sol</div>
+        </div>
+        <div class="income-amount" style="color:var(--green-lt)">+₱۱٬۰۰۰</div>
+      </div>
+      <div class="income-row">
+        <div class="income-icon" style="background:#23863622">💼</div>
+        <div class="income-info">
+          <div class="income-label">حقوق ماهانه — اسفند ۲۵۸۴</div>
+          <div class="income-sub">کارفرما: شرکت الف · تأیید: CitizenCard.sol</div>
+        </div>
+        <div class="income-amount" style="color:var(--green-lt)">+₱۱٬۰۰۰</div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">مزایای رفاهی</div>
+      <div class="income-row">
+        <div class="income-icon" style="background:#23863622">❤️</div>
+        <div class="income-info">
+          <div class="income-label">اعتبار سلامت سالانه</div>
+          <div class="income-sub">۱ فروردین ۲۵۸۵ · تأیید: SovereignWealthFund.sol</div>
+        </div>
+        <div class="income-amount" style="color:var(--green-lt)">+₱۵۰۰</div>
+      </div>
+      <div class="income-row">
+        <div class="income-icon" style="background:#C9A84C22">💊</div>
+        <div class="income-info">
+          <div class="income-label">سهمیه دارو — فروردین ۲۵۸۵</div>
+          <div class="income-sub">۱ فروردین ۲۵۸۵ · سقف: سره ۱۰۰</div>
+        </div>
+        <div class="income-amount" style="color:var(--gold)">سره ۱۰۰</div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">بازنشستگی</div>
+      <div class="income-row">
+        <div class="income-icon" style="background:#7D859022">⏰</div>
+        <div class="income-info">
+          <div class="income-label">صندوق بازنشستگی</div>
+          <div class="income-sub">وضعیت: غیرفعال — سن فعلی ۳۵، بازنشستگی در ۶۵</div>
+        </div>
+        <div class="income-amount" style="color:var(--text3)">—</div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">مالیات پرداخت‌شده</div>
+      <div class="income-row">
+        <div class="income-icon" style="background:#B91C1C22">🏛️</div>
+        <div class="income-info">
+          <div class="income-label">مالیات بر درآمد — فروردین ۲۵۸۵</div>
+          <div class="income-sub">نرخ: ۱۰٪ · تأیید: Provincial.sol</div>
+        </div>
+        <div class="income-amount">−₱۱۰۰</div>
+      </div>
+      <div class="income-row">
+        <div class="income-icon" style="background:#B91C1C22">🏛️</div>
+        <div class="income-info">
+          <div class="income-label">مالیات بر درآمد — اسفند ۲۵۸۴</div>
+          <div class="income-sub">نرخ: ۱۰٪ · تأیید: Provincial.sol</div>
+        </div>
+        <div class="income-amount">−₱۱۰۰</div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:16px;line-height:20px">
+        این بخش مسیر نمایشی حقوق و مزایا در ایران‌اواس را نشان می‌دهد.<br>
+        این بخش داده‌های نمایشی است و به بلاک‌چین واقعی متصل نیست.
+      </div>
     </div>
   </div>
 
@@ -561,23 +996,23 @@ body {
     <div class="section-title">پرداخت‌نشده</div>
     <div class="bill-card" id="bill-electricity">
       <div class="bill-icon" style="background:#F0C04022">⚡</div>
-      <div class="bill-body"><div class="bill-name">برق</div><div class="bill-due">سررسید: ۱۵ فروردین ۱۴۰۵</div></div>
+      <div class="bill-body"><div class="bill-name">برق</div><div class="bill-due">سررسید: ۱۵ فروردین ۲۵۸۵</div></div>
       <div class="bill-right"><div class="bill-amount" style="color:#F0C040">₱ ۴۵</div><button class="pay-btn" onclick="payBill('electricity',45)">پرداخت</button></div>
     </div>
     <div class="bill-card" id="bill-water">
       <div class="bill-icon" style="background:#4FC3F722">💧</div>
-      <div class="bill-body"><div class="bill-name">آب</div><div class="bill-due">سررسید: ۲۰ فروردین ۱۴۰۵</div></div>
+      <div class="bill-body"><div class="bill-name">آب</div><div class="bill-due">سررسید: ۲۰ فروردین ۲۵۸۵</div></div>
       <div class="bill-right"><div class="bill-amount" style="color:#4FC3F7">₱ ۲۸</div><button class="pay-btn" onclick="payBill('water',28)">پرداخت</button></div>
     </div>
     <div class="bill-card" id="bill-internet">
       <div class="bill-icon" style="background:#81C78422">📶</div>
-      <div class="bill-body"><div class="bill-name">اینترنت</div><div class="bill-due">سررسید: ۲۵ فروردین ۱۴۰۵</div></div>
+      <div class="bill-body"><div class="bill-name">اینترنت</div><div class="bill-due">سررسید: ۲۵ فروردین ۲۵۸۵</div></div>
       <div class="bill-right"><div class="bill-amount" style="color:#81C784">₱ ۳۵</div><button class="pay-btn" onclick="payBill('internet',35)">پرداخت</button></div>
     </div>
     <div class="section-title" style="margin-top:16px">پرداخت‌شده</div>
     <div class="bill-card paid">
       <div class="bill-icon" style="background:#FF8A6522">🔥</div>
-      <div class="bill-body"><div class="bill-name">گاز</div><div class="bill-due">سررسید: ۱۰ فروردین ۱۴۰۵</div></div>
+      <div class="bill-body"><div class="bill-name">گاز</div><div class="bill-due">سررسید: ۱۰ فروردین ۲۵۸۵</div></div>
       <div class="bill-right"><div class="bill-amount" style="color:#FF8A65">₱ ۶۲</div><div class="paid-badge">✅ پرداخت‌شد</div></div>
     </div>
     <div style="font-size:12px;color:var(--text3);text-align:center;margin-top:20px;line-height:20px">پرداخت مستقیم از کیف‌پول پهلوی — بدون درگاه بانکی</div>
@@ -594,7 +1029,7 @@ body {
     <div class="stats-row">
       <div class="stat-card"><span style="font-size:18px">🔒</span><div class="stat-value" style="color:var(--gold)">₱ ۵۰۰</div><div class="stat-label">قفل‌شده</div></div>
       <div class="stat-card"><span style="font-size:18px">📈</span><div class="stat-value" style="color:var(--green-lt)">₱ ۱۲.۵</div><div class="stat-label">سود تجمیع‌شده</div></div>
-      <div class="stat-card"><span style="font-size:18px">📅</span><div class="stat-value" style="color:var(--text2);font-size:12px">۱۵ تیر ۱۴۰۵</div><div class="stat-label">آزادسازی</div></div>
+      <div class="stat-card"><span style="font-size:18px">📅</span><div class="stat-value" style="color:var(--text2);font-size:12px">۱۵ تیر ۲۵۸۵</div><div class="stat-label">آزادسازی</div></div>
     </div>
     <div class="progress-card">
       <div class="progress-hdr">
@@ -656,7 +1091,7 @@ body {
     </button>
     <button class="tab" id="tab-card" onclick="showTab('card')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-      کارت
+      هویت
     </button>
     <button class="tab" id="tab-wallet" onclick="showTab('wallet')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V6H4v14h16v-6"/><circle cx="17" cy="12" r="2"/></svg>
@@ -668,7 +1103,7 @@ body {
     </button>
     <button class="tab" id="tab-staking" onclick="showTab('staking')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      استیک
+      صندوق
     </button>
   </nav>
 </div>
@@ -687,6 +1122,9 @@ body {
 
 <!-- ════ TOAST ════ -->
 <div class="toast" id="toast"></div>
+
+<!-- ════ GLOBAL DEMO WATERMARK ════ -->
+<div class="demo-watermark">نسخه نمایشی</div>
 
 <script>
 // ──────────────────── SPLASH
@@ -709,7 +1147,7 @@ for (let i = 0; i < 9; i++) {
 // ──────────────────── TAB NAVIGATION
 const SCREENS = ['home','card','wallet','bills','staking','kernel'];
 const TITLES  = {
-  home:'ایران‌اواس', card:'کارت شهروندی دیجیتال',
+  home:'ایران‌اواس — داشبورد ملی', card:'هویت دیجیتال شهروندی',
   wallet:'کیف‌پول پهلوی', bills:'پرداخت قبوض',
   staking:'صندوق ثروت ملی — L2', kernel:'وضعیت هسته (Kernel)'
 };
@@ -726,12 +1164,14 @@ function showTab(name) {
   document.getElementById('top-title').textContent = TITLES[name] || 'ایران‌اواس';
 }
 
-// ──────────────────── WALLET TABS
+// ──────────────────── WALLET TABS (3 tabs now)
 function walletTab(t) {
   document.getElementById('wallet-history').style.display = t==='history'?'block':'none';
-  document.getElementById('wallet-send').style.display = t==='send'?'block':'none';
+  document.getElementById('wallet-send').style.display    = t==='send'   ?'block':'none';
+  document.getElementById('wallet-income').style.display  = t==='income' ?'block':'none';
   document.getElementById('wt-history').classList.toggle('active', t==='history');
-  document.getElementById('wt-send').classList.toggle('active', t==='send');
+  document.getElementById('wt-send').classList.toggle('active',    t==='send');
+  document.getElementById('wt-income').classList.toggle('active',  t==='income');
 }
 
 function doSend() {
@@ -793,7 +1233,7 @@ let modalCallback = null;
 function showModal(type) {
   const msgs = {
     stake:   ['قفل در صندوق L2', 'موجودی در لایه مولد صندوق ثروت ملی قفل می‌شود و سود ۱۵٪ سالانه دریافت می‌کنید.'],
-    unstake: ['آزادسازی موجودی', 'در ۱۵ تیر ۱۴۰۵ موجودی آزاد می‌شود.\nسود تجمیع‌شده: ₱ ۱۲.۵'],
+    unstake: ['آزادسازی موجودی', 'در ۱۵ تیر ۲۵۸۵ موجودی آزاد می‌شود.\nسود تجمیع‌شده: ₱ ۱۲.۵'],
   };
   showModal2(msgs[type][0], msgs[type][1], () => showToast('✓ قرارداد امضا شد'));
 }
