@@ -149,8 +149,7 @@ body {
   border:1px solid var(--gold-dim); border-radius:20px;
   padding:20px; margin-bottom:20px; position:relative; overflow:hidden;
 }
-.card-flag { position:absolute; top:0; left:0; right:0; height:18px; display:flex; direction:ltr; }
-.card-flag div { flex:1; }
+.card-flag { position:absolute; top:0; left:0; right:0; height:18px; background:linear-gradient(to bottom, #1B7340 0 33.33%, #FFFFFF 33.33% 66.66%, #B91C1C 66.66% 100%); }
 .card-header { display:flex; align-items:center; gap:12px; margin-top:8px; margin-bottom:16px; }
 .card-header-text { flex:1; text-align:right; }
 .card-hdr-title { font-size:11px; color:var(--text2); }
@@ -882,11 +881,7 @@ body {
 
     <!-- کارت شهروندی (بدون تغییر) -->
     <div class="citizen-card">
-      <div class="card-flag">
-        <div style="background:#1B7340"></div>
-        <div style="background:#FFFFFF"></div>
-        <div style="background:#B91C1C"></div>
-      </div>
+      <div class="card-flag"></div>
       <div class="card-header">
         <svg width="52" height="52" aria-label="شیر و خورشید"
              style="background:#fff1d6;border-radius:6px;padding:2px;flex-shrink:0">
