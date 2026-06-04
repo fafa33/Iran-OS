@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>ایران‌اواس — اپلیکیشن ملی شهروندی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:       #0D1117;
@@ -39,6 +42,23 @@ body {
   overflow-x: hidden;
 }
 
+@media (min-width: 768px) {
+  html {
+    background: #070C11;
+    min-height: 100%;
+  }
+  body {
+    min-height: 100vh;
+    box-shadow: 0 0 80px rgba(0,0,0,0.7);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .tab-bar {
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+}
+
 /* ────── SPLASH ────── */
 #splash {
   position: fixed; inset: 0;
@@ -48,8 +68,7 @@ body {
   z-index: 999;
   transition: opacity .5s;
 }
-#splash .flag-bar { position: absolute; top:0; left:0; right:0; height:18px; display:flex; direction:ltr; }
-#splash .flag-bar div { flex:1; }
+#splash .flag-bar { position: absolute; top:0; left:0; right:0; height:18px; background:linear-gradient(to bottom, #1B7340 0 33.33%, #FFFFFF 33.33% 66.66%, #B91C1C 66.66% 100%); }
 .splash-logo { animation: popIn .8s cubic-bezier(.34,1.56,.64,1) forwards; opacity:0; display:block; filter: drop-shadow(0 4px 16px rgba(201,168,76,0.5)); }
 @keyframes popIn { to { opacity:1; transform:scale(1); } from { opacity:0; transform:scale(.8); } }
 .splash-title { font-size:38px; font-weight:700; color:var(--gold); margin-top:20px; letter-spacing:1px; }
@@ -597,6 +616,221 @@ body {
 }
 .sys-health-val { font-size:13px; font-weight:700; color:var(--text); font-family:monospace; }
 .sys-health-lbl { font-size:9px; color:var(--text3); margin-top:3px; }
+
+/* ══════════════ PREMIUM VISUAL POLISH ══════════════ */
+:root {
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.015);
+  --shadow-md: 0 6px 24px rgba(0,0,0,.55);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.7);
+  --gold-gradient: linear-gradient(135deg, #E8C96A 0%, #C9A84C 55%, #8A6B28 100%);
+  --gold-line: linear-gradient(90deg, transparent, rgba(201,168,76,.5), rgba(232,201,106,.7), rgba(201,168,76,.5), transparent);
+}
+body {
+  font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background: radial-gradient(ellipse 90% 45% at 50% -5%, rgba(201,168,76,.04) 0%, transparent 65%);
+}
+/* Top bar */
+.top-bar {
+  background: rgba(22,27,34,.94);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(48,54,61,.6);
+  box-shadow: 0 1px 0 rgba(255,255,255,.025), 0 4px 20px rgba(0,0,0,.35);
+}
+.top-bar-title { font-weight:700; letter-spacing:.01em; }
+.kernel-badge {
+  background: rgba(35,134,54,.07); border-color: rgba(35,134,54,.5);
+  backdrop-filter: blur(8px); transition: all .2s;
+}
+.kernel-badge:hover { background: rgba(35,134,54,.14); }
+.kernel-badge .dot { box-shadow: 0 0 0 3px rgba(35,134,54,.2), 0 0 8px rgba(35,134,54,.4); }
+/* Cards */
+.card {
+  box-shadow: var(--shadow-sm);
+  border-color: rgba(48,54,61,.85);
+  transition: box-shadow .25s, border-color .25s;
+}
+.card:hover { box-shadow: var(--shadow-md); border-color: rgba(201,168,76,.12); }
+/* Section titles */
+.section-title {
+  font-size:11px; font-weight:700; color:var(--text3);
+  letter-spacing:1.3px; text-transform:uppercase; margin-bottom:14px;
+}
+/* Citizen card */
+.citizen-card {
+  background: linear-gradient(155deg, rgba(30,44,30,.97) 0%, rgba(13,17,23,.99) 45%, rgba(44,30,12,.97) 85%, rgba(52,36,8,.95) 100%);
+  border: 1px solid rgba(201,168,76,.35); border-radius:22px;
+  padding: 22px 20px 18px; margin-bottom:24px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.75), 0 0 0 1px rgba(201,168,76,.08), inset 0 1px 0 rgba(201,168,76,.14), inset 0 -1px 0 rgba(0,0,0,.3);
+}
+.citizen-card::before {
+  content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background: linear-gradient(135deg, rgba(255,255,255,.03) 0%, transparent 45%, rgba(0,0,0,.14) 100%);
+}
+.citizen-card::after {
+  content:''; position:absolute; bottom:0; left:8%; right:8%; height:1px;
+  background: var(--gold-line);
+}
+.card-flag { height:20px; }
+.card-header { margin-top:14px; margin-bottom:18px; }
+.card-hdr-title { font-size:10px; letter-spacing:.9px; text-transform:uppercase; }
+.card-hdr-sub { font-size:15px; font-weight:800; letter-spacing:.02em; }
+.card-name { font-size:26px; font-weight:800; letter-spacing:-.01em; }
+.card-divider { background: rgba(201,168,76,.2); margin-bottom:18px; }
+.chip { border-radius:20px; padding:5px 12px; font-size:11px; font-weight:600; backdrop-filter:blur(8px); }
+.card-footer { font-size:9px; letter-spacing:.8px; color:rgba(201,168,76,.35); padding-top:12px; border-top:1px solid rgba(201,168,76,.1); margin-top:16px; }
+/* Balance */
+.balance-amount {
+  font-size:50px; font-weight:900; letter-spacing:-.02em;
+  background: var(--gold-gradient);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+/* Tab bar */
+.tab-bar {
+  background: rgba(22,27,34,.92);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(48,54,61,.55);
+  box-shadow: 0 -4px 24px rgba(0,0,0,.45);
+}
+.tab { font-size:10px; font-weight:600; letter-spacing:.3px; transition: color .2s, transform .15s; }
+.tab:active { transform: scale(.9); }
+.tab.active svg { filter: drop-shadow(0 0 6px rgba(201,168,76,.5)); }
+.tab svg { transition: filter .2s; }
+/* Action buttons */
+.action-btn { border-radius:14px; transition: background .2s, transform .15s; }
+.action-btn:hover { background: rgba(201,168,76,.1); }
+.action-btn:active { transform: scale(.91); }
+/* Welfare tiles */
+.welfare-tile { background:var(--elevated); border-radius:16px; box-shadow:var(--shadow-sm); transition:box-shadow .2s, border-color .2s; }
+.welfare-tile:hover { box-shadow:var(--shadow-md); border-color:rgba(201,168,76,.22); }
+.welfare-value { font-weight:800; }
+/* Kernel health */
+.kernel-health-bar {
+  background: linear-gradient(135deg, rgba(35,134,54,.09), rgba(22,27,34,.95));
+  border-color: rgba(35,134,54,.45);
+  box-shadow: 0 0 24px rgba(35,134,54,.07), var(--shadow-sm);
+}
+.kernel-health-dot { width:12px; height:12px; box-shadow: 0 0 0 3px rgba(35,134,54,.2), 0 0 14px rgba(35,134,54,.4); }
+.kernel-health-title { font-size:14px; font-weight:800; }
+.alert-banner-ok { background:rgba(35,134,54,.07); border-color:rgba(35,134,54,.3); box-shadow:0 0 18px rgba(35,134,54,.05); }
+/* SWF */
+.swf-tile {
+  background: linear-gradient(135deg, rgba(30,35,42,.95), rgba(22,27,34,.99));
+  box-shadow: var(--shadow-sm); transition: box-shadow .2s;
+}
+.swf-tile:hover { box-shadow: var(--shadow-md); }
+.swf-tile-val { font-weight:800; font-size:14px; }
+/* Province/emp */
+.province-row-card, .emp-status-card { box-shadow: var(--shadow-sm); transition: box-shadow .2s; }
+.province-score-val { font-size:22px; font-weight:900; background:linear-gradient(135deg,#E8C96A,#D29922); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+/* Staking */
+.apy-card {
+  background: linear-gradient(155deg, rgba(26,21,0,.99) 0%, rgba(13,17,23,.99) 50%, rgba(0,26,13,.99) 100%);
+  border-color: rgba(201,168,76,.42);
+  box-shadow: 0 24px 64px rgba(0,0,0,.65), 0 0 0 1px rgba(201,168,76,.06), inset 0 1px 0 rgba(201,168,76,.12);
+}
+.apy-rate { font-size:62px; font-weight:900; letter-spacing:-.02em; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.progress-bar-fill { background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-lt)); }
+/* Layer rows */
+.layer-row { box-shadow:var(--shadow-sm); transition:box-shadow .2s, border-color .2s; }
+.layer-row:hover { box-shadow:var(--shadow-md); }
+.layer-row.active { background:linear-gradient(135deg, rgba(201,168,76,.06), var(--surface)); border-color:rgba(201,168,76,.42); box-shadow:0 0 22px rgba(201,168,76,.07),var(--shadow-sm); }
+/* Buttons */
+.btn-primary, .send-btn, .pay-all-btn {
+  background: linear-gradient(135deg, #E8C96A 0%, #C9A84C 55%, #9A7030 100%);
+  box-shadow: 0 4px 20px rgba(201,168,76,.28), inset 0 1px 0 rgba(255,255,255,.12);
+  transition: all .2s; color:rgba(13,17,23,.95); font-weight:800;
+}
+.btn-primary:hover, .send-btn:hover, .pay-all-btn:hover { box-shadow:0 6px 28px rgba(201,168,76,.4); transform:translateY(-1px); }
+.btn-primary:active, .send-btn:active, .pay-all-btn:active { transform:translateY(0); box-shadow:0 2px 10px rgba(201,168,76,.2); }
+.btn-secondary { border-color:rgba(201,168,76,.42); transition:all .2s; }
+.btn-secondary:hover { background:rgba(201,168,76,.08); border-color:rgba(201,168,76,.6); }
+.pay-btn { background:linear-gradient(135deg, #E8C96A, #C9A84C); font-weight:700; box-shadow:0 2px 10px rgba(201,168,76,.22); }
+/* Kernel */
+.kernel-header { background:linear-gradient(155deg,rgba(35,134,54,.09),rgba(22,27,34,.96) 40%,rgba(22,27,34,.96)); border-color:rgba(35,134,54,.42); box-shadow:0 0 44px rgba(35,134,54,.09),var(--shadow-md); }
+.kernel-status-title { font-weight:800; letter-spacing:.02em; }
+.sig-dot { background:rgba(48,54,61,.85); box-shadow:inset 0 1px 0 rgba(255,255,255,.05); transition:all .3s; }
+.monetary-card { box-shadow:var(--shadow-sm); }
+.mon-val { font-weight:700; }
+.code-chip { letter-spacing:.5px; font-size:10px; font-weight:800; }
+/* Hub */
+.hub-card { box-shadow:var(--shadow-sm); transition:transform .2s, box-shadow .2s, border-color .2s; }
+.hub-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-md); border-color:rgba(201,168,76,.28); }
+.hub-card:active { transform:translateY(0); }
+.hub-card-title { font-weight:800; }
+.hub-card-icon { filter:drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
+/* Gov items */
+.gov-item { box-shadow:var(--shadow-sm); transition:box-shadow .2s, border-color .2s; }
+.gov-item:hover { box-shadow:var(--shadow-md); border-color:rgba(201,168,76,.16); }
+/* Crawler */
+.crawler-status-card { box-shadow:0 0 32px rgba(35,134,54,.12),var(--shadow-md); border-color:rgba(35,134,54,.5); }
+.crawler-dot { box-shadow:0 0 0 4px rgba(35,134,54,.2),0 0 18px rgba(35,134,54,.45); }
+.crawler-title { font-weight:800; font-size:14px; }
+/* Frozen */
+.frozen-stat { box-shadow:var(--shadow-sm); }
+.frozen-stat-val { font-weight:800; font-size:15px; }
+/* Back btn */
+.back-btn { transition:all .2s; }
+.back-btn:hover { background:rgba(201,168,76,.09); border-color:rgba(201,168,76,.32); color:var(--gold); }
+/* Inputs */
+.form-input:focus { box-shadow:0 0 0 3px rgba(201,168,76,.14); }
+.form-select { cursor:pointer; transition:border-color .2s; }
+/* ZKP */
+.zkp-card { box-shadow:var(--shadow-sm); }
+/* Modal */
+.modal-overlay { background:rgba(0,0,0,.82); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+.modal { background:rgba(22,27,34,.98); box-shadow:0 -24px 64px rgba(0,0,0,.65); border-top-color:rgba(48,54,61,.65); }
+.modal-ok { background:linear-gradient(135deg,#E8C96A,#C9A84C); font-weight:800; box-shadow:0 4px 16px rgba(201,168,76,.3); }
+/* Toast */
+.toast { backdrop-filter:blur(10px); box-shadow:0 4px 20px rgba(35,134,54,.3); }
+/* Wallet tabs */
+.wallet-tab-btn { font-weight:600; transition:all .2s; }
+.wallet-tab-btn.active { background:linear-gradient(135deg,#E8C96A,#C9A84C); font-weight:800; box-shadow:0 2px 10px rgba(201,168,76,.25); }
+/* Stat card */
+.stat-card { box-shadow:var(--shadow-sm); }
+.stat-value { font-weight:800; }
+/* Tx/rows hover */
+.tx-row { transition:background .15s; }
+.tx-row:hover { background:rgba(255,255,255,.018); }
+.benefit-row { transition:background .15s; }
+.benefit-row:hover { background:rgba(255,255,255,.015); }
+.benefit-val { font-weight:700; }
+.income-row { transition:background .15s; }
+.income-row:hover { background:rgba(255,255,255,.015); }
+.income-label { font-weight:700; }
+.oracle-row { transition:background .15s; }
+.oracle-row:hover { background:rgba(255,255,255,.015); }
+.expenditure-row, .reclaim-row { transition:background .15s; }
+.expenditure-row:hover, .reclaim-row:hover { background:rgba(255,255,255,.015); }
+.expenditure-name, .reclaim-name { font-weight:600; }
+.expenditure-amt, .reclaim-amt { font-weight:800; }
+.red-line-row, .mon-row, .lock-status-row, .event-row, .gov-item-footer { transition:background .15s; }
+.red-line-row:hover, .mon-row:hover { background:rgba(255,255,255,.015); }
+.event-title { font-weight:500; }
+/* Splash */
+.splash-title { font-size:40px; font-weight:900; letter-spacing:.02em; background:var(--gold-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.splash-sub { font-weight:400; letter-spacing:.5px; }
+.splash-divider { background:linear-gradient(90deg,transparent,var(--gold-dim),transparent); width:80px; height:1px; }
+.splash-motto { font-size:14px; line-height:27px; }
+/* Identity */
+.identity-section-card { box-shadow:var(--shadow-sm); }
+/* Treasury */
+.treasury-bar-card { box-shadow:var(--shadow-sm); }
+/* Sys health */
+.sys-health-tile { box-shadow:var(--shadow-sm); }
+/* Bill card */
+.bill-card { box-shadow:var(--shadow-sm); transition:box-shadow .2s; }
+.bill-card:not(.paid):hover { box-shadow:var(--shadow-md); }
+/* Gov badge */
+.gov-badge { font-weight:700; }
+/* Income summary */
+.income-sum-val { font-weight:900; }
+/* Demo watermark */
+.demo-watermark { font-weight:600; letter-spacing:.6px; text-transform:uppercase; }
 </style>
 </head>
 <body>
@@ -653,11 +887,7 @@ body {
 
 <!-- ══════════════ SPLASH ══════════════ -->
 <div id="splash">
-  <div class="flag-bar">
-    <div style="background:#1B7340"></div>
-    <div style="background:#FFFFFF"></div>
-    <div style="background:#B91C1C"></div>
-  </div>
+  <div class="flag-bar"></div>
 
   <svg class="splash-logo" width="230" height="175" aria-label="شیر و خورشید — نشان ملی ایران">
     <use href="#lion-sun"/>
