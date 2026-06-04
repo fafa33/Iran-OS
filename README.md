@@ -6,6 +6,26 @@
 
 [![CI](https://github.com/fafa33/Iran-OS/actions/workflows/ci.yml/badge.svg)](https://github.com/fafa33/Iran-OS/actions/workflows/ci.yml)
 
+---
+
+## For External Reviewers (English)
+
+**IranOS** is an open-source blockchain governance operating system — a technical blueprint for a post-Islamic-Republic Iran. It encodes a secular constitutional monarchy (*Charter of Welfare and Justice*) into auditable Solidity smart contracts, governance protocols, and deployment documentation.
+
+**Current status:**
+- 15 Solidity contracts — 499/499 tests passing
+- Step 13 (cross-fargard fidelity review) — internal remediation complete, **open for external review**
+- Step 12 (external audit / formal verification) — **open, no accepted evidence yet**
+- **Not production-ready.** No external audit. No formal verification. No deployment on any public network.
+
+**External reviewer entry points:**
+- [Step 13 Reviewer Index (English)](docs/step13/STEP13_REVIEWER_INDEX_EN.md) — start here
+- [SECURITY.md](SECURITY.md) — security status and non-claim policy
+- [LICENSE](LICENSE) — MIT
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — contributor conduct
+
+---
+
 </div>
 
 **سیستم‌عامل حکمرانی بلاک‌چین‌محور برای ایران**
