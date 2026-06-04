@@ -1,0 +1,87 @@
+name: External Review Submission
+description: Submit findings from an independent review of IranOS contracts, documentation, or whitepaper traceability. Related to Issue #35 (Step 13).
+title: "[External Review]: "
+labels:
+  - external-review
+  - step13
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reviewing IranOS. This template is for submitting independent review findings related to **Step 13** ([Issue #35](https://github.com/fafa33/Iran-OS/issues/35)).
+
+        **Before submitting:** Read [docs/step13/STEP13_REVIEWER_INDEX_EN.md](https://github.com/fafa33/Iran-OS/blob/main/docs/step13/STEP13_REVIEWER_INDEX_EN.md) and [docs/step13/STEP13_REVIEWER_INSTRUCTIONS_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/step13/STEP13_REVIEWER_INSTRUCTIONS_FA.md).
+
+        Submitting this form does not close Issue #35, Step 13, or any Step 12 blocker.
+
+  - type: textarea
+    id: background
+    attributes:
+      label: Reviewer Background
+      description: Brief description of your relevant background (Solidity, formal verification, governance, Persian law, etc.). No personal information required.
+      placeholder: |
+        e.g. Smart contract auditor with 3 years experience, familiar with OpenZeppelin AccessControl patterns.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reviewed_documents
+    attributes:
+      label: Reviewed Documents / Contracts
+      description: List the specific files, contracts, or documents you reviewed.
+      placeholder: |
+        - contracts/kernel.sol
+        - docs/step13/WHITEPAPER_STEP13_CROSS_FARGARD_FIDELITY_REVIEW_FA.md
+        - whitepaper/whitepaper-fa.md (Fargard 4)
+    validations:
+      required: true
+
+  - type: textarea
+    id: findings
+    attributes:
+      label: Findings
+      description: Describe your findings. Include file references and line numbers where applicable.
+      placeholder: |
+        Finding 1: [file:line] — description
+        Finding 2: [file:line] — description
+    validations:
+      required: true
+
+  - type: textarea
+    id: concerns
+    attributes:
+      label: Concerns
+      description: Any broader concerns about architecture, constitution alignment, or security posture?
+    validations:
+      required: false
+
+  - type: textarea
+    id: recommendations
+    attributes:
+      label: Recommendations
+      description: What changes or follow-up actions do you recommend?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: conflict_of_interest
+    attributes:
+      label: Conflict of Interest Declaration
+      description: Do you have any financial, political, or personal interest in this project?
+      options:
+        - "No conflict of interest"
+        - "Yes — described in Concerns field"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: non_claim
+    attributes:
+      label: Non-Claim Confirmation
+      options:
+        - label: This submission does not claim to close Issue #35, Step 13, or any Step 12 blocker.
+          required: true
+        - label: This submission does not claim production readiness, release approval, completed audit, or completed formal verification for IranOS.
+          required: true
+        - label: I understand that IranOS is not production-ready and no external audit has been completed.
+          required: true
