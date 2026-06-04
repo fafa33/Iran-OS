@@ -469,6 +469,42 @@ body {
 .income-sum-lbl { font-size:12px; color:var(--text2); }
 .income-sum-val { font-size:20px; font-weight:700; color:var(--green-lt); }
 
+/* ────── PHASE 3B: MELLAT HUB + GOVERNANCE ────── */
+.hub-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:12px; margin-bottom:16px;
+}
+.hub-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:20px 14px;
+  display:flex; flex-direction:column; align-items:center;
+  gap:8px; cursor:pointer; text-align:center;
+  transition:border-color .2s;
+}
+.hub-card:active { border-color:var(--gold-dim); }
+.hub-card-icon  { font-size:28px; }
+.hub-card-title { font-size:14px; font-weight:700; color:var(--text); }
+.hub-card-sub   { font-size:10px; color:var(--text3); line-height:16px; }
+
+.gov-item {
+  background:var(--elevated); border:1px solid var(--border);
+  border-radius:12px; padding:14px 16px; margin-bottom:10px;
+}
+.gov-item-title { font-size:14px; font-weight:600; text-align:right; }
+.gov-item-meta  { font-size:11px; color:var(--text2); margin-top:4px; text-align:right; }
+.gov-item-footer{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+.gov-badge {
+  font-size:11px; font-weight:600; padding:3px 10px;
+  border-radius:10px; border:1px solid;
+}
+.back-btn {
+  display:flex; align-items:center; gap:6px;
+  background:var(--elevated); border:1px solid var(--border);
+  border-radius:10px; padding:8px 14px; cursor:pointer;
+  font-size:13px; color:var(--text2); font-family:inherit;
+  margin-bottom:16px;
+}
+
 /* ────── PHASE 3A: KERNEL EXPANSION ────── */
 .oracle-row {
   display:flex; align-items:center; gap:10px;
@@ -1196,6 +1232,140 @@ body {
 
   </div>
 
+  <!-- ════ SCREEN: MELLAT HUB ════ -->
+  <div class="screen" id="screen-mellat">
+    <div class="section-title">مشارکت و نظارت ملی</div>
+    <div class="hub-grid">
+      <div class="hub-card" onclick="showTab('governance')">
+        <div class="hub-card-icon">🗳️</div>
+        <div class="hub-card-title">حاکمیت</div>
+        <div class="hub-card-sub">انتخابات، رفراندوم و لوایح مجلس</div>
+      </div>
+      <div class="hub-card" onclick="showTab('transparency')">
+        <div class="hub-card-icon">💎</div>
+        <div class="hub-card-title">شفافیت ملی</div>
+        <div class="hub-card-sub">خزانه، صندوق ثروت و دفتر کل</div>
+      </div>
+      <div class="hub-card" onclick="showTab('justice')">
+        <div class="hub-card-icon">⚖️</div>
+        <div class="hub-card-title">دادگستری</div>
+        <div class="hub-card-sub">ثبت شکایت و پیگیری پرونده</div>
+      </div>
+      <div class="hub-card" onclick="showTab('reclaim')">
+        <div class="hub-card-icon">🔍</div>
+        <div class="hub-card-title">بازپس‌گیری</div>
+        <div class="hub-card-sub">خزنده شبکه و دارایی‌های منجمد</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:4px">
+      داده‌های نمایشی — این بخش به سیستم واقعی متصل نیست
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: GOVERNANCE ════ -->
+  <div class="screen" id="screen-governance">
+    <button class="back-btn" onclick="showTab('mellat')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+      بازگشت به ملت
+    </button>
+
+    <div class="section-title">رأی‌گیری‌های فعال</div>
+    <div class="gov-item">
+      <div class="gov-item-title">انتخابات انجمن استانی — تهران</div>
+      <div class="gov-item-meta">ثبت‌نام: ۲۸ اسفند ۲۵۸۴ &nbsp;·&nbsp; سررسید: ۱۵ اردیبهشت ۲۵۸۵</div>
+      <div class="gov-item-footer">
+        <div class="gov-badge" style="border-color:var(--ok);color:var(--ok)">فعال</div>
+        <div style="font-size:11px;color:var(--text3)">هویت بیومتریک لازم است</div>
+      </div>
+    </div>
+    <div class="gov-item">
+      <div class="gov-item-title">انتخابات شورای محلی — منطقه ۶</div>
+      <div class="gov-item-meta">ثبت‌نام: ۱ فروردین ۲۵۸۵ &nbsp;·&nbsp; سررسید: ۳۱ اردیبهشت ۲۵۸۵</div>
+      <div class="gov-item-footer">
+        <div class="gov-badge" style="border-color:var(--ok);color:var(--ok)">فعال</div>
+        <div style="font-size:11px;color:var(--text3)">سابقه اقامت ۵ سال لازم است</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:4px">مشورت‌های ملی</div>
+    <div class="gov-item">
+      <div class="gov-item-title">مشورت ملی: بودجه آموزش ۲۵۸۶</div>
+      <div class="gov-item-meta">باز برای نظردهی &nbsp;·&nbsp; تا ۳۱ فروردین ۲۵۸۵</div>
+      <div class="gov-item-footer">
+        <div class="gov-badge" style="border-color:var(--gold-dim);color:var(--gold)">نظردهی باز</div>
+        <div style="font-size:11px;color:var(--text3)">۱۲,۴۸۷ نظر ثبت‌شده</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:4px">لوایح مجلس</div>
+    <div class="gov-item">
+      <div class="gov-item-title">لایحه تنظیم بازار مسکن</div>
+      <div class="gov-item-meta">ارائه‌دهنده: دولت &nbsp;·&nbsp; ۱۵ اسفند ۲۵۸۴</div>
+      <div class="gov-item-footer">
+        <div class="gov-badge" style="border-color:var(--warn);color:var(--warn)">در بررسی</div>
+        <div style="font-size:11px;color:var(--text3)">کمیسیون اقتصادی</div>
+      </div>
+    </div>
+    <div class="gov-item">
+      <div class="gov-item-title">لایحه بودجه ۲۵۸۶</div>
+      <div class="gov-item-meta">ارائه‌دهنده: دولت &nbsp;·&nbsp; ۱ فروردین ۲۵۸۵</div>
+      <div class="gov-item-footer">
+        <div class="gov-badge" style="border-color:var(--ok);color:var(--ok)">تصویب‌شده</div>
+        <div style="font-size:11px;color:var(--text3)">دستینه پادشاه: ۵ فروردین ۲۵۸۵</div>
+      </div>
+    </div>
+    <div class="gov-item">
+      <div class="gov-item-title">لایحه استاندارد محیط زیست</div>
+      <div class="gov-item-meta">ارائه‌دهنده: نمایندگان &nbsp;·&nbsp; ۲۰ اسفند ۲۵۸۴</div>
+      <div class="gov-item-footer">
+        <div class="gov-badge" style="border-color:var(--text3);color:var(--text3)">ارجاع به کمیسیون</div>
+        <div style="font-size:11px;color:var(--text3)">کمیسیون محیط زیست</div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);text-align:center;margin-top:16px">
+      داده‌های نمایشی — این بخش به سیستم واقعی متصل نیست
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: TRANSPARENCY (placeholder) ════ -->
+  <div class="screen" id="screen-transparency">
+    <button class="back-btn" onclick="showTab('mellat')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+      بازگشت به ملت
+    </button>
+    <div style="text-align:center;padding:40px 0;color:var(--text3)">
+      <div style="font-size:32px;margin-bottom:12px">💎</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:6px">شفافیت ملی</div>
+      <div style="font-size:12px">فاز ۳C — در دست اجرا</div>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: JUSTICE (placeholder) ════ -->
+  <div class="screen" id="screen-justice">
+    <button class="back-btn" onclick="showTab('mellat')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+      بازگشت به ملت
+    </button>
+    <div style="text-align:center;padding:40px 0;color:var(--text3)">
+      <div style="font-size:32px;margin-bottom:12px">⚖️</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:6px">دادگستری</div>
+      <div style="font-size:12px">فاز ۳C — در دست اجرا</div>
+    </div>
+  </div>
+
+  <!-- ════ SCREEN: RECLAIM (placeholder) ════ -->
+  <div class="screen" id="screen-reclaim">
+    <button class="back-btn" onclick="showTab('mellat')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+      بازگشت به ملت
+    </button>
+    <div style="text-align:center;padding:40px 0;color:var(--text3)">
+      <div style="font-size:32px;margin-bottom:12px">🔍</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:6px">بازپس‌گیری</div>
+      <div style="font-size:12px">فاز ۳C — در دست اجرا</div>
+    </div>
+  </div>
+
   <!-- ════ TAB BAR ════ -->
   <nav class="tab-bar">
     <button class="tab active" id="tab-home" onclick="showTab('home')">
@@ -1210,9 +1380,9 @@ body {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12V6H4v14h16v-6"/><circle cx="17" cy="12" r="2"/></svg>
       کیف‌پول
     </button>
-    <button class="tab" id="tab-bills" onclick="showTab('bills')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      قبوض
+    <button class="tab" id="tab-mellat" onclick="showTab('mellat')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      ملت
     </button>
     <button class="tab" id="tab-staking" onclick="showTab('staking')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1258,10 +1428,12 @@ for (let i = 0; i < 9; i++) {
 }
 
 // ──────────────────── TAB NAVIGATION
-const SCREENS = ['home','card','wallet','bills','staking','kernel'];
+const SCREENS = ['home','card','wallet','bills','mellat','governance','transparency','justice','reclaim','staking','kernel'];
 const TITLES  = {
   home:'ایران‌اواس — داشبورد ملی', card:'هویت دیجیتال شهروندی',
   wallet:'کیف‌پول پهلوی', bills:'پرداخت قبوض',
+  mellat:'ملت — مشارکت و نظارت', governance:'حاکمیت',
+  transparency:'شفافیت ملی', justice:'دادگستری', reclaim:'بازپس‌گیری',
   staking:'صندوق ثروت ملی — L2', kernel:'وضعیت هسته (Kernel)'
 };
 
