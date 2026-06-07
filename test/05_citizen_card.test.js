@@ -71,6 +71,14 @@ describe("CitizenCard", function () {
         )
       ).to.be.reverted;
     });
+
+    it("ثبت با آدرس صفر رد می‌شود", async function () {
+      await expect(
+        card.connect(issuer).registerCitizen(
+          ethers.ZeroAddress, biometric1, nationalId1, 1370, false, 0
+        )
+      ).to.be.revertedWith("CitizenCard: invalid address");
+    });
   });
 
   // ─────────────────────────────────────────
