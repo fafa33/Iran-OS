@@ -164,6 +164,15 @@ describe("ConstitutionGuard", function () {
       await expect(guard.connect(kernel).rejectLaw(unknownHash, "بدون پیشنهاد", 1))
         .to.be.revertedWith("ConstitutionGuard: proposal not found");
     });
+
+    it("رد قانونی که قبلاً تایید شده رد می‌شود", async function () {
+      const approvedHash = ethers.keccak256(ethers.toUtf8Bytes("قانون تایید‌شده - رد بعدی"));
+      await guard.connect(proposer).proposeLaw(approvedHash, 0x18); // bits 3+4 = monetary+judicial only
+      await guard.connect(kernel).approveLaw(approvedHash);
+
+      await expect(guard.connect(kernel).rejectLaw(approvedHash, "تلاش برای رد پس از تایید", 1))
+        .to.be.revertedWith("ConstitutionGuard: already executed");
+    });
   });
 
   // ─────────────────────────────────────────
