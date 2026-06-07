@@ -62,6 +62,12 @@ describe("ConstitutionGuard", function () {
       await expect(guard.connect(proposer).proposeLaw(hash, 0x01))
         .to.be.revertedWith("ConstitutionGuard: already proposed");
     });
+
+    it("پیشنهاد با ماسک خارج از محدوده اصول رد می‌شود", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("قانون با ماسک نامعتبر"));
+      await expect(guard.connect(proposer).proposeLaw(hash, 0x20))
+        .to.be.revertedWith("ConstitutionGuard: invalid principles mask");
+    });
   });
 
   // ─────────────────────────────────────────
