@@ -115,6 +115,12 @@ describe("ConstitutionGuard", function () {
         .to.emit(guard, "LawApproved");
       expect(await guard.isLawApproved(safeHash)).to.be.true;
     });
+
+    it("تایید برای هشی که پیشنهاد نشده رد می‌شود", async function () {
+      const unknownHash = ethers.keccak256(ethers.toUtf8Bytes("قانون پیشنهادنشده - تایید"));
+      await expect(guard.connect(kernel).approveLaw(unknownHash))
+        .to.be.revertedWith("ConstitutionGuard: proposal not found");
+    });
   });
 
   // ─────────────────────────────────────────
@@ -146,6 +152,12 @@ describe("ConstitutionGuard", function () {
         guard.connect(kernel).rejectLaw(lawHash, "test", 9)
       ).to.be.revertedWith("ConstitutionGuard: invalid principle code");
     });
+
+    it("رد برای هشی که پیشنهاد نشده رد می‌شود", async function () {
+      const unknownHash = ethers.keccak256(ethers.toUtf8Bytes("قانون پیشنهادنشده - رد"));
+      await expect(guard.connect(kernel).rejectLaw(unknownHash, "بدون پیشنهاد", 1))
+        .to.be.revertedWith("ConstitutionGuard: proposal not found");
+    });
   });
 
   // ─────────────────────────────────────────
@@ -159,6 +171,33 @@ describe("ConstitutionGuard", function () {
 
     it("ماسکی که فقط اصل ۴ و ۵ دارد تعارض ندارد", async function () {
       expect(await guard.checkImmutableConflict(0x18)).to.be.false;
+    });
+  });
+
+  // ─────────────────────────────────────────
+  // دریافت اطلاعات پیشنهاد (getProposal)
+  // ─────────────────────────────────────────
+
+  describe("getProposal", function () {
+    it("اطلاعات پیشنهاد ثبت‌شده به‌درستی بازگردانده می‌شود", async function () {
+      const hash = ethers.keccak256(ethers.toUtf8Bytes("قانون آزادی بیان"));
+      const mask = 0x02; // اصل ۲ — حقوق بنیادین
+
+      await guard.connect(proposer).proposeLaw(hash, mask);
+      const proposal = await guard.getProposal(hash);
+
+      expect(proposal.hash).to.equal(hash);
+      expect(proposal.proposer).to.equal(proposer.address);
+      expect(proposal.principlesMask).to.equal(mask);
+      expect(proposal.isCompliant).to.be.false;
+      expect(proposal.rejectionReason).to.equal("");
+      expect(proposal.executed).to.be.false;
+    });
+
+    it("هش ثبت‌نشده با خطای «یافت نشد» رد می‌شود", async function () {
+      const unknownHash = ethers.keccak256(ethers.toUtf8Bytes("قانون ثبت‌نشده"));
+      await expect(guard.getProposal(unknownHash))
+        .to.be.revertedWith("ConstitutionGuard: not found");
     });
   });
 });
