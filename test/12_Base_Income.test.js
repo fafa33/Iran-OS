@@ -115,6 +115,11 @@ await expect(
 baseIncome.connect(swf).revokeSubsidy(employer.address)
 ).to.emit(baseIncome, "SubsidyRevoked");
 });
+it("نباید کمک کارفرمای ثبت‌نشده لغو شود", async function () {
+await expect(
+baseIncome.connect(swf).revokeSubsidy(employee2.address)
+).to.be.revertedWith("BaseIncome: not registered");
+});
 it("نباید مبلغ کمک صفر باشد", async function () {
 await expect(
 baseIncome.connect(swf).grantSubsidy(employer.address, 0)
