@@ -257,6 +257,13 @@ describe("CitizenCard", function () {
       expect(await card.isRetired(citizen1.address)).to.be.true;
     });
 
+    it("بازنشستگی دوباره رد می‌شود", async function () {
+      await card.connect(welfare).registerRetirement(citizen1.address);
+      await expect(
+        card.connect(welfare).registerRetirement(citizen1.address)
+      ).to.be.revertedWith("CitizenCard: already retired");
+    });
+
     it("ثبت بازنشستگی پس از غیرفعال‌سازی کارت رد می‌شود", async function () {
       await card.connect(kernel).deactivateCard(citizen1.address, "تست");
       await expect(
