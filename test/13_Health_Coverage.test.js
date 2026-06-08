@@ -58,6 +58,11 @@ expect(wallet.annualCredit).to.equal(ANNUAL_CREDIT);
 expect(wallet.monthlyDrugQuota).to.equal(DRUG_QUOTA);
 expect(wallet.isActive).to.be.true;
 });
+it("نباید شهروند آدرس صفر باشد", async function () {
+await expect(
+health.connect(healthAdmin).createHealthWallet(ethers.ZeroAddress)
+).to.be.revertedWith("HealthCoverage: invalid citizen");
+});
 it("نباید غیر HEALTH_ROLE کیف پول بسازد", async function () {
 await expect(
 health.connect(attacker).createHealthWallet(citizen1.address)
