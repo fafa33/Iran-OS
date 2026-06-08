@@ -89,6 +89,21 @@ await expect(
 baseIncome.connect(employer).recordWagePayment(employee1.address, lowWage)
 ).to.emit(baseIncome, "EmployerNonCompliant");
 });
+it("باید کارفرما پس از پرداخت سازگار دوباره سازگار شود", async function () {
+const lowWage = ethers.parseUnits("500", 18);
+const nonCompliantBefore = await baseIncome.totalNonCompliantEmployers();
+const compliantBefore = await baseIncome.totalCompliantEmployers();
+
+await baseIncome.connect(employer).recordWagePayment(employee1.address, lowWage);
+let emp = await baseIncome.getEmployerRecord(employer.address);
+expect(emp.isCompliant).to.be.false;
+expect(await baseIncome.totalNonCompliantEmployers()).to.equal(nonCompliantBefore + 1n);
+
+await baseIncome.connect(employer).recordWagePayment(employee1.address, MIN_WAGE);
+emp = await baseIncome.getEmployerRecord(employer.address);
+expect(emp.isCompliant).to.be.true;
+expect(await baseIncome.totalCompliantEmployers()).to.equal(compliantBefore + 1n);
+});
 it("نباید غیرکارفرما پرداخت ثبت کند", async function () {
 await expect(
 baseIncome.connect(attacker).recordWagePayment(employee1.address, MIN_WAGE)
