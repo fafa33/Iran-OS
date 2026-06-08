@@ -130,6 +130,14 @@ describe("CitizenCard", function () {
       ).to.be.revertedWith("CitizenCard: card not active");
     });
 
+    it("پایان اشتغال توسط کارفرمای غیرمرتبط رد می‌شود", async function () {
+      await card.connect(employer).startEmployment(citizen1.address);
+      await card.connect(kernel).registerEmployer(stranger.address);
+      await expect(
+        card.connect(stranger).endEmployment(citizen1.address)
+      ).to.be.revertedWith("CitizenCard: not current employer");
+    });
+
     it("پایان اشتغال پس از غیرفعال‌سازی کارت رد می‌شود", async function () {
       await card.connect(kernel).deactivateCard(citizen1.address, "تست");
       await expect(
