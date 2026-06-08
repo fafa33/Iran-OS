@@ -131,6 +131,14 @@ health.connect(healthAdmin).grantMaternityLeave(ethers.ZeroAddress)
 });
 });
 
+describe("Provider Registration", function () {
+it("نباید ارائه‌دهنده آدرس صفر باشد", async function () {
+await expect(
+health.connect(kernel).registerProvider(ethers.ZeroAddress, "test")
+).to.be.revertedWith("HealthCoverage: invalid provider");
+});
+});
+
 describe("Strategic Reserve", function () {
 it("باید صندوق ثروت ملی ذخیره استراتژیک را به‌روز کند", async function () {
 const amount = ethers.parseUnits("100000000000", 18);
