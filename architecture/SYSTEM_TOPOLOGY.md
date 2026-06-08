@@ -15,12 +15,12 @@
 ایران‌ او‌اس‌‌‌ از چند لایه اصلی تشکیل می‌شود:
 
 1. [لایه منشور](../README.md)
-2. [لایه هسته](../kernel/KERNEL_SPECIFICATION.md)
+2. [لایه هسته](./KERNEL_SPECIFICATION.md)
 3. [لایه عامل‌های هوشمند](../CLAUDE.md)
 4. [لایه گردشکارها](../workflows/welfare-payment.workflow.md)
-5. [لایه اوراکل‌ها](../architecture/SYSTEM_ARCHITECTURE.md)
+5. [لایه اوراکل‌ها](./ORACLE_LAYER_SPECIFICATION.md)
 6. [لایه قراردادهای هوشمند](../protocols/README.md)
-7. [لایه دفترکل ملی](../architecture/SYSTEM_ARCHITECTURE.md)
+7. [لایه دفترکل ملی](./LEDGER_SPECIFICATION.md)
 8. [لایه نظارت انسانی](../protocols/citizen-identity-fa.md)
 9. [لایه امنیت و ماشه اضطراری](../constitution/README.md)
 
