@@ -37,6 +37,12 @@ expect(await health.MONTHLY_DRUG_QUOTA()).to.equal(DRUG_QUOTA);
 it("باید مرخصی زایمان ۶۰۰۰ پهلوی باشد (۶ ماه)", async function () {
 expect(await health.MATERNITY_LEAVE_PAY()).to.equal(MATERNITY_PAY);
 });
+it("نباید کرنل آدرس صفر باشد", async function () {
+const Health = await ethers.getContractFactory("HealthCoverage");
+await expect(
+Health.deploy(ethers.ZeroAddress)
+).to.be.revertedWith("HealthCoverage: invalid kernel");
+});
 });
 
 describe("Health Wallet Creation", function () {
