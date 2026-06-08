@@ -45,6 +45,17 @@ describe("CitizenCard", function () {
       expect(await card.isRegistered(citizen1.address)).to.be.true;
     });
 
+    it("ثبت دوباره همان شهروند رد می‌شود", async function () {
+      await card.connect(issuer).registerCitizen(
+        citizen1.address, biometric1, nationalId1, 1370, false, 0
+      );
+      await expect(
+        card.connect(issuer).registerCitizen(
+          citizen1.address, biometric1, nationalId1, 1370, false, 0
+        )
+      ).to.be.revertedWith("CitizenCard: already registered");
+    });
+
     it("بیومتریک تکراری رد می‌شود", async function () {
       await card.connect(issuer).registerCitizen(
         citizen1.address, biometric1, nationalId1, 1370, false, 0
