@@ -173,6 +173,15 @@ describe("CitizenCard", function () {
         )
       ).to.be.revertedWith("CitizenCard: insufficient health credit");
     });
+
+    it("استفاده از اعتبار سلامت پس از غیرفعال‌سازی کارت رد می‌شود", async function () {
+      await card.connect(kernel).deactivateCard(citizen1.address, "تست");
+      await expect(
+        card.connect(health).useHealthCredit(
+          citizen1.address, ethers.parseUnits("10", 18), stranger.address
+        )
+      ).to.be.revertedWith("CitizenCard: card not active");
+    });
   });
 
   // ─────────────────────────────────────────
