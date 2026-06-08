@@ -124,6 +124,11 @@ const leave = await health.getMaternityLeave(1);
 expect(leave.totalPayment).to.equal(MATERNITY_PAY);
 expect(leave.parent).to.equal(citizen1.address);
 });
+it("نباید والد آدرس صفر باشد", async function () {
+await expect(
+health.connect(healthAdmin).grantMaternityLeave(ethers.ZeroAddress)
+).to.be.revertedWith("HealthCoverage: invalid parent");
+});
 });
 
 describe("Strategic Reserve", function () {
