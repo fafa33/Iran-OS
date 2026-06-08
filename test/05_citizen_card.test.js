@@ -141,6 +141,13 @@ describe("CitizenCard", function () {
       await expect(card.connect(welfare).payUnemploymentInsurance(citizen1.address))
         .to.be.revertedWith("CitizenCard: not unemployed");
     });
+
+    it("پرداخت بیمه بیکاری پس از غیرفعال‌سازی کارت رد می‌شود", async function () {
+      await card.connect(kernel).deactivateCard(citizen1.address, "تست");
+      await expect(
+        card.connect(welfare).payUnemploymentInsurance(citizen1.address)
+      ).to.be.revertedWith("CitizenCard: card not active");
+    });
   });
 
   // ─────────────────────────────────────────
