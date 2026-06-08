@@ -215,4 +215,15 @@ describe("CitizenCard", function () {
         .to.be.reverted;
     });
   });
+
+  // ─────────────────────────────────────────
+  // ثبت کارفرما
+  // ─────────────────────────────────────────
+
+  describe("registerEmployer", function () {
+    it("ثبت کارفرما با آدرس صفر رد می‌شود", async function () {
+      await expect(card.connect(kernel).registerEmployer(ethers.ZeroAddress))
+        .to.be.revertedWith("CitizenCard: invalid employer");
+    });
+  });
 });
