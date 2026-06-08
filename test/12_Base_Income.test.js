@@ -104,6 +104,12 @@ await expect(
 baseIncome.connect(employer).recordWagePayment(employee1.address, 0)
 ).to.be.revertedWith("BaseIncome: zero amount");
 });
+it("نباید کارفرمای ثبت‌نشده دارای نقش پرداخت ثبت کند", async function () {
+await baseIncome.connect(kernel).grantRole(EMPLOYER_ROLE, employee2.address);
+await expect(
+baseIncome.connect(employee2).recordWagePayment(employee1.address, MIN_WAGE)
+).to.be.revertedWith("BaseIncome: not registered");
+});
 });
 
 describe("Subsidy", function () {
