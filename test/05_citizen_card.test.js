@@ -105,6 +105,13 @@ describe("CitizenCard", function () {
         .to.be.revertedWith("CitizenCard: already employed");
     });
 
+    it("شروع اشتغال پس از غیرفعال‌سازی کارت رد می‌شود", async function () {
+      await card.connect(kernel).deactivateCard(citizen1.address, "تست");
+      await expect(
+        card.connect(employer).startEmployment(citizen1.address)
+      ).to.be.revertedWith("CitizenCard: card not active");
+    });
+
     it("پایان اشتغال وضعیت را به بیکاری تغییر می‌دهد", async function () {
       await card.connect(employer).startEmployment(citizen1.address);
       await expect(card.connect(employer).endEmployment(citizen1.address))
