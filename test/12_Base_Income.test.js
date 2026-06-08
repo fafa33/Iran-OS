@@ -28,6 +28,12 @@ expect(await baseIncome.MIN_WAGE()).to.equal(MIN_WAGE);
 it("باید معافیت مالیاتی ۱۰۰۰ پهلوی باشد", async function () {
 expect(await baseIncome.TAX_EXEMPT_CAP()).to.equal(MIN_WAGE);
 });
+it("نباید کرنل آدرس صفر باشد", async function () {
+const BaseIncome = await ethers.getContractFactory("BaseIncome");
+await expect(
+BaseIncome.deploy(ethers.ZeroAddress)
+).to.be.revertedWith("BaseIncome: invalid kernel");
+});
 });
 
 describe("Employer Registration", function () {
