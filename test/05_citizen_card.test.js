@@ -176,6 +176,26 @@ describe("CitizenCard", function () {
   });
 
   // ─────────────────────────────────────────
+  // سهمیه دارو
+  // ─────────────────────────────────────────
+
+  describe("useDrugQuota", function () {
+    beforeEach(async function () {
+      await card.connect(issuer).registerCitizen(
+        citizen1.address, biometric1, nationalId1, 1370, false, 0
+      );
+    });
+
+    it("استفاده بیش از سهمیه دارو رد می‌شود", async function () {
+      await expect(
+        card.connect(health).useDrugQuota(
+          citizen1.address, ethers.parseUnits("9999", 18), stranger.address
+        )
+      ).to.be.revertedWith("CitizenCard: insufficient drug quota");
+    });
+  });
+
+  // ─────────────────────────────────────────
   // بازنشستگی
   // ─────────────────────────────────────────
 
