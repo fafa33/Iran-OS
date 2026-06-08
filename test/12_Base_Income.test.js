@@ -41,6 +41,11 @@ await expect(
 baseIncome.connect(attacker).registerEmployer(employer.address, 10)
 ).to.be.reverted;
 });
+it("نباید کارفرما آدرس صفر باشد", async function () {
+await expect(
+baseIncome.connect(oracle).registerEmployer(ethers.ZeroAddress, 10)
+).to.be.revertedWith("BaseIncome: invalid employer");
+});
 it("نباید تعداد کارمندان صفر باشد", async function () {
 await expect(
 baseIncome.connect(oracle).registerEmployer(employer.address, 0)
