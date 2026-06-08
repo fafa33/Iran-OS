@@ -88,6 +88,11 @@ await expect(
 baseIncome.connect(attacker).recordWagePayment(employee1.address, MIN_WAGE)
 ).to.be.reverted;
 });
+it("نباید کارمند آدرس صفر باشد", async function () {
+await expect(
+baseIncome.connect(employer).recordWagePayment(ethers.ZeroAddress, MIN_WAGE)
+).to.be.revertedWith("BaseIncome: invalid employee");
+});
 it("نباید مبلغ صفر مجاز باشد", async function () {
 await expect(
 baseIncome.connect(employer).recordWagePayment(employee1.address, 0)
