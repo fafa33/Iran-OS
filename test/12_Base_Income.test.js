@@ -120,6 +120,11 @@ await expect(
 baseIncome.connect(swf).grantSubsidy(employer.address, 0)
 ).to.be.revertedWith("BaseIncome: zero subsidy");
 });
+it("نباید به کارفرمای ثبت‌نشده کمک اعطا شود", async function () {
+await expect(
+baseIncome.connect(swf).grantSubsidy(employee2.address, MIN_WAGE)
+).to.be.revertedWith("BaseIncome: not registered");
+});
 it("نباید غیر صندوق کمک اعطا کند", async function () {
 await expect(
 baseIncome.connect(attacker).grantSubsidy(employer.address, MIN_WAGE)
