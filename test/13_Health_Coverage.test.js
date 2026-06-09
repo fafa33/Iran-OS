@@ -86,6 +86,11 @@ await expect(
 health.connect(provider).useHealthCredit(citizen1.address, amount, provider.address)
 ).to.emit(health, "HealthCreditUsed");
 });
+it("نباید ارائه‌دهنده تأییدنشده اعتبار استفاده کند", async function () {
+await expect(
+health.connect(provider).useHealthCredit(citizen1.address, 1n, attacker.address)
+).to.be.revertedWith("HealthCoverage: provider not approved");
+});
 it("نباید اعتبار بیشتر از موجودی برداشت شود", async function () {
 const overAmount = ethers.parseUnits("600", 18);
 await expect(
