@@ -108,6 +108,11 @@ it("نباید از مقدار تاییدشده بیشتر پرداخت شود",
     fund.connect(council).payCompensation(1, over)
   ).to.be.revertedWith("VictimFund: exceeds approved");
 });
+it("نباید به پرونده غیرفعال پرداخت شود", async function () {
+  await expect(
+    fund.connect(council).payCompensation(999, approved)
+  ).to.be.revertedWith("VictimFund: not active");
+});
 it("نباید بیشتر از موجودی پرداخت شود", async function () {
   const newFund = await (await ethers.getContractFactory("VictimFund")).deploy(kernel.address);
   await newFund.connect(kernel).grantRole(COURT_ROLE, court.address);
