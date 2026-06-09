@@ -152,6 +152,18 @@ it("باید با ۳ تایید نود قبل از ۷۲ ساعت منجمد شو
     crawler.connect(node1).freezeTarget(targetId)
   ).to.emit(crawler, "AssetFrozen");
 });
+it("نباید هدف منجمدشده دوباره منجمد شود", async function () {
+  await crawler.connect(node2).identifyTarget(
+    targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
+  );
+  await crawler.connect(node3).identifyTarget(
+    targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
+  );
+  await crawler.connect(node1).freezeTarget(targetId);
+  await expect(
+    crawler.connect(node1).freezeTarget(targetId)
+  ).to.be.revertedWith("SovereignCrawler: wrong status");
+});
 
 });
 
