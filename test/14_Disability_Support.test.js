@@ -153,6 +153,11 @@ await disability.connect(welfare).issueAccessibilityCard(citizen1.address);
 const record = await disability.getDisabledCitizen(citizen1.address);
 expect(record.accessibilityCard).to.be.true;
 });
+it("نباید کارت دسترسی‌پذیری برای شهروند ثبت‌نشده صادر نشود", async function () {
+await expect(
+	disability.connect(welfare).issueAccessibilityCard(attacker.address)
+).to.be.revertedWith("DisabilitySupport: not registered");
+});
 });
 
 describe("Accessibility Audit", function () {
