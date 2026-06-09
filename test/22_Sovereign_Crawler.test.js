@@ -228,6 +228,20 @@ it("نباید غیر Kernel آزادسازی کند", async function () {
     crawler.connect(attacker).releaseTarget(targetId, "تست")
   ).to.be.reverted;
 });
+it("نباید دارایی منتقل‌شده به صندوق آزادسازی شود", async function () {
+  await crawler.connect(node2).identifyTarget(
+    targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
+  );
+  await crawler.connect(node3).identifyTarget(
+    targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
+  );
+  await crawler.connect(node1).freezeTarget(targetId);
+  await crawler.connect(council).confirmByCouncil(targetId);
+  await crawler.connect(council).transferToSWF(targetId);
+  await expect(
+    crawler.connect(kernel).releaseTarget(targetId, "تلاش پس از انتقال")
+  ).to.be.revertedWith("SovereignCrawler: transferred");
+});
 
 });
 });
