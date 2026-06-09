@@ -121,6 +121,11 @@ await expect(
 health.connect(pharmacy).useDrugQuota(citizen1.address, overAmount, pharmacy.address)
 ).to.be.revertedWith("HealthCoverage: insufficient quota");
 });
+it("نباید سهمیه دارو برای کیف‌پول غیرفعال استفاده شود", async function () {
+await expect(
+health.connect(pharmacy).useDrugQuota(citizen2.address, 1n, pharmacy.address)
+).to.be.revertedWith("HealthCoverage: not active");
+});
 });
 
 describe("Maternity Leave", function () {
