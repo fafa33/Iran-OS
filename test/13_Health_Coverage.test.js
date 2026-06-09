@@ -91,6 +91,11 @@ await expect(
 health.connect(provider).useHealthCredit(citizen1.address, 1n, attacker.address)
 ).to.be.revertedWith("HealthCoverage: provider not approved");
 });
+it("نباید اعتبار سلامت برای کیف‌پول غیرفعال استفاده شود", async function () {
+await expect(
+health.connect(provider).useHealthCredit(citizen2.address, 1n, provider.address)
+).to.be.revertedWith("HealthCoverage: not active");
+});
 it("نباید اعتبار بیشتر از موجودی برداشت شود", async function () {
 const overAmount = ethers.parseUnits("600", 18);
 await expect(
