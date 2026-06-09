@@ -126,6 +126,12 @@ targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, fal
 );
 });
 
+it("نباید هدف ناموجود منجمد شود", async function () {
+const unknownId = ethers.keccak256(ethers.toUtf8Bytes("nonexistent_target"));
+await expect(
+  crawler.connect(node1).freezeTarget(unknownId)
+).to.be.revertedWith("SovereignCrawler: not found");
+});
 it("باید پس از ۷۲ ساعت هدف منجمد شود", async function () {
   await ethers.provider.send("evm_increaseTime", [72 * 3600 + 1]);
   await ethers.provider.send("evm_mine");
