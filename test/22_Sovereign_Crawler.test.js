@@ -65,6 +65,13 @@ targetId, target1.address, 0, "تست", 0, ethers.ZeroHash, false
 )
 ).to.be.revertedWith("SovereignCrawler: zero value");
 });
+it("نباید آدرس هدف صفر مجاز باشد", async function () {
+await expect(
+crawler.connect(node1).identifyTarget(
+targetId, ethers.ZeroAddress, 0, "تست", estimatedValue, ethers.ZeroHash, false
+)
+).to.be.revertedWith("SovereignCrawler: invalid address");
+});
 it("باید تعداد هدف‌ها افزایش یابد", async function () {
 await crawler.connect(node1).identifyTarget(
 targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
