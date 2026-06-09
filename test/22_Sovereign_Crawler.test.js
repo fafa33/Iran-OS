@@ -182,6 +182,15 @@ await ethers.provider.send("evm_mine");
 await crawler.connect(node1).freezeTarget(targetId);
 });
 
+it("نباید شورا هدف منجمدنشده را تایید کند", async function () {
+  const unfrozenId = ethers.keccak256(ethers.toUtf8Bytes("unfrozen_target"));
+  await crawler.connect(node1).identifyTarget(
+    unfrozenId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
+  );
+  await expect(
+    crawler.connect(council).confirmByCouncil(unfrozenId)
+  ).to.be.revertedWith("SovereignCrawler: not frozen");
+});
 it("باید شورا بتواند انجماد را تایید کند", async function () {
   await expect(
     crawler.connect(council).confirmByCouncil(targetId)
