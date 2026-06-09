@@ -132,6 +132,11 @@ await disability.connect(healthAdmin).updateDisabilityLevel(citizen1.address, SE
 const record = await disability.getDisabledCitizen(citizen1.address);
 expect(record.monthlyStipend).to.equal(ethers.parseUnits("1700", 18));
 });
+it("نباید سطح شهروند ثبت‌نشده به‌روز شود", async function () {
+await expect(
+	disability.connect(healthAdmin).updateDisabilityLevel(citizen2.address, SEVERE)
+).to.be.revertedWith("DisabilitySupport: not registered");
+});
 });
 
 describe("Accessibility Card", function () {
