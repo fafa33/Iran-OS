@@ -119,6 +119,11 @@ it("نباید دوبار غرامت پرداخت شود", async function () {
     fund.connect(council).payCompensation(1, approved)
   ).to.be.revertedWith("VictimFund: compensated");
 });
+it("نباید مبلغ صفر پرداخت شود", async function () {
+  await expect(
+    fund.connect(council).payCompensation(1, 0)
+  ).to.be.revertedWith("VictimFund: zero amount");
+});
 it("نباید بیشتر از موجودی پرداخت شود", async function () {
   const newFund = await (await ethers.getContractFactory("VictimFund")).deploy(kernel.address);
   await newFund.connect(kernel).grantRole(COURT_ROLE, court.address);
