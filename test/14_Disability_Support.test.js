@@ -111,6 +111,11 @@ await expect(
 disability.connect(attacker).payMonthlyStipend(citizen1.address)
 ).to.be.reverted;
 });
+it("نباید به شهروند ثبت‌نشده پرداخت شود", async function () {
+await expect(
+	disability.connect(welfare).payMonthlyStipend(citizen2.address)
+).to.be.revertedWith("DisabilitySupport: not registered");
+});
 });
 
 describe("Disability Level Update", function () {
