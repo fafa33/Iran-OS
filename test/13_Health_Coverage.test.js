@@ -158,6 +158,12 @@ await expect(
 health.connect(healthAdmin).renewAnnualCredit(citizen2.address)
 ).to.be.revertedWith("HealthCoverage: not active");
 });
+it("نباید تمدید اعتبار قبل از ۳۶۵ روز انجام شود", async function () {
+await health.connect(healthAdmin).createHealthWallet(citizen1.address);
+await expect(
+health.connect(healthAdmin).renewAnnualCredit(citizen1.address)
+).to.be.revertedWith("HealthCoverage: too early");
+});
 });
 
 describe("Provider Registration", function () {
