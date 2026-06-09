@@ -143,6 +143,11 @@ await expect(
 health.connect(kernel).registerProvider(ethers.ZeroAddress, "test")
 ).to.be.revertedWith("HealthCoverage: invalid provider");
 });
+it("نباید استاندارد ارائه‌دهنده ثبت‌نشده به‌روز شود", async function () {
+await expect(
+health.connect(healthAdmin).updateProviderStandard(attacker.address, true)
+).to.be.revertedWith("HealthCoverage: not found");
+});
 });
 
 describe("Strategic Reserve", function () {
