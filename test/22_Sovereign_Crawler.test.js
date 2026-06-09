@@ -197,6 +197,11 @@ it("باید شورا بتواند انجماد را تایید کند", async f
   ).to.emit(crawler, "AssetConfirmedByCouncil");
 });
 
+it("نباید دارایی تاییدنشده به صندوق منتقل شود", async function () {
+  await expect(
+    crawler.connect(council).transferToSWF(targetId)
+  ).to.be.revertedWith("SovereignCrawler: not confirmed");
+});
 it("باید پس از تایید، دارایی به صندوق منتقل شود", async function () {
   await crawler.connect(council).confirmByCouncil(targetId);
   await expect(
