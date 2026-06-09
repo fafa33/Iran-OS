@@ -72,6 +72,19 @@ targetId, ethers.ZeroAddress, 0, "تست", estimatedValue, ethers.ZeroHash, fals
 )
 ).to.be.revertedWith("SovereignCrawler: invalid address");
 });
+it("نباید تایید تکراری نود مجاز باشد", async function () {
+await crawler.connect(node1).identifyTarget(
+targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
+);
+await crawler.connect(node1).identifyTarget(
+targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
+);
+await expect(
+crawler.connect(node1).identifyTarget(
+targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
+)
+).to.be.revertedWith("SovereignCrawler: confirmed");
+});
 it("باید تعداد هدف‌ها افزایش یابد", async function () {
 await crawler.connect(node1).identifyTarget(
 targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, false
