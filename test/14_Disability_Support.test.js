@@ -74,6 +74,11 @@ await disability.connect(healthAdmin).registerDisabledCitizen(citizen1.address, 
 const record = await disability.getDisabledCitizen(citizen1.address);
 expect(record.monthlyStipend).to.equal(ethers.parseUnits("1700", 18));
 });
+it("نباید آدرس صفر ثبت شود", async function () {
+await expect(
+	disability.connect(healthAdmin).registerDisabledCitizen(ethers.ZeroAddress, MILD)
+).to.be.revertedWith("DisabilitySupport: invalid address");
+});
 it("نباید درجه صفر (None) مجاز باشد", async function () {
 await expect(
 disability.connect(healthAdmin).registerDisabledCitizen(citizen1.address, 0)
