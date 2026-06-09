@@ -126,6 +126,11 @@ targetId, target1.address, 0, "کارتل", estimatedValue, ethers.ZeroHash, fal
 );
 });
 
+it("نباید قبل از مهلت و بدون تایید کافی منجمد شود", async function () {
+  await expect(
+    crawler.connect(node1).freezeTarget(targetId)
+  ).to.be.revertedWith("SovereignCrawler: too early");
+});
 it("نباید هدف ناموجود منجمد شود", async function () {
 const unknownId = ethers.keccak256(ethers.toUtf8Bytes("nonexistent_target"));
 await expect(
