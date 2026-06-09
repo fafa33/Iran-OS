@@ -47,6 +47,11 @@ it("نباید مبلغ صفر مجاز باشد", async function () {
     fund.connect(court).registerVictim(victim1.address, 0, 1, 0)
   ).to.be.revertedWith("VictimFund: zero amount");
 });
+it("نباید آدرس صفر ثبت شود", async function () {
+  await expect(
+    fund.connect(court).registerVictim(ethers.ZeroAddress, 0, 1, amount)
+  ).to.be.revertedWith("VictimFund: invalid victim");
+});
 it("باید شمارنده قربانیان افزایش یابد", async function () {
   await fund.connect(court).registerVictim(victim1.address, 0, 1, amount);
   expect(await fund.victimCount()).to.equal(1);
