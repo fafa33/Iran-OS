@@ -152,6 +152,14 @@ health.connect(healthAdmin).grantMaternityLeave(ethers.ZeroAddress)
 });
 });
 
+describe("Annual Credit Renewal", function () {
+it("نباید تمدید اعتبار برای کیف‌پول غیرفعال انجام شود", async function () {
+await expect(
+health.connect(healthAdmin).renewAnnualCredit(citizen2.address)
+).to.be.revertedWith("HealthCoverage: not active");
+});
+});
+
 describe("Provider Registration", function () {
 it("نباید ارائه‌دهنده آدرس صفر باشد", async function () {
 await expect(
