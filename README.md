@@ -13,7 +13,7 @@
 **IranOS** is an open-source blockchain governance operating system — a technical blueprint for a post-Islamic-Republic Iran. It encodes a secular constitutional monarchy (*Charter of Welfare and Justice*) into auditable Solidity smart contracts, governance protocols, and deployment documentation.
 
 **Current status:**
-- 15 Solidity contracts — 499/499 tests passing
+- Current repository inventory and test baseline are tracked in the [latest Step 13 checkpoint](docs/step13/WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_V4_FA.md)
 - Step 13 (cross-fargard fidelity review) — internal remediation complete, **open for external review**
 - Step 12 (external audit / formal verification) — **open, no accepted evidence yet**
 - **Not production-ready.** No external audit. No formal verification. No deployment on any public network.
