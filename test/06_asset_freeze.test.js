@@ -432,5 +432,15 @@ describe("AssetFreeze", function () {
         freeze.connect(stranger).releaseAsset(assetId, "test")
       ).to.be.reverted;
     });
+
+    it("دارایی ناموجود رد می‌شود و totalFrozenValue ثابت می‌ماند", async function () {
+      const neverFrozenId = ethers.keccak256(ethers.toUtf8Bytes("never-frozen"));
+      const frozenBefore  = await freeze.totalFrozenValue();
+
+      await expect(freeze.connect(kernel).releaseAsset(neverFrozenId, "test"))
+        .to.be.revertedWith("AssetFreeze: not found");
+
+      expect(await freeze.totalFrozenValue()).to.equal(frozenBefore);
+    });
   });
 });
