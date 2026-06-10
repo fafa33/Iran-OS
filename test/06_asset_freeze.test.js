@@ -149,6 +149,22 @@ describe("AssetFreeze", function () {
       await expect(freeze.connect(stranger).signConfirmation(assetId))
         .to.be.revertedWith("AssetFreeze: invalid status");
     });
+
+    it("امضای تکراری وضعیت و شمارش امضا را تغییر نمی‌دهد", async function () {
+      await freeze.connect(council1).signConfirmation(assetId);
+      const snap = await freeze.getFrozenAsset(assetId);
+      const sigsBefore    = snap.councilSignatures;
+      const statusBefore  = snap.status;
+      const frozenBefore  = await freeze.totalFrozenValue();
+
+      await expect(freeze.connect(council1).signConfirmation(assetId))
+        .to.be.revertedWith("AssetFreeze: already signed");
+
+      const after = await freeze.getFrozenAsset(assetId);
+      expect(after.councilSignatures).to.equal(sigsBefore);
+      expect(after.status).to.equal(statusBefore);
+      expect(await freeze.totalFrozenValue()).to.equal(frozenBefore);
+    });
   });
 
   // ─────────────────────────────────────────
