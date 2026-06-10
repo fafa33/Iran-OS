@@ -165,6 +165,21 @@ describe("AssetFreeze", function () {
       expect(after.status).to.equal(statusBefore);
       expect(await freeze.totalFrozenValue()).to.equal(frozenBefore);
     });
+
+    it("غیر‌شورا نمی‌تواند تایید کند و وضعیت ثابت می‌ماند", async function () {
+      const snap        = await freeze.getFrozenAsset(assetId);
+      const sigsBefore  = snap.councilSignatures;
+      const statusBefore = snap.status;
+      const frozenBefore = await freeze.totalFrozenValue();
+
+      await expect(freeze.connect(stranger).signConfirmation(assetId))
+        .to.be.reverted;
+
+      const after = await freeze.getFrozenAsset(assetId);
+      expect(after.councilSignatures).to.equal(sigsBefore);
+      expect(after.status).to.equal(statusBefore);
+      expect(await freeze.totalFrozenValue()).to.equal(frozenBefore);
+    });
   });
 
   // ─────────────────────────────────────────
