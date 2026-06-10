@@ -2,6 +2,8 @@
 
 # بازبینی نهایی rollup گام ۱۳ — پس از تکمیل تمام ۸ workstream
 
+> **⚠️ جایگزین‌شده (پایه مخزن):** جدول «پایه مخزن فعلی» و مجموع «۱۳ GAP» این سند snapshot تاریخی در `7d99d1c` (۴۹۹ تست؛ پیش از برطرف‌شدن TG-01) است. مرجع جاری برای پایه مخزن و مجموع GAP: `WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_V4_FA.md`. محتوای تحلیلی این rollup بازنویسی نشده و معتبر است.
+
 **نوع سند:** Final Rollup Review — documentation-only / summary
 **گام:** Step 13 — باز
 **وضعیت گام ۱۲:** باز

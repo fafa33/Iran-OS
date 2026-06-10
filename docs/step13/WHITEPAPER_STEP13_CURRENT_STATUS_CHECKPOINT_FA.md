@@ -2,6 +2,8 @@
 
 # چک‌پوینت وضعیت فعلی گام ۱۳ — به‌روزرسانی پس از TG-01
 
+> **⚠️ جایگزین‌شده:** این سند snapshot تاریخی در `48f5ffa` (۴۹۹ تست) است و دیگر مرجع «وضعیت جاری» نیست. مرجع جاری: `WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_V4_FA.md`. محتوای این سند بازنویسی نشده است.
+
 **نام فنی:** Step 13 Current Status Checkpoint (post-TG-01 merge)
 **نوع سند:** documentation-only / current status checkpoint
 **وضعیت:** باز؛ این سند Step 13 یا Step 12 را نمی‌بندد.
