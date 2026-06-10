@@ -324,6 +324,32 @@ describe("AssetFreeze", function () {
       expect(l1After.totalDeposited).to.equal(l1Before.totalDeposited);
       expect(await swf.totalAssets()).to.equal(totalBefore);
     });
+
+    it("دارایی تأییدنشده رد می‌شود و وضعیت ثابت می‌ماند", async function () {
+      const partialId = ethers.keccak256(ethers.toUtf8Bytes("partial-confirmed-asset"));
+      await freeze.connect(crawler).freezeAsset(
+        partialId, owner.address, "ملک", assetValue, "تست وضعیت ناقص"
+      );
+      await freeze.connect(council1).signConfirmation(partialId); // UnderReview, not Confirmed
+
+      const snapAsset  = await freeze.getFrozenAsset(partialId);
+      const frozenBefore  = await freeze.totalFrozenValue();
+      const l1Before      = await swf.layerL1();
+      const totalBefore   = await swf.totalAssets();
+
+      await expect(freeze.connect(council1).transferToSWF(partialId))
+        .to.be.revertedWith("AssetFreeze: not confirmed");
+
+      const afterAsset = await freeze.getFrozenAsset(partialId);
+      expect(afterAsset.status).to.equal(snapAsset.status);
+      expect(afterAsset.councilSignatures).to.equal(snapAsset.councilSignatures);
+      expect(afterAsset.transferredToSWF).to.equal(snapAsset.transferredToSWF);
+      expect(await freeze.totalFrozenValue()).to.equal(frozenBefore);
+      const l1After = await swf.layerL1();
+      expect(l1After.balance).to.equal(l1Before.balance);
+      expect(l1After.totalDeposited).to.equal(l1Before.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalBefore);
+    });
   });
 
   // ─────────────────────────────────────────
