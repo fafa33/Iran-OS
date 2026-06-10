@@ -79,7 +79,7 @@ Defines what evidence and conditions are required to formally close Step 13.
 - **Issue #35** — Step 13 external review: open, awaiting external reviewers
 - **Step 12** — External audit / formal verification: open, no accepted evidence yet
 - **G-03** — On-chain ZK verifier: deferred to a standalone phase
-- **VS-01** — VotingSystem: deferred pending ElectionProtocol
+- **VS-01** — VotingSystem ↔ CitizenCard integration: deferred pending ElectionProtocol (`VotingSystem.sol` itself exists and is tested)
 - **deploy/ scripts** — Hardhat deployment scripts not yet created (G-11 technical remainder)
 
 ---
@@ -93,4 +93,4 @@ Defines what evidence and conditions are required to formally close Step 13.
 - No production-readiness is claimed
 - No deployment on any public network exists
 - The on-chain ZK verifier does not exist
-- VotingSystem does not exist
+- The VotingSystem ↔ CitizenCard integration does not exist and ElectionProtocol is not defined (correction: `VotingSystem.sol` itself exists at `contracts/governance/VotingSystem.sol`, tested in `test/18_Voting_System.test.js`)

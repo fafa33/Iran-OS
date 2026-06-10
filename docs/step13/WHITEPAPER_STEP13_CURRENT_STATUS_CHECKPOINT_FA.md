@@ -130,7 +130,7 @@
 | WS-5 قراردادها و ماژول‌های runtime | `WHITEPAPER_STEP13_WS5_CONTRACTS_RUNTIME_MODULES_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review فنی/حقوقی/حکمرانی | 2 COMPLETE / 23 PARTIAL / 0 GAP (TG-01 remediated — PR #36) |
 | WS-3 رفاه و عدالت | `WHITEPAPER_STEP13_WS3_WELFARE_AND_JUSTICE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review حقوقی/اقتصادی/حکمرانی | 2 COMPLETE / 11 PARTIAL / 1 GAP (ZK Proof) |
 | WS-7 evidence / audit / signoff | `WHITEPAPER_STEP13_WS7_EVIDENCE_AUDIT_SIGNOFF_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review انسانی مستقل | 0 COMPLETE / 9 PARTIAL / 3 GAP (Deployment، Release، هیچ accepted evidence) |
-| WS-6 اوراکل و سیگنال‌ها | `WHITEPAPER_STEP13_WS6_ORACLE_AND_SIGNAL_ARCHITECTURE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review فنی/oracle/حکمرانی | 2 COMPLETE / 13 PARTIAL / 2 GAP (Airnode، TG-01) |
+| WS-6 اوراکل و سیگنال‌ها | `WHITEPAPER_STEP13_WS6_ORACLE_AND_SIGNAL_ARCHITECTURE_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review فنی/oracle/حکمرانی | 2 COMPLETE / 13 PARTIAL / 1 GAP (Airnode) — TG-01 برطرف‌شده (PR #36 — commit `48f5ffa`) |
 | WS-8 مشارکت عمومی فارسی‌زبان | `WHITEPAPER_STEP13_WS8_PUBLIC_PARTICIPATION_TRACEABILITY_REVIEW_FA.md` | AI-assisted pre-review — نیازمند review حکمرانی/حقوقی/قانون اساسی | 2 COMPLETE / 9 PARTIAL / 2 GAP (feedback عمومی، voter registry) |
 | **Final Rollup** | `WHITEPAPER_STEP13_FINAL_ROLLUP_REVIEW_FA.md` | خلاصه کلی WS-1 تا WS-8 — documentation-only | **مجموع: 17 COMPLETE / 94 PARTIAL / 11 GAP (TG-01 remediated)** |
 
@@ -149,7 +149,7 @@
 
 | سند | وضعیت |
 | --- | --- |
-| `WHITEPAPER_STEP13_FINAL_ROLLUP_REVIEW_FA.md` | ایجاد شد — مجموع: 17 COMPLETE / 94 PARTIAL / 13 GAP |
+| `WHITEPAPER_STEP13_FINAL_ROLLUP_REVIEW_FA.md` | ایجاد شد — مجموع در snapshot اولیه rollup (تاریخی): 17 COMPLETE / 94 PARTIAL / 13 GAP — این رقم ۱۳ وضعیت فعلی نیست؛ پس از برطرف‌شدن TG-01 (PR #36 — commit `48f5ffa`)، مجموع جاری مطابق جدول §۷ همین سند **11 GAP** است |
 | `WHITEPAPER_STEP13_HUMAN_REVIEW_PREPARATION_PACKAGE_FA.md` | ایجاد شد — بسته آماده‌سازی review انسانی (۲۰ بخش) |
 | **Step 12** | **باز** — هیچ evidence پذیرفته نشده، هیچ blocker بسته نشده |
 | **Step 13** | **باز** — هیچ review انسانی، هیچ signoff، هیچ blocker closure |

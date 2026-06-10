@@ -117,8 +117,8 @@
 **دلیل تعویق:**  
 سیستم رأی‌گیری جزء لایه ۵ (نهادی) و لایه ۷ (مجلس مؤسسان) است. پیش از نهایی شدن پروتکل انتخابات، پیاده‌سازی زودهنگام خطرناک است.
 
-**وضعیت فعلی:**  
-`CitizenCard.sol` هویت شهروندی دارد اما هیچ `VotingSystem.sol` یا رجیستری رأی‌دهنده وجود ندارد.
+**وضعیت فعلی (اصلاحیه):**  
+`CitizenCard.sol` هویت شهروندی دارد و `VotingSystem.sol` نیز موجود است (`contracts/governance/VotingSystem.sol`؛ آزمون: `test/18_Voting_System.test.js`). شکاف باز VS-01 فقط یکپارچه‌سازی VotingSystem ↔ CitizenCard (رجیستری رأی‌دهنده) و تعریف‌نشدن ElectionProtocol است.
 
 **اقدام بعدی:** پس از تعریف ElectionProtocol — یکپارچه‌سازی با CitizenCard
 
@@ -147,7 +147,7 @@
 |------|-----|----------------|
 | اسکریپت‌های `deploy/01_kernel.js` تا `deploy/08_verify.js` | کد | پیش از testnet |
 | ZK verifier روی‌زنجیر (G-03) | کد | مرحله جداگانه |
-| VotingSystem (VS-01) | کد | پس از ElectionProtocol |
+| یکپارچه‌سازی VotingSystem ↔ CitizenCard (VS-01) | کد | پس از ElectionProtocol |
 | اعطای `KERNEL_ROLE` روی Treasury به TriggerProtocol | استقرار | پیش از mainnet |
 | ثبت ۹ عضو `COURT_ROLE` | استقرار | پیش از mainnet |
 | تأمین منابع Airnode و feeder registry | عملیات | پیش از mainnet |
@@ -165,7 +165,7 @@
 - Airnode در محیط واقعی deploy نشده است
 - feeder registry تأسیس نشده است
 - ZK verifier روی‌زنجیر وجود ندارد
-- VotingSystem پیاده‌سازی نشده است
+- یکپارچه‌سازی VotingSystem ↔ CitizenCard پیاده‌سازی نشده است؛ ElectionProtocol تعریف نشده است
 
 ---
 

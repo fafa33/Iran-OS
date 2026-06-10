@@ -11,6 +11,8 @@
 
 > **⚠️ وضعیت: گزارش اطلاعاتی — Step 13 را نمی‌بندد — Step 12 را نمی‌بندد — حسابرسی، تأیید رسمی، یا آمادگی تولید نیست**
 
+> **اصلاحیه (docs-only):** ادعای پیشین این سند مبنی بر نبودِ `VotingSystem.sol` نادرست بود. این قرارداد در `contracts/governance/VotingSystem.sol` موجود است و در `test/18_Voting_System.test.js` آزمون دارد. شکاف باز VS-01 فقط یکپارچه‌سازی VotingSystem ↔ CitizenCard و تعریف‌نشدن ElectionProtocol است. وضعیت تعویق VS-01 بدون تغییر باقی می‌ماند؛ هیچ شکافی بسته نمی‌شود.
+
 ---
 
 ## فهرست مطالب
@@ -92,7 +94,7 @@ Step 13 (بررسی وفاداری بین‌فرگردی) شش شکاف واقع
 
 ### VS-01 — پیوند VotingSystem ↔ CitizenCard
 **دلیل تعویق:** پیش از نهایی شدن ElectionProtocol (لایه ۵/۷) پیاده‌سازی خطرناک است.  
-**وضعیت فعلی:** `CitizenCard.sol` موجود است؛ `VotingSystem.sol` وجود ندارد.  
+**وضعیت فعلی (اصلاحیه):** `CitizenCard.sol` و `VotingSystem.sol` هر دو موجودند (`contracts/governance/VotingSystem.sol`؛ آزمون: `test/18_Voting_System.test.js`). شکاف باز VS-01 فقط یکپارچه‌سازی VotingSystem ↔ CitizenCard (رجیستری رأی‌دهنده) و تعریف‌نشدن ElectionProtocol است.  
 **اقدام بعدی:** پس از تعریف ElectionProtocol.
 
 ---
@@ -147,7 +149,7 @@ Step 13 (بررسی وفاداری بین‌فرگردی) شش شکاف واقع
 - Airnode در محیط واقعی deploy نشده است
 - feeder registry تأسیس نشده است
 - ZK verifier روی‌زنجیر وجود ندارد
-- VotingSystem پیاده‌سازی نشده است
+- یکپارچه‌سازی VotingSystem ↔ CitizenCard پیاده‌سازی نشده است؛ ElectionProtocol تعریف نشده است
 - هیچ issue‌ای بسته نشده است
 
 ---

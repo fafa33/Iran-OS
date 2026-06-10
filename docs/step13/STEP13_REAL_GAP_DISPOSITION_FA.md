@@ -141,8 +141,8 @@
 **اولویت:** Medium  
 **مانع:** هیچ (در این مرحله)
 
-**وضعیت:**  
-`CitizenCard.sol` هویت شهروندی دارد اما هیچ `VotingSystem.sol` یا رجیستری رأی‌دهنده وجود ندارد.
+**وضعیت (اصلاحیه):**  
+`CitizenCard.sol` هویت شهروندی دارد و `VotingSystem.sol` نیز موجود است (`contracts/governance/VotingSystem.sol`؛ آزمون: `test/18_Voting_System.test.js`). شکاف باز VS-01 فقط یکپارچه‌سازی VotingSystem ↔ CitizenCard (رجیستری رأی‌دهنده) و تعریف‌نشدن ElectionProtocol است.
 
 **تکلیف پیشنهادی:** Defer  
 سیستم رأی‌گیری جزء لایه ۵ (نهادی) و لایه ۷ (مجلس مؤسسان) است. پیش از نهایی شدن پروتکل انتخابات، پیاده‌سازی زودهنگام خطرناک است.
