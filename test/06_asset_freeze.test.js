@@ -139,6 +139,16 @@ describe("AssetFreeze", function () {
       await expect(freeze.connect(council1).signConfirmation(missingId))
         .to.be.revertedWith("AssetFreeze: not found");
     });
+
+    it("وضعیت نامعتبر رد می‌شود", async function () {
+      await freeze.connect(council1).signConfirmation(assetId);
+      await freeze.connect(council2).signConfirmation(assetId);
+      await freeze.connect(council3).signConfirmation(assetId);
+      const COUNCIL = await freeze.COUNCIL_ROLE();
+      await freeze.connect(kernel).grantRole(COUNCIL, stranger.address);
+      await expect(freeze.connect(stranger).signConfirmation(assetId))
+        .to.be.revertedWith("AssetFreeze: invalid status");
+    });
   });
 
   // ─────────────────────────────────────────
