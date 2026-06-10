@@ -442,5 +442,36 @@ describe("AssetFreeze", function () {
 
       expect(await freeze.totalFrozenValue()).to.equal(frozenBefore);
     });
+
+    it("دارایی منتقل‌شده نمی‌تواند آزاد شود و وضعیت ثابت می‌ماند", async function () {
+      const transferredId = ethers.keccak256(ethers.toUtf8Bytes("release-after-transfer"));
+      await freeze.connect(crawler).freezeAsset(
+        transferredId, owner.address, "ملک", assetValue, "تست آزادسازی پس از انتقال"
+      );
+      await freeze.connect(council1).signConfirmation(transferredId);
+      await freeze.connect(council2).signConfirmation(transferredId);
+      await freeze.connect(council3).signConfirmation(transferredId);
+      await freeze.connect(council1).transferToSWF(transferredId);
+
+      const snapAsset   = await freeze.getFrozenAsset(transferredId);
+      const frozenSnap  = await freeze.totalFrozenValue();
+      const l1Snap      = await swf.layerL1();
+      const totalSnap   = await swf.totalAssets();
+
+      expect(snapAsset.transferredToSWF).to.equal(true);
+
+      await expect(freeze.connect(kernel).releaseAsset(transferredId, "test"))
+        .to.be.revertedWith("AssetFreeze: already transferred");
+
+      const afterAsset = await freeze.getFrozenAsset(transferredId);
+      expect(afterAsset.status).to.equal(snapAsset.status);
+      expect(afterAsset.transferredToSWF).to.equal(snapAsset.transferredToSWF);
+      expect(afterAsset.estimatedValue).to.equal(snapAsset.estimatedValue);
+      expect(await freeze.totalFrozenValue()).to.equal(frozenSnap);
+      const l1After = await swf.layerL1();
+      expect(l1After.balance).to.equal(l1Snap.balance);
+      expect(l1After.totalDeposited).to.equal(l1Snap.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalSnap);
+    });
   });
 });
