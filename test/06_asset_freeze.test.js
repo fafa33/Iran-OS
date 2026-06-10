@@ -92,6 +92,14 @@ describe("AssetFreeze", function () {
         )
       ).to.be.revertedWith("AssetFreeze: invalid owner");
     });
+
+    it("شناسه صفر رد می‌شود", async function () {
+      await expect(
+        freeze.connect(crawler).freezeAsset(
+          ethers.ZeroHash, owner.address, "ملک", assetValue, "تست"
+        )
+      ).to.be.revertedWith("AssetFreeze: invalid id");
+    });
   });
 
   // ─────────────────────────────────────────
