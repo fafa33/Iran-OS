@@ -31,7 +31,7 @@
 | **TG-01** | مسدودسازی خودکار خزانه‌داری | Runtime | ~~Fix~~ **IMPLEMENTED** | ~~Critical~~ **Done** | ~~وفاداری قانون اساسی A~~ **PR #36 — commit `48f5ffa`** |
 | **G-03** | تأییدکننده ZK روی‌زنجیر | Runtime | Defer | High | وفاداری قانون اساسی A |
 | **G-02** | یکپارچه‌سازی Airnode RRP | Integration | ~~External evidence~~ **ADDRESSED** | ~~High~~ **Done** | ~~آمادگی تولید~~ **`AIRNODE_INTEGRATION_PROTOCOL.md`** |
-| **G-11** | مانیفست استقرار | Deployment | ~~Document~~ **ADDRESSED** | ~~High~~ **Done** | ~~آمادگی تولید + بررسی خارجی~~ **`DEPLOYMENT_MANIFEST_PROTOCOL.md`** |
+| **G-11** | مانیفست استقرار | Deployment | ~~Document~~ **PARTIALLY ADDRESSED (16/25)** | ~~High~~ **Partial** | ~~آمادگی تولید + بررسی خارجی~~ **`DEPLOYMENT_MANIFEST_PROTOCOL.md` — دامنه ۱۶ از ۲۵ قرارداد** |
 | **COURT-01** | در دسترس بودن COURT_ROLE | Governance | ~~Document~~ **ADDRESSED** | ~~Medium~~ **Done** | ~~آمادگی تولید~~ **`COURT_ROLE_ASSIGNMENT_PROTOCOL.md`** |
 | **VS-01** | پیوند VotingSystem ↔ CitizenCard | Integration | Defer | Medium | هیچ (در این مرحله) |
 
@@ -101,10 +101,10 @@
 
 ### G-11 — مانیفست استقرار
 **دسته:** Deployment  
-**اولویت:** ~~High~~ **ADDRESSED (مستندسازی)**  
-**مانع:** ~~آمادگی تولید + بررسی خارجی~~ **مستند شده**
+**اولویت:** ~~High~~ **PARTIALLY ADDRESSED (مستندسازی — دامنه ۱۶ از ۲۵ قرارداد)**  
+**مانع:** ~~آمادگی تولید + بررسی خارجی~~ **به‌طور جزئی مستند شده — ۹ قرارداد خارج از دامنه مانیفست**
 
-**وضعیت — پس از ایجاد مانیفست:**  
+**وضعیت — پس از ایجاد مانیفست (دامنه: ۱۶ قرارداد از ۲۵؛ ۹ قرارداد شامل VotingSystem، Parliament، BudgetAllocation، Fargard7PolicyAdapter، VelocityFee، BaseIncome، HealthCoverage، DisabilitySupport و SovereignCrawler خارج از این نسخه‌اند):**  
 `docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` ایجاد شد. این سند شامل:
 - نقشه وابستگی سازنده‌ها (Layer 0/1/2/3)
 - ترتیب اجباری استقرار ۱۶ قرارداد
@@ -113,6 +113,8 @@
 - الزامات قابلیت تکرار
 
 **باقی‌مانده G-11 فنی:** اسکریپت‌های `deploy/` هنوز ایجاد نشده‌اند. این مرحله بعدی G-11 است.
+
+**باقی‌مانده G-11 مستندی:** گسترش مانیفست به هر ۲۵ قرارداد (۹ قرارداد فعلاً خارج از دامنه) — docs است نه کد.
 
 **اقدام بعدی:** ایجاد اسکریپت‌های `deploy/01_kernel.js` تا `deploy/08_verify.js` — کد است نه docs.
 
@@ -157,7 +159,7 @@
 
 | اولویت | شکاف | اقدام | نوع | وضعیت |
 |--------|-------|-------|-----|--------|
-| ۱ | ~~**G-11** مانیفست استقرار~~ | ~~ایجاد `hardhat.config.js` + اسکریپت deploy~~ | ~~Deployment~~ | **ADDRESSED (docs) — اسکریپت‌های deploy/ باقی‌مانده** |
+| ۱ | ~~**G-11** مانیفست استقرار~~ | ~~ایجاد `hardhat.config.js` + اسکریپت deploy~~ | ~~Deployment~~ | **PARTIALLY ADDRESSED (docs — 16/25) — اسکریپت‌های deploy/ و ۹ قرارداد مانیفست باقی‌مانده** |
 | ۲ | ~~**TG-01** مستندسازی تأخیر~~ | ~~ایجاد issue core برای step38~~ | ~~Documentation~~ | **DONE — PR #36** |
 | ۳ | ~~**G-02** پروتکل Airnode~~ | ~~ایجاد `AIRNODE_INTEGRATION_PROTOCOL.md`~~ | ~~Documentation~~ | **DONE** |
 | ۴ | ~~**COURT-01** پروتکل تعیین قضات~~ | ~~ایجاد `COURT_ROLE_ASSIGNMENT_PROTOCOL.md`~~ | ~~Documentation~~ | **DONE** |
@@ -181,7 +183,7 @@
 
 ```
 Critical → DONE:        TG-01 (PR #36 — commit 48f5ffa)
-High → ADDRESSED(docs): G-11 (DEPLOYMENT_MANIFEST_PROTOCOL.md — اسکریپت‌های deploy/ باقی‌مانده)
+High → PARTIALLY ADDRESSED(docs — 16/25): G-11 (DEPLOYMENT_MANIFEST_PROTOCOL.md — ۹ قرارداد و اسکریپت‌های deploy/ باقی‌مانده)
 High → ADDRESSED(docs): G-02 (AIRNODE_INTEGRATION_PROTOCOL.md)
 High → Defer:           G-03 (مرحله بعدی — باز)
 Medium → DONE:          COURT-01 (COURT_ROLE_ASSIGNMENT_PROTOCOL.md)
