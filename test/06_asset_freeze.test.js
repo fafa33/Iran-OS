@@ -308,6 +308,22 @@ describe("AssetFreeze", function () {
       expect(await swf.totalAssets()).to.equal(totalAssetsBefore);
       expect(await swf.txCount()).to.equal(txCountBefore);
     });
+
+    it("شناسه ناموجود رد می‌شود و وضعیت ثابت می‌ماند", async function () {
+      const invalidId      = ethers.keccak256(ethers.toUtf8Bytes("never-frozen-asset"));
+      const frozenBefore   = await freeze.totalFrozenValue();
+      const l1Before       = await swf.layerL1();
+      const totalBefore    = await swf.totalAssets();
+
+      await expect(freeze.connect(council1).transferToSWF(invalidId))
+        .to.be.revertedWith("AssetFreeze: not confirmed");
+
+      expect(await freeze.totalFrozenValue()).to.equal(frozenBefore);
+      const l1After = await swf.layerL1();
+      expect(l1After.balance).to.equal(l1Before.balance);
+      expect(l1After.totalDeposited).to.equal(l1Before.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalBefore);
+    });
   });
 
   // ─────────────────────────────────────────
