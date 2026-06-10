@@ -325,6 +325,40 @@ describe("AssetFreeze", function () {
       expect(await swf.totalAssets()).to.equal(totalBefore);
     });
 
+    it("انتقال تکراری پس از موفقیت رد می‌شود و وضعیت ثابت می‌ماند", async function () {
+      const replayId = ethers.keccak256(ethers.toUtf8Bytes("replay-transfer-asset"));
+      await freeze.connect(crawler).freezeAsset(
+        replayId, owner.address, "ملک", assetValue, "تست تکرار انتقال"
+      );
+      await freeze.connect(council1).signConfirmation(replayId);
+      await freeze.connect(council2).signConfirmation(replayId);
+      await freeze.connect(council3).signConfirmation(replayId);
+
+      await freeze.connect(council1).transferToSWF(replayId);
+
+      const snapAsset    = await freeze.getFrozenAsset(replayId);
+      const frozenSnap   = await freeze.totalFrozenValue();
+      const l1Snap       = await swf.layerL1();
+      const totalSnap    = await swf.totalAssets();
+      const txCountSnap  = await swf.txCount();
+
+      expect(snapAsset.transferredToSWF).to.equal(true);
+
+      await expect(freeze.connect(council1).transferToSWF(replayId))
+        .to.be.revertedWith("AssetFreeze: already transferred");
+
+      const afterAsset = await freeze.getFrozenAsset(replayId);
+      expect(afterAsset.status).to.equal(snapAsset.status);
+      expect(afterAsset.transferredToSWF).to.equal(snapAsset.transferredToSWF);
+      expect(afterAsset.councilSignatures).to.equal(snapAsset.councilSignatures);
+      expect(await freeze.totalFrozenValue()).to.equal(frozenSnap);
+      const l1After = await swf.layerL1();
+      expect(l1After.balance).to.equal(l1Snap.balance);
+      expect(l1After.totalDeposited).to.equal(l1Snap.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalSnap);
+      expect(await swf.txCount()).to.equal(txCountSnap);
+    });
+
     it("دارایی تأییدنشده رد می‌شود و وضعیت ثابت می‌ماند", async function () {
       const partialId = ethers.keccak256(ethers.toUtf8Bytes("partial-confirmed-asset"));
       await freeze.connect(crawler).freezeAsset(
