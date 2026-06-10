@@ -384,6 +384,28 @@ describe("AssetFreeze", function () {
       expect(l1After.totalDeposited).to.equal(l1Before.totalDeposited);
       expect(await swf.totalAssets()).to.equal(totalBefore);
     });
+
+    it("غیر‌شورا نمی‌تواند انتقال دهد و وضعیت ثابت می‌ماند", async function () {
+      const snapAsset   = await freeze.getFrozenAsset(assetId);
+      const frozenSnap  = await freeze.totalFrozenValue();
+      const l1Snap      = await swf.layerL1();
+      const totalSnap   = await swf.totalAssets();
+      const txCountSnap = await swf.txCount();
+
+      await expect(freeze.connect(stranger).transferToSWF(assetId))
+        .to.be.reverted;
+
+      const afterAsset = await freeze.getFrozenAsset(assetId);
+      expect(afterAsset.status).to.equal(snapAsset.status);
+      expect(afterAsset.transferredToSWF).to.equal(snapAsset.transferredToSWF);
+      expect(afterAsset.councilSignatures).to.equal(snapAsset.councilSignatures);
+      expect(await freeze.totalFrozenValue()).to.equal(frozenSnap);
+      const l1After = await swf.layerL1();
+      expect(l1After.balance).to.equal(l1Snap.balance);
+      expect(l1After.totalDeposited).to.equal(l1Snap.totalDeposited);
+      expect(await swf.totalAssets()).to.equal(totalSnap);
+      expect(await swf.txCount()).to.equal(txCountSnap);
+    });
   });
 
   // ─────────────────────────────────────────
