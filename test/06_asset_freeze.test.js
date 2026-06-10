@@ -84,6 +84,14 @@ describe("AssetFreeze", function () {
         )
       ).to.be.revertedWith("AssetFreeze: zero value");
     });
+    it("آدرس مالک صفر رد می‌شود", async function () {
+      const freshId = ethers.keccak256(ethers.toUtf8Bytes("asset_invalid_owner"));
+      await expect(
+        freeze.connect(crawler).freezeAsset(
+          freshId, ethers.ZeroAddress, "ملک", assetValue, "تست مالک نامعتبر"
+        )
+      ).to.be.revertedWith("AssetFreeze: invalid owner");
+    });
   });
 
   // ─────────────────────────────────────────
