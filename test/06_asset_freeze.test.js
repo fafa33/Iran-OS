@@ -133,6 +133,12 @@ describe("AssetFreeze", function () {
       await expect(freeze.connect(council1).signConfirmation(assetId))
         .to.be.revertedWith("AssetFreeze: already signed");
     });
+
+    it("دارایی ناموجود رد می‌شود", async function () {
+      const missingId = ethers.keccak256(ethers.toUtf8Bytes("missing-asset"));
+      await expect(freeze.connect(council1).signConfirmation(missingId))
+        .to.be.revertedWith("AssetFreeze: not found");
+    });
   });
 
   // ─────────────────────────────────────────
