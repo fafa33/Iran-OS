@@ -152,6 +152,50 @@ This packet is not a signoff and cannot support blocker closure by itself.
 - Oracle operations lead signoff.
 - Governance reviewer signoff.
 
+## 3A. Repository-Derived Draft Procedures (STEP9-BLOCK-004)
+
+These draft procedures are derived solely from repository source — contract constants and behavior — and from the procedures already drafted in §4A. They are draft documentary scaffolding only. Every operator identity, runtime telemetry record, and reviewer signoff remains PENDING per §3A.3. This section accepts no evidence and closes no blocker.
+
+### 3A.1 Deviation Review Procedure (derived)
+
+Repository-derived basis:
+
+- `PriceOracle.DEVIATION_THRESHOLD` is `50`.
+- `PriceOracle.submitPrice` emits `DeviationDetected` when a submitted value's deviation exceeds the threshold against an existing valid value.
+
+Derived draft steps: (1) a `DeviationDetected` event is the detection signal; (2) the deviating submission is reviewed against other fresh feeder submissions for the same key; (3) a deviating value does not by itself become fresh authority (consistent with the signal-only boundary, §4A.4); (4) correction follows the stale-data / invalidation path (§4A.1) where the value is invalid; (5) the review outcome is the recorded artifact.
+
+Not claimed: any deployed deviation value, production reviewer routing, or severity assignment.
+
+PENDING: severity classification, reviewer routing/identity, incident-packet contents, and post-incident disposition — real operators.
+
+### 3A.2 Incident Runbook Skeleton (scaffold)
+
+Documentation scaffold only — it cross-links the derived procedures and marks every operator/runtime element as pending:
+
+- **Detection inputs (derived):** staleness/invalidation (§4A.1), deviation (§3A.1), feeder onboarding/suspension state (§4A.2).
+- **Containment (derived):** stale or deviating data is non-counted; invalidation is a `KERNEL_ROLE` action (§4A.1); a suspect feeder is suspended via `FEEDER_ROLE` revoke (§4A.2).
+- **Boundary (cited):** oracle signals remain non-sovereign; no autonomous downstream execution (§4A.4).
+- **Severity model:** **PENDING operators**.
+- **On-call roster / escalation contacts:** **PENDING operators**.
+- **Incident rehearsal evidence:** **PENDING operators**.
+- **Monitoring telemetry / liveness logs:** **PENDING runtime telemetry**.
+- **Post-incident review + reviewer signoff:** **PENDING**.
+
+This skeleton adds derived documentary scaffolding only. It makes no monitoring or deployed-configuration claim, invents no operator or feeder identities, accepts no evidence, and does not close any blocker.
+
+### 3A.3 Pending markers (operator / runtime)
+
+- feeder identities: **PENDING real operators**
+- deployed quorum configuration: **PENDING real operators**
+- severity model: **PENDING operators**
+- on-call roster: **PENDING operators**
+- incident rehearsal evidence: **PENDING operators**
+- monitoring telemetry: **PENDING runtime telemetry**
+- oracle operations lead / governance reviewer signoff: **PENDING**
+
+`STEP9-BLOCK-004` remains **OPEN / PARTIALLY DOCUMENTED / PENDING OPERATORS**.
+
 ## 4. STEP9-BLOCK-007 Oracle Operations Runbook
 
 ### 4.1 Feeder and Data-Source Attestations
