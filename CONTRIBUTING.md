@@ -8,6 +8,17 @@ IranOS is an open-source blockchain governance operating system — a technical 
 
 ---
 
+## Mandatory Reviewer Primer
+
+Before proposing architectural, governance, treasury, oracle, monetary, Kernel, protocol, or smart-contract changes, contributors and reviewers must read the reviewer primers:
+
+- [Reviewer Primer — English](docs/REVIEWER_PRIMER.md)
+- [راهنمای بازبین — فارسی](docs/REVIEWER_PRIMER_FA.md)
+
+IranOS is a sovereign resilience infrastructure, not a DeFi protocol, DAO, governance-token system, central-bank simulator, or yield-maximization platform. Recommendations that appear reasonable in conventional Web3 systems may be constitutional regressions in IranOS if they weaken Kernel immutability, oracle non-sovereignty, reserve protections, monetary discipline, or authority containment.
+
+---
+
 ## Language Policy
 
 - **Primary language:** Persian (Farsi) with RTL formatting
@@ -21,10 +32,11 @@ Full contributing guide in Persian: [docs/contributing-fa.md](docs/contributing-
 
 ## Before You Contribute
 
-1. Read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-2. Read [SECURITY.md](SECURITY.md) — understand the non-claim policy
-3. For Step 13 / external review: read [docs/step13/STEP13_REVIEWER_INDEX_EN.md](docs/step13/STEP13_REVIEWER_INDEX_EN.md)
-4. Browse [Issue #35](https://github.com/fafa33/Iran-OS/issues/35) for the current Step 13 review status
+1. Read [docs/REVIEWER_PRIMER.md](docs/REVIEWER_PRIMER.md) or [docs/REVIEWER_PRIMER_FA.md](docs/REVIEWER_PRIMER_FA.md)
+2. Read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+3. Read [SECURITY.md](SECURITY.md) — understand the non-claim policy
+4. For Step 13 / external review: read [docs/step13/STEP13_REVIEWER_INDEX_EN.md](docs/step13/STEP13_REVIEWER_INDEX_EN.md)
+5. Browse [Issue #35](https://github.com/fafa33/Iran-OS/issues/35) for the current Step 13 review status
 
 ---
 
@@ -52,10 +64,11 @@ Use the appropriate issue template:
 ## PR Workflow
 
 1. Fork the repository and create a branch: `feature/<name>` or `fix/<name>`
-2. Make your changes — see [Code Quality Rules](#code-quality-rules) below
-3. Run `npm test` — all 499 tests must pass
-4. Open a PR using the default PR template
-5. Complete the non-claim checklist in the PR template
+2. Read the reviewer primer before making architecture, doctrine, protocol, treasury, oracle, monetary, Kernel, or contract-level changes
+3. Make your changes — see [Code Quality Rules](#code-quality-rules) below
+4. Run `npm test` — all 499 tests must pass
+5. Open a PR using the default PR template
+6. Complete the reviewer-primer, doctrine, and non-claim checklists in the PR template
 
 **Branch naming:**
 ```
@@ -84,6 +97,8 @@ Prefixes: `feat`, `fix`, `docs`, `test`, `refactor`, `audit`, `chore`
 - **Never** lower `MULTISIG_THRESHOLD` (7-of-9) or `COUNCIL_THRESHOLD`
 - **Never** remove a `nonReentrant` guard
 - **Never** introduce admin backdoors or upgrade proxies on the Kernel
+- **Never** give oracles emergency authority over constitutional, treasury, reserve, freeze, or monetary actions
+- **Never** convert constitutional safeguards into ordinary configurable parameters without explicit doctrine review
 - No secrets or private keys in source
 
 ---
@@ -106,8 +121,9 @@ See [SECURITY.md](SECURITY.md) for the full non-claim policy.
 
 If you are reviewing IranOS independently:
 
-1. Start at [docs/step13/STEP13_REVIEWER_INDEX_EN.md](docs/step13/STEP13_REVIEWER_INDEX_EN.md)
-2. Submit findings via the **External Review** issue template
-3. Reference [Issue #35](https://github.com/fafa33/Iran-OS/issues/35)
+1. Read [Reviewer Primer — English](docs/REVIEWER_PRIMER.md) or [راهنمای بازبین — فارسی](docs/REVIEWER_PRIMER_FA.md)
+2. Start at [docs/step13/STEP13_REVIEWER_INDEX_EN.md](docs/step13/STEP13_REVIEWER_INDEX_EN.md)
+3. Submit findings via the **External Review** issue template
+4. Reference [Issue #35](https://github.com/fafa33/Iran-OS/issues/35)
 
 Your review does not close Step 13 or Step 12. It is recorded as external evidence.
