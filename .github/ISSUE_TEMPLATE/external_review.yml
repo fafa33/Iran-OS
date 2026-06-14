@@ -10,9 +10,28 @@ body:
       value: |
         Thank you for reviewing IranOS. This template is for submitting independent review findings related to **Step 13** ([Issue #35](https://github.com/fafa33/Iran-OS/issues/35)).
 
-        **Before submitting:** Read [docs/step13/STEP13_REVIEWER_INDEX_EN.md](https://github.com/fafa33/Iran-OS/blob/main/docs/step13/STEP13_REVIEWER_INDEX_EN.md) and [docs/step13/STEP13_REVIEWER_INSTRUCTIONS_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/step13/STEP13_REVIEWER_INSTRUCTIONS_FA.md).
+        **Required before submitting:** Read the reviewer primer first:
+
+        - [Reviewer Primer — English](https://github.com/fafa33/Iran-OS/blob/main/docs/REVIEWER_PRIMER.md)
+        - [راهنمای بازبین — فارسی](https://github.com/fafa33/Iran-OS/blob/main/docs/REVIEWER_PRIMER_FA.md)
+
+        IranOS is a sovereign resilience infrastructure, not a DeFi protocol, DAO, governance-token system, central-bank simulator, or yield-maximization platform. Design choices such as Kernel immutability, oracle non-sovereignty, fixed constitutional safeguards, and monetary discipline are intentional security properties.
+
+        After reading the primer, continue with [docs/step13/STEP13_REVIEWER_INDEX_EN.md](https://github.com/fafa33/Iran-OS/blob/main/docs/step13/STEP13_REVIEWER_INDEX_EN.md) and [docs/step13/STEP13_REVIEWER_INSTRUCTIONS_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/step13/STEP13_REVIEWER_INSTRUCTIONS_FA.md).
 
         Submitting this form does not close Issue #35, Step 13, or any Step 12 blocker.
+
+  - type: checkboxes
+    id: reviewer_primer_confirmation
+    attributes:
+      label: Reviewer Primer Confirmation
+      options:
+        - label: I have read the Reviewer Primer before submitting this review.
+          required: true
+        - label: I understand that IranOS is not a DeFi protocol, DAO, governance-token system, central-bank simulator, or yield-maximization platform.
+          required: true
+        - label: I understand that Kernel immutability, oracle non-sovereignty, fixed constitutional safeguards, and monetary discipline are intentional security properties, not ordinary implementation limitations.
+          required: true
 
   - type: textarea
     id: background
@@ -30,6 +49,8 @@ body:
       label: Reviewed Documents / Contracts
       description: List the specific files, contracts, or documents you reviewed.
       placeholder: |
+        - docs/REVIEWER_PRIMER.md
+        - docs/REVIEWER_PRIMER_FA.md
         - contracts/kernel.sol
         - docs/step13/WHITEPAPER_STEP13_CROSS_FARGARD_FIDELITY_REVIEW_FA.md
         - whitepaper/whitepaper-fa.md (Fargard 4)
@@ -59,9 +80,21 @@ body:
     id: recommendations
     attributes:
       label: Recommendations
-      description: What changes or follow-up actions do you recommend?
+      description: What changes or follow-up actions do you recommend? If recommending flexibility, upgradeability, oracle authority, dynamic thresholds, or automation of final constitutional decisions, explain why the recommendation does not weaken constitutional invariants.
     validations:
       required: false
+
+  - type: checkboxes
+    id: constitutional_safety
+    attributes:
+      label: Constitutional Safety Confirmation
+      options:
+        - label: My recommendations do not require making the Kernel upgradeable unless explicitly framed as a constitutional-risk finding.
+          required: true
+        - label: My recommendations do not grant oracles sovereign, treasury, reserve, freeze, or monetary authority unless explicitly framed as a constitutional-risk finding.
+          required: true
+        - label: My recommendations do not convert constitutional thresholds or monetary safeguards into ordinary configurable parameters unless explicitly framed as a constitutional-risk finding.
+          required: true
 
   - type: dropdown
     id: conflict_of_interest
