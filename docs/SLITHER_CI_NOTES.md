@@ -67,7 +67,7 @@ slither . --hardhat-ignore-compile --json slither-report.json 2>&1 | tee slither
 echo "Exit code: $?"
 ```
 
-Exit code 0 = no findings. Exit code 1 = findings present (normal). Exit > 1 = tool error.
+Exit code 0 = no findings. Exit code 1 or 255 = findings present (both are normal; Slither v0.11.x uses `sys.exit(-1)` which becomes 255 in bash). Exit code other than 0/1/255 = tool error.
 
 **Network note:** If `binaries.soliditylang.org` is blocked in your environment, pre-compile with Hardhat's bundled WASM compiler and use `--hardhat-ignore-compile` to skip re-compilation inside Slither. See the baseline audit report for full workaround details.
 
