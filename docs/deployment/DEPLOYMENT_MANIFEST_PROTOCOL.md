@@ -2,8 +2,9 @@
 
 # مانیفست استقرار IranOS — پروتکل مستندسازی
 
-**نسخه:** ۱.۰.۰  
+**نسخه:** ۱.۱.۰  
 **تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
+**توسعه به پوشش ۲۵/۲۵:** ۲۴ خرداد ۲۵۸۵ شاهنشاهی / ۱۴ ژوئن ۲۰۲۶ میلادی  
 **شناسه شکاف:** G-11  
 **نوع:** مستندات استقرار — بدون تغییر قرارداد  
 **وضعیت:** راهنمای مرجع پیش از استقرار
@@ -15,12 +16,14 @@
 
 ---
 
-> **⚠️ یادداشت دامنه (نسخه ۱.۰.۰):**
-> این نسخه از مانیفست فقط **۱۶ قرارداد هسته‌ای از ۲۵ قرارداد موجود در مخزن** را پوشش می‌دهد. ۹ قرارداد زیر خارج از دامنه این نسخه‌اند و ترتیب استقرار، وابستگی سازنده و سیم‌کشی نقش آن‌ها هنوز مستند نشده است:
+> **⚠️ یادداشت دامنه (نسخه ۱.۱.۰):**
+> این نسخه نقشه وابستگی سازنده، جایگاه لایه، ترتیب استقرار و ارجاع سیم‌کشی نقش را برای **هر ۲۵ قرارداد مخزن** پوشش می‌دهد (پیش‌تر ۱۶/۲۵). ۹ قرارداد افزوده‌شده عبارت‌اند از:
 >
 > `VotingSystem`، `Parliament`، `BudgetAllocation`، `Fargard7PolicyAdapter`، `VelocityFee`، `BaseIncome`، `HealthCoverage`، `DisabilitySupport`، `SovereignCrawler`
 >
-> هیچ اسکریپت استقراری (`deploy/`) وجود ندارد. تکمیل مانیفست برای هر ۲۵ قرارداد، کارِ مستندیِ آینده است؛ بنابراین شکاف G-11 در سطح مستندات **به‌طور جزئی** پوشش داده شده است (PARTIALLY ADDRESSED — 16/25) و بسته نیست.
+> این اطلاعات صرفاً از **امضای سازنده و ثابت‌های نقشِ موجود در سورس مخزن** استخراج شده‌اند؛ هیچ آدرس، مقدار سازنده، هش، تخمین gas، یا اسکریپت استقراری اضافه نشده است.
+>
+> **هیچ اسکریپت استقراری (`deploy/`) وجود ندارد** و هیچ استقراری اجرا نشده است. پوشش مستندیِ نقشه استقرار اکنون **۲۵/۲۵** است، اما نیمه‌ی اجراییِ G-11 (اسکریپت‌ها، اجرای dry-run، هش‌ها، gas) همچنان باز است. `STEP9-BLOCK-005` همچنان **OPEN/PENDING** است و در این سند بسته نمی‌شود.
 
 ---
 
@@ -114,6 +117,37 @@ ProductionOracle(kernel)   ← مستقل از Layer 2
 | `Provincial` | `kernel, treasury` | Kernel، Treasury |
 | `PriceOracle` | `kernel` | Kernel |
 | `ProductionOracle` | `kernel` | Kernel |
+| `VotingSystem` | `kernel` | Kernel |
+| `Parliament` | `kernel` | Kernel |
+| `BudgetAllocation` | `kernel` | Kernel |
+| `BaseIncome` | `kernel` | Kernel |
+| `HealthCoverage` | `kernel` | Kernel |
+| `DisabilitySupport` | `kernel` | Kernel |
+| `SovereignCrawler` | `kernel, swfTempWallet` | Kernel (+ آدرس کیف‌پول موقت SWF از کتاب آدرس) |
+| `Fargard7PolicyAdapter` | `kernel, priceOracle` | Kernel، PriceOracle |
+| `VelocityFee` | `kernel, developmentBank, pahlaviToken` | Kernel، PahlaviToken (+ آدرس بانک توسعه از کتاب آدرس) |
+
+### ۲.۱. جایگاه لایه قراردادهای افزوده‌شده (استخراج‌شده از امضای سازنده)
+
+```
+Layer 1 — تنها وابسته به Kernel
+────────────────────────────────
+VotingSystem(kernel)
+Parliament(kernel)
+BudgetAllocation(kernel)
+BaseIncome(kernel)
+HealthCoverage(kernel)
+DisabilitySupport(kernel)
+SovereignCrawler(kernel, swfTempWallet)   ← swfTempWallet یک آدرس از کتاب آدرس است، نه قرارداد
+
+Layer 2 — وابسته به یک قرارداد Layer 1
+──────────────────────────────────────
+Fargard7PolicyAdapter(kernel, priceOracle)   ← پس از PriceOracle
+
+Layer 3 — وابسته به قرارداد Layer 2
+────────────────────────────────────
+VelocityFee(kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken؛ developmentBank آدرس کتاب آدرس است
+```
 
 ---
 
@@ -189,6 +223,25 @@ ProductionOracle(kernel)   ← مستقل از Layer 2
     → ثبت آدرس: ASSET_FREEZE_ADDRESS
 ```
 
+**مرحله ۴ — قراردادهای افزوده‌شده (آرگومان‌ها استخراج‌شده از امضای سازنده؛ مقادیر آدرس placeholder کتاب آدرس‌اند)**
+
+```
+# Layer 1 (تنها Kernel)
+17. deploy VotingSystem(KERNEL_ADDRESS)                  → VOTING_SYSTEM_ADDRESS
+18. deploy Parliament(KERNEL_ADDRESS)                    → PARLIAMENT_ADDRESS
+19. deploy BudgetAllocation(KERNEL_ADDRESS)              → BUDGET_ALLOCATION_ADDRESS
+20. deploy BaseIncome(KERNEL_ADDRESS)                    → BASE_INCOME_ADDRESS
+21. deploy HealthCoverage(KERNEL_ADDRESS)                → HEALTH_COVERAGE_ADDRESS
+22. deploy DisabilitySupport(KERNEL_ADDRESS)             → DISABILITY_SUPPORT_ADDRESS
+23. deploy SovereignCrawler(KERNEL_ADDRESS, SWF_TEMP_WALLET) → SOVEREIGN_CRAWLER_ADDRESS
+
+# Layer 2 (پس از PriceOracle — مرحله ۲)
+24. deploy Fargard7PolicyAdapter(KERNEL_ADDRESS, PRICE_ORACLE_ADDRESS) → FARGARD7_ADAPTER_ADDRESS
+
+# Layer 3 (پس از PahlaviToken — مرحله ۳)
+25. deploy VelocityFee(KERNEL_ADDRESS, DEVELOPMENT_BANK, PAHLAVI_TOKEN_ADDRESS) → VELOCITY_FEE_ADDRESS
+```
+
 ---
 
 ## ۴. ترتیب سیم‌کشی نقش‌ها
@@ -231,6 +284,24 @@ assetFreeze.grantRole(COUNCIL_ROLE, COUNCIL_1)
 assetFreeze.grantRole(COUNCIL_ROLE, COUNCIL_2)
 assetFreeze.grantRole(COUNCIL_ROLE, COUNCIL_3)
 ```
+
+### گروه F — سیم‌کشی قراردادهای افزوده‌شده (ارجاع نقش — استخراج‌شده از ثابت‌های نقش سورس)
+
+نقش‌های زیر پس از استقرار و طبق سیاست حاکمیتی اعطا می‌شوند. مقادیر آدرس از کتاب آدرس می‌آیند و در اینجا اختراع نمی‌شوند. این فهرست تنها **ارجاع** به ثابت‌های نقشِ موجود در سورس است:
+
+```
+VotingSystem         : ELECTION_ROLE، ORACLE_ROLE            (KERNEL_ROLE در سازنده)
+Parliament           : MP_ROLE، SPEAKER_ROLE، SOVEREIGN_ROLE
+BudgetAllocation     : PARLIAMENT_ROLE، GOVERNMENT_ROLE، AUDITOR_ROLE، ORACLE_ROLE
+BaseIncome           : ORACLE_ROLE، EMPLOYER_ROLE، SWF_ROLE
+HealthCoverage       : HEALTH_ROLE، PROVIDER_ROLE، PHARMACY_ROLE، SWF_ROLE
+DisabilitySupport    : HEALTH_ROLE، WELFARE_ROLE، SWF_ROLE
+SovereignCrawler     : NODE_ROLE، COUNCIL_ROLE
+Fargard7PolicyAdapter: POLICY_ADMIN_ROLE، RECOMMENDER_ROLE، REVIEWER_ROLE
+VelocityFee          : ORACLE_ROLE، STAKING_ROLE
+```
+
+**⚠️ توجه:** `Fargard7PolicyAdapter` صرفاً proposal-only و non-executing است؛ اعطای نقش‌های آن هیچ مسیر اجرایی ایجاد نمی‌کند. سیگنال‌های اوراکل برای `VotingSystem`، `BudgetAllocation`، `BaseIncome` و `VelocityFee` non-sovereign باقی می‌مانند.
 
 ### گروه E — سیم‌کشی Oracle (آخر از همه)
 
@@ -422,6 +493,7 @@ deploy/
 - هیچ حسابرسی امنیتی (Slither / Mythril / Echidna) انجام نشده
 - هیچ بررسی خارجی یا signoff وجود ندارد
 - اسکریپت‌های `deploy/` هنوز ایجاد نشده‌اند (باقی‌مانده G-11 فنی)
+- پوشش مستندیِ نقشه استقرار اکنون ۲۵/۲۵ است، اما هیچ آدرس، مقدار سازنده، هش، تخمین gas، یا اجرای dry-run افزوده/انجام نشده و `STEP9-BLOCK-005` همچنان **OPEN/PENDING** است
 - این سند نقطه شروع برای بررسی خارجی است، نه تأییدیه آن
 
 </div>
