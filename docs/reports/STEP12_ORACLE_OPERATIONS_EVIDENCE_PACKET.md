@@ -36,6 +36,10 @@ Repository-supported inputs used for this draft:
 - `test/23_Price_Oracle.test.js`
 - `test/25_Step7_Stress.test.js`
 - GitHub issue tracker entries: https://github.com/fafa33/Iran-OS/issues/15 and https://github.com/fafa33/Iran-OS/issues/16
+- `docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` (feeder role-wiring references, Group E/F)
+- `docs/oracle/AIRNODE_INTEGRATION_PROTOCOL.md` (integration model reference)
+- `docs/step13/WHITEPAPER_STEP13_ORACLE_AGGREGATION_MINI_SPEC_FA.md` (aggregation/quorum policy reference)
+- `docs/Doctrine/INTERPRETATION_BOUNDARIES_FA.md` (oracle = signal, not sovereignty)
 
 ## 3. STEP9-BLOCK-004 Oracle Operations Packet
 
@@ -264,6 +268,61 @@ This packet is not a signoff and cannot support blocker closure by itself.
 - Signal-only governance review.
 - Oracle operations lead signoff.
 - Governance reviewer signoff.
+
+## 4A. Repository-Derived Draft Runbook Procedures (STEP9-BLOCK-007)
+
+These draft procedures are derived solely from repository source — contract constants and behavior, deployment-manifest role-wiring references, the oracle aggregation mini-spec, and oracle doctrine. They are draft documentary scaffolding only. Every operator identity, runtime telemetry record, and reviewer signoff remains PENDING per §4A.5. This section accepts no evidence and closes no blocker.
+
+### 4A.1 Stale-data / invalidation procedure (derived)
+
+Repository-derived basis:
+
+- `API3Oracle.MAX_DATA_AGE` is `1 hours`; `flagViolation` reverts on a stale `PAH_USD_KEY` feed beyond `MAX_DATA_AGE` (`"API3Oracle: stale data feed"`).
+- `API3Oracle` data points carry `isValid` and `confidence` fields.
+- `PriceOracle.STALENESS_THRESHOLD` is `1 hours`; `isDataFresh` returns true only when the value is valid and within the threshold.
+- `PriceOracle.invalidatePrice` is `KERNEL_ROLE`-gated and emits `PriceInvalidated`.
+
+Derived draft steps: (1) detect staleness via the freshness check; (2) treat stale data as non-counted (no fresh authority); (3) invalidation is a `KERNEL_ROLE` action only; (4) the invalidation event is the recorded artifact.
+
+PENDING: who monitors/triggers staleness, escalation roster, and post-invalidation review — real operators / runtime telemetry.
+
+### 4A.2 Feeder onboarding / suspension procedure (derived)
+
+Repository-derived basis:
+
+- Feeder authority is `FEEDER_ROLE`-gated in `API3Oracle` and `PriceOracle`; admin/grant authority sits with `KERNEL_ROLE` / `DEFAULT_ADMIN_ROLE` (granted to Kernel in the constructor).
+- Deployment-manifest role-wiring (Group E) grants `FEEDER_ROLE` (`api3Oracle.grantRole(FEEDER_ROLE, FEEDER_n)`), and feeder/ORACLE_ROLE wiring is the last deploy step.
+
+Derived draft steps: onboarding = grant `FEEDER_ROLE` after off-chain attestation; suspension = revoke `FEEDER_ROLE`; both exercised through the manifest's role-wiring authority.
+
+PENDING: feeder identities, data-source attestations, approval authority, and key-custody checks — real operators.
+
+### 4A.3 Aggregation / quorum policy reference (cited)
+
+- Cite `docs/step13/WHITEPAPER_STEP13_ORACLE_AGGREGATION_MINI_SPEC_FA.md` for the independent-feeder minimum and refresh-window policy.
+- Cite `PriceOracle.MIN_FEEDERS` (`3`) aggregation requirement as code-level context only.
+- Cite `docs/oracle/AIRNODE_INTEGRATION_PROTOCOL.md` for the integration model.
+
+Not claimed: any deployed/as-deployed quorum configuration or production feeder count — PENDING real operators.
+
+### 4A.4 Signal-only governance review (cited)
+
+- Oracle doctrine: oracle is signal, not sovereignty (`docs/Doctrine/INTERPRETATION_BOUNDARIES_FA.md`); Step-5 and Step-9 affirm the signal-only boundary.
+- `Fargard7PolicyAdapter` stores recommendations with `executable: false` (proposal-only / non-executing).
+
+Derived statement: oracle outputs feed signals only; no autonomous downstream execution path is created.
+
+PENDING: governance reviewer signoff and a deployment-candidate confirmation of the signal-only boundary.
+
+### 4A.5 Pending markers (operator / runtime)
+
+- feeder identities: **PENDING real operators**
+- data-source attestations: **PENDING real operators**
+- liveness monitoring: **PENDING runtime telemetry**
+- incident rehearsal evidence: **PENDING operators**
+- governance reviewer signoff: **PENDING**
+
+This section adds derived documentary scaffolding only. It makes no monitoring or deployed-configuration claim, invents no operator identities, accepts no evidence, and does not close any blocker. `STEP9-BLOCK-007` remains **OPEN / PENDING**.
 
 ## 5. Closure Rule
 
