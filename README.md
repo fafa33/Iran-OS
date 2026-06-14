@@ -8,6 +8,19 @@
 
 ---
 
+## ⚠️ Read Before Reviewing
+
+Before reviewing IranOS architecture, contracts, tests, governance, treasury, oracle design, or monetary rules, please read the reviewer primers first:
+
+- [Reviewer Primer — English](docs/REVIEWER_PRIMER.md)
+- [راهنمای بازبین — فارسی](docs/REVIEWER_PRIMER_FA.md)
+
+IranOS is a sovereign resilience infrastructure, not a DeFi protocol, DAO, governance token system, central-bank simulator, or yield-maximization platform.
+
+Many design decisions that may appear unusual from a conventional blockchain perspective are intentional constitutional security properties. Reviews performed without understanding the project's constitutional doctrine may produce incorrect conclusions.
+
+---
+
 ## For External Reviewers (English)
 
 **IranOS** is an open-source blockchain governance operating system — a technical blueprint for a post-Islamic-Republic Iran. It encodes a secular constitutional monarchy (*Charter of Welfare and Justice*) into auditable Solidity smart contracts, governance protocols, and deployment documentation.
@@ -19,7 +32,9 @@
 - **Not production-ready.** No external audit. No formal verification. No deployment on any public network.
 
 **External reviewer entry points:**
-- [Step 13 Reviewer Index (English)](docs/step13/STEP13_REVIEWER_INDEX_EN.md) — start here
+- [Reviewer Primer — English](docs/REVIEWER_PRIMER.md) — read before reviewing
+- [راهنمای بازبین — فارسی](docs/REVIEWER_PRIMER_FA.md) — برای بازبین‌های فارسی‌زبان
+- [Step 13 Reviewer Index (English)](docs/step13/STEP13_REVIEWER_INDEX_EN.md) — start here after reading the primer
 - [SECURITY.md](SECURITY.md) — security status and non-claim policy
 - [LICENSE](LICENSE) — MIT
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — contributor conduct
@@ -27,6 +42,19 @@
 ---
 
 </div>
+
+## ⚠️ پیش از بازبینی بخوانید
+
+پیش از بررسی معماری، قراردادها، تست‌ها، حکمرانی، خزانه، طراحی اوراکل یا قواعد پولی IranOS، ابتدا این دو سند را بخوانید:
+
+- [راهنمای بازبین — فارسی](docs/REVIEWER_PRIMER_FA.md)
+- [Reviewer Primer — English](docs/REVIEWER_PRIMER.md)
+
+IranOS یک زیرساخت تاب‌آوری حاکمیتی است؛ نه پروژه DeFi، نه DAO، نه سیستم توکن‌محور حکمرانی، نه شبیه‌ساز بانک مرکزی و نه پلتفرم کسب سود.
+
+بسیاری از تصمیم‌های طراحی که ممکن است از نگاه رایج بلاک‌چین غیرمعمول به نظر برسند، ویژگی‌های امنیتی و قانون‌اساسیِ آگاهانه هستند. بازبینی بدون شناخت دکترین پروژه ممکن است به نتیجه‌گیری‌های اشتباه منجر شود.
+
+---
 
 **سیستم‌عامل حکمرانی بلاک‌چین‌محور برای ایران**
 
@@ -85,13 +113,16 @@
 
 ## شروع مشارکت
 
-۱. متن منشور را بخوانید:  
+۱. راهنمای بازبین را بخوانید:  
+[docs/REVIEWER_PRIMER_FA.md](https://github.com/fafa33/Iran-OS/blob/main/docs/REVIEWER_PRIMER_FA.md)
+
+۲. متن منشور را بخوانید:  
 [constitution/constitution-fa.md](https://github.com/fafa33/Iran-OS/blob/main/constitution/constitution-fa.md)
 
-۲. راهنمای مشارکت را بخوانید:  
+۳. راهنمای مشارکت را بخوانید:  
 [docs/contributing-fa.md](https://github.com/fafa33/Iran-OS/blob/main/docs/contributing-fa.md)
 
-۳. یک branch بسازید و Pull Request ارسال کنید.
+۴. یک branch بسازید و Pull Request ارسال کنید.
 
 <div dir="ltr">
 
