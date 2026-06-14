@@ -1,5 +1,18 @@
 # Pull Request
 
+## Reviewer Primer Confirmation
+
+Before submitting this PR, read the reviewer primer:
+
+- [Reviewer Primer — English](docs/REVIEWER_PRIMER.md)
+- [راهنمای بازبین — فارسی](docs/REVIEWER_PRIMER_FA.md)
+
+- [ ] I have read the reviewer primer before proposing this change.
+- [ ] I understand that IranOS is a sovereign resilience infrastructure, not a DeFi protocol, DAO, governance-token system, central-bank simulator, or yield-maximization platform.
+- [ ] This PR does not treat Kernel immutability, oracle non-sovereignty, fixed constitutional safeguards, or monetary discipline as ordinary implementation limitations.
+
+---
+
 ## Summary
 
 What does this PR change and why?
@@ -36,6 +49,19 @@ Does this PR affect any of the following? Check all that apply.
 - [ ] Deployment sequence (constructor dependencies, role wiring order)
 
 If any box above is checked, explain the impact:
+
+---
+
+## Constitutional Invariant Safety
+
+Confirm that this PR does not weaken any of the following unless explicitly documented and justified as a doctrine-level review item:
+
+- [ ] Kernel immutability is preserved.
+- [ ] Oracle signals remain evidence-only and non-sovereign.
+- [ ] Constitutional thresholds are not converted into ordinary configurable parameters.
+- [ ] Reserve protections and monetary discipline are not weakened.
+- [ ] Treasury mutation authority is not expanded through evidence records, oracle signals, reports, labels, or automation.
+- [ ] Final constitutional judgment is not fully delegated to automation.
 
 ---
 
