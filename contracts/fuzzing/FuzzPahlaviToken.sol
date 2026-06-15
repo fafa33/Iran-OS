@@ -13,8 +13,15 @@ pragma solidity ^0.8.20;
 //
 // Tested invariants:
 //   INV-01: totalSupply() <= MAX_SUPPLY (supply cap — TR-06 constitutional red line)
+//           Result: PASSING. reserveCompliant modifier on mint() is sufficient.
+//
 //   INV-02: (totalReserves * 1000) / totalSupply() >= MIN_RESERVE_RATIO
-//            (33.3% reserve floor — may fail; updateReserves(0) is a known gap)
+//           Result: FAILING IN PRIVILEGED HARNESS; not currently production-reachable
+//           based on available Kernel call paths. IranOS_Kernel holds KERNEL_ROLE on
+//           PahlaviToken but contains no function that calls updateReserves(). The gap
+//           becomes live if reserve sync is added to the Kernel without a floor guard.
+//           Counterexample: doMint(1) → doUpdateReserves(0)
+//           See: docs/reports/ECHIDNA_READINESS_ASSESSMENT.md §INV-02 production note.
 //
 // See: docs/reports/ECHIDNA_READINESS_ASSESSMENT.md
 // ─────────────────────────────────────────────────────────────────────────────
@@ -81,9 +88,17 @@ contract FuzzPahlaviToken {
     }
 
     /// INV-02: Reserve ratio floor — 33.3% minimum at all times.
-    /// Expected: FAILS. doMint(x) followed by doUpdateReserves(0) produces
-    /// totalReserves == 0 with totalSupply > 0, violating (0 * 1000) / supply >= 333.
-    /// This documents a real gap: updateReserves() has no lower-bound guard.
+    /// Status: FAILING IN PRIVILEGED HARNESS; not currently production-reachable
+    ///   based on available Kernel call paths.
+    /// Counterexample (confirmed): doMint(1) → doUpdateReserves(0)
+    ///   After: totalSupply = 1, totalReserves = 0 → (0*1000)/1 = 0 < 333 → FAILS
+    /// Root gap: updateReserves() accepts any uint256 with no lower-bound guard
+    ///   and no post-update ratio check. The mint-time reserveCompliant modifier
+    ///   does not protect against post-mint reserve reduction.
+    /// Production note: IranOS_Kernel (the sole KERNEL_ROLE holder on PahlaviToken)
+    ///   has no function that calls PahlaviToken.updateReserves(). The gap is
+    ///   forward-looking: it activates if reserve sync is wired into the Kernel
+    ///   without adding a corresponding floor guard to updateReserves() first.
     function echidna_reserve_ratio() public view returns (bool) {
         uint256 supply = token.totalSupply();
         if (supply == 0) return true;

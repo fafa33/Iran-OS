@@ -136,8 +136,15 @@ For each invariant:
 **Why it matters:** `MIN_RESERVE_RATIO = 333` (33.3%) is a constitutional monetary safeguard. The check `(totalReserves × 1000) / newSupply >= 333` is applied at mint time. However, `updateReserves()` can lower `totalReserves` after a mint without re-checking the ratio against the already-existing supply. A fuzzer can discover sequences where `updateReserves(0)` is called after minting.  
 **Expected property:** After any sequence of `mint()` + `updateReserves()`, if `totalSupply() > 0` then `(totalReserves × 1000) / totalSupply() >= MIN_RESERVE_RATIO`.  
 **Difficulty:** Medium — requires fuzz actor with both MINTER_ROLE and KERNEL_ROLE; exposes a known gap in reserve enforcement.  
-**Phase:** 1  
-**Note:** This invariant is likely to produce a real finding. The `reserveCompliant` modifier guards minting but not reserve reduction. A later `updateReserves(0)` call from the Kernel is valid per access control and can legally set reserves to zero after minting.
+**Phase:** 1
+
+**Echidna result (2026-06-15):** FAILING IN PRIVILEGED HARNESS; not currently production-reachable based on available Kernel call paths.
+
+- Counterexample confirmed: `doMint(1) → doUpdateReserves(0)` — 2-call sequence found within first 500 iterations.
+- Root gap: `updateReserves(uint256)` accepts any value including 0 with no lower-bound guard and no post-update ratio check. The mint-time `reserveCompliant` modifier does not protect against post-mint reserve reduction.
+- Production reachability: `KERNEL_ROLE` on `PahlaviToken` is held by `IranOS_Kernel`. Grep across all 25 production contracts confirms `IranOS_Kernel` contains zero calls to `updateReserves()` — the function is effectively unreachable from any current production transaction path.
+- Forward-looking risk: The NatSpec on `updateReserves()` states it is intended to be "called by API3Oracle through Kernel." That routing function does not yet exist in `IranOS_Kernel`. When oracle-to-token reserve synchronization is implemented in a future Kernel version, this gap will become live unless a floor guard is added first.
+- Classification: **Design completeness gap — forward-looking, not currently exploitable.**
 
 ---
 
