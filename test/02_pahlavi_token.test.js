@@ -434,4 +434,154 @@ describe("PahlaviToken", function () {
       expect(await t.totalSupply()).to.equal(supplyAtFloor);
     });
   });
+
+  // ─────────────────────────────────────────
+  // INV-01 Supply Cap Follow-Up (R-1..R-5)
+  // پیگیری ممیزی INV-01 — سقف عرضه پهلوی
+  // Source: docs/reports/INV01_SUPPLY_CAP_AUDIT.md §13
+  // ─────────────────────────────────────────
+  describe("INV-01 Supply Cap Follow-Up (R-1..R-5)", function () {
+    // reserves=300B in fixture → ratio at 900B supply = floor(300B*1000/900B) = 333,
+    // exactly the reserve floor, so a mint to the cap passes the reserve check and the
+    // cap boundary can be exercised without engaging reserve-ratio (INV-02) behavior.
+    const MAX_SUPPLY_AMOUNT = ethers.parseUnits("900000000000", 18);
+
+    it("R-1: burn frees capacity and remint recycles up to cap; supply never exceeds MAX_SUPPLY", async function () {
+      const burnAmount = ethers.parseUnits("1000", 18);
+
+      // mint to exactly MAX_SUPPLY
+      await token.connect(swf).mint(user1.address, MAX_SUPPLY_AMOUNT, "R-1 fill");
+      expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT);
+      expect(await token.remainingMintCapacity()).to.equal(0n);
+      expect(await token.canMint(1n)).to.be.false;
+
+      // burn a fixed amount — capacity reopens by exactly that amount
+      await token.connect(swf).burn(user1.address, burnAmount, "R-1 retire");
+      expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT - burnAmount);
+      expect(await token.remainingMintCapacity()).to.equal(burnAmount);
+
+      // remint the burned amount — succeeds and returns to the cap
+      await token.connect(swf).mint(user1.address, burnAmount, "R-1 recycle");
+      expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT);
+
+      // 1 wei above the cap reverts; supply unchanged
+      await expect(
+        token.connect(swf).mint(user1.address, 1n, "R-1 over")
+      ).to.be.revertedWith("PAH: exceeds liquidity cap");
+
+      // standing supply never exceeded the cap despite cumulative issuance > cap
+      expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT);
+    });
+
+    it("R-2: cap is global across multiple minters — aggregate cannot exceed MAX_SUPPLY", async function () {
+      const k = ethers.parseUnits("5000", 18);
+
+      // kernel (DEFAULT_ADMIN_ROLE) grants a second minter — audit finding F-1
+      await token.connect(kernel).grantRole(await token.MINTER_ROLE(), user2.address);
+      expect(await token.hasRole(await token.MINTER_ROLE(), user2.address)).to.be.true;
+
+      // two distinct minters mint interleaved, summing exactly to the cap
+      await token.connect(swf).mint(user1.address, MAX_SUPPLY_AMOUNT - k, "R-2 m1");
+      await token.connect(user2).mint(user2.address, k, "R-2 m2");
+      expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT);
+
+      // neither minter can push past the global cap, regardless of which one tries
+      await expect(
+        token.connect(user2).mint(user2.address, 1n, "R-2 m2 over")
+      ).to.be.revertedWith("PAH: exceeds liquidity cap");
+      await expect(
+        token.connect(swf).mint(user1.address, 1n, "R-2 m1 over")
+      ).to.be.revertedWith("PAH: exceeds liquidity cap");
+
+      // aggregate supply remains exactly at the cap
+      expect(await token.totalSupply()).to.equal(MAX_SUPPLY_AMOUNT);
+    });
+
+    it("R-3: emergency mode halts minting regardless of available capacity; cap state unchanged", async function () {
+      const mintAmount = ethers.parseUnits("1000", 18);
+
+      await token.connect(kernel).activateEmergencyMode();
+      expect(await token.emergencyMode()).to.be.true;
+
+      // mint is blocked by the emergency guard (which precedes the cap check)
+      await expect(
+        token.connect(swf).mint(user1.address, mintAmount, "R-3 blocked")
+      ).to.be.revertedWith("PAH: system in emergency mode");
+
+      // supply and remaining capacity untouched
+      expect(await token.totalSupply()).to.equal(0n);
+      expect(await token.remainingMintCapacity()).to.equal(MAX_SUPPLY_AMOUNT);
+
+      // positive control: after deactivation, the same mint succeeds
+      await token.connect(kernel).deactivateEmergencyMode();
+      expect(await token.emergencyMode()).to.be.false;
+      await expect(
+        token.connect(swf).mint(user1.address, mintAmount, "R-3 resumed")
+      ).to.not.be.reverted;
+      expect(await token.totalSupply()).to.equal(mintAmount);
+    });
+
+    it("R-4: PahlaviToken.MAX_SUPPLY equals Kernel.LIQUIDITY_CAP and both equal 900B PAH", async function () {
+      // deploy the Kernel locally — constructor is (sovereign, court, oracle, swf)
+      const Kernel = await ethers.getContractFactory("IranOS_Kernel");
+      const k = await Kernel.deploy(
+        kernel.address,   // sovereign
+        user1.address,    // court
+        user2.address,    // oracle
+        swf.address       // swf
+      );
+      await k.waitForDeployment();
+
+      const tokenCap = await token.MAX_SUPPLY();
+      const kernelCap = await k.LIQUIDITY_CAP();
+
+      expect(tokenCap).to.equal(kernelCap);
+      expect(tokenCap).to.equal(MAX_SUPPLY_AMOUNT);
+      expect(kernelCap).to.equal(MAX_SUPPLY_AMOUNT);
+    });
+
+    it("R-5: view functions agree with the cap gate across a mint/burn/remint sequence", async function () {
+      // helper: remainingMintCapacity must always equal MAX_SUPPLY - totalSupply
+      const assertCapacityConsistent = async () => {
+        const supply = await token.totalSupply();
+        expect(await token.remainingMintCapacity()).to.equal(MAX_SUPPLY_AMOUNT - supply);
+      };
+
+      const A = ethers.parseUnits("100000000000", 18); // 100B
+      const B = ethers.parseUnits("100000000000", 18); // 100B
+      const C = ethers.parseUnits("50000000000", 18);  //  50B (burn)
+      const D = ethers.parseUnits("100000000000", 18); // 100B
+
+      await assertCapacityConsistent();
+
+      // step A
+      expect(await token.canMint(A)).to.be.true;
+      await token.connect(swf).mint(user1.address, A, "R-5 A");
+      await assertCapacityConsistent();
+
+      // step B
+      expect(await token.canMint(B)).to.be.true;
+      await token.connect(swf).mint(user1.address, B, "R-5 B");
+      await assertCapacityConsistent();
+
+      // burn C — capacity should grow back
+      await token.connect(swf).burn(user1.address, C, "R-5 burn C");
+      await assertCapacityConsistent();
+
+      // step D
+      expect(await token.canMint(D)).to.be.true;
+      await token.connect(swf).mint(user1.address, D, "R-5 D");
+      await assertCapacityConsistent();
+
+      // over-cap boundary: canMint(false) AND the mint reverts with the cap string
+      const overCap = MAX_SUPPLY_AMOUNT; // current supply is 250B; +900B exceeds cap
+      expect(await token.canMint(overCap)).to.be.false;
+      await expect(
+        token.connect(swf).mint(user1.address, overCap, "R-5 over")
+      ).to.be.revertedWith("PAH: exceeds liquidity cap");
+
+      // view/state still consistent after the rejected mint
+      await assertCapacityConsistent();
+    });
+  });
 });
