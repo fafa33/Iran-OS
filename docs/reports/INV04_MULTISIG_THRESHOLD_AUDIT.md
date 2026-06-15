@@ -1,10 +1,10 @@
 # INV-04 — Multisig Threshold: Complete Authority Audit
 ## IranOS Step 12 Security Analysis
 
-**Version:** 1.0.0
+**Version:** 1.1.0 (Corrective — addresses authority-capture gap in v1.0.0)
 **Date:** 2026-06-15
 **Status:** Analysis Only — No Code Changes
-**Scope:** All kernel multisig logic; signature counting, uniqueness, gating, and replay resistance
+**Scope:** All kernel multisig logic; signature counting, uniqueness, gating, replay resistance, and signer-independence
 
 > **Disclaimers**
 > - This document does not claim production readiness.
@@ -18,15 +18,17 @@
 ## Table of Contents
 
 1. [Invariant Definition](#1-invariant-definition)
-2. [Reachable Authority Graph](#2-reachable-authority-graph)
-3. [Exact Functions and State Variables](#3-exact-functions-and-state-variables)
-4. [Enforcement Point Analysis](#4-enforcement-point-analysis)
-5. [Attack Surface Evaluation](#5-attack-surface-evaluation)
-6. [Adversarial Scenarios](#6-adversarial-scenarios)
-7. [Proof of Threshold Enforcement](#7-proof-of-threshold-enforcement)
-8. [Risk Rating](#8-risk-rating)
-9. [Recommended Invariant Harness Design](#9-recommended-invariant-harness-design)
-10. [Findings Summary](#10-findings-summary)
+2. [Critical Distinction: Address Count vs. Authority Independence](#2-critical-distinction-address-count-vs-authority-independence)
+3. [Reachable Authority Graph](#3-reachable-authority-graph)
+4. [Exact Functions and State Variables](#4-exact-functions-and-state-variables)
+5. [Enforcement Point Analysis](#5-enforcement-point-analysis)
+6. [Attack Surface Evaluation](#6-attack-surface-evaluation)
+7. [Adversarial Scenarios](#7-adversarial-scenarios)
+8. [Proof of Threshold Enforcement](#8-proof-of-threshold-enforcement)
+9. [Risk Rating](#9-risk-rating)
+10. [Recommended Invariant Harness Design](#10-recommended-invariant-harness-design)
+11. [Follow-up Recommendations](#11-follow-up-recommendations)
+12. [Findings Summary](#12-findings-summary)
 
 ---
 
@@ -38,20 +40,84 @@
 
 ### Constitutional Significance
 
-`MULTISIG_THRESHOLD = 7` is a hard-coded constitutional minimum representing 7-of-9 court signatures required to activate the trigger protocol. This threshold encodes the principle that no individual — including the Sovereign — can unilaterally execute constitutional enforcement. It requires supermajority agreement among the independent judiciary.
+`MULTISIG_THRESHOLD = 7` is a hard-coded constitutional minimum representing 7-of-9 court signatures required to activate the trigger protocol. The constitutional intent is that no individual — including the Sovereign — can unilaterally execute constitutional enforcement without supermajority agreement among an **independent** judiciary.
 
-A threshold bypass would reduce the effective activation requirement from 7-of-9 to as few as 1-of-1 — destroying the constitutional separation between accusation (oracle flagging) and enforcement (court confirmation).
+A threshold bypass via counting logic would reduce the effective activation requirement from 7-of-9 to as few as 1-of-1. This type of bypass is architecturally impossible (see §5, §8).
 
-### Invariant Statement
+However, a second class of bypass exists at the authority layer: the Sovereign (`DEFAULT_ADMIN_ROLE`) can grant `COURT_ROLE` to any addresses — including addresses under the Sovereign's own control — and satisfy the 7-distinct-address threshold through controlled proxies. This is **not** a duplicate-signature bug and **not** a threshold-counting bug. It is a **signer-independence gap**: the contract enforces 7 distinct addresses but does not enforce that those addresses represent 7 independent authorities.
+
+### Corrected Invariant Statement
+
+**What the contract enforces (code-level guarantee):**
 
 For any `violationId` where `violations[violationId].triggered == true`:
 1. `violations[violationId].signaturesCount >= 7`
-2. The signatures came from 7 **distinct** addresses, each holding `COURT_ROLE` at the time of signing
+2. The signatures came from 7 **distinct** addresses (by EVM `msg.sender`), each holding `COURT_ROLE` at the time of signing
 3. No single address contributed more than one counted signature to `signaturesCount`
+
+**What the contract does NOT enforce (constitutional gap):**
+
+4. That the 7 signing addresses represent 7 **independent** court authorities
+5. That the Sovereign did not grant `COURT_ROLE` to all 7 signing addresses
+6. That a single controlling actor did not orchestrate all 7 signatures through controlled accounts
+
+INV-04 holds as a **7-distinct-address invariant**. It does not hold as a **7-independent-authority invariant**.
 
 ---
 
-## 2. Reachable Authority Graph
+## 2. Critical Distinction: Address Count vs. Authority Independence
+
+This section documents the finding that corrects v1.0.0 of this audit.
+
+### 2.1 What "7 distinct addresses" means
+
+The contract enforces that 7 different EVM addresses — each with `COURT_ROLE` at signing time — contributed to `signaturesCount` before `_activateTrigger()` was called. This is enforced by GATE C (`violationSignatures[id][msg.sender]` write-once-true) and the threshold gate. It is a rigorous code-level property.
+
+**This is what INV-04 currently guarantees.**
+
+### 2.2 What "7 independent authorities" would mean
+
+The constitutional design intent is that 7 independent court members — not controlled by a single actor — must agree before enforcement proceeds. This would require that no single entity controls the private keys of 7 or more `COURT_ROLE` holders, and that `COURT_ROLE` grants are subject to an independent governance process.
+
+**This is NOT what the current contract enforces.**
+
+### 2.3 The authority-capture path
+
+The Sovereign (`DEFAULT_ADMIN_ROLE`) administers all roles in `IranOS_Kernel`. There is no constraint preventing the Sovereign from:
+
+1. Granting `ORACLE_ROLE` to an address they control → calling `flagViolation()` to create a violation record
+2. Granting `COURT_ROLE` to 7 or more addresses they control (each a distinct EVM address)
+3. Having all 7 controlled addresses call `signViolation()` → threshold met → `_activateTrigger()` fires
+
+**Result:** The Sovereign can satisfy the 7-distinct-address threshold entirely through controlled proxies, achieving effective unilateral trigger activation without any genuinely independent court participation. No signature-counting rule is violated. No gate is bypassed. The code operates exactly as designed — but the output (trigger activation) is achieved by a single controlling actor.
+
+This is a **current risk**, not a forward-looking one. The mechanism is available in the deployed contract today.
+
+### 2.4 Scope of the gap
+
+| Property | Enforced by contract? |
+|---|---|
+| `signaturesCount >= 7` before trigger | **YES** |
+| 7 distinct `msg.sender` addresses signed | **YES** |
+| No address signed twice | **YES** |
+| 7 addresses are independent of each other | **NO** |
+| 7 addresses are independent of the Sovereign | **NO** |
+| Sovereign cannot orchestrate all 7 signatures | **NO** |
+| COURT_ROLE grants require independent governance | **NO** |
+
+### 2.5 Relationship to v1.0.0 classification
+
+v1.0.0 classified the `AccessControl.grantRole()` path as:
+> "Governance trust assumption gap. Not a code-level threshold bypass... a forward-looking architectural note, not a current vulnerability."
+
+**This classification was incorrect.** The gap is:
+- **Current**, not forward-looking — the path is available in the deployed contract with no preconditions beyond Sovereign key control
+- **High-impact**, not low — it enables effective unilateral trigger activation by the Sovereign through controlled proxies
+- **Authority-capture**, not threshold-bypass — the counting mechanism works correctly; the independence assumption is what fails
+
+---
+
+## 3. Reachable Authority Graph
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -112,7 +178,7 @@ STEP 4 — POST-TRIGGER STATE
 
 ---
 
-## 3. Exact Functions and State Variables
+## 4. Exact Functions and State Variables
 
 ### State variables involved in threshold enforcement
 
@@ -150,7 +216,7 @@ uint256 public violationCount;                         // monotonically incremen
 
 ---
 
-## 4. Enforcement Point Analysis
+## 5. Enforcement Point Analysis
 
 ### 4.1 GATE A — Violation Existence Check
 
@@ -219,7 +285,7 @@ This is the exclusive gate to `_activateTrigger()`. `_activateTrigger()` is `int
 
 ---
 
-## 5. Attack Surface Evaluation
+## 6. Attack Surface Evaluation
 
 ### 5.1 Can `signaturesCount` reach 7 with fewer than 7 distinct signers?
 
@@ -255,24 +321,24 @@ For `signaturesCount` to reach 7, exactly 7 distinct addresses must have called 
 
 **Classification:** Non-blocking edge case. Not a threshold bypass.
 
-### 5.7 The `AccessControl.grantRole()` Inherited Path
+### 6.7 The `AccessControl.grantRole()` Inherited Path — Authority-Capture Risk
 
 `IranOS_Kernel` inherits from OpenZeppelin `AccessControl`. The inherited `grantRole(role, account)` is callable by any `DEFAULT_ADMIN_ROLE` holder (the Sovereign). This function:
 - Does NOT go through `grantOfficialAccess()`
 - Does NOT enforce the `notLocked` modifier
 - Is not explicitly overridden in `IranOS_Kernel`
 
-**What this means:** During an emergency lock (when `emergencyLockActive == true`), the Sovereign cannot call `grantOfficialAccess()` (blocked by `notLocked`), but COULD call the inherited `AccessControl.grantRole(COURT_ROLE, newAddr)` directly to add a new court member.
+**Does this bypass the 7-distinct-address threshold?** No. The counting logic is not circumvented. Each controlled address contributes at most 1 signature per violationId.
 
-**Does this bypass the 7-of-9 threshold?** No. Adding a new COURT_ROLE holder does not change the threshold value or the counting logic. Any new court member still contributes at most 1 signature per violationId. To fire a trigger, 7 distinct addresses must still sign.
+**Does this enable unilateral trigger activation by the Sovereign?** **Yes.** The Sovereign can create 7 controlled addresses, grant each `COURT_ROLE` (via the inherited path, bypassing `notLocked`), and have all 7 sign any violation — including one flagged by a Sovereign-controlled oracle address. This satisfies the 7-distinct-address threshold entirely through controlled proxies.
 
-**Does this weaken the emergency lock's isolation?** Partially. The `notLocked` guard on `grantOfficialAccess()` is intended to prevent role changes during a crisis. The inherited `grantRole()` bypasses this intent. During emergency lock, a Sovereign could expand the court roster via the inherited path.
+**Classification (corrected from v1.0.0):** **Current high-impact authority-capture risk.** This is not a duplicate-signature bug. This is not a threshold-counting bug. This is a role-administration / signer-independence gap that allows effective unilateral trigger activation by the Sovereign. The gap is available in the current deployed contract with no additional preconditions.
 
-**Classification:** Governance trust assumption gap. Not a code-level threshold bypass. The Sovereign must be trusted not to abuse DEFAULT_ADMIN_ROLE during an emergency. This is a forward-looking architectural note, not a current vulnerability.
+See §2 (Critical Distinction) and Scenario G (§7) for full analysis.
 
 ---
 
-## 6. Adversarial Scenarios
+## 7. Adversarial Scenarios
 
 ### Scenario A — Court Member Attempts Duplicate Signature
 
@@ -374,6 +440,68 @@ Sovereign calls: AccessControl.grantRole(COURT_ROLE, newAddr)
 
 ---
 
+### Scenario G — Sovereign Authority Capture via Controlled Signer Pool
+
+**Setup:** The Sovereign controls addresses `0xC01` through `0xC07` (7 EOA accounts or contracts under Sovereign control). The Sovereign also controls address `0xOR1` (a controlled oracle).
+
+**Goal:** Activate trigger against an arbitrary `offender` without genuine court participation.
+
+**Trace:**
+```
+Pre-condition: No emergency lock active.
+
+Step 1 — Establish controlled oracle:
+  Sovereign calls: grantOfficialAccess(0xOR1, ORACLE_ROLE)
+    → hasRole(ORACLE_ROLE, 0xOR1) = true
+
+Step 2 — Establish controlled court pool:
+  Sovereign calls grantOfficialAccess(0xC01..0xC07, COURT_ROLE) [7 calls]
+  OR
+  Sovereign calls AccessControl.grantRole(COURT_ROLE, 0xC01..0xC07) [inherited path]
+    → hasRole(COURT_ROLE, 0xC01..0xC07) = true (7 addresses)
+
+Step 3 — Flag violation via controlled oracle:
+  0xOR1 calls: flagViolation(code, offender, reason)
+    → ORACLE_ROLE check: passes (0xOR1 has ORACLE_ROLE)
+    → violations[1] created: signaturesCount=0, triggered=false
+    → if code ≤ 3: emergencyLockActive = true
+
+Step 4 — Sign via controlled court pool (7 transactions):
+  0xC01 calls: signViolation(1) → GATE A/B/C pass → signaturesCount = 1
+  0xC02 calls: signViolation(1) → GATE A/B/C pass → signaturesCount = 2
+  0xC03 calls: signViolation(1) → GATE A/B/C pass → signaturesCount = 3
+  0xC04 calls: signViolation(1) → GATE A/B/C pass → signaturesCount = 4
+  0xC05 calls: signViolation(1) → GATE A/B/C pass → signaturesCount = 5
+  0xC06 calls: signViolation(1) → GATE A/B/C pass → signaturesCount = 6
+  0xC07 calls: signViolation(1) → GATE A/B/C pass → signaturesCount = 7
+    → signaturesCount >= MULTISIG_THRESHOLD (7)
+    → record.courtConfirmed = true
+    → _activateTrigger(1) fires
+    → offender's roles revoked; TriggerProtocol.executeTrigger() called
+
+Result: Trigger activated. All gates passed. No counting rule violated.
+        The 7-distinct-address invariant holds.
+        No genuinely independent court authority participated.
+```
+
+**Does any gate prevent this?**
+
+| Gate | Status | Reason |
+|---|---|---|
+| GATE A (violation exists) | PASSES | Oracle legitimately created violation |
+| GATE B (not triggered) | PASSES | First trigger attempt |
+| GATE C (no duplicate) | PASSES | 7 distinct addresses; each signs once |
+| Threshold gate (≥ 7) | PASSES | Exactly 7 addresses signed |
+| GATE D (double-trigger) | PASSES | First activation |
+| `onlyCourt` modifier | PASSES | All 7 addresses hold COURT_ROLE |
+| `onlyOracle` modifier | PASSES | 0xOR1 holds ORACLE_ROLE |
+
+**All gates pass. No code-level bypass occurs. The trigger fires correctly by the rules of the contract — but effective control was exercised by a single actor (the Sovereign).**
+
+**Classification:** Current high-impact authority-capture risk. Role-administration / signer-independence gap. Not prevented by the counting architecture.
+
+---
+
 ### Scenario F — `_activateTrigger()` Called Twice (Internal Double-Trigger)
 
 **Setup:** Somehow `_activateTrigger()` is called twice for the same violationId. (This is currently impossible via the external call path but evaluated defensively.)
@@ -393,7 +521,7 @@ Second call to _activateTrigger(1):
 
 ---
 
-## 7. Proof of Threshold Enforcement
+## 8. Proof of Threshold Enforcement
 
 **Claim:** `violations[id].triggered == true` implies `violations[id].signaturesCount >= 7` and 7 distinct addresses contributed to that count.
 
@@ -445,17 +573,19 @@ Combined: triggered == true ↔ at least 7 distinct COURT_ROLE holders
 signed the violation.
 ```
 
-**QED.** The threshold invariant is enforced by architecture with no known bypass.
+**QED.** The 7-distinct-address threshold invariant is enforced by architecture with no known bypass at the counting layer.
+
+**Note on scope:** This proof establishes that `signaturesCount >= 7` and each increment came from a distinct address. It does not establish, and cannot establish, that those distinct addresses represent independent court authorities. The independence property requires constraints on role administration that do not currently exist in the contract.
 
 ---
 
-## 8. Risk Rating
+## 9. Risk Rating
 
-### Current State
+### Risk by Category
 
 | Risk Category | Rating | Basis |
 |---|---|---|
-| Trigger with < 7 signatures | NONE | Threshold gate is the exclusive path to `_activateTrigger()`; architecturally impossible |
+| Trigger with < 7 signatures (counting bypass) | NONE | Threshold gate is the exclusive path to `_activateTrigger()`; architecturally impossible |
 | Duplicate signature counting | NONE | Per-address deduplication flag is permanent; never reset |
 | Replay attack | NONE | `violationSignatures[id][addr]` is write-once-true; no reset function exists |
 | Signature via role replacement | NONE | Flag persists through role revoke/regrant cycles |
@@ -463,16 +593,27 @@ signed the violation.
 | Post-trigger re-signing | NONE | GATE B permanently blocks; `triggered` is monotonically `false→true` |
 | violationId collision | NONE | `violationCount` monotonically increments; IDs never reused |
 | `signaturesCount` overflow | NONE (theoretical) | Trigger fires at 7; post-trigger GATE B prevents further increments |
-| Offender self-signing | LOW (edge case) | Allowed; does not help avoid execution; not a bypass |
-| Inherited `grantRole()` during emergency | LOW-MEDIUM (forward-looking) | Bypasses `notLocked` intent for court expansion; does not bypass threshold value |
+| Offender self-signing | LOW (edge case) | Allowed; does not help avoid execution; not a counting bypass |
+| **Authority capture via admin-controlled signer pool** | **HIGH (current)** | Sovereign can grant COURT_ROLE + ORACLE_ROLE to controlled addresses; satisfies 7-distinct-address threshold through proxies; effective unilateral trigger activation |
+| Inherited `grantRole()` bypassing `notLocked` | MEDIUM | Enables role grants during emergency lock; root enabler of authority-capture path |
 
-### Overall Rating: **LOW**
+### Risk Classification for Authority-Capture Finding
 
-The multisig threshold is one of the most thoroughly enforced properties in the system. Five independent enforcement layers (GATE A through GATE D plus the threshold gate) must all pass for execution to proceed.
+- **Category:** Role-administration / signer-independence gap
+- **Current or forward-looking:** CURRENT — no preconditions beyond Sovereign key control
+- **Is this a duplicate-signature bug?** NO — counting logic is correct
+- **Is this a threshold-counting bug?** NO — MULTISIG_THRESHOLD = 7 is enforced as designed
+- **What fails:** The assumption that 7 distinct addresses implies 7 independent authorities
+- **Who can exploit:** Only the Sovereign (`DEFAULT_ADMIN_ROLE` holder)
+- **Impact if exploited:** Unilateral trigger activation against any target
+
+### Overall Rating: **HIGH** (revised from LOW in v1.0.0)
+
+The 7-distinct-address threshold counting is one of the most thoroughly enforced properties in the system. However, the authority-independence property — which is the constitutional purpose of the threshold — is not enforced. The Sovereign can satisfy the counting requirement through controlled proxies.
 
 ---
 
-## 9. Recommended Invariant Harness Design
+## 10. Recommended Invariant Harness Design
 
 ### Why INV-04 harness is more complex than INV-01/02/03
 
@@ -637,10 +778,42 @@ contract FuzzKernelMultisig {
 
 ### Expected Echidna results
 
-| Property | Expected result |
-|---|---|
-| `echidna_trigger_requires_threshold` | PASSING |
-| `echidna_no_single_signer_can_trigger` | PASSING |
+| Property | Expected result | Tests |
+|---|---|---|
+| `echidna_trigger_requires_threshold` | PASSING | Duplicate-signature rejection; counting correctness |
+| `echidna_no_single_signer_can_trigger` | PASSING | Address-distinctness enforcement |
+| `echidna_admin_capture_possible` (new) | **FAILING** | Demonstrates authority-capture gap (Sovereign grants all COURT_ROLE) |
+
+### Additional harness property for authority-capture testing
+
+```solidity
+/// INV-04c: Authority-capture property — EXPECTED TO FAIL.
+/// Demonstrates that the Sovereign (harness itself, holding DEFAULT_ADMIN_ROLE)
+/// can grant COURT_ROLE to 7 controlled addresses and trigger activation.
+/// A FAILING result here is the correct finding — it confirms the gap.
+function echidna_no_admin_capture() public view returns (bool) {
+    uint256 count = kernel.violationCount();
+    for (uint256 i = 1; i <= count; i++) {
+        (,,,,,, bool triggered) = _getViolation(i);
+        if (!triggered) continue;
+        // Check: were all signers granted COURT_ROLE by the harness (sovereign)?
+        // If the harness was able to produce a triggered violation using only
+        // addresses it controls (courts[0..8]), that demonstrates the capture gap.
+        uint8 harnessControlledSigners = 0;
+        for (uint j = 0; j < 9; j++) {
+            if (kernel.violationSignatures(i, address(courts[j]))) {
+                harnessControlledSigners++;
+            }
+        }
+        // If all 7 signatures came from harness-controlled court helpers,
+        // the trigger was achieved through admin-controlled proxies alone.
+        if (harnessControlledSigners >= 7) return false; // CAPTURE DEMONSTRATED
+    }
+    return true;
+}
+```
+
+**Expected result:** FAILING (the harness controls all CourtHelpers; it will naturally use them to sign; this is the correct finding — the capture path is real and exercisable.)
 
 ### Implementation notes
 
@@ -649,14 +822,64 @@ contract FuzzKernelMultisig {
 - `violationSignatures(uint256, address)` is a public mapping — accessible directly.
 - The constructor's circular dependency (CourtHelper needs Kernel address; Kernel constructor needs CourtHelper address) requires deploying CourtHelpers twice or using a two-phase init. The sketch above shows the pattern; a cleaner implementation would use a `setKernel()` on CourtHelper.
 - This harness requires the Kernel to be deployed with `address(this)` as sovereign, which grants the harness `notLocked`-exempt DEFAULT_ADMIN_ROLE. This is an intentional harness-only privilege.
+- The `echidna_no_admin_capture` property is intentionally expected to FAIL — its failure demonstrates the authority-capture gap rather than a harness error.
 
 ---
 
-## 10. Findings Summary
+## 11. Follow-up Recommendations
 
-### Question 1: Trigger execution with fewer than 7 signatures?
+The following recommendations address the authority-capture gap. They are recorded here for governance consideration. No production code changes are made in this document.
 
-**IMPOSSIBLE.** `_activateTrigger()` is `internal` and reachable only through the `signaturesCount >= MULTISIG_THRESHOLD` gate inside `signViolation()`. The gate cannot be reached otherwise.
+### R-01: Fixed Court Roster or Independent Court Registry
+
+Replace the Sovereign's unilateral ability to add `COURT_ROLE` holders with a process that requires independent confirmation. Options:
+
+- **Fixed roster at deployment:** Include all 9 court member addresses in the constructor; make `COURT_ROLE` non-grantable after deployment by removing the ability to call `grantOfficialAccess` for `COURT_ROLE` post-deploy.
+- **Independent court registry:** A separate `CourtRegistry` contract controlled by a multisig of existing court members (not the Sovereign) manages court membership changes. `grantOfficialAccess` for `COURT_ROLE` requires CourtRegistry approval before the Kernel executes it.
+
+### R-02: Constraints on COURT_ROLE Grants
+
+Add a check in `grantOfficialAccess()` that limits the total number of `COURT_ROLE` holders, or requires existing court member supermajority approval before a new member is added. This prevents a Sovereign from expanding the court roster to include controlled addresses.
+
+### R-03: Emergency-Lock Restriction on Role Grants
+
+Override `grantRole()` in `IranOS_Kernel` to enforce `notLocked`:
+
+```solidity
+function grantRole(bytes32 role, address account)
+    public
+    override
+    notLocked
+{
+    super.grantRole(role, account);
+}
+```
+
+This prevents the Sovereign from expanding the court roster during an active emergency lock via the inherited OZ path — closing the most acute form of the capture gap (where the Sovereign uses a crisis to consolidate control).
+
+### R-04: Separate Governance Process for Court Membership
+
+Require that `COURT_ROLE` grants go through the `ConstitutionGuard.proposeLaw()` → court-approval flow rather than a direct Sovereign administrative action. This introduces a deliberation layer before any court roster change takes effect.
+
+### R-05: Echidna Harness Enhancement
+
+A future Echidna harness for INV-04 should test **both** sub-invariants explicitly:
+
+| Property | Expected result | What it tests |
+|---|---|---|
+| `echidna_trigger_requires_threshold` | PASSING | Duplicate-signer rejection; counting correctness |
+| `echidna_no_single_signer_can_trigger` | PASSING | Address-distinctness at the counting layer |
+| `echidna_no_admin_capture` | **FAILING** (demonstrates gap) | Signer-independence / authority-capture |
+
+The `FAILING` result on `echidna_no_admin_capture` is the correct outcome: it documents the gap for governance consideration rather than claiming the system is secure against it.
+
+---
+
+## 12. Findings Summary
+
+### Question 1: Trigger execution with fewer than 7 distinct address signatures?
+
+**IMPOSSIBLE.** `_activateTrigger()` is `internal` and reachable only through the `signaturesCount >= MULTISIG_THRESHOLD` gate inside `signViolation()`. GATE C ensures each address contributes at most 1 increment. The counting architecture has no known bypass.
 
 ### Question 2: Duplicate signatures counting multiple times?
 
@@ -669,18 +892,29 @@ contract FuzzKernelMultisig {
 | Replay (same address, same violation) | NO | GATE C: flag persists; revert on re-entry |
 | Replacement (revoke+regrant role to same address) | NO | Flag bound to address, not role; persists through role cycle |
 | Reset (clear signaturesCount) | NO | No function resets signaturesCount after initialization |
-| Overwrite (write to signaturesCount externally) | NO | Only written in kernel.sol flagViolation() and signViolation(); no external contract writes to it |
+| Overwrite (write to signaturesCount externally) | NO | Only written in kernel.sol; no external contract writes to it |
 | State transition (triggered = false) | NO | triggered is monotonically false→true; no function reverses it |
-| Role expansion during emergency via inherited grantRole() | PARTIAL | Does not bypass threshold counting; weakens notLocked isolation for court roster. Forward-looking risk. |
+| Role expansion via inherited `grantRole()` | PARTIAL | Does not bypass counting; root enabler of authority-capture path |
 | Offender self-signing | EDGE CASE | Allowed; contributes to threshold; does not help offender avoid execution |
+| **Authority capture via Sovereign-controlled signer pool** | **YES** | Sovereign grants ORACLE_ROLE + COURT_ROLE to controlled addresses; satisfies 7-distinct-address requirement through proxies |
 
-### INV-04 currently safe?
+### Question 4: Can a single actor unilaterally satisfy the 7-of-9 threshold?
 
-**YES — fully safe in current production revision.** The threshold is enforced by five independent gates with no known bypass. The one forward-looking risk (inherited `grantRole()` during emergency lock) does not bypass the threshold counting but weakens the emergency lock's role-change isolation.
+**YES — through authority capture.** The Sovereign can grant `ORACLE_ROLE` and `COURT_ROLE` to 7+ addresses under their control, flag a violation via the controlled oracle, and have all 7 controlled addresses sign. All gates pass. The trigger fires. No counting rule is violated. This constitutes effective unilateral execution by the Sovereign through controlled proxies.
+
+**This corrects the v1.0.0 claim** that "no individual — including the Sovereign — can unilaterally execute constitutional enforcement." That claim was incorrect at the authority layer. The correct statement is: **no single address can satisfy the 7-distinct-address threshold alone. However, a single controlling actor can orchestrate 7 distinct controlled addresses to satisfy it.**
+
+### INV-04 as a 7-distinct-address invariant: HOLDS
+
+The counting invariant — that any triggered violation required 7 distinct `msg.sender` values each holding `COURT_ROLE` at signing time — is fully enforced by the code with no bypass.
+
+### INV-04 as a 7-independent-authority invariant: DOES NOT HOLD
+
+The independence invariant — that those 7 addresses represent 7 genuinely independent authorities not controlled by a single actor — is not enforced by the contract. The role administration system permits authority capture.
 
 ### Production code changes required?
 
-**None required for threshold correctness.** The one governance-layer gap (inherited `grantRole()` during emergency) could be addressed by overriding `grantRole()` in `IranOS_Kernel` to enforce `notLocked` — but this is a governance hardening decision, not a correctness fix. It is not required for INV-04 to hold.
+None for counting correctness. For independence enforcement, see §11 (Follow-up Recommendations). The authority-capture gap requires governance-layer changes (fixed court roster, independent registry, or `grantRole` override with `notLocked`) to close.
 
 ### Files examined for this audit
 
