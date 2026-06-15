@@ -1,0 +1,7 @@
+testMode: "property"
+corpusDir: "corpus"
+coverage: true
+workers: 1
+testLimit: 50000
+cryticArgs:
+  - "--hardhat-ignore-compile"

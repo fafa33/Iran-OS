@@ -8,3 +8,5 @@ coverage.json
 .env.local
 .DS_Store
 .claude/
+corpus/
+crytic-export/
