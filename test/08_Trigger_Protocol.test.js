@@ -2196,4 +2196,172 @@ expect(await tg01Treasury.isBlocked(attacker.address)).to.be.true;
 expect(await tg01Treasury.txCount()).to.equal(txCountBefore);
 });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INV-03 Authority Boundary Follow-Up (R-1..R-5)
+//
+// Characterises TriggerProtocol.executeTrigger() access control:
+//  - enforced via address-equality (msg.sender == kernel), not role-based
+//  - Kernel role holders (COURT, GUARDIAN, SOVEREIGN, ORACLE) have NO special
+//    access to TriggerProtocol; only the Kernel CONTRACT address may call it
+//  - all failed unauthorized calls leave trigger state completely unchanged
+//
+// This block deploys IranOS_Kernel with real role assignments so tests prove
+// role possession (via hasRole) before asserting the revert.
+// ═══════════════════════════════════════════════════════════════════════════
+describe("INV-03 Authority Boundary Follow-Up (R-1..R-5)", function () {
+  let inv03Kernel;   // IranOS_Kernel contract (the production kernel)
+  let inv03Trigger;  // TriggerProtocol wired to inv03Kernel.address
+  let inv03Treasury; // Treasury for TriggerProtocol.blockAddressByTrigger()
+  let inv03Admin;    // Treasury DEFAULT_ADMIN (signers[0])
+  let inv03Sovereign, inv03Court, inv03Oracle, inv03Guardian, inv03Attacker;
+
+  beforeEach(async function () {
+    const signers = await ethers.getSigners();
+    inv03Admin     = signers[0]; // Treasury admin only
+    inv03Sovereign = signers[5]; // holds SOVEREIGN_ROLE + DEFAULT_ADMIN_ROLE on Kernel
+    inv03Court     = signers[6]; // holds COURT_ROLE on Kernel
+    inv03Oracle    = signers[7]; // holds ORACLE_ROLE on Kernel
+    inv03Guardian  = signers[8]; // granted GUARDIAN_ROLE post-deployment
+    inv03Attacker  = signers[9]; // holds no roles
+
+    // Treasury: inv03Admin is DEFAULT_ADMIN + KERNEL_ROLE
+    const TreasuryFactory = await ethers.getContractFactory("Treasury");
+    inv03Treasury = await TreasuryFactory.deploy(inv03Admin.address);
+    await inv03Treasury.waitForDeployment();
+
+    // IranOS_Kernel: real role assignments
+    const KernelFactory = await ethers.getContractFactory("IranOS_Kernel");
+    inv03Kernel = await KernelFactory.deploy(
+      inv03Sovereign.address, // _sovereign → SOVEREIGN_ROLE + DEFAULT_ADMIN_ROLE
+      inv03Court.address,     // _court     → COURT_ROLE
+      inv03Oracle.address,    // _oracle    → ORACLE_ROLE
+      inv03Sovereign.address  // _swf       (address only, not called during setup)
+    );
+    await inv03Kernel.waitForDeployment();
+
+    // Grant GUARDIAN_ROLE via Sovereign (DEFAULT_ADMIN_ROLE holder)
+    const GUARDIAN_ROLE = await inv03Kernel.GUARDIAN_ROLE();
+    await inv03Kernel.connect(inv03Sovereign).grantRole(GUARDIAN_ROLE, inv03Guardian.address);
+
+    // TriggerProtocol wired to the Kernel CONTRACT address (not an EOA signer)
+    const TriggerFactory = await ethers.getContractFactory("TriggerProtocol");
+    inv03Trigger = await TriggerFactory.deploy(
+      await inv03Kernel.getAddress(),    // kernel  = contract address
+      await inv03Treasury.getAddress(),  // treasury
+      inv03Sovereign.address             // swf
+    );
+    await inv03Trigger.waitForDeployment();
+
+    // Grant KERNEL_ROLE on Treasury to TriggerProtocol so blockAddressByTrigger() works
+    await inv03Treasury.connect(inv03Admin).grantRole(
+      await inv03Treasury.KERNEL_ROLE(),
+      await inv03Trigger.getAddress()
+    );
+  });
+
+  // ─── R-1: COURT_ROLE ─────────────────────────────────────────────────────
+  it("INV-03 R-1: COURT_ROLE holder cannot call executeTrigger() directly — reverts", async function () {
+    expect(await inv03Kernel.hasRole(await inv03Kernel.COURT_ROLE(), inv03Court.address)).to.be.true;
+    await expect(
+      inv03Trigger.connect(inv03Court).executeTrigger(1, inv03Attacker.address, 1, ethers.ZeroAddress)
+    ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+  });
+
+  it("INV-03 R-1: COURT_ROLE direct call is state-neutral", async function () {
+    await expect(
+      inv03Trigger.connect(inv03Court).executeTrigger(1, inv03Attacker.address, 1, ethers.ZeroAddress)
+    ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+    expect(await inv03Trigger.executionCount()).to.equal(0);
+    expect(await inv03Trigger.isTreasuryBlocked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.isSignatureRevoked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.getInterimReplacement(inv03Attacker.address)).to.equal(ethers.ZeroAddress);
+  });
+
+  // ─── R-2: GUARDIAN_ROLE ──────────────────────────────────────────────────
+  it("INV-03 R-2: GUARDIAN_ROLE holder cannot call executeTrigger() directly — reverts", async function () {
+    expect(await inv03Kernel.hasRole(await inv03Kernel.GUARDIAN_ROLE(), inv03Guardian.address)).to.be.true;
+    await expect(
+      inv03Trigger.connect(inv03Guardian).executeTrigger(1, inv03Attacker.address, 2, ethers.ZeroAddress)
+    ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+  });
+
+  it("INV-03 R-2: GUARDIAN_ROLE direct call is state-neutral", async function () {
+    await expect(
+      inv03Trigger.connect(inv03Guardian).executeTrigger(1, inv03Attacker.address, 2, ethers.ZeroAddress)
+    ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+    expect(await inv03Trigger.executionCount()).to.equal(0);
+    expect(await inv03Trigger.isTreasuryBlocked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.isSignatureRevoked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.getInterimReplacement(inv03Attacker.address)).to.equal(ethers.ZeroAddress);
+  });
+
+  // ─── R-3: SOVEREIGN_ROLE / DEFAULT_ADMIN_ROLE ────────────────────────────
+  it("INV-03 R-3: SOVEREIGN_ROLE / DEFAULT_ADMIN_ROLE holder cannot call executeTrigger() directly — reverts", async function () {
+    expect(await inv03Kernel.hasRole(await inv03Kernel.SOVEREIGN_ROLE(), inv03Sovereign.address)).to.be.true;
+    expect(await inv03Kernel.hasRole(await inv03Kernel.DEFAULT_ADMIN_ROLE(), inv03Sovereign.address)).to.be.true;
+    await expect(
+      inv03Trigger.connect(inv03Sovereign).executeTrigger(1, inv03Attacker.address, 1, ethers.ZeroAddress)
+    ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+  });
+
+  it("INV-03 R-3: SOVEREIGN_ROLE direct call is state-neutral", async function () {
+    await expect(
+      inv03Trigger.connect(inv03Sovereign).executeTrigger(1, inv03Attacker.address, 1, ethers.ZeroAddress)
+    ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+    expect(await inv03Trigger.executionCount()).to.equal(0);
+    expect(await inv03Trigger.isTreasuryBlocked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.isSignatureRevoked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.getInterimReplacement(inv03Attacker.address)).to.equal(ethers.ZeroAddress);
+  });
+
+  // ─── R-4: ORACLE_ROLE ────────────────────────────────────────────────────
+  it("INV-03 R-4: ORACLE_ROLE holder cannot call executeTrigger() directly — reverts", async function () {
+    expect(await inv03Kernel.hasRole(await inv03Kernel.ORACLE_ROLE(), inv03Oracle.address)).to.be.true;
+    await expect(
+      inv03Trigger.connect(inv03Oracle).executeTrigger(1, inv03Attacker.address, 1, ethers.ZeroAddress)
+    ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+  });
+
+  it("INV-03 R-4: ORACLE_ROLE direct call is state-neutral", async function () {
+    await expect(
+      inv03Trigger.connect(inv03Oracle).executeTrigger(1, inv03Attacker.address, 1, ethers.ZeroAddress)
+    ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+    expect(await inv03Trigger.executionCount()).to.equal(0);
+    expect(await inv03Trigger.isTreasuryBlocked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.isSignatureRevoked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.getInterimReplacement(inv03Attacker.address)).to.equal(ethers.ZeroAddress);
+  });
+
+  // ─── R-5: Systematic state-neutrality across all actor classes ───────────
+  it("INV-03 R-5: all unauthorized actors leave identical clean state (systematic state-neutrality)", async function () {
+    const actors = [inv03Court, inv03Guardian, inv03Sovereign, inv03Oracle, inv03Attacker];
+    for (const actor of actors) {
+      await expect(
+        inv03Trigger.connect(actor).executeTrigger(1, inv03Attacker.address, 1, ethers.ZeroAddress)
+      ).to.be.revertedWith("TriggerProtocol: caller is not the Kernel");
+    }
+    expect(await inv03Trigger.executionCount()).to.equal(0);
+    expect(await inv03Trigger.isTreasuryBlocked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.isSignatureRevoked(inv03Attacker.address)).to.be.false;
+    expect(await inv03Trigger.getInterimReplacement(inv03Attacker.address)).to.equal(ethers.ZeroAddress);
+    const exec = await inv03Trigger.executions(1);
+    expect(exec.violationId).to.equal(0);
+    expect(exec.offender).to.equal(ethers.ZeroAddress);
+    expect(exec.violationCode).to.equal(0);
+    expect(exec.executedAt).to.equal(0);
+    expect(exec.treasuryBlocked).to.be.false;
+    expect(exec.signatureRevoked).to.be.false;
+    expect(exec.publicNotified).to.be.false;
+    expect(exec.interimReplacement).to.equal(ethers.ZeroAddress);
+  });
+
+  it("INV-03 R-5: TriggerProtocol.kernel is the Kernel CONTRACT address, not any role-holder EOA", async function () {
+    const kernelAddr = await inv03Trigger.kernel();
+    expect(kernelAddr).to.equal(await inv03Kernel.getAddress());
+    for (const actor of [inv03Sovereign, inv03Court, inv03Guardian, inv03Oracle, inv03Attacker]) {
+      expect(actor.address).to.not.equal(kernelAddr);
+    }
+  });
+});
 });
