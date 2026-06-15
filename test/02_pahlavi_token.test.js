@@ -623,20 +623,34 @@ describe("PahlaviToken", function () {
     });
 
     // ── R-2: updateReserves authority (§5) ──
-    it("INV-02 R-2: only KERNEL_ROLE can updateReserves; unauthorized attempts revert and leave reserves unchanged", async function () {
+    it("INV-02 R-2: updateReserves authorization is role-based (KERNEL_ROLE), not address-based", async function () {
       const before = await token.totalReserves(); // INITIAL_RESERVES (300B)
       const attempt = before + ethers.parseUnits("1", 18);
 
+      // signers WITHOUT KERNEL_ROLE cannot update reserves
       for (const signer of [swf, stranger, user2]) {
+        expect(await token.hasRole(await token.KERNEL_ROLE(), signer.address)).to.be.false;
         await expect(
           token.connect(signer).updateReserves(attempt)
         ).to.be.revertedWith("PAH: caller is not the Kernel");
       }
       expect(await token.totalReserves()).to.equal(before);
 
+      // the constructor-configured kernel holder can update reserves
       await expect(token.connect(kernel).updateReserves(attempt))
         .to.emit(token, "ReservesUpdated");
       expect(await token.totalReserves()).to.equal(attempt);
+
+      // role-based (not address-based) check: grant KERNEL_ROLE to a SECOND signer
+      // (kernel holds DEFAULT_ADMIN_ROLE) and verify that signer can now update
+      // reserves. A regression hard-coding `msg.sender == kernel` would fail here.
+      await token.connect(kernel).grantRole(await token.KERNEL_ROLE(), user2.address);
+      expect(await token.hasRole(await token.KERNEL_ROLE(), user2.address)).to.be.true;
+
+      const secondUpdate = attempt + ethers.parseUnits("1", 18);
+      await expect(token.connect(user2).updateReserves(secondUpdate))
+        .to.emit(token, "ReservesUpdated");
+      expect(await token.totalReserves()).to.equal(secondUpdate);
     });
 
     // ── R-3: CF-1 characterization (§7.2, §10) ──
