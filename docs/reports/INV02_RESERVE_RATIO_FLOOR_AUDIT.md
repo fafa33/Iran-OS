@@ -1,17 +1,23 @@
 # INV-02 — Reserve Ratio Floor: Complete Enforcement Audit
 ## IranOS Step 12 Security Analysis
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Date:** 2026-06-15
 **Status:** Analysis Only — No Code Changes
-**Scope:** `contracts/monetary/PahlaviToken.sol`; `contracts/kernel.sol` (ratio constant mirror, `KERNEL_ROLE` holder); all 25 production contracts for reserve-writer verification; `contracts/fuzzing/FuzzPahlaviToken.sol` and `test/02_pahlavi_token.test.js` for coverage cross-reference
+**Scope:** `contracts/monetary/PahlaviToken.sol`; `contracts/kernel.sol` (ratio constant mirror, `KERNEL_ROLE` holder); all 25 production contracts for reserve-writer verification; `contracts/fuzzing/FuzzPahlaviToken.sol` and `test/02_pahlavi_token.test.js` for coverage cross-reference; doctrine: `docs/architecture/MONETARY_EXPANSION_CONSTRAINTS.md`, `docs/architecture/RESERVE_RUNTIME_GAP_REGISTER.md`
+
+> **Amendment note (v1.1.0, 2026-06-15)**
+> This revision reconciles the report with existing IranOS doctrine in response to two Codex review comments on PR #65:
+> 1. **Overflow precision** — a low-severity, privileged, self-inflicted, recoverable overflow/DoS sub-case is now documented (§6, CF-7).
+> 2. **Standing-invariant reconciliation** — doctrine ([MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md) §"Reserve-Ratio Breach Conditions", and [RESERVE_RUNTIME_GAP_REGISTER.md](../architecture/RESERVE_RUNTIME_GAP_REGISTER.md)) explicitly recognizes the post-update sub-floor state as a *breach-relevant condition* to be routed to monitoring / Kernel-Court / burn remediation, **not** prevented by a contract-level floor guard. The v1.0.0 "standing contract invariant" framing and CF-1 "design-completeness gap / latent-CRITICAL" classification are corrected accordingly (§1, §7.2, §9 CF-1, §10, §13). The v1.0.0 mint-time analysis is unchanged and stands.
+> The correction is to this report's framing only. No doctrine, contract, test, or fuzz harness is changed.
 
 > **Disclaimers**
 > - This document does not claim production readiness.
 > - This document does not claim external audit completion.
 > - This document does not claim formal verification completion.
 > - This document does not close any Step 12 / STEP9-BLOCK-* blocker.
-> - This document does **not** claim INV-02 is fixed. It documents a partially-enforced invariant with an identified design-completeness gap that remains open.
+> - This document does **not** claim INV-02 is fixed. It documents an invariant that is enforced at mint time, with an open monitoring / breach-routing dimension (CF-1) handled by doctrine rather than by a contract floor guard.
 > - No contracts, tests, CI, deployment scripts, fuzzing harnesses, or production code were modified. No fix is implemented.
 > - INV-09 is untouched and not referenced.
 
@@ -32,7 +38,7 @@
 11. [Existing Hardhat Coverage](#11-existing-hardhat-coverage)
 12. [Existing Echidna Coverage and Known Failure](#12-existing-echidna-coverage-and-known-failure)
 13. [Missing Evidence](#13-missing-evidence)
-14. [Proposed Follow-Up Tests R-1..R-7](#14-proposed-follow-up-tests-r-1r-7)
+14. [Proposed Follow-Up Tests R-1..R-8](#14-proposed-follow-up-tests-r-1r-8)
 15. [Remediation Guidance](#15-remediation-guidance)
 16. [Conclusion](#16-conclusion)
 
@@ -43,19 +49,21 @@
 **ID:** INV-02
 **Contract:** `PahlaviToken` (`contracts/monetary/PahlaviToken.sol`)
 **Category:** Constitutional Monetary Safeguard (reserve backing)
-**Risk:** CRITICAL (severity-conditional — see §10)
+**Risk:** HIGH for the monitoring/breach-routing dimension (see §10); the mint-time gate itself is sound
 
-### Intended invariant
+### What the doctrine actually requires (two-part invariant)
 
-For all reachable states of `PahlaviToken`:
+INV-02 is **not** a single standing contract invariant that must hold after every reserve movement. Per IranOS doctrine ([MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md)), the reserve-ratio floor is composed of two distinct obligations:
 
-> If `totalSupply() > 0`, then `(totalReserves * 1000) / totalSupply() >= MIN_RESERVE_RATIO` (= 333, i.e. 33.3%), at **all times** — not only at the moment of minting.
+**(a) Hard mint-time gate (preventive, contract-enforced).**
+> At the instant of a `mint()` call, `(totalReserves * 1000) / (totalSupply() + mintAmount) >= MIN_RESERVE_RATIO` (= 333). No mint may *create* a sub-floor ratio; there is no averaging, forecasting, or "grow into compliance" path.
 
-### Enforced invariant (as built)
+This is fully enforced by `reserveCompliant` and is the primary line of defense. **It holds and is well-tested** (§7.1, §11).
 
-> At the instant of a `mint()` call, `(totalReserves * 1000) / (totalSupply() + mintAmount) >= MIN_RESERVE_RATIO`.
+**(b) Post-update breach condition (detective + remediative, governance-routed).**
+> If an authorized `updateReserves()` (reflecting a genuine reserve drop, confirmed loss, or reclassification) leaves `currentReserveRatio() < MIN_RESERVE_RATIO` for the existing supply, the system has entered a **doctrine-recognized breach-relevant condition**. Doctrine requires this state to be (i) treated as making further expansion ineligible (already enforced by `reserveCompliant`), (ii) routed through the existing Kernel/Court violation-flagging channels (TR-05/TR-06), and (iii) corrected via `burn`/contraction — **not** prevented by ratio-gating `updateReserves`.
 
-The gap between the **intended standing invariant** and the **enforced mint-time invariant** is the central subject of this audit (Finding CF-1, §9). The floor is enforced when supply *increases*; it is **not** re-validated when reserves *decrease* via `updateReserves()`.
+The contract **can** reach a post-update sub-floor state, and doctrine **expects** it can ([MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md), "Post-Update Detection (monitoring)"). The open audit question is therefore **not** "why is `updateReserves` missing a floor guard" — its non-gating is intentional (§7.2, §9 CF-1) — but **"is the doctrine-mandated monitoring / breach-routing path implemented and evidenced?"** (§10, §13).
 
 ---
 
@@ -89,6 +97,8 @@ INV-01 (PAH Supply Cap) audits doctrine rule ۱ and is **closed at the standing-
 | [test/01_kernel.test.js](../../test/01_kernel.test.js), [test/08_Trigger_Protocol.test.js](../../test/08_Trigger_Protocol.test.js) | Kernel constant assertions |
 | [docs/reports/ECHIDNA_READINESS_ASSESSMENT.md](./ECHIDNA_READINESS_ASSESSMENT.md) | §INV-02, §7.1 — documented gap |
 | [docs/reports/INV01_SUPPLY_CAP_AUDIT.md](./INV01_SUPPLY_CAP_AUDIT.md) | Adjacent finding F-5 (modifier coupling) |
+| [docs/architecture/MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md) | **Governing doctrine** — defines the mint-time hard gate, the post-update breach-relevant condition, and the Kernel/Court + `burn` remediation direction (added in v1.1.0) |
+| [docs/architecture/RESERVE_RUNTIME_GAP_REGISTER.md](../architecture/RESERVE_RUNTIME_GAP_REGISTER.md) | **Governing doctrine** — registers the `updateReserves`/`reserveCompliant` boundary as GAP-MEX-04/05, framed as "a load-bearing design feature, not an enforcement shortfall" (added in v1.1.0) |
 
 A repo-wide grep for `updateReserves` / `totalReserves` writers across all 25 contracts was performed to confirm reserve write authority (§5).
 
@@ -134,7 +144,7 @@ The `ReservesUpdated` event ([:63](../../contracts/monetary/PahlaviToken.sol), e
 
 `updateReserves()` is gated to `KERNEL_ROLE`, held by `IranOS_Kernel`. **However, a grep across all 25 production contracts confirms `IranOS_Kernel` contains no function that calls `PahlaviToken.updateReserves()`.** The reserve-update authority therefore exists but is **not exercised by any current production transaction path**. Reserves can only be changed today by (a) the constructor, or (b) a future Kernel function that does not yet exist, or (c) a test/EOA directly holding `KERNEL_ROLE` in a non-production deployment.
 
-This disconnect is the hinge of the severity analysis (§10): the dangerous capability (reserve reduction without a floor re-check) is real and authority-gated, but currently unroutable on mainnet logic.
+This disconnect frames the analysis (§10): the post-update sub-floor state is a doctrine-recognized, by-design condition (§7.2), and today it is not even reachable on production logic — so the open work is the monitoring/breach-routing path that must accompany any future reserve-sync wiring, not a contract floor guard.
 
 ---
 
@@ -159,7 +169,10 @@ Observations:
 - **Basis of the mint check:** post-mint `newSupply` (correct — guarantees the *resulting* state meets the floor at that instant).
 - **Floor-division bias is conservative.** A true ratio of 332.9 computes to `332` and is rejected; the rounding direction never permits a sub-floor mint. INV-02 cannot be breached *at mint time* by rounding (threat T7).
 - **`supply == 0` handling is consistent:** the modifier skips the ratio check when `newSupply == 0` (vacuous), and both views return `1000` for zero supply ([:250](../../contracts/monetary/PahlaviToken.sol), [:263](../../contracts/monetary/PahlaviToken.sol)). No division-by-zero path exists.
-- **Overflow:** `totalReserves * 1000` is checked 0.8.x arithmetic; with reserves bounded by realistic dollar values far below `2^256/1000`, no overflow path is reachable in practice.
+- **Overflow (precision note — CF-7).** `totalReserves * 1000` is checked 0.8.x arithmetic and overflows when `totalReserves > (2²⁵⁶−1)/1000 ≈ 1.158e74`. For honest operation this is unreachable — the realistic maximum (`$300B × 1e18 = 3e29`) is ~1e44× smaller. However, the overflow **is** reachable as a *privileged, self-inflicted* sub-case, so the v1.0.0 phrasing "no overflow path is reachable in practice" is corrected:
+  - `updateReserves(type(uint256).max)` with `totalSupply() > 0` **reverts inside `updateReserves` itself** — the `newReserves * 1000` term ([:201](../../contracts/monetary/PahlaviToken.sol)) overflows under checked arithmetic. A huge-reserve state therefore cannot coexist with positive supply.
+  - `updateReserves(type(uint256).max)` with `totalSupply() == 0` **succeeds** (the ratio branch short-circuits to `1000`, no multiply) and sets `totalReserves = max`. In that state, every subsequent `mint()` reverts (the `reserveCompliant` multiply at [:87](../../contracts/monetary/PahlaviToken.sol) overflows), and `canMint()` **reverts instead of returning `false`** ([:264](../../contracts/monetary/PahlaviToken.sol)) — a temporary mint/`canMint` denial-of-service.
+  - **Classification:** LOW / documentation precision. It is `KERNEL_ROLE`-only, self-inflicted, **not production-routed** (the Kernel never calls `updateReserves` — §5.1), requires an absurd ~1e74 value no honest oracle would report, and is **fully recoverable** by the Kernel calling `updateReserves(sane)` (supply is still 0, so the call succeeds and minting resumes). It does not change CF-1's posture and is the same authority-gated, non-routed class. Recorded as CF-7 (§9).
 
 ---
 
@@ -169,7 +182,7 @@ Observations:
 
 `mint()` always passes through `reserveCompliant`. A mint that would leave the post-mint ratio below 333 reverts `"PAH: reserve ratio below minimum 33.3%"` and changes no state. This is the **only** point at which the floor is actively enforced, and it is enforced correctly (covered by tests, §11).
 
-### 7.2 `updateReserves()` non-enforcement — ABSENT (CF-1)
+### 7.2 `updateReserves()` is intentionally not ratio-gated (CF-1)
 
 ```solidity
 // PahlaviToken.sol:197-203
@@ -182,7 +195,11 @@ function updateReserves(uint256 newReserves) external onlyKernel {
 }
 ```
 
-`updateReserves()` computes the resulting ratio **only to emit it** — there is **no `require`** enforcing `ratio >= MIN_RESERVE_RATIO`. Consequently, after a healthy mint, a call to `updateReserves(x)` with `x` low enough (e.g. `0`) drives the standing ratio below the floor with no revert. The mint-time modifier provides no protection against post-mint reserve reduction. **The standing invariant of §1 does not hold.**
+`updateReserves()` computes the resulting ratio **only to emit it** — there is **no `require`** enforcing `ratio >= MIN_RESERVE_RATIO`. Consequently, after a healthy mint, a call to `updateReserves(x)` with `x` low enough (e.g. `0`) drives the current ratio below the floor with no revert. The mint-time modifier does not re-validate the ratio against existing supply when reserves decrease.
+
+**This non-gating is doctrinally intentional, not a missing guard.** Per [MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md) ("Post-Update Detection") and [RESERVE_RUNTIME_GAP_REGISTER.md](../architecture/RESERVE_RUNTIME_GAP_REGISTER.md) (GAP-MEX-04/05), `updateReserves` must be able to record a *genuine* reserve loss, confirmed loss, or reclassification — including one that lowers the ratio below 333. Hard-reverting such an update would prevent the ledger from reflecting reality and is therefore **rejected by doctrine**, which instead treats the resulting sub-floor state as a *breach-relevant condition* to be flagged and remediated (Kernel/Court routing + `burn`/contraction), never "grown into" by further expansion. The gap register explicitly calls this boundary "a load-bearing design feature, not an enforcement shortfall."
+
+The audit-relevant consequence is therefore **not** "the contract is missing a floor guard," but: *the post-update sub-floor state is reachable by design, and the open question is whether the doctrine-mandated monitoring / breach-routing path is implemented and evidenced* (§10, §13, CF-1 in §9). The mint-time gate continues to block any further expansion from such a state automatically.
 
 ### 7.3 Burn interaction — BENIGN
 
@@ -199,10 +216,11 @@ function updateReserves(uint256 newReserves) external onlyKernel {
 | # | Capability | Vector | Floor outcome |
 |---|---|---|---|
 | T1 | `MINTER_ROLE` | `mint()` beyond reserve backing | **Bounded** — `reserveCompliant` reverts at mint time |
-| T2 | `KERNEL_ROLE` | `updateReserves(0)` / low value after a mint | **Unbounded (standing)** — no floor guard; ratio drops below 333 with no revert (CF-1) |
+| T2 | `KERNEL_ROLE` | `updateReserves(0)` / low value after a mint | **By design** — non-gating is intentional so genuine reserve loss is recorded; the resulting sub-floor is a doctrine-recognized breach condition to be monitored/routed/`burn`-remediated, and further expansion stays blocked by the mint-time gate (CF-1) |
 | T3 | `KERNEL_ROLE` | `updateReserves()` during emergency | Possible (no `notInEmergency`); benign to floor (minting already halted) |
 | T4 | `BURNER_ROLE` | burn to manipulate ratio | **Benign** — burn raises ratio |
-| T5 | Oracle (future) | oracle → kernel → `updateReserves` sync wired without a floor guard | **Latent CRITICAL** — activates T2 on a live production path |
+| T5 | Oracle (future) | oracle → kernel → `updateReserves` sync wired before the breach-monitoring/routing path | **Monitoring obligation becomes live** — a genuine reserve drop must be detected and routed (TR-05/TR-06) + remediated, not silently absorbed (CF-1, CF-2) |
+| T8 | `KERNEL_ROLE` | `updateReserves(~uint256.max)` at `supply == 0` | **Self-inflicted, recoverable** — bricks `mint()`/`canMint()` via overflow until `updateReserves(sane)`; not production-routed (CF-7) |
 | T6 | Reserve reporter | assert a false `totalReserves` scalar | **Trust assumption** — floor correctness depends on honest `KERNEL_ROLE`/oracle (CF-3) |
 | T7 | Integer rounding | exploit floor division at the boundary | **Not exploitable** — rounds down, conservative |
 
@@ -214,14 +232,15 @@ The adversary is assumed unable to alter bytecode (no Kernel upgrade proxy — f
 
 | ID | Severity | Finding | Floor impact |
 |---|---|---|---|
-| **CF-1** | CRITICAL (conditional — §10) | `updateReserves()` has no lower-bound guard and no post-update ratio re-check. The floor is a mint-time check, not a standing invariant; a post-mint reserve reduction drives the ratio below 333 with no revert. | **Direct.** The intended standing invariant (§1) is not enforced. Confirmed by Echidna (§12). |
-| **CF-2** | Informational | `updateReserves()` NatSpec states it is "called by API3Oracle through Kernel" ([:194-196](../../contracts/monetary/PahlaviToken.sol)); no such routing exists in `IranOS_Kernel`. Documentation describes unbuilt behavior. | Indirect — risk of wiring the route later without first adding the floor guard (turns CF-1 live). |
+| **CF-1** | HIGH (monitoring/evidence gap, not a contract bug — §10) | `updateReserves()` is intentionally not ratio-gated, so a genuine reserve loss can be recorded; the resulting post-update sub-floor state is a **doctrine-recognized breach-relevant condition** ([MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md), [RESERVE_RUNTIME_GAP_REGISTER.md](../architecture/RESERVE_RUNTIME_GAP_REGISTER.md) GAP-MEX-04/05). The real open gap is whether the doctrine-mandated **monitoring / Kernel-Court breach-routing / `burn` remediation** path is implemented and evidenced — not a missing contract floor guard. | **Not a mint-time defect.** The mint-time gate still blocks all further expansion from a sub-floor state. The Echidna "failure" (§12) reflects the *privileged-harness* reaching this by-design state, not a production bug. |
+| **CF-2** | Informational | `updateReserves()` NatSpec states it is "called by API3Oracle through Kernel" ([:194-196](../../contracts/monetary/PahlaviToken.sol)); no such routing exists in `IranOS_Kernel`. Documentation describes unbuilt behavior. | Indirect — when the route is built, the doctrine-mandated breach-monitoring/routing (CF-1) must be in place so a genuine reserve drop is flagged and remediated, not silently absorbed. |
 | **CF-3** | Low (trust) | `totalReserves` is a trusted asserted scalar with no on-chain reconciliation against `SovereignWealthFund` or custodied assets. | The floor's economic meaning inherits full trust in the reserve reporter. |
 | **CF-4** | Informational | `updateReserves()` lacks `notInEmergency`; reserves are mutable during an emergency halt. | None on the floor (minting halted); noted for freeze-integrity review. |
-| **CF-5** | Informational | A sub-floor `updateReserves()` emits `ReservesUpdated` carrying the sub-floor ratio but raises no breach signal and does not revert; no on-chain alarm for a floor violation. | Observability gap — a breach is silent except to off-chain monitors. |
-| **CF-6** | Informational (cross-ref INV-01 F-5) | The cap check and the ratio check are coupled in the single `reserveCompliant` modifier. The ratio half is exactly what CF-1 leaves incomplete post-mint. | Structural — documents the coupling so future edits to one half don't silently weaken the other. |
+| **CF-5** | Informational | A sub-floor `updateReserves()` emits `ReservesUpdated` carrying the sub-floor ratio but raises no *distinct* breach signal and does not revert. | **Most directly actionable part of CF-1's monitoring gap.** `ReservesUpdated` is the on-chain hook a monitor would watch, but there is no dedicated breach event/flag; the doctrine-mandated detection currently rests on off-chain interpretation of the emitted ratio. |
+| **CF-6** | Informational (cross-ref INV-01 F-5) | The cap check and the ratio check are coupled in the single `reserveCompliant` modifier. | Structural — documents the coupling so future edits to one half don't silently weaken the other. |
+| **CF-7** | LOW (documentation precision) | `updateReserves(type(uint256).max)` at `supply == 0` sets `totalReserves = max`, after which `mint()` reverts and `canMint()` reverts (rather than returning `false`) on the `totalReserves * 1000` overflow — a privileged, self-inflicted mint/`canMint` DoS. At `supply > 0` the update itself reverts on checked arithmetic. | None on the floor. `KERNEL_ROLE`-only, not production-routed, requires an absurd ~1e74 value, fully recoverable by `updateReserves(sane)` (§6). Corrects v1.0.0 "no overflow path is reachable in practice." |
 
-**No defect permits a sub-floor state to be reached *at mint time*.** The open issue (CF-1) is that the floor is not maintained as a *standing* property after reserve reduction.
+**No defect permits a sub-floor state to be reached *at mint time*.** CF-1 is not a contract-level standing-invariant violation: the post-update sub-floor state is reachable **by design** (doctrine expects it), and the substantive open item is the monitoring / breach-routing path (CF-1, CF-5), not a missing `require`.
 
 ---
 
@@ -229,12 +248,12 @@ The adversary is assumed unable to alter bytecode (no Kernel upgrade proxy — f
 
 This framing is the core of the audit and must not be collapsed into a single label:
 
-1. **Mint-time floor holds.** Every supply increase is gated; no mint can produce a sub-floor resulting state (§7.1, tests §11). At mint instants, INV-02 is enforced and correct.
-2. **Standing floor is not enforced.** Between mints, `updateReserves()` can lower reserves with no floor re-check, so `totalSupply()>0 ⇒ ratio≥333` is **not** a maintained contract invariant (CF-1, §7.2).
-3. **Currently authority-gated and not production-routed.** The only post-deploy reserve writer is `updateReserves()`, gated to `KERNEL_ROLE`, and **no function in `IranOS_Kernel` calls it** (§5.1, grep-verified). On current production logic the gap is **not reachable** by any transaction path — it is a *design-completeness gap*, not a presently-exploitable vulnerability.
-4. **Becomes CRITICAL if wired without a guard.** The `updateReserves()` NatSpec anticipates oracle-to-token reserve synchronization through the Kernel (CF-2). The moment that routing is implemented in a future Kernel version **without first adding a floor guard**, threat T2/T5 becomes live on a production path and the severity is realized as CRITICAL.
+1. **Mint-time floor holds.** Every supply increase is gated; no mint can produce a sub-floor resulting state (§7.1, tests §11). At mint instants, INV-02's preventive obligation is enforced and correct.
+2. **Post-update sub-floor is reachable by design, not a missing guard.** Between mints, `updateReserves()` can lower reserves with no floor re-check. Doctrine ([MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md), "Post-Update Detection") **explicitly recognizes** this state and requires it be handled as a breach-relevant condition (Kernel/Court flagging + `burn`), **not** prevented by ratio-gating the update — so the ledger can record a genuine reserve loss. `RESERVE_RUNTIME_GAP_REGISTER.md` registers the boundary (GAP-MEX-04/05) as "a load-bearing design feature, not an enforcement shortfall." The earlier "standing contract invariant is violated" framing is therefore incorrect.
+3. **The genuine open gap is monitoring/evidence, not arithmetic.** The doctrine-mandated detective+remediative path — recognize the post-update breach, route it through TR-05/TR-06 review, correct via `burn`/contraction — has **no dedicated on-chain breach signal** (only the generic `ReservesUpdated` event, CF-5) and **no test or runtime evidence** that the routing is implemented end-to-end. This is the substantive, presently-open item.
+4. **Authority-gated and not production-routed today.** The only post-deploy reserve writer is `updateReserves()`, gated to `KERNEL_ROLE`, and **no function in `IranOS_Kernel` calls it** (§5.1, grep-verified). So a sub-floor state cannot even arise on current production logic; the monitoring obligation becomes live once oracle-to-token reserve sync is wired (CF-2). When that routing is built, the breach-monitoring/routing path (point 3) must be in place **with it**.
 
-**Net classification:** *Design-completeness gap — forward-looking, authority-gated, not currently production-reachable; latent-CRITICAL contingent on future oracle/kernel reserve-sync wiring.* This matches the Echidna assessment's classification (§12). **INV-02 is therefore partially enforced (mint-time) and not closed as a standing invariant.**
+**Net classification:** *Doctrine-aligned monitoring/evidence gap — the mint-time gate is sound and enforced; the post-update sub-floor state is a doctrine-recognized breach condition, not a contract bug; the open work is implementing/evidencing the breach-detection and routing path (and doing so before/with any future reserve-sync wiring).* This is consistent with the Echidna result (§12), which exercises the by-design state in a privileged harness. **INV-02 is therefore enforced at mint time and not fully closed on the monitoring/breach-routing dimension. It is not a standing contract invariant and was never doctrinally intended to be one.**
 
 ---
 
@@ -274,9 +293,9 @@ function echidna_reserve_ratio() public view returns (bool) {
 
 - **Status: FAILING in the privileged harness.** The harness grants itself `MINTER_ROLE`/`BURNER_ROLE`/`KERNEL_ROLE`, so it can call `updateReserves()` directly.
 - **Confirmed counterexample:** `doMint(1) → doUpdateReserves(0)` — found within the first ~500 iterations. After: `totalSupply = 1`, `totalReserves = 0` ⇒ `(0*1000)/1 = 0 < 333` ⇒ property fails.
-- **Root gap:** as in CF-1 — `updateReserves()` accepts any value with no floor guard / no post-update re-check.
-- **Production reachability:** the harness reaches the gap only because it holds `KERNEL_ROLE` and calls `updateReserves()` itself; `IranOS_Kernel` exposes no such call, so the sequence is **not reproducible from production logic** (§5.1, §10).
-- **Documented classification:** *design-completeness gap — forward-looking, not currently exploitable* ([ECHIDNA_READINESS_ASSESSMENT.md §INV-02](./ECHIDNA_READINESS_ASSESSMENT.md)).
+- **Interpretation (corrected in v1.1.0):** the "failure" is the harness reaching the **by-design** post-update sub-floor state (CF-1) — `updateReserves()` is intentionally not ratio-gated so a genuine reserve loss can be recorded (§7.2, doctrine). The property as written encodes the *standing* invariant, which doctrine does **not** require of the contract; it does not encode the doctrine-mandated *breach-routing* obligation. The result therefore flags a state doctrine expects to be reachable, not a contract bug.
+- **Production reachability:** the harness reaches the state only because it holds `KERNEL_ROLE` and calls `updateReserves()` itself; `IranOS_Kernel` exposes no such call, so the sequence is **not reproducible from production logic** (§5.1, §10).
+- **Documented classification:** *forward-looking, not currently exploitable* ([ECHIDNA_READINESS_ASSESSMENT.md §INV-02](./ECHIDNA_READINESS_ASSESSMENT.md)). A future harness aligned to doctrine would assert the *breach-routing* path (detect → flag → `burn`), not a standing ratio.
 
 The harness and its result are reported here as evidence; **they are not modified by this audit.**
 
@@ -284,15 +303,14 @@ The harness and its result are reported here as evidence; **they are not modifie
 
 ## 13. Missing Evidence
 
-- **No INV-02 audit report existed before this document** (only the Echidna assessment and fuzz property).
-- **No Hardhat test pins CF-1's standing-floor behavior** — no test asserts that a post-mint `updateReserves(0)` leaves `currentReserveRatio() < 333` *without reverting* (the gap itself, as distinct from "minting is blocked afterward").
-- **No documented doctrine decision** on whether `updateReserves()` *should* enforce the floor, soft-revert, or signal a breach. Remediation choice is a doctrine matter (§15).
+- **Doctrine decision on `updateReserves` floor handling already exists (correction).** Contrary to the v1.0.0 draft, the repository **does** document this: [MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md) ("Post-Update Detection (monitoring)") states the post-update sub-floor state is reachable "since `updateReserves` is not itself ratio-gated" and is to be handled as a breach-relevant condition (Kernel/Court routing + `burn`), not blocked; [RESERVE_RUNTIME_GAP_REGISTER.md](../architecture/RESERVE_RUNTIME_GAP_REGISTER.md) registers the same boundary (GAP-MEX-04/05) as "a load-bearing design feature, not an enforcement shortfall." The doctrine direction is therefore **monitor + route + remediate**, not contract-level floor-gating. The v1.0.0 "no documented doctrine decision" claim is withdrawn.
+- **The actual missing evidence is implementation of the doctrine-mandated monitoring/routing path** — there is no dedicated on-chain breach signal beyond the generic `ReservesUpdated` event (CF-5), and no test or runtime artifact demonstrating that a post-update sub-floor condition would be detected, flagged through TR-05/TR-06, and remediated via `burn` end-to-end.
+- **No Hardhat test characterizes the post-update sub-floor behavior** — no test asserts that a post-mint `updateReserves(0)` leaves `currentReserveRatio() < 333` *without reverting* while the mint-time gate continues to block further expansion (the by-design state, as distinct from "minting is blocked afterward").
 - **No on-chain SWF ↔ token reserve reconciliation spec** (CF-3) — the trust boundary of the reserve scalar is undocumented.
-- **No defined breach-signal / monitoring contract event** for sub-floor states (CF-5).
 
 ---
 
-## 14. Proposed Follow-Up Tests R-1..R-7
+## 14. Proposed Follow-Up Tests R-1..R-8
 
 *Specification only — no tests are written by this document. These pin current behavior; R-3 is a characterization of the CF-1 gap and must be labeled as documenting current (gapped) behavior, not endorsing it.*
 
@@ -300,7 +318,8 @@ The harness and its result are reported here as evidence; **they are not modifie
 |---|---|---|
 | R-1 | Mint-time floor boundary: ratio exactly 333 mints; 332 reverts `"PAH: reserve ratio below minimum 33.3%"`. | §7.1 (relabels/extends INV-05a/b under INV-02) |
 | R-2 | `updateReserves()` authority: only `KERNEL_ROLE` succeeds (emits `ReservesUpdated`); SWF / council / stranger revert. | §5 |
-| R-3 | **CF-1 characterization:** mint at a healthy ratio → `updateReserves(0)` **succeeds (no revert)** → assert `currentReserveRatio() < 333`, `canMint(small) == false`, and the next `mint()` reverts on the floor. Explicitly documents the standing-floor gap as current behavior. | §7.2, §10 |
+| R-3 | **CF-1 characterization:** mint at a healthy ratio → `updateReserves(0)` **succeeds (no revert)** → assert `currentReserveRatio() < 333`, `canMint(small) == false`, and the next `mint()` reverts on the floor. Documents the **by-design** post-update sub-floor state (doctrine-recognized breach condition), not a contract defect. | §7.2, §10 |
+| R-8 | **CF-7 overflow precision:** at `supply == 0`, `updateReserves(type(uint256).max)` succeeds; subsequent `mint()` reverts and `canMint(x)` reverts on overflow; recovery via `updateReserves(sane)` restores minting. At `supply > 0`, `updateReserves(type(uint256).max)` itself reverts. | §6, CF-7 |
 | R-4 | Burn raises ratio: mint, burn, assert `currentReserveRatio()` strictly increases; burn never floor-blocked. | §7.3 |
 | R-5 | Emergency interaction: `updateReserves()` callable during emergency; `mint()` still halted; ratio math consistent. | §7.4 |
 | R-6 | View/gate agreement: `currentReserveRatio()`, `canMint()`, and actual `mint()` outcomes agree at the 333/332 boundary; `supply==0 → 1000`. | §6 |
@@ -310,19 +329,21 @@ The harness and its result are reported here as evidence; **they are not modifie
 
 ## 15. Remediation Guidance
 
-1. **No contract patch is made in this task.** This is an analysis-only audit; `updateReserves()` and all reserve/emergency logic are left unchanged.
-2. **Any floor guard on `updateReserves()` requires separate doctrine review.** Adding `require((newReserves*1000)/supply >= MIN_RESERVE_RATIO)` (or a soft-signal variant) changes monetary-discipline behavior and the reserve-update semantics; it must be decided as a doctrine-level item, not slipped in as an implementation fix. The decision space includes: hard revert on sub-floor update; allow the update but emit a distinct `ReserveFloorBreached` signal (addresses CF-5); or gate reserve sync behind an explicit attested path. Each has different operational implications for legitimate reserve drawdowns and must be weighed against doctrine.
-3. **Sequencing constraint (most important).** When oracle-to-token reserve synchronization is eventually wired into the Kernel (the route CF-2 anticipates), the floor guard — in whatever form doctrine selects — **must land first or simultaneously**. Wiring the route before the guard is exactly the step that converts CF-1 from latent to live-CRITICAL (§10).
-4. **Interim:** add the test-only characterization suite (§14, especially R-3) to lock current behavior and make any future regression or premature wiring visible. Tests are deferred — not implemented in this task.
+1. **No contract patch is made in this task,** and none is recommended for `updateReserves()`. This is an analysis-only audit; `updateReserves()` and all reserve/emergency logic are left unchanged.
+2. **A hard floor-guard on `updateReserves()` is *not* the doctrine-aligned remediation.** Doctrine requires `updateReserves` to be able to record a genuine reserve loss; a `require((newReserves*1000)/supply >= MIN_RESERVE_RATIO)` would prevent the ledger from reflecting reality and contradicts [MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md). The doctrine-aligned direction is **detect + route + remediate**: recognize the post-update sub-floor as a breach-relevant condition, surface it (e.g., a distinct breach event addressing CF-5), route it through the existing TR-05/TR-06 Kernel/Court channels, and correct via `burn`/contraction. Any change implementing this remains a doctrine-review item — not slipped in as an implementation fix — and is **out of scope for this analysis-only task.**
+3. **Sequencing constraint.** When oracle-to-token reserve synchronization is eventually wired into the Kernel (the route CF-2 anticipates), the doctrine-mandated breach-monitoring/routing path **must be implemented first or simultaneously**, so that a genuine reserve drop is flagged and remediated rather than silently absorbed (§10).
+4. **Interim (recommended next step):** add the test-only characterization suite (§14) — especially R-3 (by-design post-update sub-floor) and R-8 (CF-7 overflow) — to pin current behavior, and produce monitoring-gap documentation describing how a post-update breach would be detected and routed under existing doctrine. Tests are deferred — not implemented in this task. **No contract change.**
 
 ---
 
 ## 16. Conclusion
 
-INV-02 is **partially enforced.** At every mint, the reserve-ratio floor is correctly checked against the post-mint supply, and no mint can produce a sub-floor resulting state — this half is sound and well-tested. The floor is **not** enforced as a *standing* invariant: `updateReserves()` can lower reserves after a mint with no floor guard and no post-update re-check, so `totalSupply()>0 ⇒ ratio≥333` is not a maintained contract property (Finding CF-1, confirmed by the failing Echidna property).
+**Mint-time reserve-floor enforcement holds.** At every mint, `reserveCompliant` checks the ratio against the post-mint supply, and no mint can produce a sub-floor resulting state — this preventive obligation is sound and well-tested.
 
-That gap is presently **authority-gated and not production-routed** — `KERNEL_ROLE` holds the only post-deploy reserve-writer and `IranOS_Kernel` never calls it — so it is a forward-looking design-completeness gap, not a currently-exploitable vulnerability. It becomes **CRITICAL** if oracle/kernel reserve synchronization is wired without a floor guard added first.
+**The post-update sub-floor state is doctrine-recognized breach-relevant behavior, not automatically a contract bug.** `updateReserves()` is intentionally not ratio-gated so a genuine reserve loss, confirmed loss, or reclassification can be recorded; doctrine ([MONETARY_EXPANSION_CONSTRAINTS.md](../architecture/MONETARY_EXPANSION_CONSTRAINTS.md), [RESERVE_RUNTIME_GAP_REGISTER.md](../architecture/RESERVE_RUNTIME_GAP_REGISTER.md) GAP-MEX-04/05) explicitly anticipates the resulting sub-floor state and requires it be detected, routed through TR-05/TR-06 Kernel/Court review, and remediated via `burn`/contraction — **not** prevented by a contract floor guard. INV-02 was therefore never doctrinally a "standing contract invariant," and the v1.0.0 framing/CF-1 classification to that effect is corrected in this revision. The Echidna result exercises this by-design state in a privileged harness; on current production logic the state is unreachable (`KERNEL_ROLE` holds the only reserve-writer and `IranOS_Kernel` never calls it, §5.1).
 
-**INV-02 is not closed as a standing invariant.** No fix is made here and none is claimed. The recommended next step is **test-only characterization** (R-1…R-7, especially the CF-1 characterization R-3) to pin current behavior and surface any future regression, with any actual `updateReserves()` floor guard deferred to a separate doctrine review.
+**The genuine open item is the monitoring / breach-routing dimension** (CF-1, CF-5): there is no dedicated on-chain breach signal beyond `ReservesUpdated`, and no test or runtime evidence that a post-update sub-floor condition would be detected, flagged, and remediated end-to-end. This must be in place before/with any future oracle-to-token reserve sync (CF-2). A LOW-severity overflow precision item (CF-7) is also recorded.
+
+**INV-02 is enforced at mint time and not fully closed on the monitoring/breach-routing dimension. It is not claimed fixed.** The recommended next step is **test-only characterization** (R-1…R-8) plus **monitoring-gap documentation**, with **no contract patch** to `updateReserves()` — any breach-detection/routing mechanism remains a separate doctrine-review item.
 
 This document is analysis only. No production code, tests, CI configuration, deployment scripts, fuzzing harnesses, or doctrine were modified. No production-readiness, external-audit, or formal-verification completion is claimed; no STEP9-BLOCK-* blocker is closed; INV-02 is **not** claimed fixed. INV-09 is untouched.
