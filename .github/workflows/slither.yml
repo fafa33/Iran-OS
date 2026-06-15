@@ -40,35 +40,33 @@ jobs:
       - name: Run Slither
         id: slither
         run: |
-          # Run Slither; capture exit code without failing the step.
-          # Exit 0 = no findings. Exit 1 or 255 = findings present (both are normal;
-          # Slither v0.11.x uses sys.exit(-1) which becomes 255 in bash). Other = tool error.
+          # Findings are non-blocking via --fail-none; nonzero means Slither failed.
+          # Exclude test-only fuzzing harnesses from the production-contract baseline.
           slither . \
             --hardhat-ignore-compile \
+            --filter-paths "contracts/fuzzing" \
+            --fail-none \
             --json slither-report.json \
             2>&1 | tee slither-output.txt
           SLITHER_EXIT="${PIPESTATUS[0]}"
           echo "slither_exit=${SLITHER_EXIT}" >> "$GITHUB_OUTPUT"
 
-          # Write a summary to the job summary page.
           {
             echo "## Slither Static Analysis"
             echo ""
             if [ "$SLITHER_EXIT" -eq 0 ]; then
-              echo "**Result:** No findings detected."
-            elif [ "$SLITHER_EXIT" -eq 1 ] || [ "$SLITHER_EXIT" -eq 255 ]; then
-              echo "**Result:** Findings detected (see artifacts). This is non-blocking; review new findings against the baseline in \`docs/reports/SLITHER_BASELINE_AUDIT.md\`."
+              echo "**Result:** Slither completed successfully. Findings, if present, are non-blocking and available in the artifacts."
             else
-              echo "**Result:** Slither encountered a tool error (exit code ${SLITHER_EXIT}). Check the step log."
+              echo "**Result:** Slither failed with exit code ${SLITHER_EXIT}. Check the step log."
             fi
             echo ""
+            echo "Scope: production-contract baseline; excludes \`contracts/fuzzing/\`."
             echo "Baseline: 130 findings documented in \`docs/reports/SLITHER_BASELINE_AUDIT.md\`."
             echo "Triage guidance: \`docs/reports/SLITHER_REMEDIATION_PRIORITY_MATRIX.md\`."
           } >> "$GITHUB_STEP_SUMMARY"
 
-          # Fail only on tool error — findings (exit 1 or 255) are non-blocking.
-          if [ "$SLITHER_EXIT" -ne 0 ] && [ "$SLITHER_EXIT" -ne 1 ] && [ "$SLITHER_EXIT" -ne 255 ]; then
-            echo "::error::Slither exited with unexpected code ${SLITHER_EXIT}. See step log for details."
+          if [ "$SLITHER_EXIT" -ne 0 ]; then
+            echo "::error::Slither failed with exit code ${SLITHER_EXIT}. See step log for details."
             exit "$SLITHER_EXIT"
           fi
 
@@ -78,6 +76,7 @@ jobs:
         with:
           name: slither-report-json
           path: slither-report.json
+          if-no-files-found: warn
           retention-days: 30
 
       - name: Upload Slither text output
@@ -86,4 +85,5 @@ jobs:
         with:
           name: slither-report-text
           path: slither-output.txt
+          if-no-files-found: warn
           retention-days: 30
