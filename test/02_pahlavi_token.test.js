@@ -584,4 +584,260 @@ describe("PahlaviToken", function () {
       await assertCapacityConsistent();
     });
   });
+
+  // ─────────────────────────────────────────
+  // INV-02 Reserve Ratio Floor Follow-Up (R-1..R-8)
+  // پیگیری ممیزی INV-02 — کف نسبت پشتوانه
+  // Source: docs/reports/INV02_RESERVE_RATIO_FLOOR_AUDIT.md §14 (v1.1.1)
+  //
+  // These tests CHARACTERIZE current behavior only. They do not assert that
+  // any behavior is correct or defective, do not implement remediation, do
+  // not patch updateReserves, and do not add a reserve-floor guard. R-3 and
+  // R-8 in particular document reachable states (CF-1 sub-floor, CF-7 overflow)
+  // whose remediation doctrine leaves open — see the audit report.
+  // ─────────────────────────────────────────
+  describe("INV-02 Reserve Ratio Floor Follow-Up (R-1..R-8)", function () {
+    const PahlaviTokenFactory = async () => ethers.getContractFactory("PahlaviToken");
+
+    // ── R-1: mint-time floor boundary (§7.1) ──
+    it("INV-02 R-1a: mint leaving post-mint ratio exactly 333 succeeds", async function () {
+      // reserves=333e18, mint 1000e18 → ratio = floor(333000/1000) = 333 (== floor)
+      const F = await PahlaviTokenFactory();
+      const t = await F.deploy(swf.address, kernel.address, ethers.parseUnits("333", 18));
+      await t.waitForDeployment();
+      await expect(
+        t.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-02 R-1a")
+      ).to.not.be.reverted;
+      expect(await t.totalSupply()).to.equal(ethers.parseUnits("1000", 18));
+    });
+
+    it("INV-02 R-1b: mint leaving post-mint ratio 332 reverts; supply unchanged", async function () {
+      // reserves=333e18, mint 1001e18 → ratio = floor(333000/1001) = 332 < 333
+      const F = await PahlaviTokenFactory();
+      const t = await F.deploy(swf.address, kernel.address, ethers.parseUnits("333", 18));
+      await t.waitForDeployment();
+      await expect(
+        t.connect(swf).mint(user1.address, ethers.parseUnits("1001", 18), "INV-02 R-1b")
+      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+      expect(await t.totalSupply()).to.equal(0n);
+    });
+
+    // ── R-2: updateReserves authority (§5) ──
+    it("INV-02 R-2: updateReserves authorization is role-based (KERNEL_ROLE), not address-based", async function () {
+      const before = await token.totalReserves(); // INITIAL_RESERVES (300B)
+      const attempt = before + ethers.parseUnits("1", 18);
+
+      // signers WITHOUT KERNEL_ROLE cannot update reserves
+      for (const signer of [swf, stranger, user2]) {
+        expect(await token.hasRole(await token.KERNEL_ROLE(), signer.address)).to.be.false;
+        await expect(
+          token.connect(signer).updateReserves(attempt)
+        ).to.be.revertedWith("PAH: caller is not the Kernel");
+      }
+      expect(await token.totalReserves()).to.equal(before);
+
+      // the constructor-configured kernel holder can update reserves
+      await expect(token.connect(kernel).updateReserves(attempt))
+        .to.emit(token, "ReservesUpdated");
+      expect(await token.totalReserves()).to.equal(attempt);
+
+      // role-based (not address-based) check: grant KERNEL_ROLE to a SECOND signer
+      // (kernel holds DEFAULT_ADMIN_ROLE) and verify that signer can now update
+      // reserves. A regression hard-coding `msg.sender == kernel` would fail here.
+      await token.connect(kernel).grantRole(await token.KERNEL_ROLE(), user2.address);
+      expect(await token.hasRole(await token.KERNEL_ROLE(), user2.address)).to.be.true;
+
+      const secondUpdate = attempt + ethers.parseUnits("1", 18);
+      await expect(token.connect(user2).updateReserves(secondUpdate))
+        .to.emit(token, "ReservesUpdated");
+      expect(await token.totalReserves()).to.equal(secondUpdate);
+    });
+
+    // ── R-3: CF-1 characterization (§7.2, §10) ──
+    it("INV-02 R-3: post-update reserve drop leaves a reachable sub-floor state (CF-1 characterization)", async function () {
+      // CHARACTERIZATION ONLY. This documents that the reserve floor is a
+      // mint-time gate, not a standing contract invariant: updateReserves is
+      // not ratio-gated, so reserves can be driven below the floor for the
+      // existing supply with no revert. This is a doctrine-recognized
+      // breach-relevant condition whose remediation is UNDECIDED (preventive
+      // guard / soft-signal / TR-05-06 routing / burn — none implemented).
+      // This test asserts current behavior; it is NOT an endorsement and NOT
+      // a defect assertion. No remediation is implemented here.
+      await token.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-02 R-3 mint");
+      const supplyAfterMint = await token.totalSupply();
+
+      // updateReserves(0) succeeds — no floor guard, no post-update ratio re-check
+      await expect(token.connect(kernel).updateReserves(0n)).to.not.be.reverted;
+
+      // the standing ratio is now below the floor, with no revert having occurred
+      expect(await token.currentReserveRatio()).to.equal(0n);
+      expect(await token.currentReserveRatio()).to.be.lessThan(333n);
+      expect(await token.canMint(ethers.parseUnits("1", 18))).to.be.false;
+
+      // the mint-time gate still blocks any further expansion from this state
+      await expect(
+        token.connect(swf).mint(user1.address, ethers.parseUnits("1", 18), "INV-02 R-3 blocked")
+      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+
+      // state is exactly as expected: supply untouched by the failed mint, reserves at 0
+      expect(await token.totalSupply()).to.equal(supplyAfterMint);
+      expect(await token.totalReserves()).to.equal(0n);
+    });
+
+    // ── R-4: burn raises ratio; burn never floor-blocked (§7.3) ──
+    it("INV-02 R-4: burn lowers supply and raises the ratio, including from a sub-floor state", async function () {
+      const F = await PahlaviTokenFactory();
+      const t = await F.deploy(swf.address, kernel.address, ethers.parseUnits("1000", 18));
+      await t.waitForDeployment();
+
+      // mint 2000e18 → ratio = floor(1000*1000/2000) = 500
+      await t.connect(swf).mint(user1.address, ethers.parseUnits("2000", 18), "INV-02 R-4 mint");
+      expect(await t.currentReserveRatio()).to.equal(500n);
+
+      // burn 500e18 → supply 1500e18 → ratio = floor(1000000/1500) = 666 (strictly increased)
+      await t.connect(swf).burn(user1.address, ethers.parseUnits("500", 18), "INV-02 R-4 burn");
+      expect(await t.totalSupply()).to.equal(ethers.parseUnits("1500", 18));
+      expect(await t.currentReserveRatio()).to.equal(666n);
+      expect(666n).to.be.greaterThan(500n);
+
+      // drive into a sub-floor state, then confirm burn still succeeds (no floor check on burn)
+      await t.connect(kernel).updateReserves(ethers.parseUnits("100", 18)); // ratio = floor(100000/1500) = 66 < 333
+      const subFloorRatio = await t.currentReserveRatio();
+      expect(subFloorRatio).to.be.lessThan(333n);
+      await expect(
+        t.connect(swf).burn(user1.address, ethers.parseUnits("1400", 18), "INV-02 R-4 burn subfloor")
+      ).to.not.be.reverted;
+      expect(await t.totalSupply()).to.equal(ethers.parseUnits("100", 18));
+      // ratio after burn = floor(100*1000/100) = 1000, strictly above the sub-floor value
+      expect(await t.currentReserveRatio()).to.be.greaterThan(subFloorRatio);
+    });
+
+    // ── R-5: emergency interaction (§7.4) ──
+    it("INV-02 R-5: updateReserves works during emergency while mint is halted; ratio math consistent", async function () {
+      await token.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-02 R-5 mint");
+
+      await token.connect(kernel).activateEmergencyMode();
+      expect(await token.emergencyMode()).to.be.true;
+
+      // updateReserves carries no notInEmergency guard — succeeds during emergency
+      const newReserves = ethers.parseUnits("600000000000", 18);
+      await expect(token.connect(kernel).updateReserves(newReserves))
+        .to.emit(token, "ReservesUpdated");
+      expect(await token.totalReserves()).to.equal(newReserves);
+
+      // mint is halted by the emergency guard
+      await expect(
+        token.connect(swf).mint(user1.address, ethers.parseUnits("1", 18), "INV-02 R-5 blocked")
+      ).to.be.revertedWith("PAH: system in emergency mode");
+
+      // ratio view stays consistent with stored reserves/supply
+      const supply = await token.totalSupply();
+      expect(await token.currentReserveRatio()).to.equal((newReserves * 1000n) / supply);
+    });
+
+    // ── R-6: view/gate agreement (§6) ──
+    it("INV-02 R-6: currentReserveRatio / canMint / mint outcomes agree at the 333/332 boundary", async function () {
+      const F = await PahlaviTokenFactory();
+
+      // supply == 0 → ratio view returns 1000
+      const t = await F.deploy(swf.address, kernel.address, ethers.parseUnits("333", 18));
+      await t.waitForDeployment();
+      expect(await t.currentReserveRatio()).to.equal(1000n);
+
+      // canMint agrees with the gate on both sides of the boundary
+      expect(await t.canMint(ethers.parseUnits("1000", 18))).to.be.true;  // ratio 333
+      expect(await t.canMint(ethers.parseUnits("1001", 18))).to.be.false; // ratio 332
+
+      // actual mint at the 333 side succeeds (matches canMint == true)
+      await expect(
+        t.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-02 R-6 pass")
+      ).to.not.be.reverted;
+      expect(await t.currentReserveRatio()).to.equal(333n);
+
+      // actual mint at the 332 side reverts (matches canMint == false), on a fresh instance
+      const t2 = await F.deploy(swf.address, kernel.address, ethers.parseUnits("333", 18));
+      await t2.waitForDeployment();
+      expect(await t2.canMint(ethers.parseUnits("1001", 18))).to.be.false;
+      await expect(
+        t2.connect(swf).mint(user1.address, ethers.parseUnits("1001", 18), "INV-02 R-6 fail")
+      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+    });
+
+    // ── R-7: cross-contract constant equality (§2) ──
+    it("INV-02 R-7: PahlaviToken.MIN_RESERVE_RATIO equals Kernel.MIN_RESERVE_RATIO equals 333", async function () {
+      const Kernel = await ethers.getContractFactory("IranOS_Kernel");
+      const k = await Kernel.deploy(
+        kernel.address, // sovereign
+        user1.address,  // court
+        user2.address,  // oracle
+        swf.address     // swf
+      );
+      await k.waitForDeployment();
+
+      const tokenRatio = await token.MIN_RESERVE_RATIO();
+      const kernelRatio = await k.MIN_RESERVE_RATIO();
+      expect(tokenRatio).to.equal(333n);
+      expect(kernelRatio).to.equal(333n);
+      expect(tokenRatio).to.equal(kernelRatio);
+    });
+
+    // ── R-8: CF-7 overflow precision (§6) ──
+    // Uses revertedWithPanic(0x11) (ARITHMETIC_OVERFLOW) from hardhat-chai-matchers.
+    const MAX_UINT256 = ethers.MaxUint256;
+
+    it("INV-02 R-8a: updateReserves(MaxUint256) with supply > 0 reverts (checked overflow); reserves unchanged", async function () {
+      await token.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-02 R-8a mint");
+      const before = await token.totalReserves();
+      // (newReserves * 1000) overflows inside updateReserves when supply > 0
+      await expect(
+        token.connect(kernel).updateReserves(MAX_UINT256)
+      ).to.be.revertedWithPanic(0x11);
+      // the reverted assignment is rolled back
+      expect(await token.totalReserves()).to.equal(before);
+    });
+
+    it("INV-02 R-8b: updateReserves(MaxUint256) at supply == 0 succeeds, then mint/canMint overflow; ratio view returns 1000; recovery works in-fixture", async function () {
+      const F = await PahlaviTokenFactory();
+      const t = await F.deploy(swf.address, kernel.address, ethers.parseUnits("300000000000", 18));
+      await t.waitForDeployment();
+
+      // supply == 0 → ratio branch short-circuits to 1000, no multiply, so this succeeds
+      await expect(t.connect(kernel).updateReserves(MAX_UINT256)).to.not.be.reverted;
+      expect(await t.totalReserves()).to.equal(MAX_UINT256);
+
+      // subsequent mint and canMint compute totalReserves * 1000 → overflow → revert
+      await expect(
+        t.connect(swf).mint(user1.address, ethers.parseUnits("1", 18), "INV-02 R-8b mint")
+      ).to.be.revertedWithPanic(0x11);
+      await expect(t.canMint(ethers.parseUnits("1", 18))).to.be.revertedWithPanic(0x11);
+
+      // currentReserveRatio() returns 1000 early while supply == 0 (no multiply)
+      expect(await t.currentReserveRatio()).to.equal(1000n);
+
+      // recovery is possible ONLY because this fixture's KERNEL_ROLE holder (an EOA)
+      // can call updateReserves. Under production wiring (KERNEL_ROLE held by the
+      // IranOS_Kernel contract, which has no updateReserves call path), this state
+      // is NOT recoverable in-place and the deployment must be replaced.
+      await t.connect(kernel).updateReserves(ethers.parseUnits("300000000000", 18));
+      await expect(
+        t.connect(swf).mint(user1.address, ethers.parseUnits("1", 18), "INV-02 R-8b recover")
+      ).to.not.be.reverted;
+    });
+
+    it("INV-02 R-8c: constructor with oversized _initialReserves succeeds, then mint/canMint overflow at genesis", async function () {
+      // The constructor accepts an unbounded _initialReserves with no upper-bound check.
+      // Under production Kernel wiring there is no updateReserves call path, so a
+      // genesis deployment in this state is NOT recoverable in-place — redeploy required.
+      const F = await PahlaviTokenFactory();
+      const tc = await F.deploy(swf.address, kernel.address, MAX_UINT256);
+      await tc.waitForDeployment();
+      expect(await tc.totalSupply()).to.equal(0n);
+      expect(await tc.totalReserves()).to.equal(MAX_UINT256);
+
+      await expect(
+        tc.connect(swf).mint(user1.address, ethers.parseUnits("1", 18), "INV-02 R-8c mint")
+      ).to.be.revertedWithPanic(0x11);
+      await expect(tc.canMint(ethers.parseUnits("1", 18))).to.be.revertedWithPanic(0x11);
+    });
+  });
 });
