@@ -20,6 +20,9 @@ contract JurySelection is AccessControl, ReentrancyGuard {
     uint8 public constant CONVICTION_THRESHOLD = 8;
     uint8 public constant ACQUITTAL_THRESHOLD  = 5;
 
+    /// @dev Groth16 (Circom/SnarkJS) ABI-encoded proof minimum: pi_a(64) + pi_b(128) + pi_c(64) = 256 bytes.
+    uint256 public constant ZK_PROOF_MIN_LENGTH = 256;
+
     struct JuryPool {
         bytes32[] jurorCommitments;
         uint256   caseId;
@@ -57,12 +60,28 @@ contract JurySelection is AccessControl, ReentrancyGuard {
         emit JurySelected(caseId, block.timestamp);
     }
 
+    /**
+     * @notice رای هیئت منصفه را به همراه ZK proof ثبت می‌کند
+     * @dev اعتبارسنجی ساختاری: حداقل ZK_PROOF_MIN_LENGTH بایت و تراز ۳۲ بایتی
+     *      (سازگار با قالب ABI-encoded Groth16 از Circom/SnarkJS).
+     *      هشدار — این تأیید رمزنگاری کامل نیست.
+     *      هیچ قرارداد verifier در حال حاضر مستقر نشده است.
+     *      اعتبارسنجی ساختاری تنها از جعل‌های سطحی جلوگیری می‌کند.
+     *      G-1 تا یکپارچه‌سازی قرارداد verifier در نسخه آینده باز باقی می‌ماند.
+     * @param caseId شناسه پرونده
+     * @param commitment تعهد داور (bytes32)
+     * @param isGuilty رای مجرم یا غیرمجرم
+     * @param zkProof اثبات ZK (حداقل ۲۵۶ بایت، تراز ۳۲ بایتی)
+     */
     function submitVote(uint256 caseId, bytes32 commitment, bool isGuilty, bytes calldata zkProof) external nonReentrant {
         JuryPool storage pool = juryPools[caseId];
         require(pool.selectedAt > 0, "JurySelection: no jury for this case");
         require(!pool.isComplete, "JurySelection: voting complete");
         require(!usedCommitments[commitment], "JurySelection: already voted");
-        require(zkProof.length > 0, "JurySelection: invalid ZK proof");
+        require(
+            zkProof.length >= ZK_PROOF_MIN_LENGTH && zkProof.length % 32 == 0,
+            "JurySelection: invalid ZK proof"
+        );
         bool isValidJuror = false;
         for (uint8 i = 0; i < pool.jurorCommitments.length; i++) {
             if (pool.jurorCommitments[i] == commitment) { isValidJuror = true; break; }
