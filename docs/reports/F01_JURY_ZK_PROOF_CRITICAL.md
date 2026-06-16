@@ -66,13 +66,21 @@ on-chain (verdict not yet reached).
 
 1. Attacker monitors the mempool or chain history for `selectJury(caseId, commitments)`.
 2. Reads all 12 `commitments[0..11]` from calldata — they are public bytes on-chain.
-3. Calls `submitVote(caseId, commitments[i], <chosen_vote>, bytes("x"))` for each `i`.
+3. Calls `submitVote(caseId, commitments[i], <chosen_vote>, bytes("x"))` for each vote cast.
    - `bytes("x")` satisfies `zkProof.length > 0`.
    - `_isValidJuror(caseId, commitments[i])` returns `true` (commitment is in pool).
    - `!usedCommitments[commitments[i]]` is `true` (not yet voted).
-4. All 12 votes go through. Attacker dictates the verdict.
+4. Attacker reaches the verdict threshold of their choice:
+   - **Conviction:** 8 guilty votes → `VerdictReached(caseId, 1, ...)` emitted. Done in 8 txns.
+   - **Acquittal:** 5 not-guilty votes → `VerdictReached(caseId, 2, ...)` emitted. Done in 5 txns.
+   - After the threshold is hit, `voting complete` rejects further votes — but the verdict is
+     already locked and the attacker has achieved their goal.
 
-**Cost:** One `selectJury` observation + 12 `submitVote` transactions. No key material required.
+Note: voting the same choice for all 12 commitments will not result in 12 accepted votes —
+the contract halts at CONVICTION_THRESHOLD (8) or ACQUITTAL_THRESHOLD (5). The attacker
+controls which threshold is reached, not the raw vote count.
+
+**Cost:** One `selectJury` observation + as few as 5 `submitVote` transactions. No key material required.
 
 ---
 
