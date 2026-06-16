@@ -55,7 +55,7 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
     bool public emergencyMode;
 
     /// @notice وضعیت نقض کف پشتوانه — true وقتی updateReserves نسبت را زیر MIN_RESERVE_RATIO برده باشد
-    /// @dev توسط updateReserves() تنظیم و پاک می‌شود. CF-1 Option C — ردیابی نقض. GAP-MEX-05 را ببینید.
+    /// @dev توسط updateReserves() و burn() تنظیم و پاک می‌شود. CF-1 Option C — ردیابی نقض. GAP-MEX-05 را ببینید.
     bool public reserveFloorBreached;
 
     // ─────────────────────────────────────────
@@ -75,7 +75,7 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
         uint256 supplyAtBreach
     );
 
-    /// @notice بازگشت انطباق — هنگامی که updateReserves نسبت را به MIN_RESERVE_RATIO یا بالاتر بازمی‌گرداند
+    /// @notice بازگشت انطباق — هنگامی که updateReserves یا burn نسبت را به MIN_RESERVE_RATIO یا بالاتر بازمی‌گرداند
     /// @dev CF-1 Option C. یک بار در انتقال از وضعیت نقض به انطباق منتشر می‌شود.
     event ReserveFloorRestored(
         uint256 newReserves,
@@ -189,6 +189,8 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
 
     /**
      * @notice سوزاندن پهلوی (برای تنظیم عرضه یا بازپس‌گیری)
+     * @dev CF-1 Option C: اگر در حالت نقض باشیم و سوزاندن نسبت را به MIN_RESERVE_RATIO یا بالاتر برساند،
+     *      وضعیت نقض پاک و ReserveFloorRestored منتشر می‌شود.
      * @param from آدرس صاحب توکن
      * @param amount مقدار
      * @param reason دلیل سوزاندن
@@ -205,6 +207,14 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
 
         _burn(from, amount);
         emit PahlaviBurned(from, amount, totalSupply(), reason);
+        if (reserveFloorBreached) {
+            uint256 supply = totalSupply();
+            uint256 ratio = supply > 0 ? (totalReserves * 1000) / supply : 1000;
+            if (ratio >= MIN_RESERVE_RATIO) {
+                reserveFloorBreached = false;
+                emit ReserveFloorRestored(totalReserves, ratio, supply);
+            }
+        }
     }
 
     // ─────────────────────────────────────────

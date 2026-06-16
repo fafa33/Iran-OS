@@ -927,5 +927,48 @@ describe("PahlaviToken", function () {
       // mint gate no longer blocked by ratio (mint-time check passes)
       expect(await token.canMint(ethers.parseUnits("1", 18))).to.be.true;
     });
+
+    it("CF-1 D: burn-based supply contraction clears stale breach state and emits ReserveFloorRestored", async function () {
+      // Setup: mint 1000e18, set reserves to 100e18 → ratio = 100 < 333 → breach
+      const mintAmt = ethers.parseUnits("1000", 18);
+      await token.connect(swf).mint(user1.address, mintAmt, "CF-1 D mint");
+      const subFloorReserves = ethers.parseUnits("100", 18);
+      await token.connect(kernel).updateReserves(subFloorReserves);
+      expect(await token.reserveFloorBreached()).to.be.true;
+      // sanity: ratio is currently sub-floor (100e18*1000 / 1000e18 = 100)
+      expect(await token.currentReserveRatio()).to.equal(100n);
+
+      // Burn 700e18 → supply = 300e18 → ratio = (100e18*1000)/300e18 = 333 ≥ 333 → compliant
+      const burnAmt = ethers.parseUnits("700", 18);
+      const supplyAfterBurn = mintAmt - burnAmt;                             // 300e18
+      const ratioAfterBurn = (subFloorReserves * 1000n) / supplyAfterBurn;  // 333
+
+      await expect(token.connect(swf).burn(user1.address, burnAmt, "CF-1 D burn"))
+        .to.emit(token, "ReserveFloorRestored")
+        .withArgs(subFloorReserves, ratioAfterBurn, supplyAfterBurn);
+
+      // breach state cleared
+      expect(await token.reserveFloorBreached()).to.be.false;
+
+      // ratio is now compliant
+      expect(await token.currentReserveRatio()).to.be.gte(333n);
+    });
+
+    it("CF-1 E: burn that does not restore compliance leaves breach state unchanged", async function () {
+      // mint 1000e18, reserves = 0 → ratio = 0 → breach
+      const mintAmt = ethers.parseUnits("1000", 18);
+      await token.connect(swf).mint(user1.address, mintAmt, "CF-1 E mint");
+      await token.connect(kernel).updateReserves(0n);
+      expect(await token.reserveFloorBreached()).to.be.true;
+
+      // burn only 1e18 → supply = 999e18 → ratio = 0 < 333 → still non-compliant
+      const burnAmt = ethers.parseUnits("1", 18);
+      await expect(token.connect(swf).burn(user1.address, burnAmt, "CF-1 E burn"))
+        .to.not.emit(token, "ReserveFloorRestored");
+
+      // breach state must remain true
+      expect(await token.reserveFloorBreached()).to.be.true;
+      expect(await token.currentReserveRatio()).to.equal(0n);
+    });
   });
 });
