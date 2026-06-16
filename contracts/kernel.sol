@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./interfaces/IPahlaviToken.sol";
 
 interface ITriggerProtocol {
     function executeTrigger(
@@ -74,6 +75,10 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
 
     /// @notice آدرس اوراکل API3
     address public api3Oracle;
+
+    /// @notice آدرس قرارداد توکن پهلوی — تنها برای هدایت داده ذخایر به PahlaviToken.updateReserves استفاده می‌شود
+    /// @dev GAP-MEX-05: این آدرس توسط setPahlaviToken تنظیم می‌شود. توسط syncReserves برای ارسال داده استفاده می‌شود.
+    address public pahlaviToken;
 
     // ─────────────────────────────────────────
     // ساختارها (Structs)
@@ -155,6 +160,15 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
         string  contractName,
         address oldAddress,
         address newAddress
+    );
+
+    /// @notice انتشار می‌شود هر بار که syncReserves داده ذخایر را به PahlaviToken ارسال می‌کند
+    /// @dev ردیابی حسابرسی لایه Kernel. رویدادهای تطابق (ReserveFloorBreached/Restored) از PahlaviToken صادر می‌شوند.
+    ///      GAP-MEX-05.
+    event ReserveSynced(
+        address indexed caller,
+        uint256 newReserves,
+        uint256 timestamp
     );
 
     // ─────────────────────────────────────────
@@ -473,6 +487,51 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
         address old = sovereignWealthFund;
         sovereignWealthFund = _swf;
         emit KernelContractUpdated("SovereignWealthFund", old, _swf);
+    }
+
+    /**
+     * @notice تنظیم آدرس قرارداد توکن پهلوی
+     * @dev نیازمند تایید پادشاه و وضعیت بدون قفل.
+     *      این تنها آدرس مورد استفاده توسط syncReserves برای ارسال داده ذخایر است.
+     *      GAP-MEX-05.
+     * @param _pahlaviToken آدرس قرارداد PahlaviToken
+     */
+    function setPahlaviToken(address _pahlaviToken)
+        external
+        onlySovereign
+        notLocked
+        nonReentrant
+    {
+        require(_pahlaviToken != address(0), "Kernel: invalid address");
+        address old = pahlaviToken;
+        pahlaviToken = _pahlaviToken;
+        emit KernelContractUpdated("PahlaviToken", old, _pahlaviToken);
+    }
+
+    /**
+     * @notice ارسال داده ذخایر تایید‌شده اوراکل به PahlaviToken
+     * @dev سطح ارسال داده خالص. هیچ منطق انطباق، نسبت ذخایر، یا وضعیت نقض
+     *      در این تابع محاسبه نمی‌شود.
+     *
+     *      تنها مسئولیت: دریافت داده ذخایر تایید‌شده → ارسال مقدار ذخایر
+     *      به PahlaviToken.updateReserves() → انتشار ردیابی حسابرسی.
+     *
+     *      هیچ عمل دیگری در این تابع مجاز نیست.
+     *
+     *      عمداً از قفل اضطراری معاف است: حقیقت ذخایر باید در هنگام بحران
+     *      در دسترس بماند. PahlaviToken.updateReserves() نیز بدون نگهبان
+     *      اضطراری قابل فراخوانی است. GAP-MEX-05.
+     *
+     * @param newReserves ارزش ذخایر در واحد 1e18 (گزارش‌شده توسط اوراکل)
+     */
+    function syncReserves(uint256 newReserves)
+        external
+        onlyOracle
+        nonReentrant
+    {
+        require(pahlaviToken != address(0), "Kernel: pahlaviToken not set");
+        IPahlaviToken(pahlaviToken).updateReserves(newReserves);
+        emit ReserveSynced(msg.sender, newReserves, block.timestamp);
     }
 
     // ─────────────────────────────────────────
