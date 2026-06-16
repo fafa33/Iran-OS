@@ -401,5 +401,23 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
         freshKernel.connect(oracle).syncReserves(ethers.parseUnits("100", 18))
       ).to.be.revertedWith("Kernel: pahlaviToken not set");
     });
+
+    it("setPahlaviToken reverts during active emergency lock (CLC-06)", async function () {
+      // Activate emergency lock via TR-01 violation
+      await kernel.connect(oracle).flagViolation(1, stranger.address, "test emergency");
+      expect(await kernel.emergencyLockActive()).to.be.true;
+
+      const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+      const token2 = await PahlaviToken.deploy(swf.address, await kernel.getAddress(), INITIAL_RESERVES);
+      await token2.waitForDeployment();
+
+      // notLocked() must block setPahlaviToken during emergency
+      await expect(
+        kernel.connect(sovereign).setPahlaviToken(await token2.getAddress())
+      ).to.be.revertedWith("Kernel: system is under emergency lock");
+
+      // pahlaviToken address must remain unchanged
+      expect(await kernel.pahlaviToken()).to.equal(await token.getAddress());
+    });
   });
 });
