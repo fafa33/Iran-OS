@@ -43,14 +43,19 @@ require(_isValidJuror(caseId, commitment), "JurySelection: not a valid juror");
 
 1. Watch chain for `selectJury(caseId, commitments)` calldata.
 2. Read `commitments[0..11]` — 12 public bytes32 values.
-3. For each commitment, call:
-   ```
-   submitVote(caseId, commitments[i], <chosen_vote>, bytes("x"))
-   ```
+3. Call `submitVote(caseId, commitments[i], <chosen_vote>, bytes("x"))` for each vote:
    - `bytes("x")` satisfies `length > 0`.
    - `_isValidJuror` returns `true` — commitment is in pool.
    - No key material required.
-4. All 12 votes accepted. Attacker controls verdict.
+4. Attacker reaches the verdict threshold of their choice:
+   - **Conviction:** submit 8 guilty votes → `VerdictReached(caseId, 1, ...)` fired. Done in 8 txns.
+   - **Acquittal:** submit 5 not-guilty votes → `VerdictReached(caseId, 2, ...)` fired. Done in 5 txns.
+   - `voting complete` rejects any further calls — verdict is already locked.
+
+Note: submitting the same vote for all 12 commitments will not yield 12 accepted votes.
+The contract halts at `CONVICTION_THRESHOLD` (8) or `ACQUITTAL_THRESHOLD` (5) and rejects
+subsequent calls. The exploit remains critical because the attacker controls which verdict
+is reached, not because all 12 votes are unconditionally accepted.
 
 ---
 
