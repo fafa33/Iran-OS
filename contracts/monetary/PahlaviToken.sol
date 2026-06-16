@@ -54,6 +54,10 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
     /// @notice وضعیت اضطراری — در صورت فعال بودن، انتقال‌ها متوقف می‌شوند
     bool public emergencyMode;
 
+    /// @notice وضعیت نقض کف پشتوانه — true وقتی updateReserves نسبت را زیر MIN_RESERVE_RATIO برده باشد
+    /// @dev توسط updateReserves() تنظیم و پاک می‌شود. CF-1 Option C — ردیابی نقض. GAP-MEX-05 را ببینید.
+    bool public reserveFloorBreached;
+
     // ─────────────────────────────────────────
     // رویدادها
     // ─────────────────────────────────────────
@@ -61,6 +65,24 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
     event PahlaviMinted(address indexed to, uint256 amount, uint256 newTotalSupply, string reason);
     event PahlaviBurned(address indexed from, uint256 amount, uint256 newTotalSupply, string reason);
     event ReservesUpdated(uint256 oldReserves, uint256 newReserves, uint256 reserveRatioInThousandths);
+
+    /// @notice نقض کف نسبت پشتوانه — هنگامی که updateReserves نسبت را برای عرضه موجود زیر MIN_RESERVE_RATIO می‌برد
+    /// @dev CF-1 Option C. با هر تماس updateReserves که در وضعیت نقض است، منتشر می‌شود.
+    event ReserveFloorBreached(
+        uint256 oldReserves,
+        uint256 newReserves,
+        uint256 ratioInThousandths,
+        uint256 supplyAtBreach
+    );
+
+    /// @notice بازگشت انطباق — هنگامی که updateReserves نسبت را به MIN_RESERVE_RATIO یا بالاتر بازمی‌گرداند
+    /// @dev CF-1 Option C. یک بار در انتقال از وضعیت نقض به انطباق منتشر می‌شود.
+    event ReserveFloorRestored(
+        uint256 newReserves,
+        uint256 ratioInThousandths,
+        uint256 supply
+    );
+
     event EmergencyModeActivated(uint256 timestamp);
     event EmergencyModeDeactivated(uint256 timestamp);
     event SWFAddressUpdated(address oldSWF, address newSWF);
@@ -191,7 +213,11 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
 
     /**
      * @notice به‌روزرسانی مقدار ذخایر پشتوانه
-     * @dev فراخوانی توسط API3Oracle از طریق Kernel
+     * @dev فراخوانی توسط API3Oracle از طریق Kernel.
+     *      CF-1 Option C: اگر به‌روزرسانی نسبت را زیر MIN_RESERVE_RATIO ببرد،
+     *      وضعیت نقض ثبت و رویداد ReserveFloorBreached منتشر می‌شود (بدون برگشت).
+     *      بازگشت به انطباق، وضعیت را پاک و ReserveFloorRestored را منتشر می‌کند.
+     *      برگشت رویداد یا تماس با TriggerProtocol انجام نمی‌شود — GAP-MEX-05 را ببینید.
      * @param newReserves ارزش دلاری ذخایر در واحد 1e18
      */
     function updateReserves(uint256 newReserves) external onlyKernel {
@@ -200,6 +226,15 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
         uint256 supply = totalSupply();
         uint256 ratio = supply > 0 ? (newReserves * 1000) / supply : 1000;
         emit ReservesUpdated(old, newReserves, ratio);
+        if (supply > 0 && ratio < MIN_RESERVE_RATIO) {
+            if (!reserveFloorBreached) {
+                reserveFloorBreached = true;
+            }
+            emit ReserveFloorBreached(old, newReserves, ratio, supply);
+        } else if (reserveFloorBreached) {
+            reserveFloorBreached = false;
+            emit ReserveFloorRestored(newReserves, ratio, supply);
+        }
     }
 
     // ─────────────────────────────────────────

@@ -840,4 +840,92 @@ describe("PahlaviToken", function () {
       await expect(tc.canMint(ethers.parseUnits("1", 18))).to.be.revertedWithPanic(0x11);
     });
   });
+
+  // ─────────────────────────────────────────
+  // CF-1 Option C — Reserve Breach Detection
+  // ردیابی نقض کف پشتوانه و رویداد اطلاع‌رسانی
+  // Source: docs/reports/CF1_BREACH_DETECTION_DISPOSITION.md
+  //
+  // Tests A–C verify the breach-detection contract change:
+  //   A) Compliant update: no breach state, no breach event
+  //   B) Non-compliant update: breach state set, ReserveFloorBreached emitted,
+  //      transaction succeeds, totalReserves updated
+  //   C) Recovery: breach state cleared, ReserveFloorRestored emitted
+  //
+  // No revert, no TriggerProtocol, no Kernel call — Option C only.
+  // ─────────────────────────────────────────
+  describe("CF-1 Option C — Reserve Breach Detection", function () {
+
+    it("CF-1 A: compliant updateReserves emits no breach event and leaves reserveFloorBreached false", async function () {
+      // supply == 0: ratio branch short-circuits to 1000; no breach possible
+      await expect(
+        token.connect(kernel).updateReserves(INITIAL_RESERVES)
+      ).to.not.emit(token, "ReserveFloorBreached");
+      expect(await token.reserveFloorBreached()).to.be.false;
+
+      // supply > 0, ratio stays above floor: still no breach event
+      const mintAmt = ethers.parseUnits("1000", 18);
+      await token.connect(swf).mint(user1.address, mintAmt, "CF-1 A mint");
+      // reserves = INITIAL_RESERVES (300B e18), supply = 1000e18 → ratio >> 333
+      const complyingReserves = INITIAL_RESERVES; // ratio = 300B, well above floor
+      await expect(
+        token.connect(kernel).updateReserves(complyingReserves)
+      ).to.not.emit(token, "ReserveFloorBreached");
+      expect(await token.reserveFloorBreached()).to.be.false;
+      // ReservesUpdated is still emitted (existing behavior preserved)
+      await expect(
+        token.connect(kernel).updateReserves(complyingReserves)
+      ).to.emit(token, "ReservesUpdated");
+    });
+
+    it("CF-1 B: non-compliant updateReserves sets breach state, emits ReserveFloorBreached, succeeds, updates reserves", async function () {
+      const mintAmt = ethers.parseUnits("1000", 18);
+      await token.connect(swf).mint(user1.address, mintAmt, "CF-1 B mint");
+
+      const oldReserves = await token.totalReserves();
+      const subFloorReserves = 0n;               // post-update ratio = 0 < 333
+      const supply = await token.totalSupply();
+      const expectedRatio = 0n;                  // (0 * 1000) / supply = 0
+
+      // transaction succeeds (no revert) and emits ReserveFloorBreached
+      await expect(token.connect(kernel).updateReserves(subFloorReserves))
+        .to.emit(token, "ReserveFloorBreached")
+        .withArgs(oldReserves, subFloorReserves, expectedRatio, supply)
+        .and.to.emit(token, "ReservesUpdated"); // existing event still emitted
+
+      // breach state recorded
+      expect(await token.reserveFloorBreached()).to.be.true;
+
+      // totalReserves updated correctly
+      expect(await token.totalReserves()).to.equal(subFloorReserves);
+      expect(await token.currentReserveRatio()).to.equal(0n);
+    });
+
+    it("CF-1 C: breach state clears and ReserveFloorRestored emits when reserves are updated to a compliant ratio", async function () {
+      const mintAmt = ethers.parseUnits("1000", 18);
+      await token.connect(swf).mint(user1.address, mintAmt, "CF-1 C mint");
+
+      // enter breach state
+      await token.connect(kernel).updateReserves(0n);
+      expect(await token.reserveFloorBreached()).to.be.true;
+
+      // restore: (334e18 * 1000) / 1000e18 = 334 >= 333
+      const restoredReserves = ethers.parseUnits("334", 18);
+      const supply = await token.totalSupply();
+      const restoredRatio = (restoredReserves * 1000n) / supply;
+
+      await expect(token.connect(kernel).updateReserves(restoredReserves))
+        .to.emit(token, "ReserveFloorRestored")
+        .withArgs(restoredReserves, restoredRatio, supply);
+
+      // breach state cleared
+      expect(await token.reserveFloorBreached()).to.be.false;
+
+      // ratio is compliant
+      expect(await token.currentReserveRatio()).to.be.gte(333n);
+
+      // mint gate no longer blocked by ratio (mint-time check passes)
+      expect(await token.canMint(ethers.parseUnits("1", 18))).to.be.true;
+    });
+  });
 });
