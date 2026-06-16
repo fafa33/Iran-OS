@@ -143,22 +143,91 @@ The breach detection implemented here represents the **on-chain detection side**
 
 ---
 
+## GAP-MEX-05 Disposition — Kernel→PahlaviToken Reserve Sync
+
+**Implementation date:** 2026-06-16
+**PR:** `claude/dependabot-pr-cleanup-neu16i`
+**Status: CLOSED**
+
+### What was implemented
+
+**New file: `contracts/interfaces/IPahlaviToken.sol`**
+
+Minimal single-function interface. Used only by `syncReserves`. Not expanded.
+
+**Kernel additions: `contracts/kernel.sol`**
+
+| Addition | Description |
+|---|---|
+| `address public pahlaviToken` | Address of PahlaviToken — set by `setPahlaviToken`, used by `syncReserves` |
+| `event ReserveSynced(address indexed caller, uint256 newReserves, uint256 timestamp)` | Kernel-layer audit record emitted on each sync |
+| `setPahlaviToken(address)` | `onlySovereign notLocked` setter — follows existing address-update pattern |
+| `syncReserves(uint256 newReserves)` | `onlyOracle nonReentrant` — data-forwarding only; see guardrail below |
+
+**`syncReserves` behavior — three steps, closed:**
+
+1. `require(pahlaviToken != address(0), "Kernel: pahlaviToken not set")`
+2. `IPahlaviToken(pahlaviToken).updateReserves(newReserves)`
+3. `emit ReserveSynced(msg.sender, newReserves, block.timestamp)`
+
+**`syncReserves` guardrail (binding):**
+
+`syncReserves` is a pure data-forwarding surface. It does not compute reserve ratios, inspect breach state, call TriggerProtocol, call freeze/treasury/SWF/governance/mint/burn, or make any constitutional or enforcement decision. All compliance logic remains in `PahlaviToken.updateReserves()`. Constitutional enforcement remains human-mediated via 7-of-9 multi-sig.
+
+**Emergency gate decision:**
+
+`syncReserves` is intentionally exempt from `notLocked()`. Reserve truth must remain available during crisis. `PahlaviToken.updateReserves()` is also unblocked during emergency (no `notInEmergency` gate). The emergency lock freezes monetary flows, not financial reporting.
+
+**New test file: `test/28_GAP_MEX_05.test.js`**
+
+27 tests covering: role enforcement, reserve propagation, breach/restoration event attribution, emergency gate behavior, side-effect isolation (TriggerProtocol, mint/burn, enforcement state), edge cases (zero, same-value, repeated, increase, decrease, CF-7 overflow characterization), and setter tests.
+
+### Kernel remains non-enforcement surface
+
+- No ratio computation in Kernel
+- No `reserveFloorBreached` variable in Kernel
+- No `flagViolation()` call from `syncReserves`
+- No TriggerProtocol call from `syncReserves`
+- All breach/restoration events emitted by `PahlaviToken` — verified by T07b and T08b
+- Kernel enforcement state (`emergencyLockActive`, `triggerActivationCount`, `violationCount`) unchanged by `syncReserves` — verified by T12
+
+### No constitutional automation introduced
+
+Full path from reserve decline to constitutional action:
+
+```
+oracle calls syncReserves(subFloor)
+→ PahlaviToken.totalReserves updated
+→ PahlaviToken.reserveFloorBreached = true
+→ PahlaviToken emits ReserveFloorBreached
+→ [human operator observes event — GAP-MEX-06]
+→ human calls kernel.flagViolation(TR_SWF_INDEPENDENCE, ...) [not automated]
+→ court signs 7-of-9 [human actors required]
+→ TriggerActivated
+```
+
+Two mandatory human decision points remain. `syncReserves` is data propagation only.
+
+---
+
 ## What Remains Open
 
 | Item | Status |
 |---|---|
-| CF-1: on-chain breach detection (event + state flag) | **IMPLEMENTED** — this PR |
-| CF-5: distinct on-chain breach signal | **ADDRESSED** — `ReserveFloorBreached` event added |
-| GAP-MEX-05: Kernel → `updateReserves` call path | **Open** — Kernel has no reserve-sync function |
-| GAP-MEX-06: breach → TR-05/TR-06 oracle routing | **Open** — monitoring specification required |
-| CF-1: burn/contraction remediation path (Path D) | **Open** — detection in place; operational remedy undecided |
+| CF-1: on-chain breach detection (event + state flag) | **IMPLEMENTED** — PR #76 |
+| CF-5: distinct on-chain breach signal | **ADDRESSED** — `ReserveFloorBreached` event added (PR #76) |
+| CF-1: burn-recovery stale state | **FIXED** — PR #77 |
+| GAP-MEX-05: Kernel → `updateReserves` call path | **CLOSED** — `syncReserves` implemented; `totalReserves` now live |
+| INV-02: reserve-ratio floor invariant | **CLOSED** — mint-time gate sound; breach detection live; burn recovery fixed; reserve feed live |
+| GAP-MEX-06: breach → TR-05/TR-06 oracle routing | **Open** — human-mediated monitoring specification required; no code permissible |
 | CF-7 constructor: `_initialReserves` upper-bound | **Open** — deploy-time validation absent |
-| CF-7 runtime: overflow guard at supply == 0 | **Open** — characterized only |
-| INV-02 | **Not fixed** — enforced at mint time; post-update breach detection now in place; remediation path open |
+| CF-7 runtime: overflow at supply == 0 in `syncReserves` | **Open** — characterized in T16b; no guard in Kernel by design; self-correcting via corrective sync |
+| GAP-MEX-04: oracle data freshness at call boundary | **Open** — stale data accepted without timestamp check; out of scope |
 
 ---
 
 *Report date: 2026-06-16*
 *Branch: claude/dependabot-pr-cleanup-neu16i*
-*Affected contract: `contracts/monetary/PahlaviToken.sol`*
+*Affected contracts: `contracts/kernel.sol`, `contracts/interfaces/IPahlaviToken.sol`*
+*Test: `test/28_GAP_MEX_05.test.js`*
 *Prior reports: `docs/reports/INV02_RESERVE_RATIO_FLOOR_AUDIT.md`, `docs/reports/INV02_REMEDIATION_OPTIONS.md`*
