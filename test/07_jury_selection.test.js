@@ -331,4 +331,159 @@ describe("JurySelection", function () {
       expect(await jury.usedCommitments(commitments[9])).to.be.false;
     });
   });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // INV-04 KTJ-05 Boundary Characterization (R-1..R-4)
+  //
+  // Documents missing boundary coverage identified in INV-04 discovery:
+  //  R-1: conviction fires at exactly CONVICTION_THRESHOLD=8 regardless of
+  //       prior not-guilty votes; verdict=3 (SecondRoundRequired) is
+  //       mathematically unreachable under current constants
+  //  R-2: 1-byte ZK proof satisfies length>0 guard — documents G-1 gap;
+  //       no cryptographic validation exists (by design, per CLAUDE.md §6)
+  //  R-3: cross-case commitment deduplication — same commitment can appear in
+  //       two pools but voting in the first blocks voting in the second
+  //  R-4: intra-batch duplicate commitment accepted by selectJury —
+  //       usedCommitments is written only in submitVote, not during selection
+  //
+  // No contracts changed. No ZK implementation. No production-ready claim.
+  // ═══════════════════════════════════════════════════════════════════════════
+  describe("INV-04 KTJ-05 Boundary Characterization (R-1..R-4)", function () {
+    let inv04Commitments;
+    const inv04CaseId = 2001n;
+
+    beforeEach(async function () {
+      inv04Commitments = makeCommitments();
+      await jury.connect(vrf).selectJury(inv04CaseId, inv04Commitments);
+    });
+
+    // ─── R-1: verdict=3 unreachability and conviction at exact threshold ──────
+    it("INV-04 R-1: 7 guilty + 4 not-guilty + 1 guilty → conviction fires at 8th guilty vote (verdict=1)", async function () {
+      // Cast 7 guilty votes — below CONVICTION_THRESHOLD, no verdict
+      for (let i = 0; i < 7; i++) {
+        await jury.connect(stranger).submitVote(inv04CaseId, inv04Commitments[i], true, fakeZkProof);
+      }
+      // Cast 4 not-guilty votes — below ACQUITTAL_THRESHOLD, no verdict; total=11
+      for (let i = 7; i < 11; i++) {
+        await jury.connect(stranger).submitVote(inv04CaseId, inv04Commitments[i], false, fakeZkProof);
+      }
+      let pool = await jury.getJuryPool(inv04CaseId);
+      expect(pool[0]).to.equal(7);  // guiltyVotes
+      expect(pool[1]).to.equal(4);  // notGuiltyVotes
+      expect(pool[2]).to.be.false;  // not complete
+      expect(pool[3]).to.equal(0);  // verdict still pending
+
+      // 12th vote is guilty → 8th guilty vote fires conviction (verdict=1)
+      await expect(
+        jury.connect(stranger).submitVote(inv04CaseId, inv04Commitments[11], true, fakeZkProof)
+      ).to.emit(jury, "VerdictReached").withArgs(inv04CaseId, 1, anyValue);
+
+      pool = await jury.getJuryPool(inv04CaseId);
+      expect(pool[0]).to.equal(8);  // guiltyVotes
+      expect(pool[1]).to.equal(4);  // notGuiltyVotes unchanged
+      expect(pool[2]).to.be.true;   // isComplete
+      expect(pool[3]).to.equal(1);  // verdict=1 (conviction)
+      expect(await jury.getVerdict(inv04CaseId)).to.equal(1n);
+    });
+
+    it("INV-04 R-1: verdict=3 (SecondRoundRequired) is unreachable — max non-verdict state is 7+4=11 votes", async function () {
+      // Maximum votes castable without triggering either threshold:
+      //   CONVICTION_THRESHOLD=8 → at most 7 guilty
+      //   ACQUITTAL_THRESHOLD=5  → at most 4 not-guilty
+      //   7 + 4 = 11 < JURY_SIZE=12
+      // Therefore the 12th vote always triggers conviction (guilty≥8) or acquittal (not-guilty≥5).
+      // SecondRoundRequired (verdict=3) at guiltyVotes+notGuiltyVotes==JURY_SIZE is dead code.
+      for (let i = 0; i < 7; i++) {
+        await jury.connect(stranger).submitVote(inv04CaseId, inv04Commitments[i], true, fakeZkProof);
+      }
+      for (let i = 7; i < 11; i++) {
+        await jury.connect(stranger).submitVote(inv04CaseId, inv04Commitments[i], false, fakeZkProof);
+      }
+      // State: 7+4=11, no verdict — this is the maximum reachable without verdict
+      let pool = await jury.getJuryPool(inv04CaseId);
+      expect(pool[0]).to.equal(7);
+      expect(pool[1]).to.equal(4);
+      expect(pool[2]).to.be.false;
+      expect(pool[3]).to.equal(0); // pending
+
+      // 12th vote as not-guilty → 5th not-guilty fires acquittal (verdict=2), not second round (verdict=3)
+      await expect(
+        jury.connect(stranger).submitVote(inv04CaseId, inv04Commitments[11], false, fakeZkProof)
+      ).to.emit(jury, "VerdictReached").withArgs(inv04CaseId, 2, anyValue)
+        .and.not.to.emit(jury, "SecondRoundRequired");
+
+      pool = await jury.getJuryPool(inv04CaseId);
+      expect(pool[3]).to.equal(2); // verdict=2 (acquittal), never 3
+    });
+
+    // ─── R-2: ZK proof length-only check (G-1 gap characterization) ──────────
+    it("INV-04 R-2: 1-byte ZK proof satisfies length>0 guard — length-only check, no cryptographic validation", async function () {
+      // A single arbitrary byte passes zkProof.length > 0; no circuit verification exists.
+      // This documents G-1 per CLAUDE.md §6 — not a fix.
+      const oneByteProof = ethers.toUtf8Bytes("x"); // length=1, satisfies length>0
+      await expect(
+        jury.connect(stranger).submitVote(inv04CaseId, inv04Commitments[0], true, oneByteProof)
+      ).to.emit(jury, "VoteSubmitted");
+
+      // Vote was counted — proof content was never verified on-chain
+      const pool = await jury.getJuryPool(inv04CaseId);
+      expect(pool[0]).to.equal(1); // guiltyVotes incremented
+    });
+
+    // ─── R-3: Cross-case commitment deduplication ────────────────────────────
+    it("INV-04 R-3a: same commitment batch can appear in a second jury pool before any vote is cast", async function () {
+      // usedCommitments is written only in submitVote, not in selectJury.
+      // Therefore the same commitments can be selected for two different cases simultaneously.
+      const inv04CaseId2 = 2002n;
+      await expect(
+        jury.connect(vrf).selectJury(inv04CaseId2, inv04Commitments)
+      ).to.emit(jury, "JurySelected");
+      expect(await jury.totalCasesHandled()).to.equal(2n); // both cases active
+    });
+
+    it("INV-04 R-3b: commitment voted in case A cannot be reused in case B (cross-case deduplication)", async function () {
+      const inv04CaseId2 = 2002n;
+      // Select the same commitments for a second case (permitted before any vote)
+      await jury.connect(vrf).selectJury(inv04CaseId2, inv04Commitments);
+
+      // Vote in case A — marks usedCommitments[inv04Commitments[0]] = true
+      await jury.connect(stranger).submitVote(inv04CaseId, inv04Commitments[0], true, fakeZkProof);
+      expect(await jury.usedCommitments(inv04Commitments[0])).to.be.true;
+
+      // Same commitment in case B now reverts — global deduplication prevents cross-case reuse
+      await expect(
+        jury.connect(stranger).submitVote(inv04CaseId2, inv04Commitments[0], false, fakeZkProof)
+      ).to.be.revertedWith("JurySelection: already voted");
+
+      // Case B pool state is unchanged
+      const pool = await jury.getJuryPool(inv04CaseId2);
+      expect(pool[0]).to.equal(0); // guiltyVotes untouched
+      expect(pool[1]).to.equal(0); // notGuiltyVotes untouched
+      expect(pool[2]).to.be.false; // not complete
+    });
+
+    // ─── R-4: Intra-batch duplicate commitment (new gap characterization) ─────
+    it("INV-04 R-4: intra-batch duplicate commitment is accepted by selectJury (usedCommitments not written at selection)", async function () {
+      const inv04CaseId3 = 2003n;
+      // Build 12 commitments where the first appears twice (index 0 and 11)
+      const dupCommitments = makeCommitments(11);
+      dupCommitments.push(dupCommitments[0]); // duplicate at position 11
+      expect(dupCommitments.length).to.equal(12);
+      expect(dupCommitments[0]).to.equal(dupCommitments[11]);
+
+      // selectJury does not write usedCommitments, so intra-batch duplicates pass undetected
+      await expect(
+        jury.connect(vrf).selectJury(inv04CaseId3, dupCommitments)
+      ).to.emit(jury, "JurySelected");
+
+      // Consequence: only 11 unique commitments can vote; the duplicate slot is permanently unusable
+      await jury.connect(stranger).submitVote(inv04CaseId3, dupCommitments[0], true, fakeZkProof);
+      expect(await jury.usedCommitments(dupCommitments[0])).to.be.true;
+
+      // Second attempt with the duplicate commitment (same bytes32) reverts — slot is lost
+      await expect(
+        jury.connect(stranger).submitVote(inv04CaseId3, dupCommitments[11], true, fakeZkProof)
+      ).to.be.revertedWith("JurySelection: already voted");
+    });
+  });
 });
