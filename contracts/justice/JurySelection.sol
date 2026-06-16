@@ -62,22 +62,28 @@ contract JurySelection is AccessControl, ReentrancyGuard {
 
     /**
      * @notice رای هیئت منصفه را به همراه ZK proof ثبت می‌کند
-     * @dev اعتبارسنجی ساختاری: حداقل ZK_PROOF_MIN_LENGTH بایت و تراز ۳۲ بایتی
-     *      (سازگار با قالب ABI-encoded Groth16 از Circom/SnarkJS).
-     *      هشدار — این تأیید رمزنگاری کامل نیست.
-     *      هیچ قرارداد verifier در حال حاضر مستقر نشده است.
-     *      اعتبارسنجی ساختاری تنها از جعل‌های سطحی جلوگیری می‌کند.
-     *      G-1 تا یکپارچه‌سازی قرارداد verifier در نسخه آینده باز باقی می‌ماند.
+     * @dev سخت‌سازی ساختاری (mitigation فقط — نه تأیید رمزنگاری کامل):
+     *      - حداقل ZK_PROOF_MIN_LENGTH بایت و تراز ۳۲ بایتی اجباری است
+     *      - این بررسی proof جعلی padding‌شده با اندازه صحیح را رد نمی‌کند
+     *      - proof به caseId، commitment یا isGuilty متصل نیست
+     *      - هیچ قرارداد verifier روی زنجیره وجود ندارد
+     *      - خطر باقیمانده: هر blob با اندازه صحیح و تراز مناسب پذیرفته می‌شود
+     *      - بستن G-1: نیاز به قرارداد Groth16 verifier با public inputs
+     *        (caseId، commitment، isGuilty/nullifier) دارد
      * @param caseId شناسه پرونده
      * @param commitment تعهد داور (bytes32)
      * @param isGuilty رای مجرم یا غیرمجرم
-     * @param zkProof اثبات ZK (حداقل ۲۵۶ بایت، تراز ۳۲ بایتی)
+     * @param zkProof اثبات ZK (حداقل ZK_PROOF_MIN_LENGTH بایت، تراز ۳۲ بایتی؛ محتوا تأیید نمی‌شود)
      */
     function submitVote(uint256 caseId, bytes32 commitment, bool isGuilty, bytes calldata zkProof) external nonReentrant {
         JuryPool storage pool = juryPools[caseId];
         require(pool.selectedAt > 0, "JurySelection: no jury for this case");
         require(!pool.isComplete, "JurySelection: voting complete");
         require(!usedCommitments[commitment], "JurySelection: already voted");
+        // Structural hardening only: rejects trivially short / non-word-aligned blobs.
+        // Does NOT verify proof content or bind proof to caseId/commitment/isGuilty.
+        // A correctly shaped fake proof still passes. G-1 is mitigated, not closed.
+        // Closure requires a Groth16 verifier contract with public inputs.
         require(
             zkProof.length >= ZK_PROOF_MIN_LENGTH && zkProof.length % 32 == 0,
             "JurySelection: invalid ZK proof"

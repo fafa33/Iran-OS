@@ -490,15 +490,17 @@ describe("JurySelection", function () {
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // G-1 Remediation — Structural ZK Proof Validation (fix(justice): G-1)
+  // G-1 Mitigation — Trivial Fake Proof Rejection (Structural Hardening)
   //
-  // Validates that ZK_PROOF_MIN_LENGTH=256 and 32-byte alignment enforcement
-  // block trivial fake proofs. Documents residual gap: no on-chain verifier
-  // is present; structural validation reduces forgery cost only.
+  // Validates ZK_PROOF_MIN_LENGTH=256 and 32-byte alignment enforcement.
+  // This is mitigation only: rejects trivially short / non-word-aligned blobs.
+  // Does NOT bind proof to caseId/commitment/isGuilty; no on-chain verifier
+  // exists. A correctly shaped fake proof still passes (documented residual gap).
   //
-  // G-1 remains partially open until verifier contract integration.
+  // G-1 remains open. Closure requires a Groth16 verifier contract with
+  // public inputs (caseId, commitment, isGuilty/nullifier).
   // ═══════════════════════════════════════════════════════════════════════════
-  describe("G-1 Remediation — Structural ZK Proof Validation", function () {
+  describe("G-1 Mitigation — Trivial Fake Proof Rejection (Structural Hardening)", function () {
     let g1Commitments;
     const g1CaseId = 3001n;
 
@@ -507,8 +509,8 @@ describe("JurySelection", function () {
       await jury.connect(vrf).selectJury(g1CaseId, g1Commitments);
     });
 
-    it("G-1 regression: legacy 1-byte proof now reverts (was accepted pre-remediation)", async function () {
-      const oneByteProof = "0x" + "ff"; // 1 byte — the exact G-1 attack vector
+    it("G-1 mitigation: legacy 1-byte proof now reverts (was accepted pre-hardening)", async function () {
+      const oneByteProof = "0x" + "ff"; // 1 byte — the original G-1 trivial attack vector
       await expect(
         jury.connect(stranger).submitVote(g1CaseId, g1Commitments[0], true, oneByteProof)
       ).to.be.revertedWith("JurySelection: invalid ZK proof");
