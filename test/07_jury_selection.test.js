@@ -18,7 +18,9 @@ describe("JurySelection", function () {
     );
   }
 
-  const fakeZkProof = ethers.toUtf8Bytes("fake_zk_proof_placeholder");
+  // 256-byte structurally valid test proof: 8 × 32-byte words matching Groth16 ABI layout.
+  // NOT cryptographically valid. Satisfies ZK_PROOF_MIN_LENGTH structural guard only.
+  const fakeZkProof = "0x" + "aa".repeat(256);
 
   beforeEach(async function () {
     [kernel, vrf, court, stranger] = await ethers.getSigners();
@@ -416,18 +418,18 @@ describe("JurySelection", function () {
       expect(pool[3]).to.equal(2); // verdict=2 (acquittal), never 3
     });
 
-    // ─── R-2: ZK proof length-only check (G-1 gap characterization) ──────────
-    it("INV-04 R-2: 1-byte ZK proof satisfies length>0 guard — length-only check, no cryptographic validation", async function () {
-      // A single arbitrary byte passes zkProof.length > 0; no circuit verification exists.
-      // This documents G-1 per CLAUDE.md §6 — not a fix.
-      const oneByteProof = ethers.toUtf8Bytes("x"); // length=1, satisfies length>0
+    // ─── R-2: ZK proof structural validation (G-1 remediation characterization) ─
+    it("INV-04 R-2 (G-1 hardened): 1-byte ZK proof now reverts — structural guard raised to ZK_PROOF_MIN_LENGTH", async function () {
+      // G-1 remediation: ZK_PROOF_MIN_LENGTH=256 and 32-byte alignment enforced.
+      // A 1-byte proof is rejected. Residual gap: no on-chain cryptographic verifier exists.
+      const oneByteProof = ethers.toUtf8Bytes("x"); // length=1, below ZK_PROOF_MIN_LENGTH
       await expect(
         jury.connect(stranger).submitVote(inv04CaseId, inv04Commitments[0], true, oneByteProof)
-      ).to.emit(jury, "VoteSubmitted");
+      ).to.be.revertedWith("JurySelection: invalid ZK proof");
 
-      // Vote was counted — proof content was never verified on-chain
+      // Vote was NOT counted
       const pool = await jury.getJuryPool(inv04CaseId);
-      expect(pool[0]).to.equal(1); // guiltyVotes incremented
+      expect(pool[0]).to.equal(0); // guiltyVotes unchanged
     });
 
     // ─── R-3: Cross-case commitment deduplication ────────────────────────────
@@ -484,6 +486,72 @@ describe("JurySelection", function () {
       await expect(
         jury.connect(stranger).submitVote(inv04CaseId3, dupCommitments[11], true, fakeZkProof)
       ).to.be.revertedWith("JurySelection: already voted");
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // G-1 Mitigation — Trivial Fake Proof Rejection (Structural Hardening)
+  //
+  // Validates ZK_PROOF_MIN_LENGTH=256 and 32-byte alignment enforcement.
+  // This is mitigation only: rejects trivially short / non-word-aligned blobs.
+  // Does NOT bind proof to caseId/commitment/isGuilty; no on-chain verifier
+  // exists. A correctly shaped fake proof still passes (documented residual gap).
+  //
+  // G-1 remains open. Closure requires a Groth16 verifier contract with
+  // public inputs (caseId, commitment, isGuilty/nullifier).
+  // ═══════════════════════════════════════════════════════════════════════════
+  describe("G-1 Mitigation — Trivial Fake Proof Rejection (Structural Hardening)", function () {
+    let g1Commitments;
+    const g1CaseId = 3001n;
+
+    beforeEach(async function () {
+      g1Commitments = makeCommitments();
+      await jury.connect(vrf).selectJury(g1CaseId, g1Commitments);
+    });
+
+    it("G-1 mitigation: legacy 1-byte proof now reverts (was accepted pre-hardening)", async function () {
+      const oneByteProof = "0x" + "ff"; // 1 byte — the original G-1 trivial attack vector
+      await expect(
+        jury.connect(stranger).submitVote(g1CaseId, g1Commitments[0], true, oneByteProof)
+      ).to.be.revertedWith("JurySelection: invalid ZK proof");
+    });
+
+    it("G-1: proof below ZK_PROOF_MIN_LENGTH (128 bytes) reverts", async function () {
+      const shortProof = "0x" + "aa".repeat(128); // 128 bytes — below 256-byte minimum
+      await expect(
+        jury.connect(stranger).submitVote(g1CaseId, g1Commitments[0], true, shortProof)
+      ).to.be.revertedWith("JurySelection: invalid ZK proof");
+    });
+
+    it("G-1: proof at exactly ZK_PROOF_MIN_LENGTH (256 bytes) succeeds", async function () {
+      const minProof = "0x" + "ab".repeat(256); // 256 bytes — boundary, 32-byte aligned
+      await expect(
+        jury.connect(stranger).submitVote(g1CaseId, g1Commitments[0], true, minProof)
+      ).to.emit(jury, "VoteSubmitted");
+    });
+
+    it("G-1: proof above minimum but non-32-byte-aligned (257 bytes) reverts", async function () {
+      const misalignedProof = "0x" + "ab".repeat(256) + "cd"; // 257 bytes — not 32-byte aligned
+      await expect(
+        jury.connect(stranger).submitVote(g1CaseId, g1Commitments[0], true, misalignedProof)
+      ).to.be.revertedWith("JurySelection: invalid ZK proof");
+    });
+
+    it("G-1: proof above minimum and 32-byte-aligned (288 bytes) succeeds", async function () {
+      const largerProof = "0x" + "cd".repeat(288); // 288 bytes — above minimum, 32-byte aligned
+      await expect(
+        jury.connect(stranger).submitVote(g1CaseId, g1Commitments[0], true, largerProof)
+      ).to.emit(jury, "VoteSubmitted");
+    });
+
+    it("G-1 residual gap: 256-byte structurally valid proof with arbitrary content is accepted", async function () {
+      // Documents residual gap: structural check passes for any 256-byte, 32-byte-aligned blob.
+      // No on-chain verifier contract exists. Full cryptographic verification is future work.
+      const arbitraryProof = "0x" + "de".repeat(256);
+      await expect(
+        jury.connect(stranger).submitVote(g1CaseId, g1Commitments[0], true, arbitraryProof)
+      ).to.emit(jury, "VoteSubmitted");
+      // This is the documented residual gap — G-1 is NOT fully closed.
     });
   });
 });

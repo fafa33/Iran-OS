@@ -20,6 +20,9 @@ contract JurySelection is AccessControl, ReentrancyGuard {
     uint8 public constant CONVICTION_THRESHOLD = 8;
     uint8 public constant ACQUITTAL_THRESHOLD  = 5;
 
+    /// @dev Groth16 (Circom/SnarkJS) ABI-encoded proof minimum: pi_a(64) + pi_b(128) + pi_c(64) = 256 bytes.
+    uint256 public constant ZK_PROOF_MIN_LENGTH = 256;
+
     struct JuryPool {
         bytes32[] jurorCommitments;
         uint256   caseId;
@@ -57,12 +60,34 @@ contract JurySelection is AccessControl, ReentrancyGuard {
         emit JurySelected(caseId, block.timestamp);
     }
 
+    /**
+     * @notice رای هیئت منصفه را به همراه ZK proof ثبت می‌کند
+     * @dev سخت‌سازی ساختاری (mitigation فقط — نه تأیید رمزنگاری کامل):
+     *      - حداقل ZK_PROOF_MIN_LENGTH بایت و تراز ۳۲ بایتی اجباری است
+     *      - این بررسی proof جعلی padding‌شده با اندازه صحیح را رد نمی‌کند
+     *      - proof به caseId، commitment یا isGuilty متصل نیست
+     *      - هیچ قرارداد verifier روی زنجیره وجود ندارد
+     *      - خطر باقیمانده: هر blob با اندازه صحیح و تراز مناسب پذیرفته می‌شود
+     *      - بستن G-1: نیاز به قرارداد Groth16 verifier با public inputs
+     *        (caseId، commitment، isGuilty/nullifier) دارد
+     * @param caseId شناسه پرونده
+     * @param commitment تعهد داور (bytes32)
+     * @param isGuilty رای مجرم یا غیرمجرم
+     * @param zkProof اثبات ZK (حداقل ZK_PROOF_MIN_LENGTH بایت، تراز ۳۲ بایتی؛ محتوا تأیید نمی‌شود)
+     */
     function submitVote(uint256 caseId, bytes32 commitment, bool isGuilty, bytes calldata zkProof) external nonReentrant {
         JuryPool storage pool = juryPools[caseId];
         require(pool.selectedAt > 0, "JurySelection: no jury for this case");
         require(!pool.isComplete, "JurySelection: voting complete");
         require(!usedCommitments[commitment], "JurySelection: already voted");
-        require(zkProof.length > 0, "JurySelection: invalid ZK proof");
+        // Structural hardening only: rejects trivially short / non-word-aligned blobs.
+        // Does NOT verify proof content or bind proof to caseId/commitment/isGuilty.
+        // A correctly shaped fake proof still passes. G-1 is mitigated, not closed.
+        // Closure requires a Groth16 verifier contract with public inputs.
+        require(
+            zkProof.length >= ZK_PROOF_MIN_LENGTH && zkProof.length % 32 == 0,
+            "JurySelection: invalid ZK proof"
+        );
         bool isValidJuror = false;
         for (uint8 i = 0; i < pool.jurorCommitments.length; i++) {
             if (pool.jurorCommitments[i] == commitment) { isValidJuror = true; break; }
