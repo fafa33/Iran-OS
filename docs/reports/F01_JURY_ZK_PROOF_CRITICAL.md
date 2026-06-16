@@ -146,9 +146,15 @@ verification. Recommended approach:
    `C = hash(secret, caseId, salt)`. The circuit proves `knowledge_of(secret)` such that
    `hash(secret, caseId, salt) == C` without revealing `secret`.
 2. **On-chain verifier:** Deploy a Groth16 or PLONK verifier contract generated from the
-   circuit. `submitVote()` calls `verifier.verifyProof(proof, [C, caseId])`.
-3. **Nullifier binding:** Bind the proof to `msg.sender` or to a nullifier to prevent
-   proof replay across voters.
+   circuit. `submitVote()` calls `verifier.verifyProof(proof, publicInputs)` where
+   `publicInputs = [C, caseId, isGuilty, nullifier]`. The vote choice (`isGuilty`) and a
+   non-replayable nullifier (e.g. `keccak256(secret, caseId, isGuilty)` or derived from
+   `msg.sender`) **must** be part of the public inputs. Binding only `[C, caseId]` is
+   insufficient: a mempool observer could copy a valid proof and front-run `submitVote()`
+   with the same commitment but the opposite vote before `usedCommitments` is set.
+3. **Nullifier binding:** The nullifier must commit to both the juror identity and the vote
+   choice. A nullifier that only prevents double-submission does not bind the proof to the
+   submitted `isGuilty` value — include `isGuilty` in the nullifier preimage.
 4. **Optional — allowedSigners mapping:** As an interim defense-in-depth measure, require
    that juror wallet addresses be registered before voting. This does not replace ZK verification
    but reduces the attacker surface to registered accounts only.
