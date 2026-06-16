@@ -191,12 +191,28 @@ Minimal single-function interface. Used only by `syncReserves`. Not expanded.
 - All breach/restoration events emitted by `PahlaviToken` — verified by T07b and T08b
 - Kernel enforcement state (`emergencyLockActive`, `triggerActivationCount`, `violationCount`) unchanged by `syncReserves` — verified by T12
 
+### Production data path — corrected (Codex P1 fix)
+
+The deployment manifest grants `ORACLE_ROLE` on the Kernel to `API3Oracle`, not to individual feeder EOAs. Feeders hold `FEEDER_ROLE` on `API3Oracle`. A feeder calling `Kernel.syncReserves()` directly reverts. The production-usable path is:
+
+```
+feeder calls API3Oracle.syncReserves(newReserves)      ← FEEDER_ROLE on API3Oracle
+→ API3Oracle calls Kernel.syncReserves(newReserves)    ← ORACLE_ROLE on Kernel
+→ Kernel calls PahlaviToken.updateReserves(newReserves)
+→ PahlaviToken.totalReserves updated
+→ PahlaviToken emits ReservesUpdated (always)
+→ PahlaviToken emits ReserveFloorBreached (if ratio < MIN_RESERVE_RATIO)
+```
+
+`API3Oracle.syncReserves` is data propagation only — no compliance computation, no ratio check, no enforcement call. It adds feeder-level attribution (`ReserveSyncForwarded` event) not visible in `Kernel.ReserveSynced` (which records API3Oracle as caller).
+
 ### No constitutional automation introduced
 
 Full path from reserve decline to constitutional action:
 
 ```
-oracle calls syncReserves(subFloor)
+feeder → API3Oracle.syncReserves(subFloor)
+→ Kernel.syncReserves (data-forwarding only)
 → PahlaviToken.totalReserves updated
 → PahlaviToken.reserveFloorBreached = true
 → PahlaviToken emits ReserveFloorBreached
@@ -206,7 +222,7 @@ oracle calls syncReserves(subFloor)
 → TriggerActivated
 ```
 
-Two mandatory human decision points remain. `syncReserves` is data propagation only.
+Two mandatory human decision points remain. `API3Oracle.syncReserves` and `Kernel.syncReserves` are both data propagation only.
 
 ---
 
@@ -217,7 +233,7 @@ Two mandatory human decision points remain. `syncReserves` is data propagation o
 | CF-1: on-chain breach detection (event + state flag) | **IMPLEMENTED** — PR #76 |
 | CF-5: distinct on-chain breach signal | **ADDRESSED** — `ReserveFloorBreached` event added (PR #76) |
 | CF-1: burn-recovery stale state | **FIXED** — PR #77 |
-| GAP-MEX-05: Kernel → `updateReserves` call path | **CLOSED** — `syncReserves` implemented; `totalReserves` now live |
+| GAP-MEX-05: Kernel → `updateReserves` call path | **CLOSED** — `syncReserves` implemented; `API3Oracle` forwarding wired (Codex P1 fix); `totalReserves` now live |
 | INV-02: reserve-ratio floor invariant | **CLOSED** — mint-time gate sound; breach detection live; burn recovery fixed; reserve feed live |
 | GAP-MEX-06: breach → TR-05/TR-06 oracle routing | **Open** — human-mediated monitoring specification required; no code permissible |
 | CF-7 constructor: `_initialReserves` upper-bound | **Open** — deploy-time validation absent |
@@ -226,8 +242,8 @@ Two mandatory human decision points remain. `syncReserves` is data propagation o
 
 ---
 
-*Report date: 2026-06-16*
+*Report date: 2026-06-16 (updated: Codex P1 API3Oracle wiring fix)*
 *Branch: claude/dependabot-pr-cleanup-neu16i*
-*Affected contracts: `contracts/kernel.sol`, `contracts/interfaces/IPahlaviToken.sol`*
+*Affected contracts: `contracts/kernel.sol`, `contracts/interfaces/IPahlaviToken.sol`, `contracts/oracles/API3Oracle.sol`*
 *Test: `test/28_GAP_MEX_05.test.js`*
 *Prior reports: `docs/reports/INV02_RESERVE_RATIO_FLOOR_AUDIT.md`, `docs/reports/INV02_REMEDIATION_OPTIONS.md`*

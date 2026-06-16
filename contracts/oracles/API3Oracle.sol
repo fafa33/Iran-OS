@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 interface IIranOSKernel {
     function flagViolation(uint8 violationCode, address offender, string calldata reason) external returns (uint256 violationId);
+    function syncReserves(uint256 newReserves) external;
 }
 
 /**
@@ -58,6 +59,10 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
     event DataUpdated(bytes32 indexed key, int256 value, uint256 timestamp, address feeder);
     event ViolationFlagged(uint256 indexed flagId, address indexed offender, uint8 violationCode);
     event ViolationConfirmed(uint256 indexed flagId, address indexed offender);
+    /// @notice Emitted when a feeder forwards a reserve value to Kernel.syncReserves.
+    /// @dev Provides feeder-level attribution not visible in Kernel.ReserveSynced (which records API3Oracle as caller).
+    ///      GAP-MEX-05 production wiring.
+    event ReserveSyncForwarded(address indexed feeder, uint256 newReserves, uint256 timestamp);
 
     modifier onlyFeeder() {
         require(hasRole(FEEDER_ROLE, msg.sender), "API3Oracle: caller is not a feeder");
@@ -81,6 +86,19 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
         }
         dataPoints[key] = DataPoint({ dataType: dataType, key: key, value: value, timestamp: block.timestamp, feeder: msg.sender, isValid: true, confidence: confidence });
         emit DataUpdated(key, value, block.timestamp, msg.sender);
+    }
+
+    /**
+     * @notice هدایت داده ذخایر به Kernel.syncReserves — مسیر تولید: feeder → API3Oracle → Kernel → PahlaviToken
+     * @dev مسیر داده‌رسانی فقط. هیچ منطق انطباق، محاسبه نسبت، یا فراخوانی اجرایی اضافه نمی‌کند.
+     *      API3Oracle دارنده ORACLE_ROLE در Kernel است. Feeder‌ها ORACLE_ROLE در Kernel ندارند.
+     *      این تابع تنها نقطه ورود مجاز feeder به مسیر همگام‌سازی ذخایر است.
+     *      GAP-MEX-05 production wiring.
+     * @param newReserves ارزش ذخایر جدید (واحد 1e18، گزارش‌شده توسط feeder)
+     */
+    function syncReserves(uint256 newReserves) external onlyFeeder nonReentrant {
+        IIranOSKernel(kernel).syncReserves(newReserves);
+        emit ReserveSyncForwarded(msg.sender, newReserves, block.timestamp);
     }
 
     function flagViolation(address offender, uint8 violationCode, string calldata reason) external onlyFeeder nonReentrant returns (uint256 flagId) {
