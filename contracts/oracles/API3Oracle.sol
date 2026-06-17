@@ -69,11 +69,15 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
         _;
     }
 
-    constructor(address _kernel) {
+    constructor(address _kernel, address[] memory initialFeeders) {
         require(_kernel != address(0), "API3Oracle: invalid kernel");
         _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
         _grantRole(KERNEL_ROLE, _kernel);
         kernel = _kernel;
+        for (uint256 i = 0; i < initialFeeders.length; i++) {
+            require(initialFeeders[i] != address(0), "API3Oracle: invalid feeder address");
+            _grantRole(FEEDER_ROLE, initialFeeders[i]);
+        }
         dataPoints[PAH_USD_KEY] = DataPoint({ dataType: DATA_PRICE, key: PAH_USD_KEY, value: 1 * int256(1e18), timestamp: block.timestamp, feeder: msg.sender, isValid: true, confidence: 1000 });
     }
 

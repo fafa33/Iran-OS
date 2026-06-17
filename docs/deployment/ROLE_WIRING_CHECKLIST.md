@@ -152,11 +152,15 @@ kernel.grantOfficialAccess(api3OracleAddress, kernel.ORACLE_ROLE())
 
 | # | فراخوان | قرارداد هدف | نقش | دریافت‌کننده | بدون این اعطا |
 |---|---------|------------|-----|-------------|--------------|
-| 3 | `kernel` (impersonate) | `API3Oracle` | `FEEDER_ROLE` | هر آدرس feeder مجاز | `updateData()` و `flagViolation()` revert |
+| 3 | deployer (در constructor) | `API3Oracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز (آرایه در constructor) | `updateData()` و `flagViolation()` revert |
 
 ```
-api3Oracle.grantRole(api3Oracle.FEEDER_ROLE(), feederAddress)
+// Codex P1 fix: FEEDER_ROLE در زمان deploy از طریق پارامتر initialFeeders اعطا می‌شود.
+// impersonate کردن Kernel لازم نیست.
+new API3Oracle(kernelAddress, [feeder1, feeder2, ...])
 ```
+
+**توجه:** پس از deploy، برای افزودن feeder جدید به اجرای post-deployment مستقل نیاز است (در نسخه فعلی `grantRole` در API3Oracle فقط توسط `DEFAULT_ADMIN_ROLE` (Kernel) قابل فراخوانی است). این در scope Codex P1 نیست.
 
 ### و — اجباری: AssetFreeze داخلی
 

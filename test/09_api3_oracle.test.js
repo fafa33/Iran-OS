@@ -19,27 +19,10 @@ describe("API3Oracle", function () {
     );
 
     const API3Oracle = await ethers.getContractFactory("API3Oracle");
-    api3Oracle = await API3Oracle.deploy(await kernel.getAddress());
+    api3Oracle = await API3Oracle.deploy(await kernel.getAddress(), [feeder.address]);
 
     const ORACLE_ROLE = await kernel.ORACLE_ROLE();
     await kernel.connect(sovereign).grantOfficialAccess(await api3Oracle.getAddress(), ORACLE_ROLE);
-
-    const FEEDER_ROLE = await api3Oracle.FEEDER_ROLE();
-    const kernelAddress = await kernel.getAddress();
-    await network.provider.send("hardhat_setBalance", [
-      kernelAddress,
-      "0x1000000000000000000"
-    ]);
-    await network.provider.request({
-      method: "hardhat_impersonateAccount",
-      params: [kernelAddress]
-    });
-    const kernelSigner = await ethers.getSigner(kernelAddress);
-    await api3Oracle.connect(kernelSigner).grantRole(FEEDER_ROLE, feeder.address);
-    await network.provider.request({
-      method: "hardhat_stopImpersonatingAccount",
-      params: [kernelAddress]
-    });
   });
 
   describe("flagViolation bridge", function () {
@@ -259,6 +242,54 @@ describe("API3Oracle", function () {
 
     it("MAX_DATA_AGE constant equals 1 hour", async function () {
       expect(await api3Oracle.MAX_DATA_AGE()).to.equal(3600n);
+    });
+  });
+
+  describe("Codex P1 regression — constructor FEEDER_ROLE grant", function () {
+    it("feeder granted via initialFeeders holds FEEDER_ROLE without impersonation", async function () {
+      const FEEDER_ROLE = await api3Oracle.FEEDER_ROLE();
+      expect(await api3Oracle.hasRole(FEEDER_ROLE, feeder.address)).to.be.true;
+    });
+
+    it("unconfigured address does not hold FEEDER_ROLE", async function () {
+      const FEEDER_ROLE = await api3Oracle.FEEDER_ROLE();
+      expect(await api3Oracle.hasRole(FEEDER_ROLE, stranger.address)).to.be.false;
+    });
+
+    it("unconfigured address cannot call flagViolation", async function () {
+      await expect(
+        api3Oracle.connect(stranger).flagViolation(offender.address, 4, "test")
+      ).to.be.revertedWith("API3Oracle: caller is not a feeder");
+    });
+
+    it("empty initialFeeders array deploys without error and grants no FEEDER_ROLE", async function () {
+      const Kernel2 = await ethers.getContractFactory("IranOS_Kernel");
+      const kernel2 = await Kernel2.deploy(sovereign.address, court.address, sovereign.address, swf.address);
+      const API3Oracle = await ethers.getContractFactory("API3Oracle");
+      const oracle2 = await API3Oracle.deploy(await kernel2.getAddress(), []);
+      await oracle2.waitForDeployment();
+      const FEEDER_ROLE = await oracle2.FEEDER_ROLE();
+      expect(await oracle2.hasRole(FEEDER_ROLE, feeder.address)).to.be.false;
+    });
+
+    it("zero address in initialFeeders reverts constructor", async function () {
+      const Kernel3 = await ethers.getContractFactory("IranOS_Kernel");
+      const kernel3 = await Kernel3.deploy(sovereign.address, court.address, sovereign.address, swf.address);
+      const API3Oracle = await ethers.getContractFactory("API3Oracle");
+      await expect(
+        API3Oracle.deploy(await kernel3.getAddress(), [feeder.address, ethers.ZeroAddress])
+      ).to.be.revertedWith("API3Oracle: invalid feeder address");
+    });
+
+    it("multiple feeders granted via initialFeeders all hold FEEDER_ROLE", async function () {
+      const Kernel4 = await ethers.getContractFactory("IranOS_Kernel");
+      const kernel4 = await Kernel4.deploy(sovereign.address, court.address, sovereign.address, swf.address);
+      const API3Oracle = await ethers.getContractFactory("API3Oracle");
+      const oracle4 = await API3Oracle.deploy(await kernel4.getAddress(), [feeder.address, stranger.address]);
+      await oracle4.waitForDeployment();
+      const FEEDER_ROLE = await oracle4.FEEDER_ROLE();
+      expect(await oracle4.hasRole(FEEDER_ROLE, feeder.address)).to.be.true;
+      expect(await oracle4.hasRole(FEEDER_ROLE, stranger.address)).to.be.true;
     });
   });
 });

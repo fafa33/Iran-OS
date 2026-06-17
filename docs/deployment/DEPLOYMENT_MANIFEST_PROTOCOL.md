@@ -338,19 +338,19 @@ treasury.grantRole(treasury.KERNEL_ROLE(), TRIGGER_PROTOCOL_ADDRESS)
 ## ۶. سیم‌کشی Oracle
 
 ```
-# گام ۱: API3Oracle را به عنوان Oracle در Kernel ثبت کن
-kernel.grantOfficialAccess(API3_ORACLE_ADDRESS, kernel.ORACLE_ROLE())
+# گام ۱: API3Oracle را با feeder‌های اولیه deploy کن (Codex P1 fix)
+# FEEDER_ROLE در constructor اعطا می‌شود — نیازی به impersonation نیست.
+new API3Oracle(KERNEL_ADDRESS, [FEEDER_ADDRESS_1, FEEDER_ADDRESS_2, ...])
 
-# گام ۲: feeder‌های مجاز را در API3Oracle ثبت کن
-# (نیاز به impersonate کردن Kernel یا فراخوانی مستقیم از Kernel دارد)
-api3Oracle.grantRole(api3Oracle.FEEDER_ROLE(), FEEDER_ADDRESS)
+# گام ۲: API3Oracle را به عنوان Oracle در Kernel ثبت کن
+kernel.grantOfficialAccess(API3_ORACLE_ADDRESS, kernel.ORACLE_ROLE())
 
 # گام ۳: feeder‌های PriceOracle و ProductionOracle
 priceOracle.grantRole(priceOracle.FEEDER_ROLE(), PRICE_FEEDER)
 productionOracle.grantRole(productionOracle.FEEDER_ROLE(), PROD_FEEDER)
 ```
 
-**توجه:** `grantRole` در API3Oracle نیاز به `DEFAULT_ADMIN_ROLE` دارد که در constructor به `Kernel` اعطا می‌شود. در testnet از `hardhat_impersonateAccount` استفاده کنید (مانند pattern موجود در testها).
+**توجه:** `DEFAULT_ADMIN_ROLE` در API3Oracle به `Kernel` اعطا می‌شود. پس از deploy، افزودن feeder جدید نیاز به فراخوانی از Kernel دارد (در scope Codex P1 نیست). همه feeder‌های مجاز باید در زمان deploy مشخص باشند.
 
 ---
 

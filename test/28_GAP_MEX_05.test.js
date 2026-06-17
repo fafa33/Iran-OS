@@ -457,24 +457,16 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       );
       await wiredKernel.connect(sovereign).setTriggerProtocol(await wiredTrigger.getAddress());
 
-      // Deploy API3Oracle with Kernel address
+      // Deploy API3Oracle with Kernel address and initial feeder set (Codex P1 fix)
+      // FEEDER_ROLE is granted at constructor time — no impersonation required in production.
       const API3Oracle = await ethers.getContractFactory("API3Oracle");
-      api3Oracle = await API3Oracle.deploy(await wiredKernel.getAddress());
+      api3Oracle = await API3Oracle.deploy(await wiredKernel.getAddress(), [feeder.address]);
       await api3Oracle.waitForDeployment();
 
       // Grant ORACLE_ROLE on Kernel to API3Oracle (deployment manifest step د)
       await wiredKernel.connect(sovereign).grantOfficialAccess(
         await api3Oracle.getAddress(), await wiredKernel.ORACLE_ROLE()
       );
-
-      // Grant FEEDER_ROLE on API3Oracle to feeder — must impersonate Kernel (DEFAULT_ADMIN_ROLE holder)
-      // This matches the deployment manifest step ه: `kernel (impersonate) → api3Oracle.grantRole(FEEDER_ROLE, feeder)`
-      const kernelAddr = await wiredKernel.getAddress();
-      await ethers.provider.send("hardhat_setBalance", [kernelAddr, "0x1000000000000000000"]);
-      await ethers.provider.send("hardhat_impersonateAccount", [kernelAddr]);
-      const kernelSigner = await ethers.getSigner(kernelAddr);
-      await api3Oracle.connect(kernelSigner).grantRole(await api3Oracle.FEEDER_ROLE(), feeder.address);
-      await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelAddr]);
 
       // Deploy PahlaviToken and wire into Kernel
       const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
@@ -570,13 +562,30 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
 
     it("PW-09: deployment wiring matches manifest — ORACLE_ROLE=API3Oracle, feeder not on Kernel", async function () {
       // Manifest step د: kernel.grantOfficialAccess(api3OracleAddress, ORACLE_ROLE) → verified in PW-02
-      // Manifest step ه: feeder holds FEEDER_ROLE on API3Oracle
+      // Manifest step ه: feeder holds FEEDER_ROLE on API3Oracle (granted at constructor time)
       const FEEDER_ROLE = await api3Oracle.FEEDER_ROLE();
       expect(await api3Oracle.hasRole(FEEDER_ROLE, feeder.address)).to.be.true;
       expect(await api3Oracle.hasRole(FEEDER_ROLE, stranger.address)).to.be.false;
       // Full path functional end-to-end
       const newReserves = ethers.parseUnits("250000000000", 18);
       await api3Oracle.connect(feeder).syncReserves(newReserves);
+      expect(await wiredToken.totalReserves()).to.equal(newReserves);
+    });
+
+    it("PW-10 (Codex P1 regression): FEEDER_ROLE granted at constructor time — no impersonation used", async function () {
+      // This test documents that FEEDER_ROLE is reachable on mainnet without hardhat_impersonateAccount.
+      // The constructor accepts initialFeeders and calls _grantRole(FEEDER_ROLE, addr) directly.
+      // Verify the grant is present and the full sync path is functional.
+      const FEEDER_ROLE = await api3Oracle.FEEDER_ROLE();
+      expect(await api3Oracle.hasRole(FEEDER_ROLE, feeder.address)).to.be.true;
+
+      // Full path: feeder → API3Oracle.syncReserves → Kernel.syncReserves → PahlaviToken.updateReserves
+      const newReserves = ethers.parseUnits("123000000000", 18);
+      const tx = await api3Oracle.connect(feeder).syncReserves(newReserves);
+      await expect(tx)
+        .to.emit(api3Oracle, "ReserveSyncForwarded").withArgs(feeder.address, newReserves, await ethers.provider.getBlock("latest").then(b => b.timestamp))
+        .and.to.emit(wiredKernel, "ReserveSynced")
+        .and.to.emit(wiredToken, "ReservesUpdated");
       expect(await wiredToken.totalReserves()).to.equal(newReserves);
     });
   });
