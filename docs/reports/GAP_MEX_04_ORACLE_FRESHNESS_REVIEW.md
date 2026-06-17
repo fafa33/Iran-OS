@@ -400,6 +400,261 @@ Emergency mode (`emergencyMode` in PahlaviToken) and emergency lock (`emergencyL
 
 ---
 
+## Precision Gap Analysis (Implementation-Grade)
+
+This section provides implementation-grade gap analysis for each missing freshness gate. It is the authoritative input for any future remediation proposal. No fixes are proposed here.
+
+### Gate Map — Missing Freshness Enforcement Points
+
+#### GAP-MEX-04-G01 — No Freshness Gate at `API3Oracle.syncReserves` (Feeder Entry Point)
+
+| Property | Value |
+|---|---|
+| **Contract** | `contracts/oracles/API3Oracle.sol` |
+| **Function** | `syncReserves(uint256 newReserves)` — line 103 |
+| **Execution path** | `FEEDER_ROLE` holder → `API3Oracle.syncReserves(newReserves)` → `IIranOSKernel(kernel).syncReserves(newReserves)` → `IPahlaviToken(pahlaviToken).updateReserves(newReserves)` → `PahlaviToken.totalReserves = newReserves` |
+| **Stale-data entry point** | `newReserves` parameter at `API3Oracle.syncReserves` call boundary — no temporal context attached |
+| **State mutation risk** | `PahlaviToken.totalReserves` set to value of arbitrary age; `reserveCompliant` gate and `currentReserveRatio()` operate on this stale figure |
+| **Severity** | **Medium** — requires `FEEDER_ROLE` to write stale data; monetary exploitation additionally requires `MINTER_ROLE` (independent key custody) |
+
+**Contrast with `flagViolation` (same contract, fresher gate):**
+
+```solidity
+// flagViolation — freshness gate PRESENT
+require(
+    block.timestamp - dataPoints[PAH_USD_KEY].timestamp <= MAX_DATA_AGE,
+    "API3Oracle: stale data feed"
+);
+
+// syncReserves — freshness gate ABSENT
+function syncReserves(uint256 newReserves) external onlyFeeder nonReentrant {
+    IIranOSKernel(kernel).syncReserves(newReserves);   // no age check
+    emit ReserveSyncForwarded(msg.sender, newReserves, block.timestamp);
+}
+```
+
+`MAX_DATA_AGE` is already defined as a `public constant` in the same contract. The gate infrastructure exists; it is not applied to `syncReserves`.
+
+---
+
+#### GAP-MEX-04-G02 — No Freshness Enforcement at `Kernel.syncReserves` (Relay Boundary)
+
+| Property | Value |
+|---|---|
+| **Contract** | `contracts/kernel.sol` |
+| **Function** | `syncReserves(uint256 newReserves)` — line 527 |
+| **Execution path** | `onlyOracle` → `require(pahlaviToken != address(0))` → `IPahlaviToken(pahlaviToken).updateReserves(newReserves)` → `emit ReserveSynced(msg.sender, newReserves, block.timestamp)` |
+| **Stale-data entry point** | `newReserves` parameter forwarded from `API3Oracle` without temporal context; the Kernel adds `block.timestamp` to the `ReserveSynced` audit event but this records delivery time, not data age |
+| **State mutation risk** | Relay of stale `newReserves` to `PahlaviToken.updateReserves` — same chain as G01; no interception at this boundary |
+| **Severity** | **Low** — relay gap; no independent exploit path; consequential only as part of the G01→G03 chain; identified separately because remediation requires this function to be modified |
+
+**Current code (kernel.sol lines 527–535):**
+
+```solidity
+function syncReserves(uint256 newReserves)
+    external
+    onlyOracle
+    nonReentrant
+{
+    require(pahlaviToken != address(0), "Kernel: pahlaviToken not set");
+    IPahlaviToken(pahlaviToken).updateReserves(newReserves);
+    emit ReserveSynced(msg.sender, newReserves, block.timestamp);
+}
+```
+
+`block.timestamp` in `ReserveSynced` records when the Kernel received the value — not when the reserve was assessed. This is an audit timestamp, not a validity gate. `notLocked()` is intentionally absent (sovereign resilience doctrine); any remediation must preserve this exemption.
+
+---
+
+#### GAP-MEX-04-G03 — No Freshness Gate at `PahlaviToken.updateReserves` (Terminal Write Point)
+
+| Property | Value |
+|---|---|
+| **Contract** | `contracts/monetary/PahlaviToken.sol` |
+| **Function** | `updateReserves(uint256 newReserves)` — line 233 |
+| **Execution path** | `onlyKernel` → `totalReserves = newReserves` (line 235) → `reserveCompliant` consumers read stale figure |
+| **Stale-data entry point** | `newReserves` parameter; `totalReserves = newReserves` executes on line 235 with no precondition on data age |
+| **State mutation risk** | **Direct sovereign state mutation** — `totalReserves` is the foundational input to `reserveCompliant`, `currentReserveRatio()`, `canMint()`, and `reserveFloorBreached` detection; all four downstream consumers immediately reflect the stale value |
+| **Severity** | **Medium** — terminal guard opportunity; highest-value enforcement location in the chain; same exploit path as G01/G02 but absence here is most consequential because it is the final gate before sovereign state changes |
+
+**Downstream consumers of `totalReserves` (all immediately affected):**
+
+```solidity
+// reserveCompliant — mint gate reads totalReserves
+uint256 ratio = (totalReserves * 1000) / newSupply;
+require(ratio >= MIN_RESERVE_RATIO, "PAH: reserve ratio below minimum 33.3%");
+
+// currentReserveRatio — public view reads totalReserves
+return (totalReserves * 1000) / supply;
+
+// canMint — public view reads totalReserves
+return (totalReserves * 1000) / newSupply >= MIN_RESERVE_RATIO;
+
+// updateReserves — breach detection reads totalReserves
+uint256 ratio = supply > 0 ? (newReserves * 1000) / supply : 1000;
+```
+
+Once `totalReserves = newReserves` executes at line 235, all four consumers operate on the stale value for all subsequent transactions until a corrective `updateReserves` call is made.
+
+---
+
+#### GAP-MEX-04-G04 — No Last-Update Timestamp on `totalReserves` (Missing-Update Detection)
+
+| Property | Value |
+|---|---|
+| **Contract** | `contracts/monetary/PahlaviToken.sol` |
+| **Function** | N/A — missing state variable |
+| **Execution path** | N/A — missing detection; feeder silence → `totalReserves` unchanged → no on-chain indicator of staleness |
+| **Stale-data entry point** | Any `updateReserves` call followed by feeder silence; `totalReserves` persists at last submitted value with no age annotation |
+| **State mutation risk** | `reserveCompliant` operates against arbitrarily old figure indefinitely; no on-chain mechanism to detect this; `mint` may be permitted against reserves that have declined in the real world but not been reported |
+| **Severity** | **Informational** — not directly exploitable (no bypass of a gate); missing detection capability; risk is realized through feeder silence, not feeder action |
+
+**What is absent:**
+
+```solidity
+// DOES NOT EXIST in PahlaviToken.sol:
+uint256 public lastReservesUpdatedAt;
+
+// DOES NOT EXIST — no stale-reserve mint gate:
+modifier reservesCurrent() {
+    require(
+        block.timestamp - lastReservesUpdatedAt <= MAX_RESERVES_AGE,
+        "PAH: reserve figure is stale"
+    );
+    _;
+}
+```
+
+`API3Oracle.dataPoints[key].timestamp` exists per key but is not consulted by PahlaviToken. The oracle's self-reported freshness is not visible to the token contract.
+
+---
+
+#### GAP-MEX-04-G05 — No Replay Constraint on `API3Oracle.syncReserves` (Monotonicity Absent)
+
+| Property | Value |
+|---|---|
+| **Contract** | `contracts/oracles/API3Oracle.sol` |
+| **Function** | `syncReserves(uint256 newReserves)` — line 103 |
+| **Execution path** | Same as G01 — no additional constraint between the value submitted now and any prior value |
+| **Stale-data entry point** | `newReserves` parameter — any prior reserve figure may be resubmitted without restriction |
+| **State mutation risk** | `PahlaviToken.totalReserves` can be set to any historical value — not constrained to be `>= current totalReserves` or within any monotonic window. A historically high reserve figure resubmitted after a real-world decline inflates `totalReserves` above the true level. |
+| **Severity** | **Medium** — requires only `FEEDER_ROLE` compromise to inflate `totalReserves` to any prior high-watermark; monetary exploitation then additionally requires `MINTER_ROLE`. G05 differs from G01 in that G05 specifically captures the directional / temporal-ordering dimension — a fresh timestamp on a stale value would satisfy a timestamp gate (G01 fix) but would not prevent a feeder from submitting a legitimately fresh but factually reversed value unless monotonicity is also enforced |
+
+**Comparison:**
+
+| Attack | Gate That Would Prevent It |
+|---|---|
+| Submit 2-day-old reserve figure | G01 fix (timestamp gate) |
+| Submit current timestamp with a prior high-watermark `newReserves` | G05 fix (monotonicity / value-sequencing) |
+| Both above simultaneously | Both G01 + G05 fixes required |
+
+G01 and G05 are independent gaps. A G01 fix alone does not prevent G05. A G05 fix alone does not prevent G01.
+
+---
+
+### Implementation-Grade Findings
+
+#### IMPL-01 — Stale Reserve Submission Accepted at Feeder Entry Point
+
+| Field | Value |
+|---|---|
+| **Finding ID** | IMPL-01 |
+| **Component** | `API3Oracle.syncReserves` — `contracts/oracles/API3Oracle.sol:103` |
+| **Current behavior** | `syncReserves(uint256 newReserves)` accepts any `uint256` value and forwards it immediately to `Kernel.syncReserves`. No check against `block.timestamp`, no `reportedAt` parameter, no reference to `dataPoints[PAH_USD_KEY].timestamp` or any oracle key timestamp. `MAX_DATA_AGE` constant (line 30) exists in the same contract but is not applied here. |
+| **Expected behavior** | Feeder must supply a `reportedAt` timestamp alongside `newReserves`. Gate enforces `block.timestamp - reportedAt <= MAX_DATA_AGE`. Values older than `MAX_DATA_AGE` are rejected before forwarding. |
+| **Exploitability** | `FEEDER_ROLE` required. Any authorized feeder EOA can submit a reserve value of any age at any time. Replay of prior figures is unrestricted. Exploitation for monetary gain additionally requires `MINTER_ROLE`. |
+| **Authority impact** | None — `onlyFeeder` preserved; no authority escalation through this gap |
+| **Treasury impact** | None direct — Treasury has no oracle input path |
+| **Reserve impact** | **Direct** — `PahlaviToken.totalReserves` is set to the stale value; all consumers (`reserveCompliant`, `currentReserveRatio`, `canMint`, breach detection) operate on the stale figure from that point forward |
+| **Trigger impact** | None direct — `syncReserves` is data-forwarding only; `ReserveFloorBreached` from a stale-low submission provides a detection signal but does not advance the trigger lifecycle |
+| **Continuity impact** | Reserve reporting remains available during emergency lock (intended); however, the absence of a freshness gate means post-outage recovery submissions are also unvalidated |
+
+---
+
+#### IMPL-02 — Relay Boundary Adds No Freshness Enforcement
+
+| Field | Value |
+|---|---|
+| **Finding ID** | IMPL-02 |
+| **Component** | `Kernel.syncReserves` — `contracts/kernel.sol:527` |
+| **Current behavior** | `syncReserves(uint256 newReserves)` receives `newReserves` from `API3Oracle` (which holds `ORACLE_ROLE`) and calls `IPahlaviToken(pahlaviToken).updateReserves(newReserves)` immediately. Emits `ReserveSynced(caller, newReserves, block.timestamp)` — recording delivery time, not data age. No timestamp parameter, no age validation. |
+| **Expected behavior** | If a `reportedAt` timestamp is threaded through from the feeder (IMPL-01 fix), this function must accept and forward it: `updateReserves(newReserves, reportedAt)`. Alternatively, the Kernel could independently validate `reportedAt` at this boundary. |
+| **Exploitability** | Dependent on IMPL-01 — no independent exploit path at this boundary. Identified separately because any remediation of the full chain must modify this function. |
+| **Authority impact** | None — `onlyOracle` preserved; `notLocked()` exemption intentional and must not be modified |
+| **Treasury impact** | None direct |
+| **Reserve impact** | Relay of stale value to `PahlaviToken.updateReserves` — same chain as IMPL-01 |
+| **Trigger impact** | None — `ReserveSynced` is audit-only |
+| **Continuity impact** | `notLocked()` exemption critical for sovereign resilience — any remediation must explicitly preserve this; timestamp forwarding must not introduce a `notLocked` gate |
+
+---
+
+#### IMPL-03 — Terminal Reserve Write Has No Age Gate
+
+| Field | Value |
+|---|---|
+| **Finding ID** | IMPL-03 |
+| **Component** | `PahlaviToken.updateReserves` — `contracts/monetary/PahlaviToken.sol:233` |
+| **Current behavior** | `updateReserves(uint256 newReserves)` is `onlyKernel`. Executes `totalReserves = newReserves` unconditionally at line 235. Emits `ReservesUpdated`. Conditionally emits `ReserveFloorBreached` or `ReserveFloorRestored`. No timestamp parameter, no age gate, no check against any oracle key timestamp. |
+| **Expected behavior** | Should accept a `reportedAt` timestamp (forwarded through the chain from IMPL-01/IMPL-02) and enforce `require(block.timestamp - reportedAt <= MAX_DATA_AGE, "PAH: stale reserve data")` before `totalReserves = newReserves`. This is the terminal and highest-value enforcement location: if this gate passes, the state mutation has occurred regardless of upstream failures. |
+| **Exploitability** | Once the value reaches `updateReserves`, the state mutation is irreversible within the transaction. `onlyKernel` gate preserved but only constrains the caller identity, not the data age. |
+| **Authority impact** | None — `onlyKernel` preserved |
+| **Treasury impact** | None direct |
+| **Reserve impact** | **Critical gate location** — `totalReserves = newReserves` at line 235 is the sovereign state write. Once executed, `reserveCompliant` (which gates `mint`), `currentReserveRatio()`, `canMint()`, and `reserveFloorBreached` detection all operate on the stale value. A corrective call is required to reset. |
+| **Trigger impact** | `ReserveFloorBreached` may be emitted if stale-low value submitted — this is evidence, not enforcement. Human operator must decide whether to escalate. |
+| **Continuity impact** | `updateReserves` has no `notInEmergency` gate — reserve truth is recordable during token emergency (intended). Any timestamp gate added here must not introduce an emergency-mode dependency. |
+
+---
+
+#### IMPL-04 — No Last-Update Timestamp Enables Indefinite Reserve Staleness
+
+| Field | Value |
+|---|---|
+| **Finding ID** | IMPL-04 |
+| **Component** | `PahlaviToken` — missing state variable `lastReservesUpdatedAt`; `contracts/monetary/PahlaviToken.sol` |
+| **Current behavior** | `totalReserves` is a bare `uint256`. `updateReserves` sets `totalReserves = newReserves` but records no update timestamp. No state variable in `PahlaviToken` or `Kernel` records when `totalReserves` was last updated. `mint` has no maximum-age precondition on the reserve figure it consults. |
+| **Expected behavior** | A `uint256 public lastReservesUpdatedAt` state variable set to `block.timestamp` in `updateReserves` would provide on-chain observability of reserve age. An optional `require(block.timestamp - lastReservesUpdatedAt <= MAX_RESERVES_AGE)` guard on `mint` would prevent minting against an expired reserve figure. |
+| **Exploitability** | Not directly exploitable — no gate to bypass. Risk is realized through feeder silence: reserves decline in the real world, feeder does not update, `reserveCompliant` continues to pass against the prior figure. No action by the feeder is required beyond initial submission. |
+| **Authority impact** | None |
+| **Treasury impact** | None direct |
+| **Reserve impact** | `reserveCompliant` operates against a reserve figure of unlimited age. The minting gate may pass when it should fail, but only if reserves have declined off-chain and the feeder has failed to report the decline. |
+| **Trigger impact** | `reserveFloorBreached` is never set during feeder silence — breach detection requires an `updateReserves` call that reports a sub-floor value. Silent reserve decline produces no on-chain signal. |
+| **Continuity impact** | Governance monitoring (GAP-MEX-06 Domain 1) is the sole detection mechanism for feeder silence. No on-chain staleness circuit-breaker exists. |
+
+---
+
+#### IMPL-05 — Prior Reserve Values May Be Replayed Without Restriction
+
+| Field | Value |
+|---|---|
+| **Finding ID** | IMPL-05 |
+| **Component** | `API3Oracle.syncReserves` — `contracts/oracles/API3Oracle.sol:103` |
+| **Current behavior** | `syncReserves(uint256 newReserves)` accepts any `uint256`. No nonce, no comparison to `PahlaviToken.totalReserves` (current value), no minimum-advance requirement, no monotonicity constraint. A feeder may submit the same `newReserves` value an unlimited number of times. A feeder may submit a value lower than the current `totalReserves` (reporting a reserve decline) or higher (reporting recovery or inflating). |
+| **Expected behavior** | Either: (a) timestamp gate (IMPL-01 fix) — stale replay is rejected because the `reportedAt` timestamp would be old; or (b) explicit monotonicity constraint — `require(newReserves >= previousReserves || authorizedDeclineProof)`. Note: (a) alone does not prevent a feeder from submitting a current-timestamp value that reflects a prior high-watermark figure. Full protection requires both (a) and (b). |
+| **Exploitability** | Requires `FEEDER_ROLE` only to inflate `totalReserves` to any prior high-watermark. No additional role required for the inflation act itself. Monetary exploitation of the inflated figure (minting against over-stated backing) additionally requires `MINTER_ROLE`. This is a lower bar than IMPL-01 for the inflation step alone. |
+| **Authority impact** | None — `FEEDER_ROLE` is required; no role escalation |
+| **Treasury impact** | None direct; second-order: inflated `totalReserves` enables mint; new tokens can enter Treasury flows |
+| **Reserve impact** | **High** for data integrity — `totalReserves` can be set to any value in `[0, type(uint256).max]` by any `FEEDER_ROLE` holder; the monotonicity dimension means the value can be moved in either direction without restriction |
+| **Trigger impact** | None direct — replay of a stale-high value will not emit `ReserveFloorBreached` (ratio above floor); reserve inflation is silent |
+| **Continuity impact** | Replay does not affect continuity guarantees; the system remains operational; the risk is data-integrity, not availability |
+
+---
+
+### Severity Assessment
+
+| Gate Gap | Finding | Severity | Rationale |
+|---|---|---|---|
+| No freshness gate at `API3Oracle.syncReserves` | IMPL-01 | **Medium** | `FEEDER_ROLE` required; stale write; monetary exploit requires additional `MINTER_ROLE` |
+| No timestamp forwarding at `Kernel.syncReserves` | IMPL-02 | **Low** | Relay gap; no independent exploit; remediation dependency only |
+| No age gate at `PahlaviToken.updateReserves` | IMPL-03 | **Medium** | Terminal write point; absent final guard; same exploit chain but highest-consequence gap |
+| No `lastReservesUpdatedAt` state variable | IMPL-04 | **Informational** | Detection gap, not a bypassable gate; realized through feeder silence |
+| No replay constraint on `syncReserves` | IMPL-05 | **Medium** | `FEEDER_ROLE` only for inflation; `FEEDER_ROLE` + `MINTER_ROLE` for monetary exploit; data-integrity impact independent of monetary path |
+
+**Aggregate severity: Medium** — no single finding reaches High or Critical; dual-role requirement on the monetary exploit path constrains impact. If the two-role assumption is violated (e.g., a single entity controls both `FEEDER_ROLE` and `MINTER_ROLE`), aggregate severity upgrades to **High**.
+
+**Critical path for remediation:** IMPL-01 (entry point gate) → IMPL-02 (relay forwarding) → IMPL-03 (terminal gate) in that order. IMPL-04 and IMPL-05 are independent hardening items.
+
+---
+
 ## Freshness Enforcement Map
 
 | Enforcement Point | Contract | Function | Present |
