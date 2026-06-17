@@ -329,7 +329,7 @@ For every claim in every changed file, run the corresponding grep and record the
 |---|---|---|
 | "No production contract calls `F()`" | `grep -r '\.F(' contracts/ --include="*.sol" \| grep -v fuzzing` | Zero matches outside fuzzing harness |
 | "Contract `X` holds ROLE but cannot call `F()`" | `grep '\.F(' contracts/path/to/X.sol` | Zero matches |
-| "ROLE is restricted to named operators" | `grep 'ROLE' contracts/path/to/Contract.sol` — confirm only `_grantRole` in constructor, no public grant function | Constructor-only |
+| "ROLE is restricted to named operators" | (1) `grep '_grantRole(ROLE' contracts/path/to/Contract.sol` — confirm constructor grants; (2) `grep '_setRoleAdmin' contracts/path/to/Contract.sol` — confirm no custom admin override; (3) `grep 'DEFAULT_ADMIN_ROLE' contracts/path/to/Contract.sol` — identify who holds the inherited admin (default admin for all roles is `DEFAULT_ADMIN_ROLE`; its holder can call `grantRole` for any role via OpenZeppelin AccessControl) | All three greps evaluated; DEFAULT_ADMIN_ROLE holder documented |
 | "No mint path" | `grep -r '\.mint(' contracts/ --include="*.sol" \| grep -v fuzzing` | Zero matches outside fuzzing |
 | "Gap X is CLOSED" | Enumerate: what is implemented (file:line), what remains open, what test covers it | All three present |
 | "No downstream enforcement consequence" | Full caller chain from entry point to every enforcement surface (mint, freeze, trigger, treasury); grep each surface | Zero untraced paths |
