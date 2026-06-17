@@ -101,6 +101,46 @@ Prefixes: `feat`, `fix`, `docs`, `test`, `refactor`, `audit`, `chore`
 - **Never** convert constitutional safeguards into ordinary configurable parameters without explicit doctrine review
 - No secrets or private keys in source
 
+### Deployment-Path Parity (Mandatory)
+
+Any PR touching **Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, or authority boundaries** requires a deployment-path parity test in addition to unit tests. Unit tests alone are insufficient for these components.
+
+**What is a deployment-path parity test?** A test that proves the exact production-intended caller path works using only role wiring and setup documented in the deployment manifest (`docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` or `docs/deployment/ROLE_WIRING_CHECKLIST.md`).
+
+**The following are NOT proof of production reachability:**
+- `hardhat_impersonateAccount` or any Hardhat-only JSON-RPC method
+- Test-only role grants that have no mainnet-reachable equivalent
+- Artificial caller accounts with no documented production grant path
+- Undocumented manual setup steps not present in the deployment manifest
+- Admin shortcuts unavailable on mainnet
+
+If impersonation appears in a test file, it must be explicitly labeled `// TEST-ONLY — not a production grant path` and cannot be cited as evidence that the production path works.
+
+**A PR touching a sensitive component is not mergeable if CI passes while the production caller path is unreachable on mainnet.**
+
+**Why this rule exists — GAP-MEX-05:** During the GAP-MEX-05 closure work, unit tests passed CI while three production reachability gaps went undetected: (1) `API3Oracle` had no `syncReserves` forwarding method; (2) `pahlaviToken` was not configured in Kernel's deployment flow; (3) `FEEDER_ROLE` on `API3Oracle` had no mainnet-reachable grant path — `hardhat_impersonateAccount` in the test suite created a false appearance of a working production path. All three gaps required separate Codex findings and PRs (#76–#81) to close.
+
+### Pre-Implementation Red-Team Pass (Mandatory)
+
+Before writing any code for a sensitive PR, contributors (and AI assistants) must perform an internal red-team pass and document the results in the PR description.
+
+**Sensitive PRs include any change touching:** Kernel, Oracle, roles, deployment wiring, Reserve, Treasury, TriggerProtocol, PahlaviToken, or authority boundaries.
+
+The red-team pass must address each of the following before implementation begins:
+
+1. **Production caller path** — What is the exact sequence of callers from the external entry point to the target function on mainnet?
+2. **Role grant path** — How does each required role reach each caller address on mainnet? Is that path in the deployment manifest?
+3. **Deployment manifest path** — Which section of `docs/deployment/` documents this wiring? Does it exist and is it current?
+4. **Impossible or unreachable paths** — Are there paths that cannot be executed on mainnet (e.g., a role admin held by a contract with no external grant function)?
+5. **Hardhat-only assumptions** — Does any test setup rely on `hardhat_impersonateAccount` or Hardhat JSON-RPC methods unavailable on mainnet?
+6. **Test-only shortcuts** — Are any role grants or caller setups achievable only in a test environment?
+7. **Stale-state or recovery gaps** — Can an invalid state be entered that a subsequent corrective operation cannot exit?
+8. **Authority drift** — Does this change expand the set of addresses that can call any authority-gated function?
+9. **TriggerProtocol contamination risk** — Does this change risk routing a non-governance event into `executeTrigger`?
+10. **CI-green-but-production-broken risk** — Could CI pass while the real production caller path remains unreachable on mainnet?
+
+Implementation may begin only after this pass is documented.
+
 ---
 
 ## Non-Claim Discipline

@@ -52,7 +52,7 @@
 |-------|-------|-------|
 | `SOVEREIGN_ADDRESS` | آدرس کیف‌پول سخت‌افزاری پادشاه | اجباری |
 | `COURT_1` تا `COURT_9` | آدرس‌های ۹ عضو دادگاه عالی | اجباری — پیش از هر چیز |
-| `ORACLE_INITIAL` | آدرس اولیه oracle (placeholder تا API3Oracle deploy شود) | اجباری |
+| `ORACLE_INITIAL` | آدرس اولیه oracle (placeholder تا API3Oracle deploy شود) — در گروه E پس از وایرینگ API3Oracle revoke می‌شود | اجباری |
 | `SWF_MULTISIG` | آدرس چندامضایی صندوق ثروت ملی | اجباری |
 | `TREASURY_KERNEL` | آدرس Kernel (برای Treasury constructor) | از deploy Kernel |
 | `TRIGGER_TREASURY` | آدرس Treasury (برای TriggerProtocol constructor) | از deploy Treasury |
@@ -78,7 +78,7 @@ Layer 1 — وابسته به Kernel
 ───────────────────────────
 Treasury(kernel)
 SovereignWealthFund(sovereign, kernel)
-API3Oracle(kernel)
+API3Oracle(kernel, [feeder1, feeder2, ...])   ← FEEDER_ROLE در constructor اعطا می‌شود (Codex P1 fix)
 ConstitutionGuard(kernel)
 JurySelection(kernel)
 JusticeProtocol(kernel)
@@ -106,7 +106,7 @@ ProductionOracle(kernel)   ← مستقل از Layer 2
 | `SovereignWealthFund` | `sovereign, kernel` | Kernel |
 | `PahlaviToken` | `swf, kernel, initialReserves` | Kernel، SWF |
 | `TriggerProtocol` | `kernel, treasury, swf` | Kernel، Treasury، SWF |
-| `API3Oracle` | `kernel` | Kernel |
+| `API3Oracle` | `kernel, [feeder_1..N]` | Kernel (FEEDER_ROLE در constructor اعطا می‌شود) |
 | `ConstitutionGuard` | `kernel` | Kernel |
 | `AssetFreeze` | `kernel, swfTempWallet, swfContract` | Kernel، SWF |
 | `JurySelection` | `kernel` | Kernel |
@@ -182,7 +182,8 @@ VelocityFee(kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken�
 4.  deploy VictimFund(KERNEL_ADDRESS)
     → ثبت آدرس: VICTIM_FUND_ADDRESS
 
-5.  deploy API3Oracle(KERNEL_ADDRESS)
+5.  deploy API3Oracle(KERNEL_ADDRESS, [FEEDER_1, FEEDER_2, ...])
+    → FEEDER_ROLE در constructor اعطا می‌شود — post-deploy grantRole لازم نیست (Codex P1 fix)
     → ثبت آدرس: API3_ORACLE_ADDRESS
 
 6.  deploy ConstitutionGuard(KERNEL_ADDRESS)
@@ -306,13 +307,21 @@ VelocityFee          : ORACLE_ROLE، STAKING_ROLE
 ### گروه E — سیم‌کشی Oracle (آخر از همه)
 
 ```
+# گام ۱: API3Oracle را به عنوان Oracle در Kernel ثبت کن
 kernel.grantOfficialAccess(API3_ORACLE_ADDRESS, ORACLE_ROLE)
-api3Oracle.grantRole(FEEDER_ROLE, FEEDER_1)
-api3Oracle.grantRole(FEEDER_ROLE, FEEDER_2)
-...
+
+# گام ۲: ORACLE_ROLE placeholder اولیه را revoke کن
+# Kernel constructor نیاز به یک آدرس oracle غیرصفر داشت (ORACLE_INITIAL).
+# اکنون که API3Oracle سیم‌کشی شده، placeholder باید revoke شود تا
+# تنها مسیر مجاز feeder→API3Oracle→Kernel باشد.
+kernel.revokeRole(ORACLE_ROLE, ORACLE_INITIAL)
+
+# گام ۳: feeder‌های PriceOracle و ProductionOracle (این oracle‌ها constructor ساده دارند)
 priceOracle.grantRole(FEEDER_ROLE, PRICE_FEEDER)
 productionOracle.grantRole(FEEDER_ROLE, PROD_FEEDER)
 ```
+
+**⚠️ توجه — FEEDER_ROLE روی API3Oracle:** FEEDER_ROLE در constructor اعطا می‌شود (Codex P1 fix). هیچ `api3Oracle.grantRole(FEEDER_ROLE, ...)` پس از deploy لازم نیست. همه feeder‌های مجاز باید در زمان deploy به عنوان `initialFeeders` مشخص باشند.
 
 **⚠️ ORACLE_ROLE آخرین چیزی است که فعال می‌شود.** هر oracle فعال می‌تواند `flagViolation()` صدا کند و قفل اضطراری فعال کند. سیستم باید کاملاً آماده باشد.
 
@@ -338,19 +347,27 @@ treasury.grantRole(treasury.KERNEL_ROLE(), TRIGGER_PROTOCOL_ADDRESS)
 ## ۶. سیم‌کشی Oracle
 
 ```
-# گام ۱: API3Oracle را به عنوان Oracle در Kernel ثبت کن
+# گام ۱: API3Oracle را با feeder‌های اولیه deploy کن (Codex P1 fix)
+# FEEDER_ROLE در constructor اعطا می‌شود — نیازی به impersonation نیست.
+# این گام در مرحله ۲ استقرار (Layer 1) اتفاق می‌افتد.
+new API3Oracle(KERNEL_ADDRESS, [FEEDER_ADDRESS_1, FEEDER_ADDRESS_2, ...])
+
+# گام ۲: API3Oracle را به عنوان Oracle در Kernel ثبت کن (گروه E)
 kernel.grantOfficialAccess(API3_ORACLE_ADDRESS, kernel.ORACLE_ROLE())
 
-# گام ۲: feeder‌های مجاز را در API3Oracle ثبت کن
-# (نیاز به impersonate کردن Kernel یا فراخوانی مستقیم از Kernel دارد)
-api3Oracle.grantRole(api3Oracle.FEEDER_ROLE(), FEEDER_ADDRESS)
+# گام ۳: ORACLE_ROLE placeholder اولیه را revoke کن (گروه E)
+# Kernel constructor نیاز به ORACLE_INITIAL داشت؛ اکنون API3Oracle جایگزین آن شده.
+# این revoke تضمین می‌کند feeder→API3Oracle→Kernel تنها مسیر مجاز است.
+kernel.revokeRole(kernel.ORACLE_ROLE(), ORACLE_INITIAL)
 
-# گام ۳: feeder‌های PriceOracle و ProductionOracle
+# گام ۴: feeder‌های PriceOracle و ProductionOracle
 priceOracle.grantRole(priceOracle.FEEDER_ROLE(), PRICE_FEEDER)
 productionOracle.grantRole(productionOracle.FEEDER_ROLE(), PROD_FEEDER)
 ```
 
-**توجه:** `grantRole` در API3Oracle نیاز به `DEFAULT_ADMIN_ROLE` دارد که در constructor به `Kernel` اعطا می‌شود. در testnet از `hardhat_impersonateAccount` استفاده کنید (مانند pattern موجود در testها).
+**توجه — FEEDER_ROLE روی API3Oracle:** FEEDER_ROLE در constructor اعطا می‌شود. هیچ `api3Oracle.grantRole(FEEDER_ROLE, ...)` پس از deploy لازم نیست. همه feeder‌های مجاز باید در زمان deploy مشخص باشند. `DEFAULT_ADMIN_ROLE` در API3Oracle به `Kernel` اعطا می‌شود.
+
+**توجه — ORACLE_INITIAL revoke:** این گام اجباری است. بدون آن، ORACLE_INITIAL می‌تواند مستقیماً `Kernel.syncReserves()` را فراخوانی کند و مسیر feeder→API3Oracle را دور بزند.
 
 ---
 
@@ -377,7 +394,7 @@ assetFreeze.grantRole(assetFreeze.CRAWLER_ROLE(), CRAWLER_ADDRESS)
 □ کتاب آدرس کامل و در جای امن ذخیره شده
 □ ۹ عضو دادگاه شناسایی شده‌اند (COURT-01)
 □ کیف‌پول‌های سخت‌افزاری همه مقامات آماده
-□ npm test پاس می‌شود (499/499)
+□ npm test پاس می‌شود (693/693)
 □ npx hardhat compile بدون خطا اجرا می‌شود
 □ موجودی gas کافی در آدرس deployer
 □ شبکه هدف (testnet/mainnet) در hardhat.config.js تنظیم شده
@@ -415,9 +432,11 @@ assetFreeze.grantRole(assetFreeze.CRAWLER_ROLE(), CRAWLER_ADDRESS)
 
 ```
 □ kernel.hasRole(ORACLE_ROLE, API3_ORACLE_ADDRESS) → true
-□ api3Oracle.hasRole(FEEDER_ROLE, FEEDER_N) → true (برای هر feeder)
+□ kernel.hasRole(ORACLE_ROLE, ORACLE_INITIAL) → false   ← تأیید revoke placeholder (گروه E گام ۳)
+□ api3Oracle.hasRole(FEEDER_ROLE, FEEDER_N) → true (برای هر feeder مجاز — در constructor تنظیم شده)
 □ priceOracle.hasRole(FEEDER_ROLE, PRICE_FEEDER) → true
 □ productionOracle.hasRole(FEEDER_ROLE, PROD_FEEDER) → true
+□ kernel.pahlaviToken() == PAHLAVI_TOKEN_ADDRESS   ← تأیید مسیر reserve sync (GAP-MEX-05)
 ```
 
 **گروه ۴ — SWF و Reclaim**
@@ -475,7 +494,7 @@ deploy/
 ├── 04_court_wiring.js      # grantOfficialAccess × 9
 ├── 05_trigger_wiring.js    # setTriggerProtocol + KERNEL_ROLE
 ├── 06_swf_wiring.js        # RECLAIM_ROLE + COUNCIL_ROLE + CRAWLER_ROLE
-├── 07_oracle_wiring.js     # ORACLE_ROLE + FEEDER_ROLE
+├── 07_oracle_wiring.js     # grantOfficialAccess(API3Oracle, ORACLE_ROLE) + revokeRole(ORACLE_INITIAL) — FEEDER_ROLE در constructor API3Oracle تنظیم شده
 └── 08_verify.js            # تأیید تمام hasRole ها
 ```
 
