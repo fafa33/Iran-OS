@@ -213,6 +213,32 @@ API_KEY_GOVERNANCE_DATA=<مخفی>
   → اگر پس از ۲ ساعت رفع نشد: بررسی emergency manual intervention
 ```
 
+### توالی اجباری فراخوانی — syncReserves (GAP-MEX-04)
+
+برای ارسال داده ذخایر از طریق `API3Oracle.syncReserves`، feeder باید الزامات دو دروازه را رعایت کند:
+
+**دروازه الف (Gate A — liveness):** `dataPoints[PAH_USD_KEY].timestamp` باید در بازه `MAX_DATA_AGE = 1 hour` از `block.timestamp` باشد.
+**دروازه ب (Gate B — rate limiter):** حداقل `MAX_DATA_AGE` از آخرین `syncReserves` موفق گذشته باشد.
+
+**توالی اجباری در هر فراخوانی syncReserves:**
+
+```
+۱. updateData(PAH_USD_KEY, DATA_PRICE, <مقدار جاری>, <confidence>)
+   ← PAH_USD_KEY را در همان اجرا تازه می‌کند — Gate A را تضمین می‌کند
+۲. syncReserves(<مقدار ذخایر>)
+   ← بلافاصله پس از updateData فراخوانی می‌شود
+```
+
+این دو فراخوانی باید در **همان اجرای اتوماتیک** (همان اسکریپت یا job) انجام شوند. اگر در job‌های مجزا اجرا شوند، Gate A ممکن است در مرز بازه شکست بخورد.
+
+**محدودیت بازه Gate B — بازیابی پس از نقض:**
+
+اگر `syncReserves` در پنجره جاری `MAX_DATA_AGE` فراخوانی شده باشد و نیاز به ارسال مقدار اصلاحی وجود داشته باشد، Gate B تا `lastReservesSyncTimestamp + MAX_DATA_AGE` هر فراخوانی اضافی را revert می‌کند. revert رویداد on-chain منتشر نمی‌کند — پایش باید از رسیدهای تراکنش استفاده کند، نه از event log.
+
+**تنها مسیر بازیابی در پنجره جاری:** `PahlaviToken.burn()` (کاهش عرضه برای بازگرداندن نسبت پشتوانه). ارسال `syncReserves` اصلاحی تا پایان پنجره ممکن نیست.
+
+---
+
 ### فرآیند تأیید کیفیت داده
 
 قبل از `flagViolation()`:

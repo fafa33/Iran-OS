@@ -102,7 +102,9 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
      * @dev GAP-MEX-04: دو دروازه پیش از ارسال:
      *      دروازه الف (Gate A) — اطمینان از زنده بودن اوراکل: فید PAH_USD_KEY باید تازه‌تر از MAX_DATA_AGE باشد.
      *      دروازه ب (Gate B) — محدودکننده نرخ: حداکثر یک همگام‌سازی ذخایر در هر پنجره MAX_DATA_AGE.
-     *      هر دو دروازه پیش از فراخوانی خارجی بررسی می‌شوند تا از تغییر وضعیت در صورت رد شدن جلوگیری شود.
+     *      هر دو دروازه پیش از هرگونه تغییر وضعیت بررسی می‌شوند. `lastReservesSyncTimestamp` پیش از
+     *      فراخوانی خارجی نوشته می‌شود (الگوی Checks-Effects-Interactions؛ محافظت‌شده توسط `nonReentrant`).
+     *      در صورت رد شدن هر یک از دروازه‌ها، تراکنش revert می‌شود و هیچ تغییر وضعیتی باقی نمی‌ماند.
      * @param newReserves ارزش ذخایر جدید (واحد 1e18، گزارش‌شده توسط feeder)
      */
     function syncReserves(uint256 newReserves) external onlyFeeder nonReentrant {
