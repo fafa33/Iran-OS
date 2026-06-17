@@ -420,4 +420,164 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       expect(await kernel.pahlaviToken()).to.equal(await token.getAddress());
     });
   });
+
+  // ─────────────────────────────────────────
+  // Production wiring — API3Oracle → Kernel.syncReserves
+  // Codex P1: feeders hold FEEDER_ROLE on API3Oracle; API3Oracle holds ORACLE_ROLE on Kernel.
+  // Direct feeder→Kernel path is intentionally blocked. API3Oracle.syncReserves is the only
+  // production-usable entry point.
+  // ─────────────────────────────────────────
+
+  describe("production wiring — API3Oracle forwarding path (Codex P1)", function () {
+    let wiredKernel, api3Oracle, wiredToken, wiredTrigger;
+    let feeder; // holds FEEDER_ROLE on API3Oracle; does NOT hold ORACLE_ROLE on Kernel
+
+    beforeEach(async function () {
+      [sovereign, court, oracle, swf, user1, stranger] = await ethers.getSigners();
+      feeder = user1;
+
+      // Deploy Kernel — oracle placeholder (will be superseded by API3Oracle)
+      const Kernel = await ethers.getContractFactory("IranOS_Kernel");
+      wiredKernel = await Kernel.deploy(
+        sovereign.address, court.address, sovereign.address, swf.address
+      );
+      await wiredKernel.waitForDeployment();
+
+      // Deploy Treasury + TriggerProtocol for side-effect isolation
+      const Treasury = await ethers.getContractFactory("Treasury");
+      const treasury = await Treasury.deploy(sovereign.address);
+      await treasury.waitForDeployment();
+      const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
+      wiredTrigger = await TriggerProtocol.deploy(
+        await wiredKernel.getAddress(), await treasury.getAddress(), swf.address
+      );
+      await wiredTrigger.waitForDeployment();
+      await treasury.connect(sovereign).grantRole(
+        await treasury.KERNEL_ROLE(), await wiredTrigger.getAddress()
+      );
+      await wiredKernel.connect(sovereign).setTriggerProtocol(await wiredTrigger.getAddress());
+
+      // Deploy API3Oracle with Kernel address
+      const API3Oracle = await ethers.getContractFactory("API3Oracle");
+      api3Oracle = await API3Oracle.deploy(await wiredKernel.getAddress());
+      await api3Oracle.waitForDeployment();
+
+      // Grant ORACLE_ROLE on Kernel to API3Oracle (deployment manifest step د)
+      await wiredKernel.connect(sovereign).grantOfficialAccess(
+        await api3Oracle.getAddress(), await wiredKernel.ORACLE_ROLE()
+      );
+
+      // Grant FEEDER_ROLE on API3Oracle to feeder — must impersonate Kernel (DEFAULT_ADMIN_ROLE holder)
+      // This matches the deployment manifest step ه: `kernel (impersonate) → api3Oracle.grantRole(FEEDER_ROLE, feeder)`
+      const kernelAddr = await wiredKernel.getAddress();
+      await ethers.provider.send("hardhat_setBalance", [kernelAddr, "0x1000000000000000000"]);
+      await ethers.provider.send("hardhat_impersonateAccount", [kernelAddr]);
+      const kernelSigner = await ethers.getSigner(kernelAddr);
+      await api3Oracle.connect(kernelSigner).grantRole(await api3Oracle.FEEDER_ROLE(), feeder.address);
+      await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelAddr]);
+
+      // Deploy PahlaviToken and wire into Kernel
+      const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+      wiredToken = await PahlaviToken.deploy(swf.address, await wiredKernel.getAddress(), INITIAL_RESERVES);
+      await wiredToken.waitForDeployment();
+      await wiredKernel.connect(sovereign).setPahlaviToken(await wiredToken.getAddress());
+    });
+
+    it("PW-01: feeder cannot call Kernel.syncReserves directly (no ORACLE_ROLE on Kernel)", async function () {
+      await expect(
+        wiredKernel.connect(feeder).syncReserves(ethers.parseUnits("100", 18))
+      ).to.be.revertedWith("Kernel: caller is not an Oracle");
+      // totalReserves unchanged
+      expect(await wiredToken.totalReserves()).to.equal(INITIAL_RESERVES);
+    });
+
+    it("PW-02: API3Oracle holds ORACLE_ROLE on Kernel; feeder does not", async function () {
+      expect(
+        await wiredKernel.hasRole(await wiredKernel.ORACLE_ROLE(), await api3Oracle.getAddress())
+      ).to.be.true;
+      expect(
+        await wiredKernel.hasRole(await wiredKernel.ORACLE_ROLE(), feeder.address)
+      ).to.be.false;
+    });
+
+    it("PW-03: feeder → API3Oracle.syncReserves → Kernel.syncReserves succeeds", async function () {
+      const newReserves = ethers.parseUnits("200000000000", 18);
+      await expect(api3Oracle.connect(feeder).syncReserves(newReserves))
+        .to.emit(api3Oracle, "ReserveSyncForwarded")
+        .and.to.emit(wiredKernel, "ReserveSynced")
+        .and.to.emit(wiredToken, "ReservesUpdated");
+    });
+
+    it("PW-04: unauthorized account cannot call API3Oracle.syncReserves", async function () {
+      await expect(
+        api3Oracle.connect(stranger).syncReserves(ethers.parseUnits("100", 18))
+      ).to.be.revertedWith("API3Oracle: caller is not a feeder");
+      expect(await wiredToken.totalReserves()).to.equal(INITIAL_RESERVES);
+    });
+
+    it("PW-05: API3Oracle.syncReserves updates PahlaviToken.totalReserves", async function () {
+      const newReserves = ethers.parseUnits("150000000000", 18);
+      await api3Oracle.connect(feeder).syncReserves(newReserves);
+      expect(await wiredToken.totalReserves()).to.equal(newReserves);
+    });
+
+    it("PW-06: breach and restoration events originate only from PahlaviToken, not API3Oracle or Kernel", async function () {
+      // Mint supply so ratio check is meaningful
+      await wiredToken.connect(swf).mint(feeder.address, ethers.parseUnits("1000", 18), "PW-06 mint");
+
+      const subFloor = ethers.parseUnits("100", 18);
+      const tx = await api3Oracle.connect(feeder).syncReserves(subFloor);
+      const receipt = await tx.wait();
+
+      const tokenAddr   = (await wiredToken.getAddress()).toLowerCase();
+      const kernelAddr  = (await wiredKernel.getAddress()).toLowerCase();
+      const oracleAddr  = (await api3Oracle.getAddress()).toLowerCase();
+      const breachSig   = ethers.id("ReserveFloorBreached(uint256,uint256,uint256,uint256)");
+
+      // ReserveFloorBreached MUST come from PahlaviToken
+      const fromToken = receipt.logs.filter(
+        l => l.address.toLowerCase() === tokenAddr && l.topics[0] === breachSig
+      );
+      expect(fromToken.length).to.equal(1);
+
+      // Kernel and API3Oracle MUST NOT emit ReserveFloorBreached
+      const fromKernel = receipt.logs.filter(
+        l => l.address.toLowerCase() === kernelAddr && l.topics[0] === breachSig
+      );
+      const fromOracle = receipt.logs.filter(
+        l => l.address.toLowerCase() === oracleAddr && l.topics[0] === breachSig
+      );
+      expect(fromKernel.length).to.equal(0);
+      expect(fromOracle.length).to.equal(0);
+    });
+
+    it("PW-07: API3Oracle.syncReserves does not call TriggerProtocol", async function () {
+      const execBefore = await wiredTrigger.executionCount();
+      await wiredToken.connect(swf).mint(feeder.address, ethers.parseUnits("1000", 18), "PW-07 mint");
+      await api3Oracle.connect(feeder).syncReserves(ethers.parseUnits("100", 18)); // sub-floor
+      expect(await wiredTrigger.executionCount()).to.equal(execBefore);
+    });
+
+    it("PW-08: API3Oracle.syncReserves has no mint/burn/freeze side effects", async function () {
+      const supplyBefore = await wiredToken.totalSupply();
+      await api3Oracle.connect(feeder).syncReserves(ethers.parseUnits("50000000000", 18));
+      expect(await wiredToken.totalSupply()).to.equal(supplyBefore);
+      // No Kernel enforcement state change
+      expect(await wiredKernel.emergencyLockActive()).to.be.false;
+      expect(await wiredKernel.triggerActivationCount()).to.equal(0n);
+      expect(await wiredKernel.violationCount()).to.equal(0n);
+    });
+
+    it("PW-09: deployment wiring matches manifest — ORACLE_ROLE=API3Oracle, feeder not on Kernel", async function () {
+      // Manifest step د: kernel.grantOfficialAccess(api3OracleAddress, ORACLE_ROLE) → verified in PW-02
+      // Manifest step ه: feeder holds FEEDER_ROLE on API3Oracle
+      const FEEDER_ROLE = await api3Oracle.FEEDER_ROLE();
+      expect(await api3Oracle.hasRole(FEEDER_ROLE, feeder.address)).to.be.true;
+      expect(await api3Oracle.hasRole(FEEDER_ROLE, stranger.address)).to.be.false;
+      // Full path functional end-to-end
+      const newReserves = ethers.parseUnits("250000000000", 18);
+      await api3Oracle.connect(feeder).syncReserves(newReserves);
+      expect(await wiredToken.totalReserves()).to.equal(newReserves);
+    });
+  });
 });
