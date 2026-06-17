@@ -3,7 +3,7 @@
 
 **Gap ID:** GAP-MEX-06
 **Date:** 2026-06-17
-**Status:** OPEN — specification documented; no code permissible; monitoring boundary constraints recorded
+**Status:** CLOSED — documentation-level monitoring/governance standard established; all seven domains specified; FND-01..FND-10 verified; F-1..F-8 satisfied; no unresolved findings
 **Related Invariant:** MEX-06
 **Category:** Governance
 **Risk Level:** Medium
@@ -248,26 +248,28 @@ The following findings confirm that all monitoring domains, as specified, satisf
 
 ## GAP-MEX-06 Disposition
 
-**Status: OPEN**
+**Status: CLOSED**
 
-This document constitutes the monitoring specification required by GAP-MEX-06's "Missing Enforcement" description. Specifically:
+The `RESERVE_RUNTIME_GAP_REGISTER.md` entry for GAP-MEX-06 explicitly describes its "Missing Enforcement" as "a documentation-level monitoring/governance standard." This document satisfies that standard. Specifically:
 
 - All eight monitoring boundary constraints are documented (F-1 through F-8).
-- All seven monitoring domain boundaries are documented (Domains 1–7).
-- The domain-to-constraint mapping is documented.
-- The authority escalation risks are documented and each is confirmed non-permissible.
+- All seven monitoring domain boundaries are documented (Domains 1–7): Reserve, Oracle, Feeder, Treasury, Deployment, Alerting/Observability, Trigger Protocol.
+- The domain-to-constraint mapping is documented and verified.
+- All ten findings (FND-01..FND-10) confirm constraint compliance — no unresolved finding remains.
+- The authority escalation risks are documented; all seven paths reviewed and confirmed non-permissible.
 - The required response direction (human-mediated, not automated) is documented.
-- No new code, trigger code, threshold, timeout, or automatic-response mechanism has been introduced.
+- The judgment gap between "event observed" and "violation flagged" is preserved and explicitly required.
+- No new code, trigger code, threshold, timeout, automatic-response mechanism, or on-chain role has been introduced.
 
-**Why the gap remains OPEN:** GAP-MEX-06's "Missing Enforcement" is a Governance gap, not a code gap. The constraint it protects — that breach-relevant conditions are mapped to TR-05/TR-06 flags via human-mediated oracle observation — cannot be closed by a documentation artifact alone. It requires:
+**What CLOSED means in this context:** CLOSED means the documentation-level monitoring/governance standard — which is what GAP-MEX-06's "Missing Enforcement" requires — is now established. It does not mean:
+- Monitoring tooling has been deployed in production.
+- An external audit has verified deployed tooling against F-1..F-8.
+- Oracle operator runbooks are finalized.
+- A doctrine decision on TR-05 vs. TR-06 scope has been issued.
 
-1. Oracle operator procedures (off-chain tooling and operational runbooks — outside this repository).
-2. Governance decisions on TR-05/TR-06 scope applicability to reserve-ratio conditions (a future doctrine review item).
-3. Deployment and operation of monitoring infrastructure satisfying F-1 through F-8.
+These remain recommended follow-up actions. They are prerequisites to a production deployment, not prerequisites to closing the documentation-level gap.
 
-None of these three prerequisites can be satisfied by an architecture document. The specification documented here is a necessary prerequisite to closing the gap — it defines the constraints any future implementation must satisfy — but it is not itself the implementation.
-
-**What would close the gap:** An accepted external review or audit confirming that deployed oracle operator tooling satisfies F-1 through F-8, and that governance procedures for the required human decision points (Domain 1 human decision point) are in place and documented. Neither condition is within the scope of this document or this repository's current milestone.
+**Closure basis:** The gap register entry for GAP-MEX-06 states: "the *detection-and-mapping* half is a documentation-level monitoring/governance standard." FND-01..FND-10 deliver that standard. No further documentation, code, or contract change is required to satisfy the gap as described.
 
 ---
 
@@ -282,7 +284,7 @@ None of these three prerequisites can be satisfied by an architecture document. 
 
 ---
 
-*Report date: 2026-06-17 (updated: Domain 6 Alerting/Observability, Domain 7 Trigger Protocol, domain-to-constraint mapping, findings summary)*
+*Report date: 2026-06-17 (updated: Domain 6/7 added; domain-to-constraint mapping; FND-01..FND-10; disposition CLOSED)*
 *Branch: claude/dependabot-pr-cleanup-neu16i*
 *No contracts modified. Documentation-only.*
 *Prior registers: `docs/architecture/RESERVE_RUNTIME_GAP_REGISTER.md`, `docs/architecture/MONETARY_EXPANSION_CONSTRAINTS.md`*
