@@ -397,6 +397,16 @@ Every PR must include an Evidence section:
 4. Update every document referencing the finding in the same commit.
 5. State in the PR comment: what changed, at which file:line, and what grep now confirms.
 
+### Reviewer Lessons Learned Registry (Mandatory)
+
+Any reviewer finding that causes a new CLAUDE.md policy, a preflight step change, a new evidence requirement, or a governance workflow change must receive a new entry in `docs/governance/REVIEWER_LESSONS_LEARNED.md`.
+
+**Registry location:** `docs/governance/REVIEWER_LESSONS_LEARNED.md`
+
+**When to add an entry:** Immediately upon identifying that a finding produced a policy change — before closing the PR. Creating the entry is not optional.
+
+**Success metric:** The project does not measure number of findings. It measures number of **repeated finding classes**. Goal: repeated finding classes trend toward zero. A finding may happen once. The same class of finding must never happen twice.
+
 ### File Naming
 - Persian documents: `<name>-fa.md`
 - English documents: `<name>-en.md`
