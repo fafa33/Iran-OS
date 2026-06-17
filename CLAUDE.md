@@ -298,6 +298,105 @@ The table must be completed and included in the PR description or linked report 
 
 **Rationale:** IranOS prioritizes resilience, continuity, and doctrinal correctness over theoretical perfection. Hardening opportunities are valuable but must not be misclassified as active constitutional vulnerabilities. A complete exploit chain and demonstrated current doctrinal impact are required before a finding blocks implementation.
 
+### PR Preflight Standard (Mandatory)
+
+This policy governs every PR — code or documentation — touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, or audit reports. Its purpose is to eliminate post-push Codex findings caused by unverified closure claims, missing role-path evidence, or wording that is true in principle but unprovable from the text.
+
+**Core rule: verify before claim, not after challenge.** Every reachability, closure, or role-restriction claim must be backed by grep evidence collected before the PR is opened. Codex challenges that require post-hoc grep represent a workflow failure.
+
+#### Step 1 — Rebase
+
+```
+git fetch origin main
+git rebase origin/main
+```
+
+Always rebase before push. A dirty branch (`mergeable_state: dirty`) blocks CI and wastes review cycles.
+
+#### Step 2 — Test
+
+```
+npm test
+```
+
+All tests must pass before push. This applies to documentation-only PRs as well (merge conflicts can break test fixtures).
+
+#### Step 3 — Grep Evidence Collection
+
+For every claim in every changed file, run the corresponding grep and record the result before writing the claim.
+
+| Claim type | Required grep | Expected result |
+|---|---|---|
+| "No production contract calls `F()`" | `grep -r '\.F(' contracts/ --include="*.sol" \| grep -v fuzzing` | Zero matches outside fuzzing harness |
+| "Contract `X` holds ROLE but cannot call `F()`" | `grep '\.F(' contracts/path/to/X.sol` | Zero matches |
+| "ROLE is restricted to named operators" | `grep 'ROLE' contracts/path/to/Contract.sol` — confirm only `_grantRole` in constructor, no public grant function | Constructor-only |
+| "No mint path" | `grep -r '\.mint(' contracts/ --include="*.sol" \| grep -v fuzzing` | Zero matches outside fuzzing |
+| "Gap X is CLOSED" | Enumerate: what is implemented (file:line), what remains open, what test covers it | All three present |
+| "No downstream enforcement consequence" | Full caller chain from entry point to every enforcement surface (mint, freeze, trigger, treasury); grep each surface | Zero untraced paths |
+
+#### Step 4 — Claim Evidence Tier (CET) Classification
+
+Before writing any claim, assign it a CET:
+
+| Tier | Definition | Required before push |
+|---|---|---|
+| **CET-1** | Proven by grep result collected in this session | Document grep command and result in PR body |
+| **CET-2** | Believed true but grep not yet run | Run grep; upgrade to CET-1 or revise claim |
+| **CET-3** | Architectural assumption without code evidence | Run grep (upgrade to CET-1) or replace with hedged language |
+
+**CET-2 and CET-3 claims may not appear in a pushed PR.** Every claim must reach CET-1 at push time.
+
+#### Step 5 — Forbidden Wording Scan
+
+Scan every changed file for the following phrases. Each is forbidden unless immediately followed by the grep command and its result in the same text block.
+
+| Forbidden phrase | Required replacement |
+|---|---|
+| "no reachable downstream enforcement consequence" | Same phrase + `grep '\.mint(' contracts/...` result |
+| "no production contract calls `X()`" | Same phrase + `grep '\.X(' contracts/ \| grep -v fuzzing` result |
+| "no mint path" | Same phrase + grep for `.mint(` |
+| "no callable path" | Same phrase + grep for the specific function |
+| "CLOSED" (for a gap or finding) | "CLOSED (scope: [exact scope]) — remaining open: [list]" |
+| "verified by codebase" | "verified by grep: `[exact command]` → `[result]`" |
+| "no current BLOCKER" | Must be followed by completed 5-criterion evaluation table |
+| "trust-model assumption" | Acceptable only after confirming no new attack surface introduced by the current change |
+
+#### Step 6 — Self-Codex-Review
+
+Before every push, apply the 5-criterion BLOCKER_P1 gate to every claim in every changed file. Ask: "What would Codex challenge here, and can I answer it with grep evidence already in hand?" If the answer is no, collect the evidence first.
+
+#### Step 7 — Cross-Document Consistency
+
+For every gap, finding, or status being changed: grep for the gap/finding ID across all `docs/` files and update every reference in the same PR. A gap marked CLOSED in one report but Open in another will generate a Codex finding.
+
+#### Step 8 — PR Body Evidence Block
+
+Every PR must include an Evidence section:
+
+```
+## Evidence
+- grep: `<command>` → `<result>`
+- Role grant path: `<contract>:<line>` → `<deployment manifest section>`
+- npm test: N passing
+- Open residuals: [list or "none"]
+```
+
+#### Before Responding to Codex
+
+1. Never respond from memory. Run the grep the comment implies before writing any reply.
+2. Apply the 5-criterion gate explicitly — include the completed table in the reply.
+3. Include the grep command and result in the reply text. Codex cannot challenge evidence it can see.
+4. If the Codex claim is partially correct, acknowledge what is true, then disprove the specific missing link with grep evidence.
+5. If a docs update is needed to prevent the same challenge recurring: make the update, commit, push, then reply with the commit hash.
+
+#### Before Marking a Finding Resolved
+
+1. Confirm the specific claim the finding made is addressed — not just that something changed.
+2. Run the grep that would have caught the finding originally; confirm it returns the expected result.
+3. Run npm test.
+4. Update every document referencing the finding in the same commit.
+5. State in the PR comment: what changed, at which file:line, and what grep now confirms.
+
 ### File Naming
 - Persian documents: `<name>-fa.md`
 - English documents: `<name>-en.md`
