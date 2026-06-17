@@ -14,7 +14,7 @@
 ## Disclaimers
 
 - This document does not claim production readiness.
-- This document does not close GAP-MEX-06. The gap is Governance-category; its closure requires external oracle operator tooling and governance process, neither of which can be mandated by an architecture document.
+- GAP-MEX-06 is CLOSED as a documentation-level monitoring/governance standard (see Disposition below). This document does not imply that production monitoring tooling has been deployed, audited, or certified against F-1..F-8.
 - This document does not create a new trigger code, violation category, threshold, timeout, or automatic-response mechanism.
 - This document does not modify `kernel.sol`, `PahlaviToken.sol`, `API3Oracle.sol`, `TriggerProtocol.sol`, or any other contract.
 - This document does not close any STEP9-BLOCK-* blocker.
@@ -56,7 +56,7 @@ No monitoring action — direct or indirect — may cause `PahlaviToken.totalRes
 
 ### F-4: Monitoring cannot mutate treasury
 
-No monitoring action may call `Treasury.executeTransaction`, `Treasury.proposeTransaction`, `SovereignWealthFund.withdraw`, or any treasury/SWF state-mutating function. Reserve monitoring and treasury management are structurally separate domains. A breach observation does not grant disbursement authority.
+No monitoring action may call `Treasury.signTransaction`, `SovereignWealthFund.signWithdrawal`, or any treasury/SWF state-mutating function. Reserve monitoring and treasury management are structurally separate domains. A breach observation does not grant disbursement authority.
 
 **Basis:** LAYER_INTERACTION_MODEL.md (Step-43) authority boundaries. Treasury block is a TriggerProtocol consequence requiring 7-of-9 multi-sig activation — not a monitoring output.
 
@@ -105,13 +105,13 @@ No monitoring proposal may introduce a second route by which reserve conditions,
 
 ### Domain 2 — Oracle Monitoring
 
-**What can be monitored:** `API3Oracle` events (`DataPointUpdated`, `ViolationFlagged`, `ReserveSyncForwarded`), feeder activity by address, data type distribution across feeder calls, and whether the expected feeder set (per the deployment manifest) is the set actually submitting data.
+**What can be monitored:** `API3Oracle` events (`DataUpdated`, `ViolationFlagged`, `ReserveSyncForwarded`), feeder activity by address, data type distribution across feeder calls, and whether the expected feeder set (per the deployment manifest) is the set actually submitting data.
 
 **What monitoring must NOT do:** Automatically add or remove feeders from `FEEDER_ROLE`. Automatically revoke or grant `ORACLE_ROLE` on Kernel. Assert that an oracle signal is "correct" in a way that bypasses human review. Treat `DataPointUpdated` as confirmation that `totalReserves` has been updated — the path requires a subsequent `syncReserves` call by a feeder, not the oracle event alone.
 
 **Required human decision point:** Oracle operator must review anomalous feeder behavior (unexpected data type, unexpected value range, unexpected feeder address) before deciding whether to escalate to a `flagViolation` call. Automated escalation is not permissible.
 
-**Boundary note:** `API3Oracle.flagViolation` can be called by `FEEDER_ROLE` holders (not `ORACLE_ROLE`) — this is an existing design pattern. Monitoring must not assume that every `ViolationFlagged` event from `API3Oracle` will be, or should be, forwarded to `Kernel.flagViolation`. The Kernel-level flagging is a constitutional act; the oracle-level flagging is a data-reporting act.
+**Boundary note:** The production flagging path is: feeder (holding `FEEDER_ROLE` on `API3Oracle`) calls `API3Oracle.flagViolation(offender, violationCode, reason)` — `API3Oracle` then automatically forwards to `Kernel.flagViolation` under its `ORACLE_ROLE`. Feeders cannot call `Kernel.flagViolation` directly (they hold no `ORACLE_ROLE`). Monitoring must not automatically trigger this path — calling `API3Oracle.flagViolation` must be a deliberate human decision, not an automated monitoring response.
 
 ### Domain 3 — Feeder Monitoring
 
@@ -125,7 +125,7 @@ No monitoring proposal may introduce a second route by which reserve conditions,
 
 ### Domain 4 — Treasury Monitoring
 
-**What can be monitored:** `Treasury` events (`TransactionProposed`, `TransactionExecuted`, `BudgetLineCapped`, `BudgetLineExhausted`), treasury balance levels relative to budget lines, whether transactions are being proposed by addresses holding `MINTER_ROLE` or `SOVEREIGN_ROLE`, and whether the treasury block state (set by `TriggerProtocol.executeTrigger`) is active.
+**What can be monitored:** `Treasury` events (`BudgetLineCreated`, `TransactionProposed`, `TransactionSigned`, `TransactionExecuted`), treasury balance levels relative to budget lines, whether transactions are being proposed by addresses holding `GOVERNMENT_ROLE` (which gates `proposeTransaction`) and signed by `AUDITOR_ROLE` holders (which gates `signTransaction`), and whether the treasury block state (set by `TriggerProtocol.executeTrigger`) is active.
 
 **What monitoring must NOT do:** Automatically block or approve treasury transactions. Call `Treasury.executeTransaction` in response to any condition. Infer reserve sufficiency from treasury balance — treasury balance and `PahlaviToken.totalReserves` are separate accounting domains.
 
@@ -168,7 +168,7 @@ No monitoring proposal may introduce a second route by which reserve conditions,
 
 **Required human decision point:** Court signers must independently observe a violation record, evaluate its legitimacy against the constitutional grounds (TR-01 through TR-06), and call `signViolation` using their own COURT_ROLE private keys — not keys held by monitoring infrastructure. No automated co-signing. No threshold-triggered multi-sig aggregation script. Each of the 7-of-9 signatures is a distinct, independent human act.
 
-**TRIGGER_TIMEOUT boundary:** Monitoring may alert that a violation's timeout window is approaching (e.g., 24 hours before expiry). It must not automatically re-submit or re-escalate the violation. If the Court does not reach 7 signatures within 72 hours, the violation record expires; governance must independently decide whether to flag again. Monitoring surfaces this fact to governance — it does not restart the clock.
+**TRIGGER_TIMEOUT boundary:** Monitoring may alert that a violation's timeout window is approaching (e.g., 24 hours into the window). It must not automatically re-submit or re-escalate the violation. If the Court does not reach 7 signatures within the 72-hour TRIGGER_TIMEOUT window, the violation record remains open on-chain — `signViolation` has no automatic expiry or timeout rejection. TRIGGER_TIMEOUT is constitutional operational guidance, not an automatic on-chain record expiry. Governance may independently decide whether to re-flag if the window elapsed without activation. Monitoring surfaces the elapsed window to governance — it does not advance or restart any clock.
 
 **TriggerProtocol contamination constraint (F-8 specific):** The primary F-8 risk in this domain is a monitoring process that, after observing a breach-relevant reserve or treasury condition, routes directly to `flagViolation` without human review — effectively treating a contract event as equivalent to a constitutional violation determination. This is the contamination risk GAP-MEX-06 exists to prevent. Monitoring must preserve the gap between "event observed" and "violation flagged" as an irreducible human judgment step.
 
@@ -217,7 +217,7 @@ When a monitoring process observes a breach-relevant condition (any of the condi
 
 1. **Surface the condition to a human oracle operator** with sufficient context: which event was observed, at what block/timestamp, what the resulting ratio is, what `totalSupply()` and `totalReserves` are.
 2. **The human operator determines** whether the condition represents a governance-relevant event — a genuine breach of reserve independence, a constitutional violation by a governance actor, or a composition-integrity failure — or an operational event (planned write-down, authorized reclassification, legitimate reserve correction) that does not warrant a trigger.
-3. **If the operator determines a flagViolation is warranted**, they call `Kernel.flagViolation(violationCode, offender, reason)` using their `ORACLE_ROLE` on Kernel (held via `API3Oracle`, not directly). The applicable codes are TR-05 or TR-06 as described in Domain 1 above.
+3. **If the operator determines a flagViolation is warranted**, they call `API3Oracle.flagViolation(offender, violationCode, reason)` using their `FEEDER_ROLE` on `API3Oracle`. `API3Oracle` then forwards to `Kernel.flagViolation` under its `ORACLE_ROLE` on the Kernel. Feeders do not call `Kernel.flagViolation` directly. The applicable codes are TR-05 or TR-06 as described in Domain 1 above.
 4. **The Court proceeds through 7-of-9 signViolation**, independently evaluating the violation record before activating the trigger.
 5. **No step in this sequence is automated.** Steps 2 and 4 are irreducibly human judgment steps under the IranOS constitutional model.
 
@@ -232,7 +232,7 @@ The following findings confirm that all monitoring domains, as specified, satisf
 | FND-01 | All | F-1 | No monitoring domain requires or permits issuing a transaction, calling a Solidity function, or altering on-chain state as a consequence of an observed condition. All domains are observation-and-report only. |
 | FND-02 | All | F-2 | No monitoring domain requires holding `ORACLE_ROLE`, `FEEDER_ROLE`, `SOVEREIGN_ROLE`, `COURT_ROLE`, `MINTER_ROLE`, `BURNER_ROLE`, `CRAWLER_ROLE`, `KERNEL_ROLE`, or any other IranOS on-chain role. Observation requires no role. |
 | FND-03 | D1, D2, D3 | F-3 | No monitoring path in the reserve, oracle, or feeder domains can reach `PahlaviToken.updateReserves` (onlyKernel) or `Kernel.syncReserves` (onlyOracle) without holding an authority role. Since monitoring holds no such role (FND-02), reserve state mutation via monitoring is impossible without a contract modification. |
-| FND-04 | D4 | F-4 | No monitoring path in the treasury domain can reach `Treasury.executeTransaction`, `Treasury.proposeTransaction`, or `SovereignWealthFund.withdraw`. Treasury mutation requires `KERNEL_ROLE` or `COUNCIL_ROLE`; monitoring holds neither (FND-02). |
+| FND-04 | D4 | F-4 | No monitoring path in the treasury domain can reach `Treasury.signTransaction` (requires `AUDITOR_ROLE`) or `SovereignWealthFund.signWithdrawal` (requires `COUNCIL_ROLE`). Monitoring holds neither role (FND-02). |
 | FND-05 | D1, D4 | F-5 | No monitoring path can reach `PahlaviToken.mint`. `mint` requires `MINTER_ROLE` (held only by the SWF address). Monitoring holds no role (FND-02) and cannot acquire `MINTER_ROLE` through any path documented in the deployment manifest. |
 | FND-06 | D7 | F-6 | No monitoring path in the Trigger Protocol domain can call `AssetFreeze.freeze` (requires `CRAWLER_ROLE`) or activate the emergency lock except through `flagViolation` (requires `ORACLE_ROLE`). Monitoring holds neither role (FND-02). The `emergencyLockActive` flag is observable but not writable by monitoring. |
 | FND-07 | All | F-7 | No monitoring domain requires Hardhat impersonation, admin key custody, privileged RPC signing (`eth_sendTransaction` / `eth_sendRawTransaction`), or access to a private key held by any IranOS constitutional role. All monitoring access is read-only (`eth_call`, `eth_getLogs`). |
@@ -284,7 +284,7 @@ These remain recommended follow-up actions. They are prerequisites to a producti
 
 ---
 
-*Report date: 2026-06-17 (updated: Domain 6/7 added; domain-to-constraint mapping; FND-01..FND-10; disposition CLOSED)*
+*Report date: 2026-06-17 (updated: Domain 6/7 added; domain-to-constraint mapping; FND-01..FND-10; disposition CLOSED; Codex P2: disclaimer reconciled, DataUpdated event name corrected, Treasury events/roles corrected, TRIGGER_TIMEOUT on-chain expiry clarified, flagViolation routing corrected to API3Oracle entrypoint, Treasury/SWF mutation paths corrected)*
 *Branch: claude/dependabot-pr-cleanup-neu16i*
 *No contracts modified. Documentation-only.*
 *Prior registers: `docs/architecture/RESERVE_RUNTIME_GAP_REGISTER.md`, `docs/architecture/MONETARY_EXPANSION_CONSTRAINTS.md`*
