@@ -246,6 +246,58 @@ Before implementing any sensitive PR, Claude must perform an internal red-team p
 
 Implementation may begin only after this red-team pass is documented in the PR description or in a linked report.
 
+### Red-Team Finding Classification Standard (Mandatory)
+
+This policy governs how all Red-Team and Codex-style adversarial review findings are classified. It applies to every review, pre-implementation pass, and post-merge audit performed on this repository.
+
+**A finding MUST NOT be classified as BLOCKER_P1 unless ALL five criteria are demonstrated:**
+
+| Criterion | Required evidence |
+|---|---|
+| Reachable attack path | The path from an external caller to the vulnerable state must be traversable in the current codebase |
+| Privileges realistically obtainable | The required role or access must be achievable by a realistic adversary outside the existing trust model |
+| Concrete state corruption | The attack must demonstrably corrupt on-chain state, not merely make a wrong value temporarily observable |
+| Reachable downstream enforcement consequence | The corrupted state must produce a reachable enforcement consequence (mint, freeze, trigger, treasury impact) in current code |
+| Current doctrine violation | The finding must violate a doctrine constraint as encoded in the current codebase, not a hypothetical future constraint |
+
+**If any criterion fails, BLOCKER_P1 is prohibited.** Downgrade to exactly one of:
+- `HARDENING_ONLY`
+- `DOCUMENTATION_REQUIRED`
+- `FALSE_POSITIVE`
+
+**A finding MUST NOT be classified as BLOCKER_P2 unless** a concrete defect is demonstrated in one of: current contract code, current documentation, current deployment procedure, or current operational runbook. A missing item is `DOCUMENTATION_REQUIRED`, not `BLOCKER_P2`.
+
+**The following are NOT sufficient, alone or in combination, to justify BLOCKER_P1:**
+
+- Missing metadata or provenance information
+- Missing future-proofing or extensibility
+- Architectural preference or elegance concern
+- Hardening opportunity without a complete exploit chain
+- Potential future code paths not present in the current codebase
+- Potential future governance, mint, or treasury paths not currently reachable
+- Trusted-actor dishonesty that is already assumed by the existing trust model
+- Theoretical exploitability without a demonstrated reachable enforcement consequence
+
+**Existing trust-model assumptions are not vulnerabilities** unless the change under review introduces one of:
+- A new reachable attack path not present before the change
+- A new authority escalation path
+- A new current-code doctrine violation
+- A new reachable enforcement consequence
+
+**Required evaluation table for every Red-Team finding:**
+
+| Criterion | Pass / Fail | Evidence |
+|---|---|---|
+| Reachable attack path | | |
+| Privileges realistically obtainable | | |
+| Concrete state corruption | | |
+| Reachable downstream enforcement consequence | | |
+| Current doctrine violation | | |
+
+The table must be completed and included in the PR description or linked report for every finding classified as BLOCKER_P1 or BLOCKER_P2. A finding with any `Fail` row may not be classified as BLOCKER_P1.
+
+**Rationale:** IranOS prioritizes resilience, continuity, and doctrinal correctness over theoretical perfection. Hardening opportunities are valuable but must not be misclassified as active constitutional vulnerabilities. A complete exploit chain and demonstrated current doctrinal impact are required before a finding blocks implementation.
+
 ### File Naming
 - Persian documents: `<name>-fa.md`
 - English documents: `<name>-en.md`
