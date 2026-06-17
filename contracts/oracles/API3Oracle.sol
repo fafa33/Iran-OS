@@ -51,6 +51,11 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
     mapping(uint256 => ViolationFlag) public violationFlags;
     uint256 public violationFlagCount;
 
+    /// @notice Timestamp of the most recent successful syncReserves call.
+    /// @dev GAP-MEX-04 Gate B — rate-limits reserve sync to once per MAX_DATA_AGE window.
+    ///      Initialises to 0 so the first call is always permitted.
+    uint256 public lastReservesSyncTimestamp;
+
     bytes32 public constant PAH_USD_KEY   = keccak256("PAH_USD_RATE");
     bytes32 public constant INFLATION_KEY = keccak256("GLOBAL_INFLATION");
 
@@ -94,13 +99,24 @@ contract API3Oracle is AccessControl, ReentrancyGuard {
 
     /**
      * @notice هدایت داده ذخایر به Kernel.syncReserves — مسیر تولید: feeder → API3Oracle → Kernel → PahlaviToken
-     * @dev مسیر داده‌رسانی فقط. هیچ منطق انطباق، محاسبه نسبت، یا فراخوانی اجرایی اضافه نمی‌کند.
-     *      API3Oracle دارنده ORACLE_ROLE در Kernel است. Feeder‌ها ORACLE_ROLE در Kernel ندارند.
-     *      این تابع تنها نقطه ورود مجاز feeder به مسیر همگام‌سازی ذخایر است.
-     *      GAP-MEX-05 production wiring.
+     * @dev GAP-MEX-04: دو دروازه پیش از ارسال:
+     *      دروازه الف (Gate A) — اطمینان از زنده بودن اوراکل: فید PAH_USD_KEY باید تازه‌تر از MAX_DATA_AGE باشد.
+     *      دروازه ب (Gate B) — محدودکننده نرخ: حداکثر یک همگام‌سازی ذخایر در هر پنجره MAX_DATA_AGE.
+     *      هر دو دروازه پیش از فراخوانی خارجی بررسی می‌شوند تا از تغییر وضعیت در صورت رد شدن جلوگیری شود.
      * @param newReserves ارزش ذخایر جدید (واحد 1e18، گزارش‌شده توسط feeder)
      */
     function syncReserves(uint256 newReserves) external onlyFeeder nonReentrant {
+        // Gate A: oracle liveness — PAH_USD_KEY feed must be within MAX_DATA_AGE
+        require(
+            block.timestamp - dataPoints[PAH_USD_KEY].timestamp <= MAX_DATA_AGE,
+            "API3Oracle: stale data feed"
+        );
+        // Gate B: rate limiter — at most one reserve sync per MAX_DATA_AGE window
+        require(
+            block.timestamp - lastReservesSyncTimestamp >= MAX_DATA_AGE,
+            "API3Oracle: reserve sync too frequent"
+        );
+        lastReservesSyncTimestamp = block.timestamp;
         IIranOSKernel(kernel).syncReserves(newReserves);
         emit ReserveSyncForwarded(msg.sender, newReserves, block.timestamp);
     }
