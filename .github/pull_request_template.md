@@ -35,6 +35,27 @@ List the key files modified or created:
 
 ---
 
+## Deployment-Path Parity
+
+Applies to any PR touching: Kernel · Oracle · Reserve · Treasury · TriggerProtocol · PahlaviToken · roles · deployment wiring · authority boundaries.
+
+- [ ] This PR does not touch any of the above components (skip this section).
+- [ ] This PR touches one or more of the above components — deployment-path parity applies.
+
+If deployment-path parity applies, confirm ALL of the following:
+
+- [ ] A deployment-path parity test exists that proves the exact production-intended caller path works.
+- [ ] The test uses only role wiring and setup documented in the deployment manifest (`docs/deployment/`).
+- [ ] The test does NOT rely on `hardhat_impersonateAccount` as proof of production reachability.
+- [ ] The test does NOT rely on test-only role grants, undocumented setup, or admin shortcuts unavailable on mainnet.
+- [ ] CI passing on this PR does not mask an unreachable production caller path.
+
+If impersonation appears anywhere in the test file, confirm:
+
+- [ ] It is labeled `// TEST-ONLY — not a production grant path` and is not cited as deployment-path proof.
+
+---
+
 ## Doctrine Impact
 
 Does this PR affect any of the following? Check all that apply.

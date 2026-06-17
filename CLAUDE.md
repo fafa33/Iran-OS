@@ -204,6 +204,25 @@ TR-01, TR-02, TR-03 trigger an immediate emergency lock (`emergencyLockActive = 
 - Security audit required before mainnet deployment (tools: Slither, Mythril, Echidna)
 - No hidden admin access or upgrade patterns that bypass the kernel
 
+### Deployment-Path Parity (Mandatory)
+
+Any PR touching **Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, or authority boundaries** requires a deployment-path parity test. Unit tests alone are insufficient for these components.
+
+A deployment-path parity test must prove the exact production-intended caller path works using only role wiring and setup documented in the deployment manifest or repository deployment procedure (`docs/deployment/`).
+
+**Tests must NOT use the following as proof of production reachability:**
+- `hardhat_impersonateAccount` or any Hardhat-only JSON-RPC method
+- Test-only role grants that have no mainnet-reachable equivalent
+- Artificial caller accounts with no documented production grant path
+- Undocumented manual setup steps
+- Admin shortcuts unavailable on mainnet (e.g., `DEFAULT_ADMIN_ROLE` held by a contract with no external grant function)
+
+If impersonation is used in a test file for any reason, it must be explicitly labeled with a comment such as `// TEST-ONLY — not a production grant path` and does not count as deployment-path proof.
+
+A PR touching a sensitive component is not mergeable if CI can pass while the production caller path remains unreachable on mainnet.
+
+**Lesson learned — GAP-MEX-05:** GAP-MEX-05 initially passed unit tests while three production reachability gaps remained undetected: (1) `API3Oracle` had no `syncReserves` forwarding method wired to `Kernel.syncReserves`; (2) `pahlaviToken` address was not configured in Kernel's deployment flow; (3) `FEEDER_ROLE` on `API3Oracle` had no mainnet-reachable grant path — only `hardhat_impersonateAccount` in tests. All three required separate PRs (#76–#81) to close after the gaps were identified as Codex findings.
+
 ### File Naming
 - Persian documents: `<name>-fa.md`
 - English documents: `<name>-en.md`
@@ -307,3 +326,4 @@ Always read the relevant protocol document before modifying its associated contr
 - Never introduce admin backdoors, upgrade proxies on the Kernel, or any mechanism that allows bypassing the multi-sig trigger.
 - Any PR that lowers `MULTISIG_THRESHOLD`, `COUNCIL_THRESHOLD`, or removes a `nonReentrant` guard should be flagged as a security concern.
 - The constitution (`constitution-fa.md`) is the source of truth. If a contract behavior conflicts with the constitution, the contract is wrong.
+- **Deployment-path parity is mandatory** for any change touching Kernel, Oracle, roles, deployment wiring, Reserve, Treasury, TriggerProtocol, or PahlaviToken. `hardhat_impersonateAccount` and test-only role grants are not proof that a production caller path exists. Before writing or accepting tests for these components, verify that the role grant path in the test matches what is documented in `docs/deployment/`. See "Deployment-Path Parity (Mandatory)" under Development Conventions.
