@@ -235,14 +235,14 @@ Two mandatory human decision points remain. `API3Oracle.syncReserves` and `Kerne
 | CF-1: burn-recovery stale state | **FIXED** — PR #77 |
 | GAP-MEX-05: Kernel → `updateReserves` call path | **CLOSED** — `syncReserves` implemented; `API3Oracle` forwarding wired (Codex P1 fix); `totalReserves` now live |
 | INV-02: reserve-ratio floor invariant | **CLOSED** — mint-time gate sound; breach detection live; burn recovery fixed; reserve feed live |
-| GAP-MEX-06: breach → TR-05/TR-06 oracle routing | **Open** — human-mediated monitoring specification required; no code permissible |
+| GAP-MEX-06: breach → TR-05/TR-06 oracle routing | **CLOSED** — documentation-level monitoring/governance standard established (FND-01..FND-10; F-1..F-8; 7 domains); see `GAP_MEX_06_MONITORING_SPECIFICATION.md` |
 | CF-7 constructor: `_initialReserves` upper-bound | **Open** — deploy-time validation absent |
 | CF-7 runtime: overflow at supply == 0 in `syncReserves` | **Open** — characterized in T16b; no guard in Kernel by design; self-correcting via corrective sync |
 | GAP-MEX-04: oracle data freshness at call boundary | **Open** — stale data accepted without timestamp check; out of scope |
 
 ---
 
-*Report date: 2026-06-16 (updated: Codex P1 API3Oracle wiring fix)*
+*Report date: 2026-06-16 (updated: Codex P1 API3Oracle wiring fix; GAP-MEX-06 CLOSED 2026-06-17)*
 *Branch: claude/dependabot-pr-cleanup-neu16i*
 *Affected contracts: `contracts/kernel.sol`, `contracts/interfaces/IPahlaviToken.sol`, `contracts/oracles/API3Oracle.sol`*
 *Test: `test/28_GAP_MEX_05.test.js`*

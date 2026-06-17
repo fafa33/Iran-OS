@@ -321,8 +321,8 @@ These are the seventeen invariants Step-50 classified as **Mixed**: part of the 
 - **Risk Level**: Medium
 - **Reason Gap Exists**: `flagViolation` requires a human or oracle submission; there is no on-chain monitor that derives "this composition issue should become a TR-05/TR-06 flag" from internal contract state.
 - **Doctrine Impact**: The trigger-code *exclusivity* this invariant protects (no new code, no automated-response mechanism, "grow into compliance" prohibited) is solidly preserved; the *detection-and-mapping* half is a documentation-level monitoring/governance standard.
-- **Future Consideration**: Any future monitoring tooling proposal would need to route exclusively through the existing TR-05/TR-06 flagging mechanism — this invariant is explicit that no new code or automatic-response path is permissible, which any future scoping must treat as a hard constraint, not a design option.
-- **Status**: Open
+- **Future Consideration**: Any future monitoring tooling proposal would need to route exclusively through the existing TR-05/TR-06 flagging mechanism — this invariant is explicit that no new code or automatic-response path is permissible, which any future scoping must treat as a hard constraint, not a design option. See monitoring specification for the full constraint set (F-1..F-8, FND-01..FND-10, seven domain boundaries).
+- **Status**: Closed — documentation-level monitoring/governance standard established; see [`docs/reports/GAP_MEX_06_MONITORING_SPECIFICATION.md`](../reports/GAP_MEX_06_MONITORING_SPECIFICATION.md); FND-01..FND-10 verified; F-1..F-8 satisfied; no unresolved findings. CLOSED does not mean monitoring tooling is deployed or audited.
 
 ### GAP-ALD-01 — Allocation as a distinct, non-balance-moving earmark stage (general framing)
 
