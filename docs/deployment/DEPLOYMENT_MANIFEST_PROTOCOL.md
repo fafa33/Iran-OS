@@ -78,7 +78,7 @@ Layer 1 — وابسته به Kernel
 ───────────────────────────
 Treasury(kernel)
 SovereignWealthFund(sovereign, kernel)
-API3Oracle(kernel)
+API3Oracle(kernel, [feeder1, feeder2, ...])   ← FEEDER_ROLE در constructor اعطا می‌شود (Codex P1 fix)
 ConstitutionGuard(kernel)
 JurySelection(kernel)
 JusticeProtocol(kernel)
@@ -106,7 +106,7 @@ ProductionOracle(kernel)   ← مستقل از Layer 2
 | `SovereignWealthFund` | `sovereign, kernel` | Kernel |
 | `PahlaviToken` | `swf, kernel, initialReserves` | Kernel، SWF |
 | `TriggerProtocol` | `kernel, treasury, swf` | Kernel، Treasury، SWF |
-| `API3Oracle` | `kernel` | Kernel |
+| `API3Oracle` | `kernel, [feeder_1..N]` | Kernel (FEEDER_ROLE در constructor اعطا می‌شود) |
 | `ConstitutionGuard` | `kernel` | Kernel |
 | `AssetFreeze` | `kernel, swfTempWallet, swfContract` | Kernel، SWF |
 | `JurySelection` | `kernel` | Kernel |
@@ -182,7 +182,8 @@ VelocityFee(kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken�
 4.  deploy VictimFund(KERNEL_ADDRESS)
     → ثبت آدرس: VICTIM_FUND_ADDRESS
 
-5.  deploy API3Oracle(KERNEL_ADDRESS)
+5.  deploy API3Oracle(KERNEL_ADDRESS, [FEEDER_1, FEEDER_2, ...])
+    → FEEDER_ROLE در constructor اعطا می‌شود — post-deploy grantRole لازم نیست (Codex P1 fix)
     → ثبت آدرس: API3_ORACLE_ADDRESS
 
 6.  deploy ConstitutionGuard(KERNEL_ADDRESS)
@@ -306,13 +307,21 @@ VelocityFee          : ORACLE_ROLE، STAKING_ROLE
 ### گروه E — سیم‌کشی Oracle (آخر از همه)
 
 ```
+# گام ۱: API3Oracle را به عنوان Oracle در Kernel ثبت کن
 kernel.grantOfficialAccess(API3_ORACLE_ADDRESS, ORACLE_ROLE)
-api3Oracle.grantRole(FEEDER_ROLE, FEEDER_1)
-api3Oracle.grantRole(FEEDER_ROLE, FEEDER_2)
-...
+
+# گام ۲: ORACLE_ROLE placeholder اولیه را revoke کن
+# Kernel constructor نیاز به یک آدرس oracle غیرصفر داشت (ORACLE_INITIAL).
+# اکنون که API3Oracle سیم‌کشی شده، placeholder باید revoke شود تا
+# تنها مسیر مجاز feeder→API3Oracle→Kernel باشد.
+kernel.revokeRole(ORACLE_ROLE, ORACLE_INITIAL)
+
+# گام ۳: feeder‌های PriceOracle و ProductionOracle (این oracle‌ها constructor ساده دارند)
 priceOracle.grantRole(FEEDER_ROLE, PRICE_FEEDER)
 productionOracle.grantRole(FEEDER_ROLE, PROD_FEEDER)
 ```
+
+**⚠️ توجه — FEEDER_ROLE روی API3Oracle:** FEEDER_ROLE در constructor اعطا می‌شود (Codex P1 fix). هیچ `api3Oracle.grantRole(FEEDER_ROLE, ...)` پس از deploy لازم نیست. همه feeder‌های مجاز باید در زمان deploy به عنوان `initialFeeders` مشخص باشند.
 
 **⚠️ ORACLE_ROLE آخرین چیزی است که فعال می‌شود.** هر oracle فعال می‌تواند `flagViolation()` صدا کند و قفل اضطراری فعال کند. سیستم باید کاملاً آماده باشد.
 

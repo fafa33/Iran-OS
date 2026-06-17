@@ -468,6 +468,14 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
         await api3Oracle.getAddress(), await wiredKernel.ORACLE_ROLE()
       );
 
+      // Revoke ORACLE_ROLE from bootstrap placeholder — in production API3Oracle is the sole oracle.
+      // The Kernel constructor requires a non-zero oracle address; that placeholder is superseded
+      // by API3Oracle after wiring. Without this revoke the fixture permits a production-unintended
+      // direct path (sovereign → Kernel.syncReserves) that would let PW-03/PW-10 pass falsely.
+      await wiredKernel.connect(sovereign).revokeRole(
+        await wiredKernel.ORACLE_ROLE(), sovereign.address
+      );
+
       // Deploy PahlaviToken and wire into Kernel
       const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
       wiredToken = await PahlaviToken.deploy(swf.address, await wiredKernel.getAddress(), INITIAL_RESERVES);
@@ -483,12 +491,17 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       expect(await wiredToken.totalReserves()).to.equal(INITIAL_RESERVES);
     });
 
-    it("PW-02: API3Oracle holds ORACLE_ROLE on Kernel; feeder does not", async function () {
+    it("PW-02: API3Oracle holds ORACLE_ROLE on Kernel; feeder and bootstrap placeholder do not", async function () {
       expect(
         await wiredKernel.hasRole(await wiredKernel.ORACLE_ROLE(), await api3Oracle.getAddress())
       ).to.be.true;
       expect(
         await wiredKernel.hasRole(await wiredKernel.ORACLE_ROLE(), feeder.address)
+      ).to.be.false;
+      // Bootstrap placeholder (sovereign) had ORACLE_ROLE revoked after API3Oracle was wired —
+      // only API3Oracle may call Kernel.syncReserves in this parity fixture
+      expect(
+        await wiredKernel.hasRole(await wiredKernel.ORACLE_ROLE(), sovereign.address)
       ).to.be.false;
     });
 
