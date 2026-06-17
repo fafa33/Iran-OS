@@ -292,4 +292,109 @@ describe("API3Oracle", function () {
       expect(await oracle4.hasRole(FEEDER_ROLE, stranger.address)).to.be.true;
     });
   });
+
+  // ─────────────────────────────────────────
+  // GAP-MEX-04 — two-gate barrier on API3Oracle.syncReserves
+  // Gate A: PAH_USD_KEY freshness gate (oracle liveness proxy)
+  // Gate B: MAX_DATA_AGE rate limiter (lastReservesSyncTimestamp)
+  // ─────────────────────────────────────────
+  describe("GAP-MEX-04 — two-gate barrier on syncReserves", function () {
+    let gKernel, gOracle, gToken;
+    const INITIAL_RESERVES = ethers.parseUnits("300000000000", 18);
+
+    beforeEach(async function () {
+      // Full wiring required: syncReserves must reach PahlaviToken.updateReserves end-to-end.
+      // Signers sovereign, court, feeder, swf, stranger are already assigned by the outer beforeEach.
+      const KernelFactory = await ethers.getContractFactory("IranOS_Kernel");
+      gKernel = await KernelFactory.deploy(sovereign.address, court.address, sovereign.address, swf.address);
+      await gKernel.waitForDeployment();
+
+      const API3OracleFactory = await ethers.getContractFactory("API3Oracle");
+      gOracle = await API3OracleFactory.deploy(await gKernel.getAddress(), [feeder.address]);
+      await gOracle.waitForDeployment();
+
+      // Wire API3Oracle as sole oracle on Kernel (revoke bootstrap placeholder)
+      const ORACLE_ROLE = await gKernel.ORACLE_ROLE();
+      await gKernel.connect(sovereign).grantOfficialAccess(await gOracle.getAddress(), ORACLE_ROLE);
+      await gKernel.connect(sovereign).revokeRole(ORACLE_ROLE, sovereign.address);
+
+      // Deploy PahlaviToken and wire into Kernel
+      const PahlaviTokenFactory = await ethers.getContractFactory("PahlaviToken");
+      gToken = await PahlaviTokenFactory.deploy(swf.address, await gKernel.getAddress(), INITIAL_RESERVES);
+      await gToken.waitForDeployment();
+      await gKernel.connect(sovereign).setPahlaviToken(await gToken.getAddress());
+    });
+
+    it("GM-01: lastReservesSyncTimestamp initialises to zero", async function () {
+      expect(await gOracle.lastReservesSyncTimestamp()).to.equal(0n);
+    });
+
+    it("GM-02: first syncReserves call passes Gate B because elapsed time from timestamp 0 far exceeds MAX_DATA_AGE", async function () {
+      const newReserves = ethers.parseUnits("200000000000", 18);
+      await expect(gOracle.connect(feeder).syncReserves(newReserves))
+        .to.emit(gOracle, "ReserveSyncForwarded");
+    });
+
+    it("GM-03: lastReservesSyncTimestamp is set to block.timestamp on successful sync", async function () {
+      const newReserves = ethers.parseUnits("200000000000", 18);
+      const tx = await gOracle.connect(feeder).syncReserves(newReserves);
+      const receipt = await tx.wait();
+      const block = await ethers.provider.getBlock(receipt.blockNumber);
+      expect(await gOracle.lastReservesSyncTimestamp()).to.equal(BigInt(block.timestamp));
+    });
+
+    it("GM-04 Gate B: second syncReserves call within MAX_DATA_AGE window reverts 'reserve sync too frequent'", async function () {
+      const R = ethers.parseUnits("200000000000", 18);
+      // First call — sets lastReservesSyncTimestamp
+      await gOracle.connect(feeder).syncReserves(R);
+      // Immediate second call — only 1 block has elapsed, well within MAX_DATA_AGE
+      await expect(
+        gOracle.connect(feeder).syncReserves(R)
+      ).to.be.revertedWith("API3Oracle: reserve sync too frequent");
+    });
+
+    it("GM-05 Gate B: syncReserves succeeds once MAX_DATA_AGE window elapses and PAH_USD_KEY is refreshed", async function () {
+      const R1 = ethers.parseUnits("200000000000", 18);
+      await gOracle.connect(feeder).syncReserves(R1);
+
+      // Advance time past Gate B window
+      const maxDataAge = await gOracle.MAX_DATA_AGE();
+      await network.provider.send("evm_increaseTime", [Number(maxDataAge) + 1]);
+      await network.provider.send("evm_mine", []);
+
+      // PAH_USD_KEY is now stale — refresh it to also satisfy Gate A
+      const PAH_USD_KEY = await gOracle.PAH_USD_KEY();
+      await gOracle.connect(feeder).updateData(PAH_USD_KEY, 1, 1n * BigInt(1e18), 1000);
+
+      const R2 = ethers.parseUnits("210000000000", 18);
+      await expect(gOracle.connect(feeder).syncReserves(R2))
+        .to.emit(gOracle, "ReserveSyncForwarded");
+      expect(await gToken.totalReserves()).to.equal(R2);
+    });
+
+    it("GM-06 Gate A: syncReserves reverts 'stale data feed' when PAH_USD_KEY is older than MAX_DATA_AGE", async function () {
+      const maxDataAge = await gOracle.MAX_DATA_AGE();
+      await network.provider.send("evm_increaseTime", [Number(maxDataAge) + 1]);
+      await network.provider.send("evm_mine", []);
+
+      await expect(
+        gOracle.connect(feeder).syncReserves(ethers.parseUnits("100000000000", 18))
+      ).to.be.revertedWith("API3Oracle: stale data feed");
+    });
+
+    it("GM-07 Gate A: syncReserves succeeds after feeder refreshes PAH_USD_KEY within MAX_DATA_AGE", async function () {
+      const maxDataAge = await gOracle.MAX_DATA_AGE();
+      await network.provider.send("evm_increaseTime", [Number(maxDataAge) + 1]);
+      await network.provider.send("evm_mine", []);
+
+      // Refresh PAH_USD_KEY — Gate A now satisfied; Gate B passes (lastReservesSyncTimestamp=0)
+      const PAH_USD_KEY = await gOracle.PAH_USD_KEY();
+      await gOracle.connect(feeder).updateData(PAH_USD_KEY, 1, 1n * BigInt(1e18), 1000);
+
+      const newReserves = ethers.parseUnits("200000000000", 18);
+      await expect(gOracle.connect(feeder).syncReserves(newReserves))
+        .to.emit(gOracle, "ReserveSyncForwarded");
+      expect(await gToken.totalReserves()).to.equal(newReserves);
+    });
+  });
 });
