@@ -84,6 +84,8 @@ Every LL entry must reference:
 
 An entry that references only "see PR #N" without the specific comment URL and specific policy change is insufficient.
 
+**Self-Review Exception:** For self-identified findings (Reviewer: `Self (...)`) where no external GitHub review comment exists, the **Review comment URL** field must contain `N/A — self-identified [category] finding; no external review comment`. The **Finding** field must describe the observable trigger that surfaced the issue (e.g., GitHub `mergeable_state: dirty`, a failing test, a static-analysis output, a direct API status check). This form is auditable: the trigger is on record even without a comment URL. An entry that merely says `N/A` without categorizing the finding type is still insufficient.
+
 ### Naming and Numbering
 
 - LL entries are numbered sequentially: LL-001, LL-002, …
@@ -289,6 +291,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-007
+
+**Date:** 2026-06-17
+**PR:** #90
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/90#discussion_r3432074234
+**Finding:** "Allow self-identified lessons to satisfy the source rule" — the Cross-Reference Rule requires every LL entry to include a direct GitHub review-comment URL. LL-004 and LL-006 use `N/A` because they are self-identified findings with no external comment. The rule text did not define `N/A` as a valid exception, making these entries formally non-conformant and leaving future reviewers unable to distinguish a valid self-review from an incomplete entry that should block merge.
+
+**What we assumed:** Self-identified entries with `N/A` in the Review comment URL field were self-evidently valid — the absence of an external comment is reason enough for `N/A`, and no explicit exception clause was necessary.
+
+**Why the assumption failed:** Without an explicit exception clause, the rule and the entry are in formal contradiction: the rule says every entry "must reference" a comment URL; the entry says `N/A`. A future reviewer or automated check cannot determine whether `N/A` is an allowed exception or a missing required field. Ambiguity in a governance rule is itself a governance defect.
+
+**Evidence that was missing:** An explicit self-review exception in the Cross-Reference Rule defining: (a) when `N/A` is valid (Reviewer is `Self (...)`), (b) the required content of the `N/A` field (`N/A — self-identified [category] finding; no external review comment`), and (c) the auditable substitute (the observable trigger in the Finding field).
+
+**Policy created:** Cross-Reference Rule amended with Self-Review Exception: for entries where Reviewer is `Self (...)`, the Review comment URL must contain `N/A — self-identified [category] finding; no external review comment` and the Finding field must describe the observable trigger.
+
+**CLAUDE.md reference:** `### Reviewer Lessons Learned Registry (Mandatory)` — the amendment is in the registry itself; no CLAUDE.md change required.
+
+**Verification method:** For every LL entry where Reviewer contains "Self": confirm Review comment URL matches `N/A — self-identified ... finding; no external review comment` and Finding field identifies an observable trigger. For all other entries: confirm Review comment URL is a valid GitHub discussion link (`https://github.com/fafa33/Iran-OS/pull/N#discussion_rXXX`).
+
+**Affected files:** `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Cross-Reference Rule Self-Review Exception added; LL-007 entry added)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived after PR #90 merged. Fix applied in PR #91 on branch `claude/codex-adversarial-review-fyu0nb`.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -309,4 +341,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-006*
+*Entries: LL-001 through LL-007*
