@@ -223,6 +223,29 @@ A PR touching a sensitive component is not mergeable if CI can pass while the pr
 
 **Lesson learned — GAP-MEX-05:** GAP-MEX-05 initially passed unit tests while three production reachability gaps remained undetected: (1) `API3Oracle` had no `syncReserves` forwarding method wired to `Kernel.syncReserves`; (2) `pahlaviToken` address was not configured in Kernel's deployment flow; (3) `FEEDER_ROLE` on `API3Oracle` had no mainnet-reachable grant path — only `hardhat_impersonateAccount` in tests. All three required separate PRs (#76–#81) to close after the gaps were identified as Codex findings.
 
+### Pre-Implementation Red-Team Pass (Mandatory)
+
+Before implementing any sensitive PR, Claude must perform an internal red-team pass and document the results before writing any code or tests.
+
+**Sensitive PRs include any change touching:** Kernel, Oracle, roles, deployment wiring, Reserve, Treasury, TriggerProtocol, PahlaviToken, or authority boundaries.
+
+**The red-team pass must identify and document each of the following before implementation begins:**
+
+| Item | Question to answer |
+|---|---|
+| Production caller path | What is the exact sequence of callers from the external entry point to the target function on mainnet? |
+| Role grant path | How does each required role reach each caller address on mainnet? Is that path in the deployment manifest? |
+| Deployment manifest path | Which file and section in `docs/deployment/` documents this wiring? Does it exist? Is it current? |
+| Impossible or unreachable paths | Are there any assumed paths that cannot be executed on mainnet (e.g., `DEFAULT_ADMIN_ROLE` held by a contract with no external grant function)? |
+| Hardhat-only assumptions | Does any part of the proposed test setup rely on `hardhat_impersonateAccount`, Hardhat JSON-RPC methods, or test scaffolding that has no mainnet equivalent? |
+| Test-only shortcuts | Are any role grants or caller setups in the tests achievable only in a test environment? |
+| Stale-state or recovery gaps | Can a sub-floor or invalid state be entered that a subsequent corrective operation cannot exit? |
+| Authority drift | Does this change expand the set of addresses that can call any authority-gated function, directly or indirectly? |
+| TriggerProtocol contamination risk | Does this change risk routing a non-governance event (e.g., a reserve accounting event) into `executeTrigger`? |
+| CI-green-but-production-broken risk | Could CI pass on this PR while the real production caller path remains unreachable on mainnet? |
+
+Implementation may begin only after this red-team pass is documented in the PR description or in a linked report.
+
 ### File Naming
 - Persian documents: `<name>-fa.md`
 - English documents: `<name>-en.md`
@@ -327,3 +350,4 @@ Always read the relevant protocol document before modifying its associated contr
 - Any PR that lowers `MULTISIG_THRESHOLD`, `COUNCIL_THRESHOLD`, or removes a `nonReentrant` guard should be flagged as a security concern.
 - The constitution (`constitution-fa.md`) is the source of truth. If a contract behavior conflicts with the constitution, the contract is wrong.
 - **Deployment-path parity is mandatory** for any change touching Kernel, Oracle, roles, deployment wiring, Reserve, Treasury, TriggerProtocol, or PahlaviToken. `hardhat_impersonateAccount` and test-only role grants are not proof that a production caller path exists. Before writing or accepting tests for these components, verify that the role grant path in the test matches what is documented in `docs/deployment/`. See "Deployment-Path Parity (Mandatory)" under Development Conventions.
+- **Pre-implementation red-team pass is mandatory** before writing any code for sensitive PRs. Identify and document: production caller path, role grant path, deployment manifest path, impossible/unreachable paths, Hardhat-only assumptions, test-only shortcuts, stale-state gaps, authority drift, TriggerProtocol contamination risk, and CI-green-but-production-broken risk. Do not begin implementation until the pass is documented. See "Pre-Implementation Red-Team Pass (Mandatory)" under Development Conventions.
