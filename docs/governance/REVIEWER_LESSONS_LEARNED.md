@@ -413,6 +413,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-011
+
+**Date:** 2026-06-18
+**PR:** #95
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** The Red-Team Finding Classification Standard defined `HARDENING_ONLY` as a classification outcome when BLOCKER_P1 criteria fail, but provided no re-evaluation trigger list, no required documentation of the disqualifying assumptions, and no centralized register of active HARDENING_ONLY findings. A HARDENING_ONLY classification could persist indefinitely while subsequent code changes silently invalidate the assumptions on which it was based. An external auditor reviewing a PR that adds a SWF mint path would immediately recognize that K-RES-01 — classified HARDENING_ONLY under the assumption that the minting circuit is incomplete — requires re-evaluation, but no preflight step, no register check, and no enforcement mechanism existed to require it.
+
+**What we assumed:** The inline K-RES-01 re-evaluation notice in `CF1_BREACH_DETECTION_DISPOSITION.md` ("K-RES-01 must be re-evaluated before any future SWF mint path, reserve-linked mint enforcement, or new downstream consumer of `totalReserves` is introduced") was sufficient. The implementer who adds a mint path would read the disposition document and remember to re-evaluate.
+
+**Why the assumption failed:** Inline advisory notices are not enforceable. A future implementer adding a mint path in a code PR may not read `CF1_BREACH_DETECTION_DISPOSITION.md` before opening the PR. No preflight step requires checking active HARDENING_ONLY findings. No centralized register exists at a known, inspectable location. No trigger-event list defines which code changes require a re-evaluation check. Without a mechanically enforced path from "this PR adds a `.mint()` call" to "therefore re-evaluate K-RES-01 before merging," the inline note is an advisory with no enforcement.
+
+**Evidence that was missing:** (1) A formal re-evaluation policy embedded in CLAUDE.md with an enumerated trigger-event list. (2) A required documentation template for HARDENING_ONLY classification (disqualifying criterion, disqualifying assumption, re-evaluation triggers). (3) A centralized residual register at a known, maintainable location (`docs/governance/OPEN_RESIDUALS.md`).
+
+**Policy created:** HARDENING_ONLY Re-Evaluation Policy added to the Red-Team Finding Classification Standard in CLAUDE.md. Eleven re-evaluation trigger events defined. Required documentation format for HARDENING_ONLY classification specified. Centralized residual register created at `docs/governance/OPEN_RESIDUALS.md` with K-RES-01 as the first entry. The policy also closes Gap B-7 (no centralized open residual register) from the 2026-06-18 governance gap analysis.
+
+**CLAUDE.md reference:** `### Red-Team Finding Classification Standard (Mandatory)` → HARDENING_ONLY Re-Evaluation Policy (added).
+
+**Verification method:** Before any PR touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, or deployment wiring: (1) read `docs/governance/OPEN_RESIDUALS.md`; (2) for each active HARDENING_ONLY entry, check whether any of the entry's listed re-evaluation triggers applies to this PR; (3) if yes, re-run the 5-criterion evaluation table before continuing. If re-classification upgrades a finding to BLOCKER_P1, it must block the triggering PR. Run the verification grep for K-RES-01: `grep -r '\.mint(' contracts/ --include="*.sol" | grep -v fuzzing` → expected: one match in fuzzing harness only.
+
+**Affected files:** `CLAUDE.md` (HARDENING_ONLY Re-Evaluation Policy added to Classification Standard); `docs/governance/OPEN_RESIDUALS.md` (new file — centralized residual register, K-RES-01 entry); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-011 added; footer updated to LL-001 through LL-011)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap B-2 from the gap analysis report. K-RES-01 is the only active HARDENING_ONLY residual at register creation time. Gap B-7 (no centralized open residual register) is also closed by this PR — it is documented here rather than as a separate LL entry because both gaps were identified and resolved in the same implementation pass.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -433,4 +463,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-010*
+*Entries: LL-001 through LL-011*
