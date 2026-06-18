@@ -611,7 +611,19 @@ This rule applies to all documents in the repository regardless of type — code
 
 #### Step 6 — Self-Codex-Review
 
-Before every push, apply the 5-criterion BLOCKER_P1 gate to every claim in every changed file. Ask: "What would Codex challenge here, and can I answer it with grep evidence already in hand?" If the answer is no, collect the evidence first.
+Before every push, apply the 5-criterion BLOCKER_P1 gate and the Certainty Language Rule to every claim in:
+- every changed file
+- the PR title
+- the PR description (including summary, evidence block, checklist, and all reviewer-facing body text)
+
+Ask: "What would Codex challenge here, and can I answer it with grep evidence already in hand?" If the answer is no, collect the evidence first.
+
+**Any certainty claim in a PR description must satisfy the same evidence standard as a claim in a changed file.** A PR description is not exempt from the Certainty Language Rule by virtue of not being committed to the repository.
+
+**Gate:** If the PR description contains any forbidden or conditionally-allowed certainty phrase from the Certainty Language Rule table, the PR must not be marked ready until:
+- the phrase is removed, or
+- the phrase is qualified to meet the conditionally-allowed standard, or
+- CET-1 evidence is provided inline in the PR description.
 
 #### Step 7 — Cross-Document Consistency
 
@@ -630,6 +642,15 @@ Every PR must include an Evidence section:
   - File checked: docs/governance/OPEN_RESIDUALS.md
   - Matching residual IDs: [list, or "none matched"]
   - Re-evaluation result: [per-residual result, or "No matching open residuals found after consulting OPEN_RESIDUALS.md"]
+- Certainty language scan:
+  - Changed files scanned: [YES / NO]
+  - PR title scanned: [YES / NO]
+  - PR description scanned: [YES / NO]
+  - Certainty terms found: [list terms, or "none"]
+  - Evidence for each term: [inline CET-1 evidence per term, or "N/A — no terms found"]
+  - Terms rewritten or qualified: [list, or "N/A"]
+  - Result: [PASS / BLOCKED — phrase not removed, qualified, or evidenced]
+  - CET level: [CET-1 / below CET-1]
 ```
 
 #### Step 9 — Deployment Manifest Currency Check
@@ -642,7 +663,9 @@ For any PR touching a sensitive component (Kernel, Oracle, Reserve, Treasury, Tr
 4. Determine the manifest's authoritative date using the following priority:
    - **First:** An explicit `Last verified:` or `Manifest date:` field in the manifest file — this is the authoritative date.
    - **Fallback (if no explicit field exists):** The most recent git commit touching the manifest file: `git log -1 --format="%H %ad" -- docs/deployment/<manifest-file>`. The Step 9 result must be classified below CET-1 unless this commit evidence is recorded inline.
-5. Evaluate staleness: if this PR changes deployment topology, role assignment, authority routing, oracle wiring, reserve path, treasury path, trigger path, mint path, or emergency/freeze path, the manifest must be re-verified and the date field updated in the same PR.
+5. Evaluate staleness against two independent conditions — either condition alone requires action:
+   - **Condition A (inherited staleness):** Is the manifest's authoritative date older than the most recent sensitive-component PR merged to main? Run `git log -1 --format="%H %ad" -- docs/deployment/<manifest-file>` and compare to the date of the most recent sensitive-component merge on main. If the manifest predates that merge, it is stale regardless of what this PR changes — Step 9 must record DOCUMENTATION_REQUIRED.
+   - **Condition B (this PR's changes):** Does this PR change deployment topology, role assignment, authority routing, oracle wiring, reserve path, treasury path, trigger path, mint path, or emergency/freeze path? If yes, the manifest must be re-verified and the date field updated in this PR.
 6. If no manifest exists for the affected component, Step 9 must fail as DOCUMENTATION_REQUIRED — a missing manifest is not a PASS.
 7. If the manifest is stale — missing a role grant, a contract address, or a wiring change introduced since the manifest was last updated — update it in the same PR.
 
@@ -660,8 +683,9 @@ Step 9 — Deployment Manifest Currency:
 - Authoritative date field: [Last verified / Manifest date / none — commit evidence used]
 - Date value: [date or "N/A — see commit evidence below"]
 - Commit evidence if no date field: [git log -1 output, or "N/A — explicit date field present"]
-- PR affects deployment topology? [YES / NO]
-- Re-verification required? [YES / NO — if YES, confirm manifest updated in this PR]
+- Condition A (inherited staleness): manifest predates latest sensitive-component PR on main? [YES → DOCUMENTATION_REQUIRED / NO — git log evidence recorded above]
+- Condition B (this PR's changes): PR changes deployment topology, roles, oracle wiring, reserve/treasury/trigger/mint/freeze path? [YES / NO]
+- Re-verification required? [YES (Condition A) / YES (Condition B) / NO — both conditions evaluated and neither applies]
 - Result: [PASS / DOCUMENTATION_REQUIRED]
 - CET level: [CET-1 / below CET-1 / DOCUMENTATION_REQUIRED]
 ```

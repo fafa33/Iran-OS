@@ -593,6 +593,66 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-017
+
+**Date:** 2026-06-18
+**PR:** #99
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/98#discussion_r3432875945
+**Finding:** Step 9's staleness guard (Step 5) was made conditional on *this PR* changing deployment topology. The manifest-date-vs-last-sensitive-PR comparison introduced in LL-008 was dropped. A sensitive-component PR that makes no topology changes can record `Condition A: NO`, `Re-verification required? NO`, `Result: PASS` — without detecting that an earlier sensitive PR changed wiring and left the manifest stale.
+
+**What we assumed:** Making staleness evaluation conditional on this PR's changes was sufficient. If a prior PR left the manifest stale, the next PR touching that component would naturally fall under Condition B (topology changes) and re-verify.
+
+**Why the assumption failed:** The assumption is CET-3 — it depends on the prior PR that introduced wiring changes also being the PR that does the next Step 9 check. In practice, a sensitive-component PR that changes only documentation or governance policy (no topology) would record `Condition B: NO` and skip re-verification — even if a prior PR left the manifest stale. The inherited-staleness scenario (Condition A) is structurally invisible to a Step 5 that looks only at the current PR's changes.
+
+**Evidence that was missing:** A separate Condition A check: does the manifest's authoritative date predate the most recent sensitive-component PR merged to main? This check is independent of what the current PR changes and must be evaluated on every sensitive-component PR regardless of topology impact.
+
+**Policy created:** Step 9 Step 5 split into two independent conditions — Condition A (inherited staleness: manifest predates latest sensitive PR on main) and Condition B (this PR's changes). Either condition alone requires action. Evidence block updated: Condition A and Condition B each have a dedicated field; `Re-verification required?` now distinguishes which condition triggered it. Step 9 as restored requires the manifest-date comparison for every sensitive-component PR.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 9 Step 5 (split into Condition A + Condition B); evidence block template updated (Condition A field added; Re-verification required field updated to name triggering condition).
+
+**Verification method:** For any Step 9 compliance claim: (1) confirm the PR Evidence block contains a `Condition A (inherited staleness)` field with git log evidence recorded; (2) confirm the Condition A evaluation compares the manifest date to the most recent sensitive-component PR on main, not only to this PR's changes; (3) confirm `Re-verification required?` names which condition (A or B or neither) triggered the result.
+
+**Affected files:** `CLAUDE.md` (Step 9 Step 5 split into Condition A + Condition B; evidence block template updated); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-017 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived on PR #98 (C-6/LL-016) from chatgpt-codex-connector[bot] at `#discussion_r3432875945`. PR #98 was already merged when the comment was posted. Fix applied in PR #99 on branch `claude/codex-adversarial-review-fyu0nb`.
+
+---
+
+## LL-018
+
+**Date:** 2026-06-18
+**PR:** #100
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Step 6 required scanning "every claim in every changed file" only. PR descriptions are not files. The Certainty Language Rule (Step 5) explicitly covers PR descriptions, but Step 6 did not include them in its scan scope. A PR author applying Step 6 literally would scan changed files and push without scanning the PR description — leaving closure claims, reachability assertions, and certainty language in the PR body unchecked.
+
+**What we assumed:** The Certainty Language Rule's scope clause ("applies to all documents in the repository regardless of type — code comments, audit reports, gap registers, governance documents, and PR descriptions") was sufficient. A contributor who read Step 5 would apply it to PR descriptions without Step 6 explicitly requiring it.
+
+**Why the assumption failed:** Step 6 is the procedural enforcement step — it is the step a contributor executes before push. Its scope defines what gets scanned in practice. A contributor following the preflight checklist mechanically (Steps 1–10 in order) would reach Step 6, scan changed files, and proceed. The Step 5 rule is a policy statement; Step 6 is the action item. When the action item does not name PR descriptions, they are not scanned — regardless of what the policy statement says. Historical findings (LL-001, LL-002, LL-005) were all challenges to claims in PR descriptions that predated Step 6; after Step 6 was added, it still left PR descriptions out of scope.
+
+**Evidence that was missing:** (1) Step 6 naming PR title, PR description, PR summary, PR checklist, and reviewer-facing body text as explicit scan targets alongside changed files. (2) An explicit rule equating the evidence standard for certainty claims in PR descriptions to that of changed files. (3) A gate rule: PR must not be marked ready while a forbidden or conditionally-allowed certainty phrase in the PR description lacks removal, qualification, or CET-1 evidence. (4) A Certainty language scan sub-section in the Step 8 Evidence Block template.
+
+**Policy created:** Step 6 expanded to name changed files, PR title, and PR description as explicit scan targets. Added equality rule: certainty claims in PR descriptions require the same evidence standard as changed files. Added gate rule: PR must not be marked ready until forbidden/conditionally-allowed certainty phrases are removed, qualified, or evidenced. Step 8 Evidence Block updated with a Certainty language scan sub-section (8 fields).
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 6 (scan scope expanded; equality rule added; gate rule added); Step 8 Evidence Block template (Certainty language scan sub-section added).
+
+**Verification method:** Before marking any PR ready: (1) confirm Step 6 was applied to the PR description, not only changed files; (2) confirm the Evidence block contains a `Certainty language scan` sub-section with all 8 fields completed; (3) if any certainty terms were found, confirm CET-1 evidence is recorded inline or the term is removed/qualified; (4) confirm `Result: PASS` before marking ready.
+
+**Affected files:** `CLAUDE.md` (Step 6 expanded; Step 8 Evidence Block updated); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-018 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-8 from the gap analysis report.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -613,4 +673,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-016*
+*Entries: LL-001 through LL-018*
