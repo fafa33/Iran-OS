@@ -63,7 +63,7 @@ An entry that lacks any of these four fields is incomplete and must be updated b
 A new LL entry must be created whenever a reviewer finding causes any of the following:
 
 - A new section or rule in `CLAUDE.md`
-- A change to the PR preflight checklist (Steps 1–8)
+- A change to the PR preflight checklist (Steps 1–9)
 - A new or modified evidence requirement in the grep evidence table
 - A new entry in the forbidden wording list
 - A new or modified classification rule or criterion
@@ -73,6 +73,8 @@ A new LL entry must be created whenever a reviewer finding causes any of the fol
 **Entry creation is mandatory, not optional.** The registry is the institutional memory of the project. A finding without an LL entry may be repeated.
 
 **Timing:** Create the LL entry in the same PR that implements the policy fix — not after. The entry documents *why* the fix was needed, which is most accurately captured at the time of the fix.
+
+**Post-merge exception:** When a finding arrives after the PR that introduced the defect has already merged, the LL entry and fix must be created in the next available PR on the branch. The Notes field of the LL entry must state: "Finding arrived post-merge of PR #N; fix applied in PR #M." This is the only permitted exception to the same-PR timing rule.
 
 ### Cross-Reference Rule — What Every Entry Must Reference
 
@@ -321,6 +323,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-008
+
+**Date:** 2026-06-18
+**PR:** #94
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Deployment manifest currency has no preflight verification step. The Pre-Implementation Red-Team Pass requires checking `docs/deployment/` for each sensitive PR, but no preflight step verifies that the manifest itself reflects the current contract state. A PR can pass all eight preflight steps while citing a stale manifest — one that describes role wiring or contract addresses that no longer match the deployed contracts — without triggering any trip-wire.
+
+**What we assumed:** The requirement to check `docs/deployment/` during the red-team pass was sufficient. If the manifest was stale, the implementer would notice while reading it.
+
+**Why the assumption failed:** "Notice while reading" is a CET-3 assumption — no grep evidence required, no mechanical check. A stale manifest produces a false green: CI passes, all 8 preflight steps pass, but the production wiring documented in the PR description does not reflect reality. An external auditor who checks the manifest against current contracts would immediately find the discrepancy.
+
+**Evidence that was missing:** A preflight step requiring: (1) grep of `docs/deployment/` for every role and contract address in the PR, (2) confirmation of manifest last-updated date relative to the most recent sensitive-component merge. Neither check existed in Steps 1–8.
+
+**Policy created:** Step 9 added to the PR Preflight Standard — Deployment Manifest Currency Check. For sensitive-component PRs: grep `docs/deployment/` for each role and address, confirm manifest date is current, update manifest in the same PR if stale. A claim that wiring is "documented in `docs/deployment/`" requires CET-1 grep evidence.
+
+**CLAUDE.md reference:** `### PR Preflight Standard` → Step 9 Deployment Manifest Currency Check (added in PR #94).
+
+**Verification method:** For every sensitive-component PR, run: `grep -r 'ROLE_NAME\|ContractName' docs/deployment/` for each role and address in the PR. Confirm at least one match in the manifest. Confirm the manifest file's last-modified date or version header is not older than the last sensitive-component PR. Paste grep results in the PR Evidence block.
+
+**Affected files:** `CLAUDE.md` (Step 9 added to PR Preflight Standard); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-008 entry; Maintenance Rule updated to Steps 1–9; post-merge timing exception clause added)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). No external Codex finding required — this class of gap was identified as high-probability before it was challenged. Post-merge timing exception clause added in the same PR to resolve the stated contradiction between the Timing rule and the LL-007 Notes field.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -341,4 +373,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-007*
+*Entries: LL-001 through LL-008*
