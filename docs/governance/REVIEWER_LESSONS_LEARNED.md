@@ -800,7 +800,71 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 ---
 
+## LL-023
+
+**Date:** 2026-06-18
+**PR:** #96
+**Fix PR:** this PR (branch `claude/codex-adversarial-review-fyu0nb`)
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/96#discussion_r3432622274
+
+**Finding:** Step 10's scope was expressed as a named list of specific contracts and document types (Kernel, PahlaviToken, Treasury, SovereignWealthFund, TriggerProtocol, API3Oracle, oracle docs, reserve docs, role docs, deployment manifests, runbooks, governance policy docs). A PR that adds a production `.mint()` call or grants `MINTER_ROLE` in any contract outside this named list — for example a new production contract — would not trigger Step 10, even though the HARDENING_ONLY Re-Evaluation Policy and K-RES-01 both require re-evaluation for any new mint path or downstream reserve consumer. The named list creates a bypass exactly where the active K-RES-01 trigger list says re-evaluation is mandatory.
+
+**What we assumed:** Naming the sensitive contract/document categories that existed at the time of writing was sufficient to capture all future sensitive PRs. A new contract with a mint path would be recognizable as sensitive by a contributor applying Step 10.
+
+**Why the assumption failed:** Step 10 is a mechanical preflight step applied by rule, not by judgment. If the scope clause does not enumerate a trigger, a contributor is not required to apply it. A new production contract — not yet named in the sensitive-component list — with a `.mint()` path would satisfy the letter of Step 10's scope clause while firing K-RES-01's Trigger 1. The named list cannot anticipate future contracts; the re-evaluation trigger list already exists in the HARDENING_ONLY Re-Evaluation Policy and covers the cases the named list misses.
+
+**Evidence that was missing:** A secondary scope clause in Step 10 covering any PR whose changes match a re-evaluation trigger event from the HARDENING_ONLY Re-Evaluation Policy — regardless of whether the specific contract or document is in the named list.
+
+**Policy created:** Step 10 scope clause expanded: in addition to the named sensitive-component list, Step 10 now applies to any PR whose changes match any re-evaluation trigger event listed in the HARDENING_ONLY Re-Evaluation Policy (new mint paths, treasury paths, reserve update paths, role model changes, AccessControl changes, oracle architecture changes, governance authority changes, emergency/freeze routing changes, deployment topology changes, or new downstream consumers of a state variable tracked by an active HARDENING_ONLY finding).
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 10 — Open Residuals Consultation — scope clause expanded.
+
+**Verification method:** `grep 'Step 10' CLAUDE.md` — confirm scope clause includes both the named list AND "any PR whose changes match any re-evaluation trigger event listed in the HARDENING_ONLY Re-Evaluation Policy above."
+
+**Affected files:** `CLAUDE.md` (Step 10 scope clause expanded); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-023 added)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived post-merge of PR #96 (C-1/LL-016 equivalent); fix applied in this PR on branch `claude/codex-adversarial-review-fyu0nb`.
+
+---
+
+## LL-024
+
+**Date:** 2026-06-18
+**PR:** #97
+**Fix PR:** this PR (branch `claude/codex-adversarial-review-fyu0nb`)
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/97#discussion_r3432848158
+
+**Finding:** The "Required fields for every red-team finding" table specified the "Evidence source" field as "File path, line number, grep command, or test reference that supports the claim." This field was not conditional on the CET tier. For CET-4 findings (assertion based on assumed behavior only — no code, architectural, or documentary evidence consulted), the field definition is incompletable by definition: CET-4 means no evidence was consulted, but the field demands a source. A reviewer documenting a CET-4 finding honestly has no valid value to enter and is forced to either invent a source (fabrication) or leave the field blank (non-conformant), neither of which is acceptable under the governance standard.
+
+**What we assumed:** The CET tier table above the required-fields table was sufficient context: a CET-4 finding has no evidence, and a reader would infer that "none" or an empty field was acceptable for CET-4 cases. The Evidence source field definition applied to the general case.
+
+**Why the assumption failed:** Required-fields tables are read mechanically. If a field says "File path, line number, grep command, or test reference," a contributor applying the table has no listed escape hatch for the tier-specific case. The template as written created exactly the situation the governance standard prohibits: a structured form that cannot be completed honestly for a legitimate (if upgradeable) tier of finding. This could cause reviewers to skip CET-4 documentation entirely rather than record an honest "no evidence" state that should be upgraded or discarded.
+
+**Evidence that was missing:** An explicit, tier-conditioned exception within the Evidence source field definition specifying what to write for CET-2 and CET-4 cases, rather than leaving the general-case description to cover all tiers.
+
+**Policy created:** Evidence source field definition amended: for CET-2 findings, state "none yet — [what would be needed to upgrade]"; for CET-4 findings, state "none — CET-4; must be upgraded to CET-1 or discarded before implementation begins." This allows honest recording of the tier without fabrication and preserves the upgrade obligation.
+
+**CLAUDE.md reference:** `### Pre-Implementation Red-Team Pass (Mandatory)` → Required fields for every red-team finding — Evidence source row updated.
+
+**Verification method:** `grep 'Evidence source' CLAUDE.md` — confirm the row includes CET-2 and CET-4 conditional text.
+
+**Affected files:** `CLAUDE.md` (Evidence source field definition updated); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-024 added)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived post-merge of PR #97 (C-7/LL-015 equivalent); fix applied in this PR on branch `claude/codex-adversarial-review-fyu0nb`. PR #98 and PR #99 Codex findings (Condition A scope and Condition A one-sided evidence) were already addressed by LL-017 (PR #99) and LL-020 (PR #100) respectively — no separate entries required.
+
+---
+
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-022*
+*Entries: LL-001 through LL-024*

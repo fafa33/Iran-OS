@@ -262,7 +262,7 @@ Implementation may begin only after this red-team pass is documented in the PR d
 | Field | Content |
 |---|---|
 | Claim | The specific assertion being made (one sentence) |
-| Evidence source | File path, line number, grep command, or test reference that supports the claim |
+| Evidence source | File path, line number, grep command, or test reference that supports the claim. For CET-2 findings: state "none yet — [what would be needed to upgrade]". For CET-4 findings: state "none — CET-4; must be upgraded to CET-1 or discarded before implementation begins". |
 | Verification method | The grep command or check that can be run to confirm the claim |
 | Certainty level | CET-1 / CET-2 / CET-3 / CET-4 |
 | Assumptions | Any conditions that must be true for the claim to hold |
@@ -711,7 +711,7 @@ A Step 9 claim that omits any of these five conditions is CET-2 at best and may 
 
 #### Step 10 — Open Residuals Consultation
 
-For any PR touching sensitive components — Kernel, PahlaviToken, Treasury, SovereignWealthFund, TriggerProtocol, API3Oracle, oracle docs, reserve docs, role docs, deployment manifests, runbooks, or governance policy docs — before opening, updating, marking ready, or merging the PR:
+For any PR touching sensitive components — Kernel, PahlaviToken, Treasury, SovereignWealthFund, TriggerProtocol, API3Oracle, oracle docs, reserve docs, role docs, deployment manifests, runbooks, or governance policy docs — **or any PR whose changes match any re-evaluation trigger event listed in the HARDENING_ONLY Re-Evaluation Policy above** (including new mint paths, treasury paths, reserve update paths, role model changes, AccessControl changes, oracle architecture changes, governance authority changes, emergency/freeze routing changes, deployment topology changes, or new downstream consumers of a state variable tracked by an active HARDENING_ONLY finding) — before opening, updating, marking ready, or merging the PR:
 
 1. Read `docs/governance/OPEN_RESIDUALS.md`.
 2. For each active HARDENING_ONLY entry in the register, check whether any of the entry's listed re-evaluation triggers applies to this PR.
