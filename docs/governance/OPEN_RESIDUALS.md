@@ -21,16 +21,16 @@
 **Source findings:** GAP-MEX-04 FND-01, FND-02, FND-08 (see `docs/reports/GAP_MEX_04_ORACLE_FRESHNESS_REVIEW.md`); disposition in `docs/reports/CF1_BREACH_DETECTION_DISPOSITION.md`
 **PRs:** #85 (Gate A/B implementation), #86/#87 (K-RES-01 documentation)
 
-**Finding summary:** `syncReserves(uint256 newReserves)` carries no timestamp or provenance for the reserve value itself. A feeder holding `FEEDER_ROLE` can refresh `PAH_USD_KEY` (satisfying Gate A freshness check on `flagViolation`) and still submit a stale or incorrect `newReserves` value, because the reserve sync path has no freshness gate at any call boundary. Stale-inflated reserves pass the `reserveCompliant` check in `PahlaviToken.mint`, potentially enabling minting against backing that no longer exists at the reported level.
+**Finding summary:** `syncReserves(uint256 newReserves)` carries no timestamp or provenance for the reserve value itself. `API3Oracle.syncReserves` is gated by `onlyFeeder`, Gate A (PAH_USD_KEY freshness: `block.timestamp - dataPoints[PAH_USD_KEY].timestamp <= MAX_DATA_AGE`), and Gate B (rate limit: one sync per `MAX_DATA_AGE` window). None of these gates verify that `newReserves` reflects current real-world reserve holdings. A feeder can satisfy all three gates (refresh PAH_USD_KEY, wait for the rate-limit window) and still submit a stale or incorrect `newReserves` value. Stale-inflated reserves pass the `reserveCompliant` check in `PahlaviToken.mint`, potentially enabling minting against backing that no longer exists at the reported level.
 
 **5-criterion evaluation at time of classification:**
 
 | Criterion | Pass / Fail | Evidence |
 |---|---|---|
-| Reachable attack path | Pass | Feeder calls `API3Oracle.syncReserves(staleFigure)` → `Kernel.syncReserves` → `PahlaviToken.updateReserves` → `totalReserves = staleFigure` — path traversable in current code; `onlyFeeder` is the sole gate |
+| Reachable attack path | Pass | Feeder calls `API3Oracle.syncReserves(staleFigure)` → `Kernel.syncReserves` → `PahlaviToken.updateReserves` → `totalReserves = staleFigure` — path traversable in current code; gates on `API3Oracle.syncReserves`: `onlyFeeder` (role gate) + Gate A (PAH_USD_KEY freshness check at `API3Oracle.sol:110-122`) + Gate B (rate limit: one sync per `MAX_DATA_AGE` window); all three gates can be satisfied by a feeder with `FEEDER_ROLE` who refreshes PAH_USD_KEY and waits for the window; none gate the freshness of `newReserves` itself |
 | Privileges realistically obtainable | Pass | `FEEDER_ROLE` on `API3Oracle` is held by named Airnode operators; key compromise is a realistic adversary scenario |
 | Concrete state corruption | Pass | `totalReserves` is set to a stale or inflated value; `reserveCompliant` and `currentReserveRatio()` operate on this figure |
-| Reachable downstream enforcement consequence | **Fail** | Minting circuit is incomplete: `SovereignWealthFund.sol` holds `MINTER_ROLE` but contains no `.mint()` call — verified by `grep -r '\.mint(' contracts/ --include="*.sol" \| grep -v fuzzing` → one match in fuzzing harness only; `reserveCompliant` modifier is unreachable from any current production code path |
+| Reachable downstream enforcement consequence | **Fail** | Minting circuit is incomplete: `SovereignWealthFund.sol` holds `MINTER_ROLE` but contains no `.mint()` call — verified by `grep -r '\.mint(' contracts/ --include="*.sol" \| grep -v fuzzing` → zero matches (the only `.mint(` call is in `contracts/fuzzing/FuzzPahlaviToken.sol`, excluded by `grep -v fuzzing`); `reserveCompliant` modifier is unreachable from any current production code path |
 | Current doctrine violation | Fail (consequential) | No enforcement consequence reaches current code; doctrine violation requires an executable monetary path |
 
 **Disqualifying assumption:** Criterion 4 fails because `SovereignWealthFund.sol` holds `MINTER_ROLE` but contains no function that calls `PahlaviToken.mint()`. The `reserveCompliant` modifier is unreachable from any current production code path.
@@ -45,7 +45,7 @@
 ```
 grep -r '\.mint(' contracts/ --include="*.sol" | grep -v fuzzing
 ```
-Expected result: one match in fuzzing harness only. Any additional match must trigger K-RES-01 re-evaluation before the PR is merged.
+Expected result: zero matches — the only `.mint(` call is in `contracts/fuzzing/FuzzPahlaviToken.sol`, which is excluded by the `grep -v fuzzing` filter. A non-empty result means a new production `.mint(` call exists and K-RES-01 must be re-evaluated before the PR is merged.
 
 **Notes:** First documented inline in `docs/reports/CF1_BREACH_DETECTION_DISPOSITION.md` (PR #87). The inline note stated: "K-RES-01 must be re-evaluated before any future SWF mint path, reserve-linked mint enforcement, or new downstream consumer of `totalReserves` is introduced." This register entry is the canonical authoritative record of K-RES-01 and supersedes the advisory inline notice as the enforceable tracking point.
 

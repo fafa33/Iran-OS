@@ -151,7 +151,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 **Why the assumption failed:** The claim was architecturally correct but stated without grep evidence. `SovereignWealthFund.sol` holds `MINTER_ROLE`, which is visible and creates a plausible challenge even when the calling code does not exist. Without the grep result, reviewers correctly challenged the claim.
 
 **Evidence that was missing:**
-- `grep -r '\.mint(' contracts/ --include="*.sol" | grep -v fuzzing` → one match only in fuzzing harness
+- `grep -r '\.mint(' contracts/ --include="*.sol" | grep -v fuzzing` → zero matches (the only `.mint(` call is in the fuzzing harness, excluded by `grep -v fuzzing`)
 - Explicit statement: "SWF holds MINTER_ROLE but SovereignWealthFund.sol contains no function that calls PahlaviToken.mint() — verified by codebase grep"
 
 **Policy created:** Any "no reachable downstream enforcement consequence" claim must be accompanied by the grep result for every enforcement surface (mint, freeze, trigger, treasury). The incomplete minting circuit must be explicitly documented with grep evidence, not inferred.
@@ -431,7 +431,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 **CLAUDE.md reference:** `### Red-Team Finding Classification Standard (Mandatory)` → HARDENING_ONLY Re-Evaluation Policy (added).
 
-**Verification method:** Before any PR touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, or deployment wiring: (1) read `docs/governance/OPEN_RESIDUALS.md`; (2) for each active HARDENING_ONLY entry, check whether any of the entry's listed re-evaluation triggers applies to this PR; (3) if yes, re-run the 5-criterion evaluation table before continuing. If re-classification upgrades a finding to BLOCKER_P1, it must block the triggering PR. Run the verification grep for K-RES-01: `grep -r '\.mint(' contracts/ --include="*.sol" | grep -v fuzzing` → expected: one match in fuzzing harness only.
+**Verification method:** Before any PR touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, or deployment wiring: (1) read `docs/governance/OPEN_RESIDUALS.md`; (2) for each active HARDENING_ONLY entry, check whether any of the entry's listed re-evaluation triggers applies to this PR; (3) if yes, re-run the 5-criterion evaluation table before continuing. If re-classification upgrades a finding to BLOCKER_P1, it must block the triggering PR. Run the verification grep for K-RES-01: `grep -r '\.mint(' contracts/ --include="*.sol" | grep -v fuzzing` → expected: zero matches (the only `.mint(` call is in the fuzzing harness, excluded by `grep -v fuzzing`).
 
 **Affected files:** `CLAUDE.md` (HARDENING_ONLY Re-Evaluation Policy added to Classification Standard); `docs/governance/OPEN_RESIDUALS.md` (new file — centralized residual register, K-RES-01 entry); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-011 added; footer updated to LL-001 through LL-011)
 
@@ -440,6 +440,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 **Repeat allowed?** NO
 
 **Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap B-2 from the gap analysis report. K-RES-01 is the only active HARDENING_ONLY residual at register creation time. Gap B-7 (no centralized open residual register) is also closed by this PR — it is documented here rather than as a separate LL entry because both gaps were identified and resolved in the same implementation pass.
+
+---
+
+## LL-012
+
+**Date:** 2026-06-18
+**PR:** #94
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/94#discussion_r3432535818 (Finding 1); https://github.com/fafa33/Iran-OS/pull/94#discussion_r3432535821 (Finding 2)
+**Finding:** Two defects in `docs/governance/OPEN_RESIDUALS.md` as created in PR #94: (1) The K-RES-01 "Reachable attack path" criterion evidence stated "`onlyFeeder` is the sole gate" on `API3Oracle.syncReserves`. In the reviewed codebase, `API3Oracle.syncReserves` also enforces Gate A (PAH_USD_KEY freshness check) and Gate B (rate limit) at lines 110–122, added in PR #85. The register is the baseline future PRs use for K-RES-01 re-evaluation; a stale gate description causes reviewers to misclassify changes against an incorrect model. (2) The K-RES-01 verification grep — `grep -r '\.mint(' contracts/ --include="*.sol" | grep -v fuzzing` — was documented with expected result "one match in fuzzing harness only." Because `grep -v fuzzing` removes lines containing the string "fuzzing" from the output, and the only `.mint(` match is in `contracts/fuzzing/FuzzPahlaviToken.sol` (whose path contains "fuzzing"), the actual command result is zero matches. The "one match in fuzzing harness only" description is factually wrong for this command.
+
+**What we assumed:** (1) Listing the role gate (`onlyFeeder`) was sufficient for the Reachable attack path evidence because the finding's concern is the absence of a reserve-value freshness gate, not role access. (2) A piped `grep -v fuzzing` command would display the fuzzing harness match while excluding it from the "production matches" count, allowing "one match in fuzzing harness only" to serve as a meaningful expected result.
+
+**Why the assumption failed:** (1) The register is the authoritative re-evaluation baseline. Future PRs that add a new oracle gate or change the syncReserves call path are re-evaluated against the documented model. If Gate A and Gate B are absent from the documented evidence, a reviewer comparing a future change against "onlyFeeder only" will assess a different attack surface than actually exists. Accuracy of the gate enumeration is required for the re-evaluation policy to function correctly. (2) `grep -v fuzzing` is an invert-match filter: it removes matching lines from output. A line from `contracts/fuzzing/FuzzPahlaviToken.sol` contains the string "fuzzing" (in its path prefix in grep output) and is removed by the filter. The net result is zero output lines. "One match in fuzzing harness only" describes what the first grep found before filtering, not what the piped command returns — these are different values and the documentation must describe the final command's actual output.
+
+**Evidence that was missing:** (1) Enumeration of all gates on `API3Oracle.syncReserves` (role gate + Gate A + Gate B) with contract line reference. (2) Verification that the documented grep command's expected result matches the command's actual output when run.
+
+**Policy created:** (1) When documenting "Reachable attack path" evidence for a HARDENING_ONLY finding, all gates at the attack entry point (role gates, freshness gates, rate limits) must be enumerated — not only the role gate. The finding's concern may be about one gate type, but the evidence must represent the full gate set. (2) When specifying a verification grep expected result, run the complete command (including all pipes and filters) and document the actual output. CET-1 applies to expected-result descriptions: the result claimed must match the result produced by running the command.
+
+**CLAUDE.md reference:** `### Red-Team Finding Classification Standard (Mandatory)` → HARDENING_ONLY Re-Evaluation Policy — required documentation: Disqualifying assumptions expressed as grep-verifiable assertions.
+
+**Verification method:** (1) For any HARDENING_ONLY entry's "Reachable attack path" criterion, grep the entry-point contract for all modifier and require statements: `grep -n 'onlyFeeder\|require\|modifier' contracts/oracles/API3Oracle.sol | head -30`. Confirm all present gates are named in the evidence. (2) For any documented verification grep: run the exact command as written and confirm the actual output matches the documented expected result. If the command pipes through a filter (`grep -v`), the documented expected result must reflect the post-filter output.
+
+**Affected files:** `docs/governance/OPEN_RESIDUALS.md` (finding summary, Reachable attack path evidence, Criterion 4 evidence, verification grep expected result corrected); `CLAUDE.md` (K-RES-01 example disqualifying assumption corrected); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-002 evidence, LL-011 verification method corrected; LL-012 added; footer updated to LL-001 through LL-012)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived post-merge of PR #94; fix applied in PR #95 on branch `claude/codex-adversarial-review-fyu0nb`. Both findings arrived in the same Codex review comment session on PR #94.
 
 ---
 
@@ -463,4 +493,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-011*
+*Entries: LL-001 through LL-012*
