@@ -35,6 +35,62 @@ List the key files modified or created:
 
 ---
 
+## Governance Preflight Synchronization
+
+`CLAUDE.md` is the authoritative governance source. This section mirrors the existing `CLAUDE.md` standard for contributor-facing review and does not create additional policy.
+
+Applies to every PR covered by the `CLAUDE.md` PR Preflight Standard: code or documentation touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, or audit reports. It also applies to any PR making security, governance, reachability, role, reserve, oracle, trigger, treasury, mint, freeze, or closure claims.
+
+- [ ] This PR is outside the `CLAUDE.md` PR Preflight Standard scope.
+- [ ] This PR is covered by the `CLAUDE.md` PR Preflight Standard.
+
+If covered, confirm the existing `CLAUDE.md` requirements were followed:
+
+- [ ] CET applied: all PR claims and red-team conclusions are CET-1 before push; no CET-2, CET-3, or CET-4 claim remains.
+- [ ] Certainty Language Rule applied to changed files, PR title, and PR description.
+- [ ] Red-Team Evidence Standard applied: claim, evidence source, verification method, certainty level, assumptions, disqualifying assumptions, and recommended action recorded where applicable.
+- [ ] Step 8 Evidence Block included below, including grep evidence, role path evidence, tests, open residuals, and certainty-language scan.
+- [ ] Step 9 Deployment Manifest Currency evidence included below for sensitive-component PRs, or not applicable because this PR is outside Step 9 scope.
+- [ ] Step 10 `docs/governance/OPEN_RESIDUALS.md` consultation completed and recorded below.
+- [ ] HARDENING_ONLY re-evaluation triggers checked; any matching active residual was re-evaluated before marking this PR ready.
+
+### Evidence Block
+
+Required for PRs covered by the `CLAUDE.md` PR Preflight Standard.
+
+- grep: `<command>` → `<result>`
+- Role grant path: `<contract>:<line>` → `<deployment manifest section>`
+- npm test: ___ passing / not run because: ___
+- Open residuals (Step 10):
+  - `OPEN_RESIDUALS.md` consulted: YES / NO
+  - Matching residual IDs: [list, or "No matching open residuals found after consulting OPEN_RESIDUALS.md"]
+  - Residual re-evaluation required: YES / NO
+  - Re-evaluation result: [per-residual result, or "N/A — no matching residuals identified"]
+- Certainty language scan:
+  - Changed files scanned: YES / NO
+  - PR title scanned: YES / NO
+  - PR description scanned: YES / NO
+  - Certainty terms found: ___
+  - Evidence for each term: ___
+  - Terms rewritten or qualified: ___
+  - Result: PASS / BLOCKED
+  - CET level: CET-1 / below CET-1
+- Step 9 — Deployment Manifest Currency:
+  - Manifest file(s) checked: ___
+  - Authoritative date field: ___
+  - Date value: ___
+  - Commit evidence if no date field: ___
+  - Condition A comparison: ___
+    - Manifest last-update: ___
+    - Latest sensitive-component PR on main: ___
+    - Comparison result: ___
+  - Condition B topology/role/oracle/reserve/treasury/trigger/mint/freeze change: YES / NO
+  - Re-verification required: YES / NO
+  - Result: PASS / DOCUMENTATION_REQUIRED
+  - CET level: CET-1 / below CET-1 / DOCUMENTATION_REQUIRED
+
+---
+
 ## Pre-Implementation Red-Team Pass
 
 Applies to any PR touching: Kernel · Oracle · Reserve · Treasury · TriggerProtocol · PahlaviToken · roles · deployment wiring · authority boundaries.
@@ -45,6 +101,7 @@ Applies to any PR touching: Kernel · Oracle · Reserve · Treasury · TriggerPr
 If red-team pass applies, confirm ALL of the following were documented before any code was written:
 
 - [ ] Internal red-team pass completed and documented (in this PR description or a linked report) before implementation began.
+- [ ] Each red-team conclusion includes the evidence fields and CET level required by `CLAUDE.md`.
 - [ ] Production caller path identified (exact sequence of callers from external entry point to target function on mainnet).
 - [ ] Role grant path identified (how each required role reaches each caller address on mainnet, via the deployment manifest).
 - [ ] Deployment manifest path identified (which file and section in `docs/deployment/` covers this wiring).
