@@ -372,7 +372,7 @@ This rule applies to all documents in the repository regardless of type — code
 | `"impossible"` (security or reachability claim) | **Forbidden** | Replace with: "No path was identified under the current codebase and evidence set: `[grep command → result]`" |
 | `"unreachable"` (security or reachability claim) | **Forbidden** | Replace with: "No reachable path was identified in the reviewed code: `[grep command → result]`" |
 | `"cannot happen"` (security claim) | **Forbidden** | Replace with: "No code path producing this outcome was identified: `[grep command → result]`" |
-| `"no attack path"` | **Forbidden** | Replace with: "No attack path was identified — 5-criterion gate: `[completed table]`" |
+| `"no attack path"` | **Forbidden** | Replace with: "No reachable exploit chain was identified in the current codebase — 5-criterion gate: `[completed table]`" |
 | `"impossible to exploit"` | **Forbidden** | Must be replaced by completed 5-criterion evaluation table |
 | `"fully mitigated"` | **Forbidden** | Replace with: "Mitigated (scope: [exact scope]) — remaining open: [list or 'none identified in reviewed code']" |
 | `"permanently closed"` | **Forbidden** | Replace with: "CLOSED (scope: [exact scope]) — remaining open: [list]" — the word "permanently" is prohibited |
