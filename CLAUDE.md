@@ -262,7 +262,7 @@ Implementation may begin only after this red-team pass is documented in the PR d
 | Field | Content |
 |---|---|
 | Claim | The specific assertion being made (one sentence) |
-| Evidence source | File path, line number, grep command, or test reference that supports the claim |
+| Evidence source | File path, line number, grep command, or test reference that supports the claim. For CET-2 findings: state "none yet — [what would be needed to upgrade]". For CET-4 findings: state "none — CET-4; must be upgraded to CET-1 or discarded before implementation begins". |
 | Verification method | The grep command or check that can be run to confirm the claim |
 | Certainty level | CET-1 / CET-2 / CET-3 / CET-4 |
 | Assumptions | Any conditions that must be true for the claim to hold |
@@ -631,16 +631,23 @@ For every gap, finding, or status being changed: grep for the gap/finding ID acr
 
 #### Step 8 — PR Body Evidence Block
 
-Every PR must include an Evidence section:
+Every sensitive-component PR covered by this Preflight Standard (any PR touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, or audit reports — as defined in the preamble above) must include an Evidence section.
+
+**Omission rule:**
+- For sensitive-component PRs, omission of the Evidence Block is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
+- For non-sensitive PRs, the Evidence Block is optional — unless the PR makes any security, governance, reachability, role, reserve, oracle, trigger, treasury, mint, freeze, or closure claim, in which case the Evidence Block is required for those claims.
+
+**Open residuals may be recorded as "none" only after consulting `docs/governance/OPEN_RESIDUALS.md` (Step 10).** Recording "none" without consulting the register is a preflight failure.
 
 ```
 ## Evidence
 - grep: `<command>` → `<result>`
 - Role grant path: `<contract>:<line>` → `<deployment manifest section>`
 - npm test: N passing
-- Open residuals consulted: [YES / NO]
-  - File checked: docs/governance/OPEN_RESIDUALS.md
-  - Matching residual IDs: [list, or "none matched"]
+- Open residuals (Step 10 — requires consulting docs/governance/OPEN_RESIDUALS.md):
+  - OPEN_RESIDUALS.md consulted: [YES / NO]
+  - Matching residual IDs: [list of matching HARDENING_ONLY entry IDs, or "none — no active entries match this PR's trigger list"]
+  - Residual re-evaluation required: [YES / NO]
   - Re-evaluation result: [per-residual result, or "No matching open residuals found after consulting OPEN_RESIDUALS.md"]
 - Certainty language scan:
   - Changed files scanned: [YES / NO]
@@ -685,7 +692,7 @@ Step 9 — Deployment Manifest Currency:
 - Commit evidence if no date field: [git log -1 output, or "N/A — explicit date field present"]
 - Condition A (inherited staleness): manifest predates latest sensitive-component PR on main?
   - Manifest last-update: [date from explicit field above, or commit hash + date from git log above]
-  - Latest sensitive-component PR on main: [PR number and merge date — run `git log --oneline --merges origin/main | head -5` to identify]
+  - Latest sensitive-component PR on main: [PR number and merge date — run `git log --merges --pretty=format:"%h %ad %s" --date=short origin/main | head -5` to identify]
   - Comparison result: manifest [OLDER / NEWER / EQUAL] → [DOCUMENTATION_REQUIRED / PASS]
 - Condition B (this PR's changes): PR changes deployment topology, roles, oracle wiring, reserve/treasury/trigger/mint/freeze path? [YES / NO]
 - Re-verification required? [YES (Condition A) / YES (Condition B) / NO — both conditions evaluated and neither applies]
@@ -704,7 +711,7 @@ A Step 9 claim that omits any of these five conditions is CET-2 at best and may 
 
 #### Step 10 — Open Residuals Consultation
 
-For any PR touching sensitive components — Kernel, PahlaviToken, Treasury, SovereignWealthFund, TriggerProtocol, API3Oracle, oracle docs, reserve docs, role docs, deployment manifests, runbooks, or governance policy docs — before opening, updating, marking ready, or merging the PR:
+For any PR touching sensitive components — Kernel, PahlaviToken, Treasury, SovereignWealthFund, TriggerProtocol, API3Oracle, oracle docs, reserve docs, role docs, deployment manifests, runbooks, or governance policy docs — **or any PR whose changes match any re-evaluation trigger event listed in the HARDENING_ONLY Re-Evaluation Policy above** (including new mint paths, treasury paths, reserve update paths, role model changes, AccessControl changes, oracle architecture changes, governance authority changes, emergency/freeze routing changes, deployment topology changes, or new downstream consumers of a state variable tracked by an active HARDENING_ONLY finding) — before opening, updating, marking ready, or merging the PR:
 
 1. Read `docs/governance/OPEN_RESIDUALS.md`.
 2. For each active HARDENING_ONLY entry in the register, check whether any of the entry's listed re-evaluation triggers applies to this PR.

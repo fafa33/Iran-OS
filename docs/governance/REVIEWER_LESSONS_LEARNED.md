@@ -80,7 +80,7 @@ A new LL entry must be created whenever a reviewer finding causes any of the fol
 
 Every LL entry must reference:
 
-1. **Originating PR** — the PR on which the review comment appeared
+1. **Originating PR** — the PR on which the review comment appeared. The `PR` field must always record the originating finding PR, not the fix PR. If the fix was applied in a separate subsequent PR, that PR is recorded in an optional **Fix PR** field immediately after the `PR` field. Placeholder URLs (e.g., `#issuecomment-0`) are not conformant — the real `comment_id` must be recorded. An entry whose `PR` field records a fix PR rather than the originating PR is non-conformant regardless of the Notes field.
 2. **Originating review comment URL** — direct link to the specific GitHub comment. Two valid URL formats are accepted:
    - **Review-thread URL:** `https://github.com/fafa33/Iran-OS/pull/N#discussion_rXXX` — a review comment created via the Files Changed or Commits view
    - **PR-comment URL:** `https://github.com/fafa33/Iran-OS/pull/N#issuecomment-XXX` — a PR-level comment posted in the Conversation view
@@ -392,7 +392,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 **Date:** 2026-06-18
 **PR:** #93
 **Reviewer:** chatgpt-codex-connector[bot]
-**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/93#issuecomment-0
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/93#issuecomment-4736984325
 **Finding:** Two defects in PR #93: (1) The replacement text for `"no attack path"` — `"No attack path was identified..."` — preserves the forbidden vocabulary. A Step 5 scan or human reviewer would still flag the replacement as using the forbidden phrase, so the policy does not close the gap it was designed to prevent. (2) The post-merge exception clause added in PR #92 (LL-008) requires Notes to state `"Finding arrived post-merge of PR #N; fix applied in PR #M"`, but LL-007 Notes still said `"Finding arrived after PR #90 merged..."` — the old form — making the registry non-conformant with the rule it introduced.
 
 **What we assumed:** (1) A replacement phrasing that restructures the claim ("No attack path was identified") is distinct from the forbidden phrase ("no attack path") and would not be caught by a scan. (2) LL-007's Notes field used equivalent wording and would be understood to satisfy the new post-merge rule.
@@ -413,7 +413,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 **Repeat allowed?** NO
 
-**Notes:** Both findings arrived on PR #93 in the same Codex review comment. Fixes committed in the same PR before merge. **PR-comment URL conformance:** This entry's `#issuecomment-0` URL was non-conformant under the original Cross-Reference Rule, which accepted only `#discussion_rXXX` format. The rule was updated in PR #100 (LL-019) to also accept `#issuecomment-XXX` format. All five required fields for a PR-comment URL entry are present: PR number (#93) ✓, comment URL (issuecomment-0) ✓, reviewer identity (chatgpt-codex-connector[bot]) ✓, finding summary (Finding field) ✓, verification method (Verification method field) ✓. This entry is conformant under the updated rule.
+**Notes:** Both findings arrived on PR #93 in the same Codex review comment. Fixes committed in the same PR before merge. **PR-comment URL:** Real `comment_id` `#issuecomment-4736984325` identified via GitHub API and recorded in this PR (LL-022) — replacing the placeholder `#issuecomment-0` that remained after PR #100 (LL-019) declared the entry conformant without looking up the actual ID. A Codex review on PR #100 (`#discussion_r3433055404`) flagged the placeholder as non-navigable. All five required fields for a PR-comment URL entry are present: PR number (#93) ✓, comment URL (`#issuecomment-4736984325`, navigable) ✓, reviewer identity (chatgpt-codex-connector[bot]) ✓, finding summary (Finding field) ✓, verification method (Verification method field) ✓. This entry is conformant under the Cross-Reference Rule.
 
 ---
 
@@ -690,7 +690,8 @@ A finding may happen once. The same *class* of finding must never happen twice.
 ## LL-020
 
 **Date:** 2026-06-18
-**PR:** #100
+**PR:** #99
+**Fix PR:** #100
 **Reviewer:** chatgpt-codex-connector[bot]
 **Review comment URL:** https://github.com/fafa33/Iran-OS/pull/99#discussion_r3432990848
 **Finding:** Step 9 Condition A evidence template required only the manifest's git log output ("git log evidence recorded above"). It did not require recording the latest sensitive-component PR on main. A reviewer could record `Condition A: NO` by observing that the manifest looked recent — without documenting the date of the most recent sensitive merge on main. The comparison that Condition A is meant to enforce (manifest date vs. latest sensitive PR date) was one-sided: only the manifest side was documented.
@@ -717,6 +718,71 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-021
+
+**Date:** 2026-06-18
+**PR:** #101
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Step 8 opened with "Every PR must include an Evidence section" — an unqualified scope that contradicted the Preflight Standard preamble, which scopes the standard to sensitive-component PRs only. This created two exploitable ambiguities: (1) over-scope — a reviewer could cite Step 8 verbatim to demand a full Evidence Block from any PR, including trivial non-sensitive docs changes; (2) under-scope — a contributor could argue that a sensitive-component PR is exempt because Step 8 itself never states that omission is a preflight failure. Additionally, the Open Residuals field used "YES/NO" and "none matched" without requiring proof that OPEN_RESIDUALS.md was actually opened and consulted — a contributor could record "none matched" based on memory or assumption without reading the register.
+
+**What we assumed:** The Preflight Standard preamble's scope clause ("This policy governs every PR — code or documentation — touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, or audit reports") carried through to every step within the standard. A contributor reading Step 8 in context of the preamble would understand that "every PR" meant "every PR covered by this standard."
+
+**Why the assumption failed:** A preflight step is an action item, not a prose document. Contributors apply steps mechanically and in sequence. Step 8 as written could be read in isolation — and a step that says "every PR" without internal scope qualification will be interpreted as applying to all PRs by any reader who does not cross-reference the preamble. The same ambiguity that allows over-scope interpretation also allows under-scope interpretation: a contributor can argue the scope clause in the preamble limits the standard but doesn't mandate an Evidence Block specifically. Without an explicit omission rule inside Step 8, omission has no named consequence.
+
+**Evidence that was missing:** (1) Scope qualification inside Step 8 itself, referencing the preamble by name. (2) An explicit omission rule: sensitive-component PR omission = preflight failure; non-sensitive PR omission = optional unless claims are made. (3) A direct link from the Open Residuals field to Step 10 and `docs/governance/OPEN_RESIDUALS.md`. (4) A prohibition on recording "none" for residuals without documented consultation of the register.
+
+**Policy created:** Step 8 opening sentence qualified to "sensitive-component PR covered by this Preflight Standard (as defined in the preamble above)." Omission rule added. Open Residuals field renamed and linked to Step 10; sub-fields expanded to OPEN_RESIDUALS.md consulted (YES/NO), Matching residual IDs, Residual re-evaluation required (YES/NO), Re-evaluation result. Explicit rule: "none" for residuals requires consulting `docs/governance/OPEN_RESIDUALS.md`; recording "none" without consulting the register is a preflight failure.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 8 PR Body Evidence Block (scope qualification, omission rule, Open Residuals field expanded and linked to Step 10).
+
+**Verification method:** For any sensitive-component PR: (1) confirm the Evidence Block is present; (2) confirm `OPEN_RESIDUALS.md consulted: YES` is recorded; (3) confirm "Matching residual IDs" names specific IDs or the exact phrase "No matching open residuals found after consulting OPEN_RESIDUALS.md" — bare "none" or "N/A" without this phrase is non-conformant; (4) confirm Residual re-evaluation required and Re-evaluation result are both completed.
+
+**Affected files:** `CLAUDE.md` (Step 8 scope qualified; omission rule added; Open Residuals field expanded and linked); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-021 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-5 from the gap analysis report.
+
+---
+
+## LL-022
+
+**Date:** 2026-06-18
+**PR:** #100
+**Fix PR:** this PR (branch `claude/codex-adversarial-review-fyu0nb`)
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:**
+- Finding A (LL-010 placeholder URL): https://github.com/fafa33/Iran-OS/pull/100#discussion_r3433055404
+- Finding B (Step 9 date-bearing command): https://github.com/fafa33/Iran-OS/pull/100#discussion_r3433055413
+- Finding C (LL-020 originating PR field): https://github.com/fafa33/Iran-OS/pull/100#discussion_r3433055420
+
+**Finding:** Three cross-reference and evidence-fidelity defects in PR #100: (A) LL-010's Review comment URL remained `#issuecomment-0` — a placeholder — after LL-019 declared the entry conformant. The real `comment_id` was not looked up at the time of the conformance declaration; the conformance claim was based on the URL's structural format, not its navigability. An auditor following the Cross-Reference Rule cannot reach the originating comment using a placeholder URL. (B) Step 9 Condition A prescribed `git log --oneline --merges origin/main | head -5`. The `--oneline` format is an alias for `--pretty=oneline --abbrev-commit` and produces only `<hash> <title-line>` — no date field — so a reviewer following this instruction cannot produce the merge date required for the Condition A comparison regardless of effort. (C) LL-020's `PR` field was set to `#100` (the fix PR) instead of `#99` (the PR where the Codex review comment appeared), violating the Cross-Reference Rule's definition of "Originating PR."
+
+**What we assumed:** (A) Declaring LL-010 conformant under the updated Cross-Reference Rule (LL-019) required verifying the URL format and the five required fields — not navigating to the actual comment. The placeholder `#issuecomment-0` was understood as a stand-in that the format check would pass. (B) `git log --oneline --merges` would expose enough information (hash + title) for a reviewer to identify the relevant merge, and the date could be obtained by subsequent means. (C) Recording the fix PR in the `PR` field was acceptable because the Notes field explained which PR was the originating PR and which was the fix PR.
+
+**Why the assumption failed:** (A) A URL that cannot be navigated is not auditable, and "conformant in format" is not the same as "conformant in substance." The Cross-Reference Rule requires a navigable link — a placeholder by definition fails this test. Declaring conformance without confirming navigability conflated format with function. (B) `--oneline` is a shorthand with a fixed output format that omits dates. Reviewers following the prescribed command face a structural impossibility — the command cannot produce the required output. (C) The Cross-Reference Rule unambiguously defines the `PR` field as the PR where the review comment appeared. Notes are explanatory, not authoritative: an audit matching `PR` to the URL's PR number will fail regardless of what the Notes say.
+
+**Evidence that was missing:** (A) GitHub API lookup confirming the actual `comment_id` for PR #93 (found: `#issuecomment-4736984325` — verified via `get_comments` on PR #93 in this session). (B) Verification that the prescribed `git log` format includes a date placeholder (`%ad`, `%cd`, `%ci`, or equivalent). (C) PR-field-to-URL alignment check: the PR number in the `PR` field must match the PR number in the `Review comment URL` path for every entry with an external review URL.
+
+**Policy created:** (A) Cross-Reference Rule amended: the `PR` field must always record the originating finding PR, not the fix PR; placeholder URLs (`#issuecomment-0`) are explicitly non-conformant — the real `comment_id` must be recorded; if a fix was applied in a separate PR, that PR is recorded in an optional `Fix PR` field immediately after `PR`. (B) Step 9 Condition A command updated from `git log --oneline --merges origin/main | head -5` to `git log --merges --pretty=format:"%h %ad %s" --date=short origin/main | head -5`, which produces hash, date (`%ad`), and subject per merge commit. (C) No separate rule needed for Finding C — LL-020's `PR` field corrected to `#99` per the existing Cross-Reference Rule; the rule's definition of "Originating PR" is unambiguous.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 9 Required evidence block — Condition A identification command updated to date-bearing format.
+
+**Verification method:** (A) `grep '^\*\*Review comment URL:\*\*.*issuecomment-0' docs/governance/REVIEWER_LESSONS_LEARNED.md` → zero matches (no URL field contains the placeholder; prose references to the old placeholder in LL-022 explanatory text are expected and do not fail this check). (B) `grep 'git log.*oneline.*merges' CLAUDE.md` → zero matches (undatable command replaced); `grep 'pretty=format' CLAUDE.md` → one match at Step 9 Condition A (date-bearing command present). (C) For every LL entry with an external review URL: the PR number in the `PR` field must match the PR number in the `Review comment URL` hostname path — verified for all entries in this session.
+
+**Affected files:** `CLAUDE.md` (Step 9 Condition A git log command updated to date-bearing format); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Cross-Reference Rule amended: Fix PR field added, placeholder URL prohibition added; LL-010 Review comment URL corrected from `#issuecomment-0` to `#issuecomment-4736984325`; LL-010 Notes updated; LL-020 PR field corrected to `#99`; LL-020 Fix PR field added; LL-022 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** All three findings arrived in the same Codex review session on PR #100. Fixes applied in this PR on branch `claude/codex-adversarial-review-fyu0nb`.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -734,7 +800,71 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 ---
 
+## LL-023
+
+**Date:** 2026-06-18
+**PR:** #96
+**Fix PR:** this PR (branch `claude/codex-adversarial-review-fyu0nb`)
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/96#discussion_r3432622274
+
+**Finding:** Step 10's scope was expressed as a named list of specific contracts and document types (Kernel, PahlaviToken, Treasury, SovereignWealthFund, TriggerProtocol, API3Oracle, oracle docs, reserve docs, role docs, deployment manifests, runbooks, governance policy docs). A PR that adds a production `.mint()` call or grants `MINTER_ROLE` in any contract outside this named list — for example a new production contract — would not trigger Step 10, even though the HARDENING_ONLY Re-Evaluation Policy and K-RES-01 both require re-evaluation for any new mint path or downstream reserve consumer. The named list creates a bypass exactly where the active K-RES-01 trigger list says re-evaluation is mandatory.
+
+**What we assumed:** Naming the sensitive contract/document categories that existed at the time of writing was sufficient to capture all future sensitive PRs. A new contract with a mint path would be recognizable as sensitive by a contributor applying Step 10.
+
+**Why the assumption failed:** Step 10 is a mechanical preflight step applied by rule, not by judgment. If the scope clause does not enumerate a trigger, a contributor is not required to apply it. A new production contract — not yet named in the sensitive-component list — with a `.mint()` path would satisfy the letter of Step 10's scope clause while firing K-RES-01's Trigger 1. The named list cannot anticipate future contracts; the re-evaluation trigger list already exists in the HARDENING_ONLY Re-Evaluation Policy and covers the cases the named list misses.
+
+**Evidence that was missing:** A secondary scope clause in Step 10 covering any PR whose changes match a re-evaluation trigger event from the HARDENING_ONLY Re-Evaluation Policy — regardless of whether the specific contract or document is in the named list.
+
+**Policy created:** Step 10 scope clause expanded: in addition to the named sensitive-component list, Step 10 now applies to any PR whose changes match any re-evaluation trigger event listed in the HARDENING_ONLY Re-Evaluation Policy (new mint paths, treasury paths, reserve update paths, role model changes, AccessControl changes, oracle architecture changes, governance authority changes, emergency/freeze routing changes, deployment topology changes, or new downstream consumers of a state variable tracked by an active HARDENING_ONLY finding).
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 10 — Open Residuals Consultation — scope clause expanded.
+
+**Verification method:** `grep 'Step 10' CLAUDE.md` — confirm scope clause includes both the named list AND "any PR whose changes match any re-evaluation trigger event listed in the HARDENING_ONLY Re-Evaluation Policy above."
+
+**Affected files:** `CLAUDE.md` (Step 10 scope clause expanded); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-023 added)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived post-merge of PR #96 (C-1/LL-016 equivalent); fix applied in this PR on branch `claude/codex-adversarial-review-fyu0nb`.
+
+---
+
+## LL-024
+
+**Date:** 2026-06-18
+**PR:** #97
+**Fix PR:** this PR (branch `claude/codex-adversarial-review-fyu0nb`)
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/97#discussion_r3432848158
+
+**Finding:** The "Required fields for every red-team finding" table specified the "Evidence source" field as "File path, line number, grep command, or test reference that supports the claim." This field was not conditional on the CET tier. For CET-4 findings (assertion based on assumed behavior only — no code, architectural, or documentary evidence consulted), the field definition is incompletable by definition: CET-4 means no evidence was consulted, but the field demands a source. A reviewer documenting a CET-4 finding honestly has no valid value to enter and is forced to either invent a source (fabrication) or leave the field blank (non-conformant), neither of which is acceptable under the governance standard.
+
+**What we assumed:** The CET tier table above the required-fields table was sufficient context: a CET-4 finding has no evidence, and a reader would infer that "none" or an empty field was acceptable for CET-4 cases. The Evidence source field definition applied to the general case.
+
+**Why the assumption failed:** Required-fields tables are read mechanically. If a field says "File path, line number, grep command, or test reference," a contributor applying the table has no listed escape hatch for the tier-specific case. The template as written created exactly the situation the governance standard prohibits: a structured form that cannot be completed honestly for a legitimate (if upgradeable) tier of finding. This could cause reviewers to skip CET-4 documentation entirely rather than record an honest "no evidence" state that should be upgraded or discarded.
+
+**Evidence that was missing:** An explicit, tier-conditioned exception within the Evidence source field definition specifying what to write for CET-2 and CET-4 cases, rather than leaving the general-case description to cover all tiers.
+
+**Policy created:** Evidence source field definition amended: for CET-2 findings, state "none yet — [what would be needed to upgrade]"; for CET-4 findings, state "none — CET-4; must be upgraded to CET-1 or discarded before implementation begins." This allows honest recording of the tier without fabrication and preserves the upgrade obligation.
+
+**CLAUDE.md reference:** `### Pre-Implementation Red-Team Pass (Mandatory)` → Required fields for every red-team finding — Evidence source row updated.
+
+**Verification method:** `grep 'Evidence source' CLAUDE.md` — confirm the row includes CET-2 and CET-4 conditional text.
+
+**Affected files:** `CLAUDE.md` (Evidence source field definition updated); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-024 added)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived post-merge of PR #97 (C-7/LL-015 equivalent); fix applied in this PR on branch `claude/codex-adversarial-review-fyu0nb`. PR #98 and PR #99 Codex findings (Condition A scope and Condition A one-sided evidence) were already addressed by LL-017 (PR #99) and LL-020 (PR #100) respectively — no separate entries required.
+
+---
+
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-020*
+*Entries: LL-001 through LL-024*
