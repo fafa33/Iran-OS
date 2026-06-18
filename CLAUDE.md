@@ -474,7 +474,10 @@ Every PR must include an Evidence section:
 - grep: `<command>` → `<result>`
 - Role grant path: `<contract>:<line>` → `<deployment manifest section>`
 - npm test: N passing
-- Open residuals: [list or "none"]
+- Open residuals consulted: [YES / NO]
+  - File checked: docs/governance/OPEN_RESIDUALS.md
+  - Matching residual IDs: [list, or "none matched"]
+  - Re-evaluation result: [per-residual result, or "No matching open residuals found after consulting OPEN_RESIDUALS.md"]
 ```
 
 #### Step 9 — Deployment Manifest Currency Check
@@ -489,6 +492,17 @@ For any PR touching a sensitive component (Kernel, Oracle, Reserve, Treasury, Tr
 A claim that wiring is "documented in `docs/deployment/`" requires CET-1 evidence: a grep result showing the specific role or address is present in the manifest file and section cited.
 
 **A PR that claims production wiring is documented but cannot produce the manifest grep result fails the preflight.**
+
+#### Step 10 — Open Residuals Consultation
+
+For any PR touching sensitive components — Kernel, PahlaviToken, Treasury, SovereignWealthFund, TriggerProtocol, API3Oracle, oracle docs, reserve docs, role docs, deployment manifests, runbooks, or governance policy docs — before opening, updating, marking ready, or merging the PR:
+
+1. Read `docs/governance/OPEN_RESIDUALS.md`.
+2. For each active HARDENING_ONLY entry in the register, check whether any of the entry's listed re-evaluation triggers applies to this PR.
+3. If a trigger matches, re-run the 5-criterion evaluation table for that finding against the current codebase before continuing. If re-classification upgrades a finding to BLOCKER_P1, that finding must block this PR.
+4. Record the result in the PR Evidence block — see Step 8.
+
+**A sensitive-component PR may not be pushed, marked ready, or merged without completing this step.** Omitting the Open Residuals Consultation is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
 
 #### Before Responding to Codex
 
