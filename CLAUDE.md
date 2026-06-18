@@ -683,7 +683,10 @@ Step 9 — Deployment Manifest Currency:
 - Authoritative date field: [Last verified / Manifest date / none — commit evidence used]
 - Date value: [date or "N/A — see commit evidence below"]
 - Commit evidence if no date field: [git log -1 output, or "N/A — explicit date field present"]
-- Condition A (inherited staleness): manifest predates latest sensitive-component PR on main? [YES → DOCUMENTATION_REQUIRED / NO — git log evidence recorded above]
+- Condition A (inherited staleness): manifest predates latest sensitive-component PR on main?
+  - Manifest last-update: [date from explicit field above, or commit hash + date from git log above]
+  - Latest sensitive-component PR on main: [PR number and merge date — run `git log --oneline --merges origin/main | head -5` to identify]
+  - Comparison result: manifest [OLDER / NEWER / EQUAL] → [DOCUMENTATION_REQUIRED / PASS]
 - Condition B (this PR's changes): PR changes deployment topology, roles, oracle wiring, reserve/treasury/trigger/mint/freeze path? [YES / NO]
 - Re-verification required? [YES (Condition A) / YES (Condition B) / NO — both conditions evaluated and neither applies]
 - Result: [PASS / DOCUMENTATION_REQUIRED]

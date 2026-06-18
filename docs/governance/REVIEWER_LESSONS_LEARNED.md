@@ -81,7 +81,11 @@ A new LL entry must be created whenever a reviewer finding causes any of the fol
 Every LL entry must reference:
 
 1. **Originating PR** — the PR on which the review comment appeared
-2. **Originating review comment URL** — direct link to the specific GitHub review comment (e.g., `https://github.com/fafa33/Iran-OS/pull/N#discussion_rXXX`)
+2. **Originating review comment URL** — direct link to the specific GitHub comment. Two valid URL formats are accepted:
+   - **Review-thread URL:** `https://github.com/fafa33/Iran-OS/pull/N#discussion_rXXX` — a review comment created via the Files Changed or Commits view
+   - **PR-comment URL:** `https://github.com/fafa33/Iran-OS/pull/N#issuecomment-XXX` — a PR-level comment posted in the Conversation view
+
+   Both formats are valid audit evidence. An entry using a PR-comment URL (`#issuecomment-XXX`) must confirm that all five of the following are present in the entry's fields: (1) PR number, (2) comment URL, (3) reviewer identity, (4) finding summary, (5) verification method.
 3. **Resulting policy or workflow change** — the specific CLAUDE.md section, preflight step, evidence table row, or governance document that was modified as a result
 
 An entry that references only "see PR #N" without the specific comment URL and specific policy change is insufficient.
@@ -311,7 +315,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 **CLAUDE.md reference:** `### Reviewer Lessons Learned Registry (Mandatory)` — the amendment is in the registry itself; no CLAUDE.md change required.
 
-**Verification method:** For every LL entry where Reviewer contains "Self": confirm Review comment URL matches `N/A — self-identified ... finding; no external review comment` and Finding field identifies an observable trigger. For all other entries: confirm Review comment URL is a valid GitHub discussion link (`https://github.com/fafa33/Iran-OS/pull/N#discussion_rXXX`).
+**Verification method:** For every LL entry where Reviewer contains "Self": confirm Review comment URL matches `N/A — self-identified ... finding; no external review comment` and Finding field identifies an observable trigger. For all other entries: confirm Review comment URL is one of the two valid formats — `https://github.com/fafa33/Iran-OS/pull/N#discussion_rXXX` (review-thread) or `https://github.com/fafa33/Iran-OS/pull/N#issuecomment-XXX` (PR-level comment). For `#issuecomment-XXX` entries, additionally confirm all five required fields are present (PR number, comment URL, reviewer identity, finding summary, verification method). [Verification method updated in PR #100 (LL-019) to reflect expanded Cross-Reference Rule.]
 
 **Affected files:** `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Cross-Reference Rule Self-Review Exception added; LL-007 entry added)
 
@@ -409,7 +413,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 **Repeat allowed?** NO
 
-**Notes:** Both findings arrived on PR #93 in the same Codex review comment. Fixes committed in the same PR before merge.
+**Notes:** Both findings arrived on PR #93 in the same Codex review comment. Fixes committed in the same PR before merge. **PR-comment URL conformance:** This entry's `#issuecomment-0` URL was non-conformant under the original Cross-Reference Rule, which accepted only `#discussion_rXXX` format. The rule was updated in PR #100 (LL-019) to also accept `#issuecomment-XXX` format. All five required fields for a PR-comment URL entry are present: PR number (#93) ✓, comment URL (issuecomment-0) ✓, reviewer identity (chatgpt-codex-connector[bot]) ✓, finding summary (Finding field) ✓, verification method (Verification method field) ✓. This entry is conformant under the updated rule.
 
 ---
 
@@ -653,6 +657,66 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-019
+
+**Date:** 2026-06-18
+**PR:** #100
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** The Cross-Reference Rule accepted only `#discussion_rXXX` URLs (review-thread comments created via the Files Changed or Commits view). LL-010 used a `#issuecomment-0` URL — a PR-level comment posted in the Conversation view — which is a legitimate GitHub URL format and a valid audit evidence source. Under the original rule, LL-010 was formally non-conformant, and any future PR-level comment from an automated reviewer or contributor would produce another non-conformant entry, creating a repeatable finding class. The gap was non-trivially discoverable: the rule's example format was specific enough to exclude issuecomment URLs without explicitly prohibiting them, making LL-010 appear to be a missing or malformed citation rather than an unsupported valid format.
+
+**What we assumed:** Review-thread URLs (`#discussion_rXXX`) were the only URL format a reviewer would use to post findings. PR-level comments (`#issuecomment-XXX`) were not anticipated as a legitimate entry point for review findings.
+
+**Why the assumption failed:** GitHub exposes two distinct comment surfaces on a PR: the Files Changed / Commits view (produces `#discussion_rXXX` URLs) and the Conversation view (produces `#issuecomment-XXX` URLs). Automated review tools like chatgpt-codex-connector may post via either surface. The Cross-Reference Rule's example format locked entries to one surface while the other produced non-conformant but valid entries. The assumption that reviewers would always use the Files Changed view is CET-3 — no evidence was consulted at the time the rule was written.
+
+**Evidence that was missing:** (1) An explicit statement that both `#discussion_rXXX` and `#issuecomment-XXX` URL formats are valid audit evidence. (2) Defined verification requirements for `#issuecomment-XXX` entries (five required fields: PR number, comment URL, reviewer identity, finding summary, verification method). (3) Normalization of LL-010 to confirm conformance under the updated rule and close the active violation.
+
+**Policy created:** Cross-Reference Rule expanded to accept two valid URL formats: `#discussion_rXXX` (review-thread) and `#issuecomment-XXX` (PR-level comment). Verification requirements defined for both formats. `#issuecomment-XXX` entries must confirm all five required fields are present. LL-010 Notes updated to confirm conformance under the updated rule. Audit of all existing LL entries confirms LL-010 is the only entry with an `#issuecomment-XXX` URL — verified by `grep 'issuecomment' docs/governance/REVIEWER_LESSONS_LEARNED.md` → one match (LL-010 only).
+
+**CLAUDE.md reference:** None — Cross-Reference Rule is defined in `docs/governance/REVIEWER_LESSONS_LEARNED.md` directly (per LL-007). No CLAUDE.md change required.
+
+**Verification method:** For every LL entry where Reviewer is not `Self (...)`: confirm Review comment URL matches one of the two valid formats — `https://github.com/fafa33/Iran-OS/pull/N#discussion_rXXX` or `https://github.com/fafa33/Iran-OS/pull/N#issuecomment-XXX`. For `#issuecomment-XXX` entries: confirm all five required fields (PR number, comment URL, reviewer identity, finding summary, verification method) are present. Run `grep 'Review comment URL' docs/governance/REVIEWER_LESSONS_LEARNED.md` — confirm each non-Self URL matches one of the two valid patterns.
+
+**Affected files:** `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Cross-Reference Rule updated; LL-010 Notes updated; LL-019 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-4 from the gap analysis report. LL-010 is the only existing entry with an `#issuecomment-XXX` URL — confirmed by `grep 'issuecomment' docs/governance/REVIEWER_LESSONS_LEARNED.md` → one match (LL-010 only).
+
+---
+
+## LL-020
+
+**Date:** 2026-06-18
+**PR:** #100
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/99#discussion_r3432990848
+**Finding:** Step 9 Condition A evidence template required only the manifest's git log output ("git log evidence recorded above"). It did not require recording the latest sensitive-component PR on main. A reviewer could record `Condition A: NO` by observing that the manifest looked recent — without documenting the date of the most recent sensitive merge on main. The comparison that Condition A is meant to enforce (manifest date vs. latest sensitive PR date) was one-sided: only the manifest side was documented.
+
+**What we assumed:** Recording the manifest's git log output was sufficient evidence for a `Condition A: NO` answer. The reviewer performing the check would mentally compare the manifest date to recent main activity and form a correct judgment.
+
+**Why the assumption failed:** "Mental comparison" is CET-3 — no documented evidence for the comparison side. The Condition A guard exists precisely because inherited staleness is non-obvious: a manifest that predates a recent sensitive PR looks fine in isolation. Without documenting the latest sensitive-component PR's date alongside the manifest date, there is no auditable proof that the comparison was made, and no way for a future reviewer to reproduce or challenge the result.
+
+**Evidence that was missing:** A required sub-field in the Step 9 Condition A evidence entry for: (1) the manifest last-update date (already partially required via commit evidence), (2) the latest sensitive-component PR on main (PR number and merge date, or the command used to identify it), and (3) the comparison result (manifest OLDER/NEWER/EQUAL and the resulting disposition).
+
+**Policy created:** Step 9 Condition A evidence field expanded into three sub-items: manifest last-update, latest sensitive-component PR on main (with identification command), and comparison result. A `Condition A: NO` answer is now auditable: both sides of the comparison are documented.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 9 Required evidence block — Condition A field expanded to three sub-items.
+
+**Verification method:** For any Step 9 Condition A entry claiming NO (not stale): confirm three sub-items are present — (1) manifest last-update date or commit, (2) latest sensitive-component PR number and merge date or identification command output, (3) comparison result stated as OLDER/NEWER/EQUAL with disposition.
+
+**Affected files:** `CLAUDE.md` (Step 9 Condition A evidence field expanded); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-020 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived post-merge of PR #99 (C-8/LL-018); fix applied in PR #100 on branch `claude/codex-adversarial-review-fyu0nb`.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -673,4 +737,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-018*
+*Entries: LL-001 through LL-020*
