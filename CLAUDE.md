@@ -298,6 +298,64 @@ The table must be completed and included in the PR description or linked report 
 
 **Rationale:** IranOS prioritizes resilience, continuity, and doctrinal correctness over theoretical perfection. Hardening opportunities are valuable but must not be misclassified as active constitutional vulnerabilities. A complete exploit chain and demonstrated current doctrinal impact are required before a finding blocks implementation.
 
+#### HARDENING_ONLY Re-Evaluation Policy
+
+**A `HARDENING_ONLY` classification is not permanently closed.** It is valid only while the assumptions that disqualified one or more BLOCKER_P1 criteria remain true. If any re-evaluation trigger event occurs, every active `HARDENING_ONLY` finding in the affected system must be re-assessed against the 5-criterion gate before the triggering PR is merged.
+
+**Re-evaluation trigger events** — any of the following requires re-evaluation of all active HARDENING_ONLY findings listed in `docs/governance/OPEN_RESIDUALS.md`:
+
+1. **New mint path** — any contract gains `MINTER_ROLE`, any new `.mint()` call is added to a production contract, or any path from a role holder to `PahlaviToken.mint()` is wired
+2. **New treasury path** — any new call path to `Treasury.proposeTransaction`, `createBudgetLine`, or any treasury state-mutating function is added
+3. **New reserve update path** — any new consumer of `totalReserves`, any new downstream path from `updateReserves`, or any new entry point to `syncReserves` is introduced
+4. **Role model changes** — any role granted to a new address, any role revoked, any change to `DEFAULT_ADMIN_ROLE` holders, any change to `_setRoleAdmin` assignments, or any change to the holder count for `FEEDER_ROLE`, `MINTER_ROLE`, `ORACLE_ROLE`, or `KERNEL_ROLE`
+5. **AccessControl changes** — any change to `_grantRole`, `_revokeRole`, `grantRole`, `revokeRole`, or `renounceRole` logic in any production contract
+6. **Oracle architecture changes** — any new oracle contract deployed, any new data type registered in `API3Oracle`, any new feeder EOA authorized, or any change to `MAX_DATA_AGE`
+7. **Governance authority changes** — any change to who can call `flagViolation`, `executeTrigger`, `signViolation`, or any function that advances the trigger lifecycle; any change to `MULTISIG_THRESHOLD`
+8. **Emergency/freeze routing changes** — any new path to activate or deactivate `emergencyLockActive` or `emergencyMode`, or any new function gated by these flags
+9. **Deployment topology changes** — any new contract address, new role wiring, or new entry in `docs/deployment/` that introduces a caller path not present at the time of the HARDENING_ONLY classification
+10. **New downstream consumer of the disqualifying data field** — any new contract or function that reads a state variable that was the basis for the HARDENING_ONLY criterion failure (e.g., `totalReserves`, `reserveCompliant`, `reserveFloorBreached`)
+11. **Resolution of a linked OPEN finding** — if a finding classified OPEN that was cited as a prerequisite or constraint for a HARDENING_ONLY finding is closed or modified by a contract change, the HARDENING_ONLY finding must be re-evaluated
+
+**Required documentation when classifying HARDENING_ONLY:**
+
+When a finding is classified as HARDENING_ONLY, the reviewer must document all four elements in the PR description or finding report:
+
+| Required element | Content |
+|---|---|
+| Original finding summary | One-line description of the finding and its affected component |
+| Disqualifying criteria | Which of the 5 BLOCKER_P1 criteria fails, and why |
+| Disqualifying assumptions | The specific observable conditions (code state, role assignments, deployment state) that cause the criterion to fail — expressed as grep-verifiable assertions |
+| Re-evaluation triggers | The specific events from the re-evaluation trigger list above that would require reclassification of this finding |
+
+After documenting, add the finding to `docs/governance/OPEN_RESIDUALS.md`.
+
+**Re-evaluation process:**
+
+When a re-evaluation trigger fires:
+1. Read `docs/governance/OPEN_RESIDUALS.md` and identify every active HARDENING_ONLY finding whose trigger list includes the fired event.
+2. Re-run the 5-criterion evaluation table for each affected finding against the current codebase.
+3. Document: the original classification, the original disqualifying assumptions, what changed, and the re-classification result.
+4. If re-classification upgrades a finding to BLOCKER_P1, that finding must be documented as BLOCKER_P1 and must block the triggering PR. Update `docs/governance/OPEN_RESIDUALS.md` with the outcome.
+
+**Examples:**
+
+*K-RES-01 — Stale-Reserve Provenance (HARDENING_ONLY)*
+
+| Required element | Content |
+|---|---|
+| Original finding | `syncReserves(uint256 newReserves)` carries no timestamp or provenance; a feeder with `FEEDER_ROLE` can submit stale reserves — root cause is GAP-MEX-04 FND-01/FND-02 |
+| Disqualifying criterion | Criterion 4 fails — "Reachable downstream enforcement consequence" |
+| Disqualifying assumption | Minting circuit incomplete: `SovereignWealthFund.sol` holds `MINTER_ROLE` but contains no `.mint()` call — verified by `grep -r '\.mint(' contracts/ --include="*.sol" \| grep -v fuzzing` → one match in fuzzing harness only |
+| Re-evaluation triggers | Trigger 1 (new mint path), Trigger 3 (new consumer of `totalReserves`), Trigger 10 (new enforcement consumer of `reserveCompliant`), Trigger 11 (FND-01 or FND-02 closed via contract change) |
+
+If Trigger 1 fires (a SWF mint path is added), criterion 4 must be re-evaluated. If criterion 4 now passes, K-RES-01 must be reclassified as BLOCKER_P1 and must block the PR that added the mint path.
+
+*Relationship between K-RES-01 and FND-01/FND-02:*
+
+FND-01 (freshness gate absent on `syncReserves`) and FND-02 (stale reserve values applied to `totalReserves`) are OPEN findings from GAP_MEX_04_ORACLE_FRESHNESS_REVIEW.md that describe the enabling conditions for K-RES-01's scenario. If FND-01 and FND-02 are closed via a contract change (timestamp gate threaded through the reserve sync path), that change fires Trigger 11 — K-RES-01 must be re-evaluated because the attack surface for stale-reserve submission changes. However, K-RES-01 would not automatically close on FND-01/FND-02 closure alone — the disqualifying assumption is criterion 4 (no mint enforcement consequence), not the absence of a freshness gate. If the freshness gate is added but the minting circuit remains incomplete, criterion 4 still fails and the HARDENING_ONLY classification remains valid. Both conditions changing together (FND-01/FND-02 fixed AND a mint path added) would require K-RES-01 to be re-evaluated as BLOCKER_P1.
+
+**Centralized residual register:** All active HARDENING_ONLY findings must be listed in `docs/governance/OPEN_RESIDUALS.md`. When a finding is created, add it. When a re-evaluation trigger fires, mark it as "Under Re-evaluation." When re-classification completes, record the outcome and update the status.
+
 ### PR Preflight Standard (Mandatory)
 
 This policy governs every PR — code or documentation — touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, or audit reports. Its purpose is to eliminate post-push Codex findings caused by unverified closure claims, missing role-path evidence, or wording that is true in principle but unprovable from the text.
