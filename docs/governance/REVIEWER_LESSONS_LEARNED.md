@@ -563,6 +563,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-016
+
+**Date:** 2026-06-18
+**PR:** #98
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Gap C-6 — Step 9 (Deployment Manifest Currency Check) requires confirming "the manifest's last-updated date is not older than the most recent sensitive-component PR merged to main," but does not define: which manifest file is authoritative when multiple exist, where the date is read from (explicit field vs. commit log), what information constitutes commit evidence, how to record the check result, or what CET level a Step 9 compliance claim receives. A reviewer following Step 9 as written could assert "manifest is current" at CET-2 or CET-3 — believed-true without running a specific verification command — and no preflight rule would catch the gap.
+
+**What we assumed:** "Confirm the manifest's last-updated date is not older than the most recent sensitive-component PR" was specific enough. Reviewers would naturally identify the manifest file, read its date, compare to the last merged PR, and record the result.
+
+**Why the assumption failed:** "Naturally identify" is CET-3 reasoning — architectural assumption without code-level verification. No specific manifest file path was required. No specific date field name was defined. No evidence format was required for the check result. A reviewer can satisfy Step 9 as written by reading the manifest and believing it looks current — no grep, no date evidence, no recorded comparison. The same class of unverified claim that triggered LL-002, LL-003, and LL-009 can enter through Step 9 unchallenged.
+
+**Evidence that was missing:** (1) Identification of the authoritative manifest file when multiple exist. (2) Defined date source priority: explicit `Last verified:`/`Manifest date:` field first, fallback to commit log with specific command. (3) Staleness condition tied to specific change types (deployment topology, role assignment, oracle/reserve/treasury/trigger/mint/freeze paths). (4) Required evidence block sub-fields for Step 9 (8 fields). (5) CET-1 qualification rule for Step 9: five conditions all required. (6) Explicit rule that a missing manifest fails Step 9 as DOCUMENTATION_REQUIRED.
+
+**Policy created:** Step 9 expanded from 4 bullet points to 7, plus a required evidence block sub-section (8 fields) and a 5-condition CET-1 qualification rule. Step 9 compliance claims may be CET-1 only when manifest file path, date source, date or commit evidence, staleness evaluation, and result are all recorded inline. Staleness triggers now enumerate specific change types. DOCUMENTATION_REQUIRED result codified for absent manifests.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 9 Deployment Manifest Currency Check (expanded: 7 steps, required evidence block sub-section, CET-1 qualification rule).
+
+**Verification method:** For any Step 9 compliance claim: (1) confirm the PR Evidence block contains all 8 Step 9 sub-fields; (2) confirm the manifest file is identified by path; (3) confirm the date value or commit evidence is recorded (not just asserted); (4) confirm the staleness condition is evaluated explicitly against the PR's change types; (5) confirm the CET level is stated as CET-1 only if all five qualification conditions are met.
+
+**Affected files:** `CLAUDE.md` (Step 9 expanded); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-016 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-6 from the gap analysis report. Finding arrived after PR #97 (C-9/LL-015) merged; fix applied in PR #98 on branch `claude/codex-adversarial-review-fyu0nb`.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -583,4 +613,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-015*
+*Entries: LL-001 through LL-016*
