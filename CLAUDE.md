@@ -631,16 +631,23 @@ For every gap, finding, or status being changed: grep for the gap/finding ID acr
 
 #### Step 8 — PR Body Evidence Block
 
-Every PR must include an Evidence section:
+Every sensitive-component PR covered by this Preflight Standard (any PR touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, or audit reports — as defined in the preamble above) must include an Evidence section.
+
+**Omission rule:**
+- For sensitive-component PRs, omission of the Evidence Block is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
+- For non-sensitive PRs, the Evidence Block is optional — unless the PR makes any security, governance, reachability, role, reserve, oracle, trigger, treasury, mint, freeze, or closure claim, in which case the Evidence Block is required for those claims.
+
+**Open residuals may be recorded as "none" only after consulting `docs/governance/OPEN_RESIDUALS.md` (Step 10).** Recording "none" without consulting the register is a preflight failure.
 
 ```
 ## Evidence
 - grep: `<command>` → `<result>`
 - Role grant path: `<contract>:<line>` → `<deployment manifest section>`
 - npm test: N passing
-- Open residuals consulted: [YES / NO]
-  - File checked: docs/governance/OPEN_RESIDUALS.md
-  - Matching residual IDs: [list, or "none matched"]
+- Open residuals (Step 10 — requires consulting docs/governance/OPEN_RESIDUALS.md):
+  - OPEN_RESIDUALS.md consulted: [YES / NO]
+  - Matching residual IDs: [list of matching HARDENING_ONLY entry IDs, or "none — no active entries match this PR's trigger list"]
+  - Residual re-evaluation required: [YES / NO]
   - Re-evaluation result: [per-residual result, or "No matching open residuals found after consulting OPEN_RESIDUALS.md"]
 - Certainty language scan:
   - Changed files scanned: [YES / NO]

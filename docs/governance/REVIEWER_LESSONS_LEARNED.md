@@ -717,6 +717,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-021
+
+**Date:** 2026-06-18
+**PR:** #101
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Step 8 opened with "Every PR must include an Evidence section" — an unqualified scope that contradicted the Preflight Standard preamble, which scopes the standard to sensitive-component PRs only. This created two exploitable ambiguities: (1) over-scope — a reviewer could cite Step 8 verbatim to demand a full Evidence Block from any PR, including trivial non-sensitive docs changes; (2) under-scope — a contributor could argue that a sensitive-component PR is exempt because Step 8 itself never states that omission is a preflight failure. Additionally, the Open Residuals field used "YES/NO" and "none matched" without requiring proof that OPEN_RESIDUALS.md was actually opened and consulted — a contributor could record "none matched" based on memory or assumption without reading the register.
+
+**What we assumed:** The Preflight Standard preamble's scope clause ("This policy governs every PR — code or documentation — touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, or audit reports") carried through to every step within the standard. A contributor reading Step 8 in context of the preamble would understand that "every PR" meant "every PR covered by this standard."
+
+**Why the assumption failed:** A preflight step is an action item, not a prose document. Contributors apply steps mechanically and in sequence. Step 8 as written could be read in isolation — and a step that says "every PR" without internal scope qualification will be interpreted as applying to all PRs by any reader who does not cross-reference the preamble. The same ambiguity that allows over-scope interpretation also allows under-scope interpretation: a contributor can argue the scope clause in the preamble limits the standard but doesn't mandate an Evidence Block specifically. Without an explicit omission rule inside Step 8, omission has no named consequence.
+
+**Evidence that was missing:** (1) Scope qualification inside Step 8 itself, referencing the preamble by name. (2) An explicit omission rule: sensitive-component PR omission = preflight failure; non-sensitive PR omission = optional unless claims are made. (3) A direct link from the Open Residuals field to Step 10 and `docs/governance/OPEN_RESIDUALS.md`. (4) A prohibition on recording "none" for residuals without documented consultation of the register.
+
+**Policy created:** Step 8 opening sentence qualified to "sensitive-component PR covered by this Preflight Standard (as defined in the preamble above)." Omission rule added. Open Residuals field renamed and linked to Step 10; sub-fields expanded to OPEN_RESIDUALS.md consulted (YES/NO), Matching residual IDs, Residual re-evaluation required (YES/NO), Re-evaluation result. Explicit rule: "none" for residuals requires consulting `docs/governance/OPEN_RESIDUALS.md`; recording "none" without consulting the register is a preflight failure.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 8 PR Body Evidence Block (scope qualification, omission rule, Open Residuals field expanded and linked to Step 10).
+
+**Verification method:** For any sensitive-component PR: (1) confirm the Evidence Block is present; (2) confirm `OPEN_RESIDUALS.md consulted: YES` is recorded; (3) confirm "Matching residual IDs" names specific IDs or the exact phrase "No matching open residuals found after consulting OPEN_RESIDUALS.md" — bare "none" or "N/A" without this phrase is non-conformant; (4) confirm Residual re-evaluation required and Re-evaluation result are both completed.
+
+**Affected files:** `CLAUDE.md` (Step 8 scope qualified; omission rule added; Open Residuals field expanded and linked); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-021 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-5 from the gap analysis report.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -737,4 +767,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-020*
+*Entries: LL-001 through LL-021*
