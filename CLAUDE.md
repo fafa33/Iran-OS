@@ -361,6 +361,44 @@ Scan every changed file for the following phrases. Each is forbidden unless imme
 | "no current BLOCKER" | Must be followed by completed 5-criterion evaluation table |
 | "trust-model assumption" | Acceptable only after confirming no new attack surface introduced by the current change |
 
+##### Certainty Language Rule (Mandatory)
+
+No contributor, reviewer, or documentation author may use **absolute certainty language** in a technical claim unless the required evidence standard has been satisfied. The core test: can the certainty phrase be replaced by its evidential equivalent with CET-1 evidence already in hand? If not, the phrase is forbidden.
+
+This rule applies to all documents in the repository regardless of type — code comments, audit reports, gap registers, governance documents, and PR descriptions.
+
+| Phrase | Classification | Required evidence if used |
+|---|---|---|
+| `"impossible"` (security or reachability claim) | **Forbidden** | Replace with: "No path was identified under the current codebase and evidence set: `[grep command → result]`" |
+| `"unreachable"` (security or reachability claim) | **Forbidden** | Replace with: "No reachable path was identified in the reviewed code: `[grep command → result]`" |
+| `"cannot happen"` (security claim) | **Forbidden** | Replace with: "No code path producing this outcome was identified: `[grep command → result]`" |
+| `"no attack path"` | **Forbidden** | Replace with: "No reachable exploit chain was identified in the current codebase — 5-criterion gate: `[completed table]`" |
+| `"impossible to exploit"` | **Forbidden** | Must be replaced by completed 5-criterion evaluation table |
+| `"fully mitigated"` | **Forbidden** | Replace with: "Mitigated (scope: [exact scope]) — remaining open: [list or 'none identified in reviewed code']" |
+| `"permanently closed"` | **Forbidden** | Replace with: "CLOSED (scope: [exact scope]) — remaining open: [list]" — the word "permanently" is prohibited |
+| `"resolved forever"` | **Forbidden** | Replace with: "Resolved as of PR #N — must be re-evaluated if [specific triggering condition]" |
+| `"no risk"` | **Forbidden** | Must be replaced by completed 5-criterion evaluation table |
+| `"never"` (as absolute security claim) | **Forbidden** | Replace with: "No such occurrence was identified in the reviewed code: `[grep command → result]`" |
+| `"guaranteed"` (without formal proof) | **Conditionally allowed** | Must immediately follow: Solidity `immutable` keyword confirmation, or constructor-only assignment verified by grep: `[command → result]` |
+| `"safe"` / `"secure"` (unqualified) | **Conditionally allowed** | Must be scoped: "safe against [named threat] as verified by [grep/test]: `[result]`" |
+| `"trusted operators only"` | **Conditionally allowed** | Must follow three-grep AccessControl audit — see ROLE restriction evidence requirement (Step 3) |
+| `"constructor-only"` | **Conditionally allowed** | Must follow three-grep AccessControl audit — see ROLE restriction evidence requirement (Step 3) |
+| `"always"` (as absolute security claim) | **Conditionally allowed** | Must follow formal invariant or exhaustive test: "Every reviewed code path satisfies [property] — verified by [test/grep]: `[result]`" |
+| `"only [role/address] can call"` (access restriction) | **Conditionally allowed** | Must follow three-grep AccessControl audit — see ROLE restriction evidence requirement (Step 3) |
+| `"never"` / `"always"` / `"only"` in non-security descriptive contexts | **Allowed** | No evidence requirement when used in non-technical, non-claim contexts (e.g., commit message prose) |
+
+**Replacement wording examples:**
+
+| Instead of | Use |
+|---|---|
+| "unreachable" | "No reachable path was identified under the current codebase and evidence set: `grep -r '\.F(' contracts/ → [result]`" |
+| "constructor-only" | "Constructor grants were verified and no additional grant path was identified in the reviewed code: `grep '_grantRole' → [result]`; `grep 'DEFAULT_ADMIN_ROLE' → [result]`" |
+| "impossible to exploit" | 5-criterion table with all five criteria evaluated |
+| "fully mitigated" | "Mitigated (scope: oracle liveness) — remaining open: reserve value provenance [K-RES-01]" |
+| "safe" | "Safe against stale-oracle injection as verified by Gate A/Gate B implementation at `API3Oracle.sol:110-124`" |
+| "no risk" | 5-criterion table showing which criteria fail |
+| "guaranteed" | "Guaranteed by Solidity `immutable` keyword — verified by grep: `grep 'immutable' contracts/kernel.sol → LIQUIDITY_CAP declared immutable`" |
+
 #### Step 6 — Self-Codex-Review
 
 Before every push, apply the 5-criterion BLOCKER_P1 gate to every claim in every changed file. Ask: "What would Codex challenge here, and can I answer it with grep evidence already in hand?" If the answer is no, collect the evidence first.
