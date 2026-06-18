@@ -611,7 +611,19 @@ This rule applies to all documents in the repository regardless of type — code
 
 #### Step 6 — Self-Codex-Review
 
-Before every push, apply the 5-criterion BLOCKER_P1 gate to every claim in every changed file. Ask: "What would Codex challenge here, and can I answer it with grep evidence already in hand?" If the answer is no, collect the evidence first.
+Before every push, apply the 5-criterion BLOCKER_P1 gate and the Certainty Language Rule to every claim in:
+- every changed file
+- the PR title
+- the PR description (including summary, evidence block, checklist, and all reviewer-facing body text)
+
+Ask: "What would Codex challenge here, and can I answer it with grep evidence already in hand?" If the answer is no, collect the evidence first.
+
+**Any certainty claim in a PR description must satisfy the same evidence standard as a claim in a changed file.** A PR description is not exempt from the Certainty Language Rule by virtue of not being committed to the repository.
+
+**Gate:** If the PR description contains any forbidden or conditionally-allowed certainty phrase from the Certainty Language Rule table, the PR must not be marked ready until:
+- the phrase is removed, or
+- the phrase is qualified to meet the conditionally-allowed standard, or
+- CET-1 evidence is provided inline in the PR description.
 
 #### Step 7 — Cross-Document Consistency
 
@@ -630,6 +642,15 @@ Every PR must include an Evidence section:
   - File checked: docs/governance/OPEN_RESIDUALS.md
   - Matching residual IDs: [list, or "none matched"]
   - Re-evaluation result: [per-residual result, or "No matching open residuals found after consulting OPEN_RESIDUALS.md"]
+- Certainty language scan:
+  - Changed files scanned: [YES / NO]
+  - PR title scanned: [YES / NO]
+  - PR description scanned: [YES / NO]
+  - Certainty terms found: [list terms, or "none"]
+  - Evidence for each term: [inline CET-1 evidence per term, or "N/A — no terms found"]
+  - Terms rewritten or qualified: [list, or "N/A"]
+  - Result: [PASS / BLOCKED — phrase not removed, qualified, or evidenced]
+  - CET level: [CET-1 / below CET-1]
 ```
 
 #### Step 9 — Deployment Manifest Currency Check

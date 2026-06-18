@@ -623,6 +623,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-018
+
+**Date:** 2026-06-18
+**PR:** #100
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Step 6 required scanning "every claim in every changed file" only. PR descriptions are not files. The Certainty Language Rule (Step 5) explicitly covers PR descriptions, but Step 6 did not include them in its scan scope. A PR author applying Step 6 literally would scan changed files and push without scanning the PR description — leaving closure claims, reachability assertions, and certainty language in the PR body unchecked.
+
+**What we assumed:** The Certainty Language Rule's scope clause ("applies to all documents in the repository regardless of type — code comments, audit reports, gap registers, governance documents, and PR descriptions") was sufficient. A contributor who read Step 5 would apply it to PR descriptions without Step 6 explicitly requiring it.
+
+**Why the assumption failed:** Step 6 is the procedural enforcement step — it is the step a contributor executes before push. Its scope defines what gets scanned in practice. A contributor following the preflight checklist mechanically (Steps 1–10 in order) would reach Step 6, scan changed files, and proceed. The Step 5 rule is a policy statement; Step 6 is the action item. When the action item does not name PR descriptions, they are not scanned — regardless of what the policy statement says. Historical findings (LL-001, LL-002, LL-005) were all challenges to claims in PR descriptions that predated Step 6; after Step 6 was added, it still left PR descriptions out of scope.
+
+**Evidence that was missing:** (1) Step 6 naming PR title, PR description, PR summary, PR checklist, and reviewer-facing body text as explicit scan targets alongside changed files. (2) An explicit rule equating the evidence standard for certainty claims in PR descriptions to that of changed files. (3) A gate rule: PR must not be marked ready while a forbidden or conditionally-allowed certainty phrase in the PR description lacks removal, qualification, or CET-1 evidence. (4) A Certainty language scan sub-section in the Step 8 Evidence Block template.
+
+**Policy created:** Step 6 expanded to name changed files, PR title, and PR description as explicit scan targets. Added equality rule: certainty claims in PR descriptions require the same evidence standard as changed files. Added gate rule: PR must not be marked ready until forbidden/conditionally-allowed certainty phrases are removed, qualified, or evidenced. Step 8 Evidence Block updated with a Certainty language scan sub-section (8 fields).
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 6 (scan scope expanded; equality rule added; gate rule added); Step 8 Evidence Block template (Certainty language scan sub-section added).
+
+**Verification method:** Before marking any PR ready: (1) confirm Step 6 was applied to the PR description, not only changed files; (2) confirm the Evidence block contains a `Certainty language scan` sub-section with all 8 fields completed; (3) if any certainty terms were found, confirm CET-1 evidence is recorded inline or the term is removed/qualified; (4) confirm `Result: PASS` before marking ready.
+
+**Affected files:** `CLAUDE.md` (Step 6 expanded; Step 8 Evidence Block updated); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-018 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-8 from the gap analysis report.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -643,4 +673,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-017*
+*Entries: LL-001 through LL-018*
