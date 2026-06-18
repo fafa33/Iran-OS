@@ -246,6 +246,52 @@ Before implementing any sensitive PR, Claude must perform an internal red-team p
 
 Implementation may begin only after this red-team pass is documented in the PR description or in a linked report.
 
+#### Red-Team Conclusion Evidence Standard
+
+**Every red-team conclusion must include an explicit certainty classification (CET).** The CET level governs whether a conclusion may advance to implementation.
+
+| Tier | Definition | Status |
+|---|---|---|
+| **CET-1** | Proven by grep result or test output collected in this session | May advance to implementation |
+| **CET-2** | Believed true but grep or test not yet run | Must be upgraded to CET-1 before implementation begins |
+| **CET-3** | Architectural assumption without code-level verification | Must be upgraded to CET-1 or replaced with hedged language before implementation begins |
+| **CET-4** | Assertion based on assumed behavior only — no code, architectural, or documentary evidence consulted | May not advance to implementation; must be upgraded or discarded |
+
+**Required fields for every red-team finding:**
+
+| Field | Content |
+|---|---|
+| Claim | The specific assertion being made (one sentence) |
+| Evidence source | File path, line number, grep command, or test reference that supports the claim |
+| Verification method | The grep command or check that can be run to confirm the claim |
+| Certainty level | CET-1 / CET-2 / CET-3 / CET-4 |
+| Assumptions | Any conditions that must be true for the claim to hold |
+| Disqualifying assumptions | Conditions under which the claim fails or must be re-evaluated |
+| Recommended action | PASS (with scope), BLOCKER_P1, BLOCKER_P2, HARDENING_ONLY, DOCUMENTATION_REQUIRED, or FALSE_POSITIVE |
+
+**Certainty language rule application**
+
+Any red-team conclusion containing the words `proven`, `impossible`, `unreachable`, `prevented`, `guaranteed`, `cannot happen`, or `no path exists` must satisfy the Certainty Language Rule (see Step 5 — Forbidden Wording Scan). No exception exists for red-team passes. CET-1 evidence must be in hand before any such phrase is written.
+
+**PASS is not evidence**
+
+A red-team "PASS" on any item is not self-evident. A PASS result must identify:
+
+1. **Scope reviewed** — the specific function, role, path, or property that was assessed
+2. **Evidence consulted** — the grep command or test reference that confirmed the property (CET-1 required for a PASS)
+3. **Residual risks remaining** — any related concerns outside the assessed scope that were observed but not addressed
+4. **Certainty level** — CET-1 through CET-4; a PASS with certainty lower than CET-1 must be documented at that tier, not as PASS
+
+A PASS with no supporting evidence is a CET-4 claim and may not serve as the basis of an implementation decision.
+
+**Residual risk discovery**
+
+If a red-team review discovers a residual risk — any concern that cannot be fully dismissed but does not currently meet all five BLOCKER_P1 criteria — `docs/governance/OPEN_RESIDUALS.md` must be consulted and referenced in the red-team documentation. If the concern qualifies as HARDENING_ONLY, it must be added to the register before implementation begins.
+
+**Governance-process change trigger**
+
+If a red-team finding causes any change to classification standards, evidence requirements, reviewer workflow, or governance policy, a Lessons Learned entry is mandatory in `docs/governance/REVIEWER_LESSONS_LEARNED.md`. The LL entry must be created in the same PR that implements the finding's fix.
+
 ### Red-Team Finding Classification Standard (Mandatory)
 
 This policy governs how all Red-Team and Codex-style adversarial review findings are classified. It applies to every review, pre-implementation pass, and post-merge audit performed on this repository.
@@ -506,8 +552,9 @@ Before writing any claim, assign it a CET:
 | **CET-1** | Proven by grep result collected in this session | Document grep command and result in PR body |
 | **CET-2** | Believed true but grep not yet run | Run grep; upgrade to CET-1 or revise claim |
 | **CET-3** | Architectural assumption without code evidence | Run grep (upgrade to CET-1) or replace with hedged language |
+| **CET-4** | Assertion based on assumed behavior only — no code, architectural, or documentary evidence consulted | May not appear in a pushed PR or red-team pass; must be upgraded or discarded |
 
-**CET-2 and CET-3 claims may not appear in a pushed PR.** Every claim must reach CET-1 at push time.
+**CET-2, CET-3, and CET-4 claims may not appear in a pushed PR.** Every claim must reach CET-1 at push time.
 
 #### Step 5 — Forbidden Wording Scan
 

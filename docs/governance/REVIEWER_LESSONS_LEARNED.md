@@ -533,6 +533,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-015
+
+**Date:** 2026-06-18
+**PR:** #97
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Gap C-9 — The Pre-Implementation Red-Team Pass requires documenting 10 items before implementation begins, but specifies no evidence standard for any answer. A CET-4 assertion (pure assumed behavior, no code evidence consulted) satisfies the documentation requirement as written. The same CET discipline applied to PR claims, findings, residuals, and reviewer assertions by the Certainty Language Rule and Step 4 was not extended to red-team conclusions — the primary gate before implementation decisions are made.
+
+**What we assumed:** The red-team pass table was self-enforcing — the act of writing answers would cause implementers to consult code evidence. "Documented in the PR description" was sufficient quality control.
+
+**Why the assumption failed:** "Documented" specifies presence, not quality. An implementer can write 10 answers at CET-3 or CET-4 without consulting a single grep result, satisfy the documentation requirement, and begin implementation. The same class of unverified claim that the Certainty Language Rule (LL-009) and the CET framework were designed to prevent can enter the workflow through the red-team pass, which is the earliest and most consequential decision point in the sensitive-PR lifecycle.
+
+**Evidence that was missing:** (1) CET tier definitions extended to red-team conclusions, including CET-4 (assertion-only, may not advance). (2) Seven required fields per finding (claim, evidence source, verification method, certainty level, assumptions, disqualifying assumptions, recommended action). (3) Explicit rule that a PASS result must name scope, evidence, residuals, and certainty level. (4) OPEN_RESIDUALS.md consultation rule for residual risks discovered during red-team. (5) LL entry trigger for governance-process-changing findings.
+
+**Policy created:** Red-Team Conclusion Evidence Standard subsection added to the Pre-Implementation Red-Team Pass in CLAUDE.md. CET-4 added to Step 4 CET table (PR Preflight Standard). Defines: CET-1 through CET-4 for red-team conclusions, 7 required finding fields, certainty language rule application, PASS is not evidence rule (with 4 required PASS sub-fields), residual risk discovery rule, governance-process change LL trigger.
+
+**CLAUDE.md reference:** `### Pre-Implementation Red-Team Pass (Mandatory)` → Red-Team Conclusion Evidence Standard (added); `### PR Preflight Standard (Mandatory)` → Step 4 CET table (CET-4 row added; rule updated to CET-2/3/4).
+
+**Verification method:** For any red-team pass documentation: (1) confirm each conclusion includes an explicit CET level (CET-1 through CET-4); (2) confirm no CET-4 conclusion is cited as the basis of an implementation decision; (3) confirm any PASS result names scope, evidence consulted, residuals, and certainty level; (4) grep any conclusion containing "proven/impossible/unreachable/prevented/guaranteed/cannot happen/no path exists" — confirm CET-1 evidence is documented inline.
+
+**Affected files:** `CLAUDE.md` (Red-Team Conclusion Evidence Standard added; Step 4 CET table extended with CET-4); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-015 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-9 from the gap analysis report. CET-4 is introduced here for the first time in this framework; it applies to both the red-team context and the PR preflight context as the explicit label for assertion-only claims with no evidentiary basis.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -553,4 +583,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-014*
+*Entries: LL-001 through LL-015*
