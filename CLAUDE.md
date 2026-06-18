@@ -381,6 +381,19 @@ Every PR must include an Evidence section:
 - Open residuals: [list or "none"]
 ```
 
+#### Step 9 — Deployment Manifest Currency Check
+
+For any PR touching a sensitive component (Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, or authority boundaries):
+
+1. Identify every role and contract address introduced or modified by the PR.
+2. Grep `docs/deployment/` for each role and contract address: `grep -r 'ROLE_NAME\|ContractName' docs/deployment/`. Confirm the manifest documents the current wiring.
+3. Confirm the manifest's last-updated date is not older than the most recent sensitive-component PR merged to main.
+4. If the manifest is stale — missing a role grant, a contract address, or a wiring change introduced since the manifest was last updated — update it in the same PR.
+
+A claim that wiring is "documented in `docs/deployment/`" requires CET-1 evidence: a grep result showing the specific role or address is present in the manifest file and section cited.
+
+**A PR that claims production wiring is documented but cannot produce the manifest grep result fails the preflight.**
+
 #### Before Responding to Codex
 
 1. Never respond from memory. Run the grep the comment implies before writing any reply.
