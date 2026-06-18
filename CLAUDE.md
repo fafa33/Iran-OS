@@ -646,9 +646,9 @@ Every sensitive-component PR covered by this Preflight Standard (any PR touching
 - npm test: N passing
 - Open residuals (Step 10 — requires consulting docs/governance/OPEN_RESIDUALS.md):
   - OPEN_RESIDUALS.md consulted: [YES / NO]
-  - Matching residual IDs: [list of matching HARDENING_ONLY entry IDs, or "none — no active entries match this PR's trigger list"]
+  - Matching residual IDs: [list of matching HARDENING_ONLY entry IDs, or "No matching open residuals found after consulting OPEN_RESIDUALS.md"]
   - Residual re-evaluation required: [YES / NO]
-  - Re-evaluation result: [per-residual result, or "No matching open residuals found after consulting OPEN_RESIDUALS.md"]
+  - Re-evaluation result: [per-residual result, or "N/A — no matching residuals identified"]
 - Certainty language scan:
   - Changed files scanned: [YES / NO]
   - PR title scanned: [YES / NO]

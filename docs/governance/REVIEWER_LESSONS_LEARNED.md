@@ -752,7 +752,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 **Date:** 2026-06-18
 **PR:** #100
-**Fix PR:** this PR (branch `claude/codex-adversarial-review-fyu0nb`)
+**Fix PR:** #101
 **Reviewer:** chatgpt-codex-connector[bot]
 **Review comment URL:**
 - Finding A (LL-010 placeholder URL): https://github.com/fafa33/Iran-OS/pull/100#discussion_r3433055404
@@ -779,7 +779,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 **Repeat allowed?** NO
 
-**Notes:** All three findings arrived in the same Codex review session on PR #100. Fixes applied in this PR on branch `claude/codex-adversarial-review-fyu0nb`.
+**Notes:** All three findings arrived in the same Codex review session on PR #100. Fixes applied in PR #101 on branch `claude/codex-adversarial-review-fyu0nb`.
 
 ---
 
@@ -804,7 +804,7 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 **Date:** 2026-06-18
 **PR:** #96
-**Fix PR:** this PR (branch `claude/codex-adversarial-review-fyu0nb`)
+**Fix PR:** #101
 **Reviewer:** chatgpt-codex-connector[bot]
 **Review comment URL:** https://github.com/fafa33/Iran-OS/pull/96#discussion_r3432622274
 
@@ -828,7 +828,7 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 **Repeat allowed?** NO
 
-**Notes:** Finding arrived post-merge of PR #96 (C-1/LL-016 equivalent); fix applied in this PR on branch `claude/codex-adversarial-review-fyu0nb`.
+**Notes:** Finding arrived post-merge of PR #96 (C-1/LL-016 equivalent); fix applied in PR #101 on branch `claude/codex-adversarial-review-fyu0nb`.
 
 ---
 
@@ -836,7 +836,7 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 **Date:** 2026-06-18
 **PR:** #97
-**Fix PR:** this PR (branch `claude/codex-adversarial-review-fyu0nb`)
+**Fix PR:** #101
 **Reviewer:** chatgpt-codex-connector[bot]
 **Review comment URL:** https://github.com/fafa33/Iran-OS/pull/97#discussion_r3432848158
 
@@ -860,11 +860,45 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 **Repeat allowed?** NO
 
-**Notes:** Finding arrived post-merge of PR #97 (C-7/LL-015 equivalent); fix applied in this PR on branch `claude/codex-adversarial-review-fyu0nb`. PR #98 and PR #99 Codex findings (Condition A scope and Condition A one-sided evidence) were already addressed by LL-017 (PR #99) and LL-020 (PR #100) respectively — no separate entries required.
+**Notes:** Finding arrived post-merge of PR #97 (C-7/LL-015 equivalent); fix applied in PR #101 on branch `claude/codex-adversarial-review-fyu0nb`. PR #98 and PR #99 Codex findings (Condition A scope and Condition A one-sided evidence) were already addressed by LL-017 (PR #99) and LL-020 (PR #100) respectively — no separate entries required.
+
+---
+
+## LL-025
+
+**Date:** 2026-06-18
+**PR:** #101
+**Fix PR:** #102
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:**
+- Finding A (Step 8 no-match wording): https://github.com/fafa33/Iran-OS/pull/101#discussion_r3434239092
+- Finding B (Fix PR numeric reference): https://github.com/fafa33/Iran-OS/pull/101#discussion_r3434239095
+
+**Finding:** Two template-consistency defects in PR #101: (A) Step 8's Evidence Block template specifies `"none — no active entries match this PR's trigger list"` as the no-match value for the `Matching residual IDs` field, but LL-021's verification method requires that field to contain either specific IDs or the exact phrase `"No matching open residuals found after consulting OPEN_RESIDUALS.md"`. A contributor who follows Step 8 verbatim produces a value that LL-021's verifier marks non-conformant, making the no-match residual case permanently unauditable. (B) LL-022, LL-023, and LL-024 each recorded `Fix PR: this PR (branch ...)` rather than a stable PR number. The Cross-Reference Rule introduced in LL-022 requires `Fix PR` to be a navigable PR number; once a branch is deleted or reused, `"this PR"` becomes an unresolvable reference and the audit trail breaks.
+
+**What we assumed:** (A) The phrase `"none — no active entries match this PR's trigger list"` was a plain-language equivalent of the exact phrase required by LL-021 — a contributor would understand both forms to mean the same thing. (B) `"this PR (branch ...)"` was sufficiently specific at the time of writing; the branch name would allow an auditor to identify the PR via `git log` or the GitHub UI. The exact PR number was not available at commit time.
+
+**Why the assumption failed:** (A) LL-021's verification method runs a mechanical text check — it requires the exact phrase or named IDs, not a semantically equivalent substitute. A plain-language paraphrase fails that check regardless of intent. The template and the verifier must use identical wording or the template is a source of guaranteed non-conformance. (B) The Cross-Reference Rule's fix is expressly for navigability: a branch name is not a permanent GitHub anchor. Branches are deleted after merge (as observed throughout this session). An auditor seeing `"this PR (branch claude/codex-adversarial-review-fyu0nb)"` after branch deletion cannot follow the reference without additional git history reconstruction. A PR number produces a stable `https://github.com/fafa33/Iran-OS/pull/N` URL that persists after branch deletion.
+
+**Evidence that was missing:** (A) Cross-check between the Step 8 template's no-match wording and the LL-021 verification method's exact-phrase requirement before push. (B) The actual PR number for LL-022/023/024 was known at push time (PR #101 — the PR containing those entries); it was not recorded because the commit predated the PR creation step.
+
+**Policy created:** (A) Step 8 `Matching residual IDs` no-match template updated to the exact required phrase: `"No matching open residuals found after consulting OPEN_RESIDUALS.md"`. `Re-evaluation result` no-match template updated to `"N/A — no matching residuals identified"` to avoid identical values in both fields. (B) LL-022, LL-023, LL-024 `Fix PR` fields updated from `"this PR (branch ...)"` to `#101`. All `"fix applied in this PR"` Notes updated to `"fix applied in PR #101"`. Operational lesson: when writing Fix PR for a post-merge finding, the PR number is available at the time of push — it must be recorded before the commit is created; leaving it as `"this PR"` is non-conformant at time of push.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 8 PR Body Evidence Block — `Matching residual IDs` and `Re-evaluation result` no-match template values corrected.
+
+**Verification method:** (A) `grep 'no active entries match' CLAUDE.md` → zero matches (old wording gone); `grep 'No matching open residuals found' CLAUDE.md` → one match in `Matching residual IDs` template (correct phrase present). (B) `grep 'Fix PR.*this PR' docs/governance/REVIEWER_LESSONS_LEARNED.md` → zero matches (no remaining "this PR" in Fix PR fields); `grep 'Fix PR.*#101' docs/governance/REVIEWER_LESSONS_LEARNED.md` → three matches (LL-022, LL-023, LL-024 all updated).
+
+**Affected files:** `CLAUDE.md` (Step 8 Matching residual IDs and Re-evaluation result no-match template updated); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-022, LL-023, LL-024 Fix PR fields and Notes updated; LL-025 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Both findings arrived in the same Codex review session on PR #101. Fixes applied in PR #102 on branch `claude/codex-adversarial-review-fyu0nb`.
 
 ---
 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-024*
+*Entries: LL-001 through LL-025*
