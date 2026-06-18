@@ -80,7 +80,7 @@ A new LL entry must be created whenever a reviewer finding causes any of the fol
 
 Every LL entry must reference:
 
-1. **Originating PR** — the PR on which the review comment appeared
+1. **Originating PR** — the PR on which the review comment appeared. The `PR` field must always record the originating finding PR, not the fix PR. If the fix was applied in a separate subsequent PR, that PR is recorded in an optional **Fix PR** field immediately after the `PR` field. Placeholder URLs (e.g., `#issuecomment-0`) are not conformant — the real `comment_id` must be recorded. An entry whose `PR` field records a fix PR rather than the originating PR is non-conformant regardless of the Notes field.
 2. **Originating review comment URL** — direct link to the specific GitHub comment. Two valid URL formats are accepted:
    - **Review-thread URL:** `https://github.com/fafa33/Iran-OS/pull/N#discussion_rXXX` — a review comment created via the Files Changed or Commits view
    - **PR-comment URL:** `https://github.com/fafa33/Iran-OS/pull/N#issuecomment-XXX` — a PR-level comment posted in the Conversation view
@@ -392,7 +392,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 **Date:** 2026-06-18
 **PR:** #93
 **Reviewer:** chatgpt-codex-connector[bot]
-**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/93#issuecomment-0
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/93#issuecomment-4736984325
 **Finding:** Two defects in PR #93: (1) The replacement text for `"no attack path"` — `"No attack path was identified..."` — preserves the forbidden vocabulary. A Step 5 scan or human reviewer would still flag the replacement as using the forbidden phrase, so the policy does not close the gap it was designed to prevent. (2) The post-merge exception clause added in PR #92 (LL-008) requires Notes to state `"Finding arrived post-merge of PR #N; fix applied in PR #M"`, but LL-007 Notes still said `"Finding arrived after PR #90 merged..."` — the old form — making the registry non-conformant with the rule it introduced.
 
 **What we assumed:** (1) A replacement phrasing that restructures the claim ("No attack path was identified") is distinct from the forbidden phrase ("no attack path") and would not be caught by a scan. (2) LL-007's Notes field used equivalent wording and would be understood to satisfy the new post-merge rule.
@@ -413,7 +413,7 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 **Repeat allowed?** NO
 
-**Notes:** Both findings arrived on PR #93 in the same Codex review comment. Fixes committed in the same PR before merge. **PR-comment URL conformance:** This entry's `#issuecomment-0` URL was non-conformant under the original Cross-Reference Rule, which accepted only `#discussion_rXXX` format. The rule was updated in PR #100 (LL-019) to also accept `#issuecomment-XXX` format. All five required fields for a PR-comment URL entry are present: PR number (#93) ✓, comment URL (issuecomment-0) ✓, reviewer identity (chatgpt-codex-connector[bot]) ✓, finding summary (Finding field) ✓, verification method (Verification method field) ✓. This entry is conformant under the updated rule.
+**Notes:** Both findings arrived on PR #93 in the same Codex review comment. Fixes committed in the same PR before merge. **PR-comment URL:** Real `comment_id` `#issuecomment-4736984325` identified via GitHub API and recorded in this PR (LL-022) — replacing the placeholder `#issuecomment-0` that remained after PR #100 (LL-019) declared the entry conformant without looking up the actual ID. A Codex review on PR #100 (`#discussion_r3433055404`) flagged the placeholder as non-navigable. All five required fields for a PR-comment URL entry are present: PR number (#93) ✓, comment URL (`#issuecomment-4736984325`, navigable) ✓, reviewer identity (chatgpt-codex-connector[bot]) ✓, finding summary (Finding field) ✓, verification method (Verification method field) ✓. This entry is conformant under the Cross-Reference Rule.
 
 ---
 
@@ -690,7 +690,8 @@ A finding may happen once. The same *class* of finding must never happen twice.
 ## LL-020
 
 **Date:** 2026-06-18
-**PR:** #100
+**PR:** #99
+**Fix PR:** #100
 **Reviewer:** chatgpt-codex-connector[bot]
 **Review comment URL:** https://github.com/fafa33/Iran-OS/pull/99#discussion_r3432990848
 **Finding:** Step 9 Condition A evidence template required only the manifest's git log output ("git log evidence recorded above"). It did not require recording the latest sensitive-component PR on main. A reviewer could record `Condition A: NO` by observing that the manifest looked recent — without documenting the date of the most recent sensitive merge on main. The comparison that Condition A is meant to enforce (manifest date vs. latest sensitive PR date) was one-sided: only the manifest side was documented.
@@ -747,6 +748,41 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-022
+
+**Date:** 2026-06-18
+**PR:** #100
+**Fix PR:** this PR (branch `claude/codex-adversarial-review-fyu0nb`)
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:**
+- Finding A (LL-010 placeholder URL): https://github.com/fafa33/Iran-OS/pull/100#discussion_r3433055404
+- Finding B (Step 9 date-bearing command): https://github.com/fafa33/Iran-OS/pull/100#discussion_r3433055413
+- Finding C (LL-020 originating PR field): https://github.com/fafa33/Iran-OS/pull/100#discussion_r3433055420
+
+**Finding:** Three cross-reference and evidence-fidelity defects in PR #100: (A) LL-010's Review comment URL remained `#issuecomment-0` — a placeholder — after LL-019 declared the entry conformant. The real `comment_id` was not looked up at the time of the conformance declaration; the conformance claim was based on the URL's structural format, not its navigability. An auditor following the Cross-Reference Rule cannot reach the originating comment using a placeholder URL. (B) Step 9 Condition A prescribed `git log --oneline --merges origin/main | head -5`. The `--oneline` format is an alias for `--pretty=oneline --abbrev-commit` and produces only `<hash> <title-line>` — no date field — so a reviewer following this instruction cannot produce the merge date required for the Condition A comparison regardless of effort. (C) LL-020's `PR` field was set to `#100` (the fix PR) instead of `#99` (the PR where the Codex review comment appeared), violating the Cross-Reference Rule's definition of "Originating PR."
+
+**What we assumed:** (A) Declaring LL-010 conformant under the updated Cross-Reference Rule (LL-019) required verifying the URL format and the five required fields — not navigating to the actual comment. The placeholder `#issuecomment-0` was understood as a stand-in that the format check would pass. (B) `git log --oneline --merges` would expose enough information (hash + title) for a reviewer to identify the relevant merge, and the date could be obtained by subsequent means. (C) Recording the fix PR in the `PR` field was acceptable because the Notes field explained which PR was the originating PR and which was the fix PR.
+
+**Why the assumption failed:** (A) A URL that cannot be navigated is not auditable, and "conformant in format" is not the same as "conformant in substance." The Cross-Reference Rule requires a navigable link — a placeholder by definition fails this test. Declaring conformance without confirming navigability conflated format with function. (B) `--oneline` is a shorthand with a fixed output format that omits dates. Reviewers following the prescribed command face a structural impossibility — the command cannot produce the required output. (C) The Cross-Reference Rule unambiguously defines the `PR` field as the PR where the review comment appeared. Notes are explanatory, not authoritative: an audit matching `PR` to the URL's PR number will fail regardless of what the Notes say.
+
+**Evidence that was missing:** (A) GitHub API lookup confirming the actual `comment_id` for PR #93 (found: `#issuecomment-4736984325` — verified via `get_comments` on PR #93 in this session). (B) Verification that the prescribed `git log` format includes a date placeholder (`%ad`, `%cd`, `%ci`, or equivalent). (C) PR-field-to-URL alignment check: the PR number in the `PR` field must match the PR number in the `Review comment URL` path for every entry with an external review URL.
+
+**Policy created:** (A) Cross-Reference Rule amended: the `PR` field must always record the originating finding PR, not the fix PR; placeholder URLs (`#issuecomment-0`) are explicitly non-conformant — the real `comment_id` must be recorded; if a fix was applied in a separate PR, that PR is recorded in an optional `Fix PR` field immediately after `PR`. (B) Step 9 Condition A command updated from `git log --oneline --merges origin/main | head -5` to `git log --merges --pretty=format:"%h %ad %s" --date=short origin/main | head -5`, which produces hash, date (`%ad`), and subject per merge commit. (C) No separate rule needed for Finding C — LL-020's `PR` field corrected to `#99` per the existing Cross-Reference Rule; the rule's definition of "Originating PR" is unambiguous.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 9 Required evidence block — Condition A identification command updated to date-bearing format.
+
+**Verification method:** (A) `grep '^\*\*Review comment URL:\*\*.*issuecomment-0' docs/governance/REVIEWER_LESSONS_LEARNED.md` → zero matches (no URL field contains the placeholder; prose references to the old placeholder in LL-022 explanatory text are expected and do not fail this check). (B) `grep 'git log.*oneline.*merges' CLAUDE.md` → zero matches (undatable command replaced); `grep 'pretty=format' CLAUDE.md` → one match at Step 9 Condition A (date-bearing command present). (C) For every LL entry with an external review URL: the PR number in the `PR` field must match the PR number in the `Review comment URL` hostname path — verified for all entries in this session.
+
+**Affected files:** `CLAUDE.md` (Step 9 Condition A git log command updated to date-bearing format); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Cross-Reference Rule amended: Fix PR field added, placeholder URL prohibition added; LL-010 Review comment URL corrected from `#issuecomment-0` to `#issuecomment-4736984325`; LL-010 Notes updated; LL-020 PR field corrected to `#99`; LL-020 Fix PR field added; LL-022 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** All three findings arrived in the same Codex review session on PR #100. Fixes applied in this PR on branch `claude/codex-adversarial-review-fyu0nb`.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -767,4 +803,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-021*
+*Entries: LL-001 through LL-022*
