@@ -503,6 +503,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-014
+
+**Date:** 2026-06-18
+**PR:** #97
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Gap C-7 — The Red-Team Finding Classification Standard names `DOCUMENTATION_REQUIRED` as a valid downgrade outcome from BLOCKER_P1, but defines no formal resolution pathway. No terminal states are defined. No closure evidence fields are required. No rule specifies when a DOCUMENTATION_REQUIRED finding escalates to BLOCKER or HARDENING_ONLY, when it is superseded by policy, or when it creates a Lessons Learned obligation. A reviewer who correctly classifies a finding as DOCUMENTATION_REQUIRED has no standard for what "closed" means, who verifies it, or where closure is recorded.
+
+**What we assumed:** Naming the three downgrade outcomes (HARDENING_ONLY, DOCUMENTATION_REQUIRED, FALSE_POSITIVE) was sufficient. Implementing the required documentation change and merging the PR constituted closure.
+
+**Why the assumption failed:** Classification without a resolution pathway is half a system. "Edit the documentation and merge" is not a verifiable closure standard — it does not specify what re-verification proves the documentation is correct, what happens if the correction reveals the underlying finding is actually BLOCKER or HARDENING_ONLY, or where the closure is recorded so a future auditor can confirm it occurred. The absence of terminal states means a finding can be simultaneously "closed" in one document and unaddressed in another, producing the same cross-document inconsistency that LL-001 and LL-010 were designed to prevent.
+
+**Evidence that was missing:** (1) Formal terminal states (DOCUMENTATION_REQUIRED_CLOSED, RECLASSIFIED_HARDENING_ONLY, RECLASSIFIED_BLOCKER, SUPERSEDED_BY_POLICY, DUPLICATE_OF_EXISTING_LL, OPEN_PENDING_EVIDENCE). (2) Required closure evidence fields (9 fields: finding ID through terminal state). (3) Rules specifying when a DOCUMENTATION_REQUIRED finding creates an LL entry obligation and when it must update OPEN_RESIDUALS.md.
+
+**Policy created:** DOCUMENTATION_REQUIRED Resolution Pathway subsection added to the Red-Team Finding Classification Standard in CLAUDE.md. Defines: 5 closure conditions, 6 terminal states, 9 required closure evidence fields, LL entry obligation rule, OPEN_RESIDUALS.md obligation rule, and 4 examples (FND-03, FND-04, FND-05, LL registry template corrections).
+
+**CLAUDE.md reference:** `### Red-Team Finding Classification Standard (Mandatory)` → DOCUMENTATION_REQUIRED Resolution Pathway (added after HARDENING_ONLY Re-Evaluation Policy).
+
+**Verification method:** For any finding classified DOCUMENTATION_REQUIRED: (1) confirm the PR description or linked report contains all 9 closure evidence fields; (2) confirm a terminal state other than `OPEN_PENDING_EVIDENCE` is assigned before merge; (3) if the finding affects classification standards, evidence requirements, or governance policy, confirm a new or updated LL entry exists in the same PR.
+
+**Affected files:** `CLAUDE.md` (DOCUMENTATION_REQUIRED Resolution Pathway subsection added to Classification Standard); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-014 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-7 from the gap analysis report. This entry itself satisfies the LL obligation rule introduced by the policy it documents.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -523,4 +553,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-013*
+*Entries: LL-001 through LL-014*

@@ -356,6 +356,111 @@ FND-01 (freshness gate absent on `syncReserves`) and FND-02 (stale reserve value
 
 **Centralized residual register:** All active HARDENING_ONLY findings must be listed in `docs/governance/OPEN_RESIDUALS.md`. When a finding is created, add it. When a re-evaluation trigger fires, mark it as "Under Re-evaluation." When re-classification completes, record the outcome and update the status.
 
+#### DOCUMENTATION_REQUIRED Resolution Pathway
+
+**A `DOCUMENTATION_REQUIRED` finding is not closed by editing documentation alone.** It is closed only after all five conditions are satisfied:
+
+1. The required documentation change is made (file:line documented).
+2. The affected claim is re-checked against current code or current governance evidence (grep result or equivalent CET-1 evidence recorded).
+3. The reviewer-facing ambiguity is removed — the text that prompted the finding no longer appears or is unambiguously qualified.
+4. The closure evidence is recorded in the PR description or linked report (see required fields below).
+5. If the finding affected classification standards, evidence requirements, reviewer workflow, or governance policy: a Lessons Learned entry is created or updated in `docs/governance/REVIEWER_LESSONS_LEARNED.md` before the PR containing the fix is merged.
+
+**Terminal states**
+
+A DOCUMENTATION_REQUIRED finding must be assigned one of the following terminal states before closure is claimed:
+
+| Terminal state | Meaning |
+|---|---|
+| `DOCUMENTATION_REQUIRED_CLOSED` | Required documentation made, claim re-verified against current code, ambiguity removed, closure evidence recorded |
+| `RECLASSIFIED_HARDENING_ONLY` | Re-evaluation shows a hardening gap, not a documentation gap; re-classified and added to `docs/governance/OPEN_RESIDUALS.md` |
+| `RECLASSIFIED_BLOCKER` | Missing documentation was obscuring a BLOCKER_P1 or BLOCKER_P2 defect; re-classified and blocks the current PR |
+| `SUPERSEDED_BY_POLICY` | Resolved by a new or amended governance rule rather than document correction; rule referenced in terminal-state record |
+| `DUPLICATE_OF_EXISTING_LL` | Already addressed by an existing Lessons Learned entry and its policy; LL entry number cited |
+| `OPEN_PENDING_EVIDENCE` | Active — required change identified but not yet made; PR may not be merged in this state |
+
+**Required closure evidence fields**
+
+Every DOCUMENTATION_REQUIRED finding closed as any terminal state other than `OPEN_PENDING_EVIDENCE` must record the following fields in the PR description or linked governance report:
+
+| Field | Content |
+|---|---|
+| Finding ID | Assigned identifier (e.g., FND-03, C-7, LL-010 Finding 2) |
+| Originating PR / review URL | PR number and direct GitHub review comment URL |
+| Affected file(s) | File path(s) and line numbers affected |
+| Required documentation change | Precise description of what must be changed and why |
+| Verification method | grep command or equivalent check confirming the change is present and accurate |
+| Evidence source | CET-1 evidence: grep result, test output, or equivalent |
+| Closure reviewer | Who verified closure (Self / external reviewer name) |
+| Closure date | Date closure was recorded |
+| Terminal state | One of the six states above |
+
+**LL entry requirement**
+
+Any DOCUMENTATION_REQUIRED finding that changes classification standards, evidence requirements, reviewer workflow, or governance policy must create or update a Lessons Learned entry in `docs/governance/REVIEWER_LESSONS_LEARNED.md` before the PR containing the fix is merged.
+
+**OPEN_RESIDUALS.md requirement**
+
+Any DOCUMENTATION_REQUIRED finding that affects a residual risk — including any finding that reveals a gap in HARDENING_ONLY classification evidence, disqualifying assumptions, or re-evaluation trigger coverage — must also update or reference `docs/governance/OPEN_RESIDUALS.md`. If the finding identifies a new residual, it must be added to the register before the PR is merged.
+
+**Examples**
+
+*FND-03 — NatSpec correction*
+
+| Field | Content |
+|---|---|
+| Finding ID | FND-03 |
+| Originating PR / review URL | PR #83 — NatSpec missing on `API3Oracle.syncReserves` |
+| Affected file(s) | `contracts/oracles/API3Oracle.sol` |
+| Required documentation change | Add `@param`, `@notice` NatSpec to `syncReserves` per coding standard |
+| Verification method | `grep -A5 'function syncReserves' contracts/oracles/API3Oracle.sol` — confirm NatSpec present |
+| Evidence source | grep result in PR description |
+| Closure reviewer | Self |
+| Closure date | 2026-06-17 |
+| Terminal state | `DOCUMENTATION_REQUIRED_CLOSED` |
+
+*FND-04 — CF-1 runbook correction*
+
+| Field | Content |
+|---|---|
+| Finding ID | FND-04 |
+| Originating PR / review URL | PR #86 — CF-1 breach detection runbook missing re-activation step |
+| Affected file(s) | `docs/reports/CF1_BREACH_DETECTION_DISPOSITION.md` |
+| Required documentation change | Add court-only emergency lock deactivation step; align with `onlyCourt` enforcement in kernel |
+| Verification method | `grep 'onlyCourt\|deactivate\|emergencyLock' docs/reports/CF1_BREACH_DETECTION_DISPOSITION.md` — confirm step present |
+| Evidence source | grep result in PR description |
+| Closure reviewer | Self |
+| Closure date | 2026-06-17 |
+| Terminal state | `DOCUMENTATION_REQUIRED_CLOSED` |
+
+*FND-05 — Oracle call-sequence note*
+
+| Field | Content |
+|---|---|
+| Finding ID | FND-05 |
+| Originating PR / review URL | PR #85 — oracle integration docs omitted Gate A → Gate B ordering constraint |
+| Affected file(s) | `docs/oracle/` integration protocol |
+| Required documentation change | Add call-sequence note: Gate A (PAH_USD_KEY refresh) must precede `syncReserves`; Gate B rate limit applies per `MAX_DATA_AGE` window |
+| Verification method | `grep 'Gate A\|Gate B\|MAX_DATA_AGE' docs/oracle/` — confirm both gates documented |
+| Evidence source | grep result in PR description |
+| Closure reviewer | Self |
+| Closure date | 2026-06-17 |
+| Terminal state | `DOCUMENTATION_REQUIRED_CLOSED` |
+
+*LL registry template corrections (PR #90 → #91)*
+
+| Field | Content |
+|---|---|
+| Finding ID | LL-007 root finding |
+| Originating PR / review URL | `https://github.com/fafa33/Iran-OS/pull/90#discussion_r3432074234` |
+| Affected file(s) | `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Cross-Reference Rule) |
+| Required documentation change | Add self-review exception clause defining valid `N/A` form for entries with no external comment URL |
+| Verification method | grep all LL entries where Reviewer contains "Self" — confirm Review comment URL follows `N/A — self-identified ... finding` format |
+| Evidence source | Confirmed in PR #91 |
+| Closure reviewer | Self |
+| Closure date | 2026-06-18 |
+| Terminal state | `SUPERSEDED_BY_POLICY` — Cross-Reference Rule amended; LL-007 created |
+
 ### PR Preflight Standard (Mandatory)
 
 This policy governs every PR — code or documentation — touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, or audit reports. Its purpose is to eliminate post-push Codex findings caused by unverified closure claims, missing role-path evidence, or wording that is true in principle but unprovable from the text.
