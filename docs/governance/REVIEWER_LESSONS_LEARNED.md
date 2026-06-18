@@ -687,6 +687,36 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-020
+
+**Date:** 2026-06-18
+**PR:** #100
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/99#discussion_r3432990848
+**Finding:** Step 9 Condition A evidence template required only the manifest's git log output ("git log evidence recorded above"). It did not require recording the latest sensitive-component PR on main. A reviewer could record `Condition A: NO` by observing that the manifest looked recent — without documenting the date of the most recent sensitive merge on main. The comparison that Condition A is meant to enforce (manifest date vs. latest sensitive PR date) was one-sided: only the manifest side was documented.
+
+**What we assumed:** Recording the manifest's git log output was sufficient evidence for a `Condition A: NO` answer. The reviewer performing the check would mentally compare the manifest date to recent main activity and form a correct judgment.
+
+**Why the assumption failed:** "Mental comparison" is CET-3 — no documented evidence for the comparison side. The Condition A guard exists precisely because inherited staleness is non-obvious: a manifest that predates a recent sensitive PR looks fine in isolation. Without documenting the latest sensitive-component PR's date alongside the manifest date, there is no auditable proof that the comparison was made, and no way for a future reviewer to reproduce or challenge the result.
+
+**Evidence that was missing:** A required sub-field in the Step 9 Condition A evidence entry for: (1) the manifest last-update date (already partially required via commit evidence), (2) the latest sensitive-component PR on main (PR number and merge date, or the command used to identify it), and (3) the comparison result (manifest OLDER/NEWER/EQUAL and the resulting disposition).
+
+**Policy created:** Step 9 Condition A evidence field expanded into three sub-items: manifest last-update, latest sensitive-component PR on main (with identification command), and comparison result. A `Condition A: NO` answer is now auditable: both sides of the comparison are documented.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 9 Required evidence block — Condition A field expanded to three sub-items.
+
+**Verification method:** For any Step 9 Condition A entry claiming NO (not stale): confirm three sub-items are present — (1) manifest last-update date or commit, (2) latest sensitive-component PR number and merge date or identification command output, (3) comparison result stated as OLDER/NEWER/EQUAL with disposition.
+
+**Affected files:** `CLAUDE.md` (Step 9 Condition A evidence field expanded); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-020 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived post-merge of PR #99 (C-8/LL-018); fix applied in PR #100 on branch `claude/codex-adversarial-review-fyu0nb`.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -707,4 +737,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-019*
+*Entries: LL-001 through LL-020*
