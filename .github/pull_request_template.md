@@ -39,7 +39,7 @@ List the key files modified or created:
 
 `CLAUDE.md` is the authoritative governance source. This section mirrors the existing `CLAUDE.md` standard for contributor-facing review and does not create additional policy.
 
-Applies to every PR covered by the `CLAUDE.md` PR Preflight Standard: code or documentation touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, or audit reports. It also applies to any PR making security, governance, reachability, role, reserve, oracle, trigger, treasury, mint, freeze, or closure claims.
+Applies to every PR covered by the `CLAUDE.md` PR Preflight Standard: sensitive-component PRs; governance-impacting PRs; PRs touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, deployment wiring, runbooks, gap registers, audit reports, oracle docs, reserve docs, role docs, deployment manifests, or governance policy docs; any PR whose changes match a HARDENING_ONLY re-evaluation trigger in `CLAUDE.md`; and any PR making security, governance, reachability, role, reserve, oracle, trigger, treasury, mint, freeze, or closure claims.
 
 - [ ] This PR is outside the `CLAUDE.md` PR Preflight Standard scope.
 - [ ] This PR is covered by the `CLAUDE.md` PR Preflight Standard.
@@ -79,11 +79,10 @@ Required for PRs covered by the `CLAUDE.md` PR Preflight Standard.
   - Manifest file(s) checked: ___
   - Authoritative date field: ___
   - Date value: ___
-  - Commit evidence if no date field: ___
-  - Condition A comparison: ___
-    - Manifest last-update: ___
-    - Latest sensitive-component PR on main: ___
-    - Comparison result: ___
+  - Fallback commit evidence if no explicit date field exists: ___
+  - Manifest last-update evidence: ___
+  - Latest sensitive-component PR on main: ___
+  - Condition A comparison result: ___
   - Condition B topology/role/oracle/reserve/treasury/trigger/mint/freeze change: YES / NO
   - Re-verification required: YES / NO
   - Result: PASS / DOCUMENTATION_REQUIRED
