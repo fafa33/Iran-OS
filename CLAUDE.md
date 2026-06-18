@@ -638,12 +638,42 @@ For any PR touching a sensitive component (Kernel, Oracle, Reserve, Treasury, Tr
 
 1. Identify every role and contract address introduced or modified by the PR.
 2. Grep `docs/deployment/` for each role and contract address: `grep -r 'ROLE_NAME\|ContractName' docs/deployment/`. Confirm the manifest documents the current wiring.
-3. Confirm the manifest's last-updated date is not older than the most recent sensitive-component PR merged to main.
-4. If the manifest is stale — missing a role grant, a contract address, or a wiring change introduced since the manifest was last updated — update it in the same PR.
+3. Identify the authoritative manifest file for the PR's scope. If multiple deployment manifests exist in `docs/deployment/`, list all relevant ones and identify which is authoritative for the components affected by this PR.
+4. Determine the manifest's authoritative date using the following priority:
+   - **First:** An explicit `Last verified:` or `Manifest date:` field in the manifest file — this is the authoritative date.
+   - **Fallback (if no explicit field exists):** The most recent git commit touching the manifest file: `git log -1 --format="%H %ad" -- docs/deployment/<manifest-file>`. The Step 9 result must be classified below CET-1 unless this commit evidence is recorded inline.
+5. Evaluate staleness: if this PR changes deployment topology, role assignment, authority routing, oracle wiring, reserve path, treasury path, trigger path, mint path, or emergency/freeze path, the manifest must be re-verified and the date field updated in the same PR.
+6. If no manifest exists for the affected component, Step 9 must fail as DOCUMENTATION_REQUIRED — a missing manifest is not a PASS.
+7. If the manifest is stale — missing a role grant, a contract address, or a wiring change introduced since the manifest was last updated — update it in the same PR.
 
 A claim that wiring is "documented in `docs/deployment/`" requires CET-1 evidence: a grep result showing the specific role or address is present in the manifest file and section cited.
 
 **A PR that claims production wiring is documented but cannot produce the manifest grep result fails the preflight.**
+
+**Required evidence block entry for Step 9:**
+
+Every sensitive-component PR must include the following in its PR Evidence section:
+
+```
+Step 9 — Deployment Manifest Currency:
+- Manifest file(s) checked: [path(s) or "N/A — PR does not affect deployment topology"]
+- Authoritative date field: [Last verified / Manifest date / none — commit evidence used]
+- Date value: [date or "N/A — see commit evidence below"]
+- Commit evidence if no date field: [git log -1 output, or "N/A — explicit date field present"]
+- PR affects deployment topology? [YES / NO]
+- Re-verification required? [YES / NO — if YES, confirm manifest updated in this PR]
+- Result: [PASS / DOCUMENTATION_REQUIRED]
+- CET level: [CET-1 / below CET-1 / DOCUMENTATION_REQUIRED]
+```
+
+**A Step 9 compliance claim is CET-1 only if all five conditions are met:**
+1. Manifest file is identified by path.
+2. Date source is identified (explicit `Last verified:`/`Manifest date:` field, or commit evidence recorded).
+3. Date or commit hash and timestamp is recorded inline.
+4. Staleness condition is evaluated against the PR's changes.
+5. Result is recorded in the Evidence block as PASS or DOCUMENTATION_REQUIRED.
+
+A Step 9 claim that omits any of these five conditions is CET-2 at best and may not be stated as PASS.
 
 #### Step 10 — Open Residuals Consultation
 
