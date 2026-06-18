@@ -141,6 +141,20 @@ The red-team pass must address each of the following before implementation begin
 
 Implementation may begin only after this pass is documented.
 
+### Governance Preflight Synchronization
+
+`CLAUDE.md` is the authoritative governance source for sensitive PR preflight, red-team evidence, finding classification, and residual-risk handling. Contributor-facing templates mirror that standard for review convenience; if wording differs, follow `CLAUDE.md`.
+
+For any PR covered by the `CLAUDE.md` PR Preflight Standard, contributors must document the existing `CLAUDE.md` requirements in the PR body:
+
+- **CET requirements:** all claims and red-team conclusions must be CET-1 before push; CET-2, CET-3, and CET-4 claims must be upgraded or removed.
+- **Certainty Language requirements:** changed files, PR title, and PR description must be scanned; forbidden or conditionally allowed certainty language must be removed, qualified, or supported with CET-1 evidence.
+- **Red-Team Evidence requirements:** applicable findings must record claim, evidence source, verification method, certainty level, assumptions, disqualifying assumptions, and recommended action. PASS results require scoped CET-1 evidence.
+- **Step 8 Evidence Block:** sensitive-component PRs must include the `CLAUDE.md` Evidence Block covering grep evidence, role grant path, tests, open residuals, and certainty-language scan.
+- **Step 9 Manifest Evidence:** sensitive-component PRs must record deployment manifest file(s), authoritative date or commit evidence, inherited-staleness comparison, current-PR topology impact, result, and CET level.
+- **Step 10 OPEN_RESIDUALS consultation:** sensitive-component PRs and PRs matching HARDENING_ONLY trigger events must consult `docs/governance/OPEN_RESIDUALS.md`, record matching residual IDs, and document any required re-evaluation.
+- **HARDENING_ONLY re-evaluation:** if a re-evaluation trigger listed in `CLAUDE.md` fires, every affected active residual must be re-assessed against the 5-criterion gate before the PR is marked ready or merged.
+
 ---
 
 ## Non-Claim Discipline
