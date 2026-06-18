@@ -345,7 +345,7 @@ When a re-evaluation trigger fires:
 |---|---|
 | Original finding | `syncReserves(uint256 newReserves)` carries no timestamp or provenance; a feeder with `FEEDER_ROLE` can submit stale reserves — root cause is GAP-MEX-04 FND-01/FND-02 |
 | Disqualifying criterion | Criterion 4 fails — "Reachable downstream enforcement consequence" |
-| Disqualifying assumption | Minting circuit incomplete: `SovereignWealthFund.sol` holds `MINTER_ROLE` but contains no `.mint()` call — verified by `grep -r '\.mint(' contracts/ --include="*.sol" \| grep -v fuzzing` → one match in fuzzing harness only |
+| Disqualifying assumption | Minting circuit incomplete: `SovereignWealthFund.sol` holds `MINTER_ROLE` but contains no `.mint()` call — verified by `grep -r '\.mint(' contracts/ --include="*.sol" \| grep -v fuzzing` → zero matches (the only `.mint(` call is in the fuzzing harness, excluded by `grep -v fuzzing`) |
 | Re-evaluation triggers | Trigger 1 (new mint path), Trigger 3 (new consumer of `totalReserves`), Trigger 10 (new enforcement consumer of `reserveCompliant`), Trigger 11 (FND-01 or FND-02 closed via contract change) |
 
 If Trigger 1 fires (a SWF mint path is added), criterion 4 must be re-evaluated. If criterion 4 now passes, K-RES-01 must be reclassified as BLOCKER_P1 and must block the PR that added the mint path.
