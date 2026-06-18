@@ -63,7 +63,7 @@ An entry that lacks any of these four fields is incomplete and must be updated b
 A new LL entry must be created whenever a reviewer finding causes any of the following:
 
 - A new section or rule in `CLAUDE.md`
-- A change to the PR preflight checklist (Steps 1–9)
+- A change to the PR preflight checklist (Steps 1–10)
 - A new or modified evidence requirement in the grep evidence table
 - A new entry in the forbidden wording list
 - A new or modified classification rule or criterion
@@ -473,6 +473,66 @@ A finding may happen once. The same *class* of finding must never happen twice.
 
 ---
 
+## LL-013
+
+**Date:** 2026-06-18
+**PR:** #96
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Gap C-1 — `docs/governance/OPEN_RESIDUALS.md` was not integrated into the PR preflight standard. The HARDENING_ONLY Re-Evaluation Policy (added in PR #94) defines 11 trigger events that require re-evaluation of active HARDENING_ONLY findings, but no preflight step required reading the register before opening or merging a sensitive-component PR. A future PR touching a SWF mint path, oracle architecture, or reserve consumer could pass all 9 preflight steps while bypassing K-RES-01 re-evaluation entirely — exactly the enforcement gap the register was designed to close.
+
+**What we assumed:** Adding the HARDENING_ONLY Re-Evaluation Policy to CLAUDE.md was sufficient. An implementer adding a `.mint()` call would read the policy, recognize that Trigger 1 applies, and consult OPEN_RESIDUALS.md voluntarily.
+
+**Why the assumption failed:** Policy without a mechanical enforcement step is advisory. No preflight step required reading OPEN_RESIDUALS.md; no evidence block field tracked whether the consultation occurred or what result it produced. An implementer who skips the policy section — or who reads it but does not apply it to a specific PR — produces no observable failure signal. The register exists but the path from "opening a sensitive PR" to "checking the register" had no enforced bridge.
+
+**Evidence that was missing:** (1) A numbered preflight step (Step 10) requiring OPEN_RESIDUALS.md consultation for sensitive-component PRs. (2) A required evidence block field ("Open residuals consulted") in Step 8 tracking the consultation, matched residual IDs, and re-evaluation result.
+
+**Policy created:** Step 10 (Open Residuals Consultation) added to the PR Preflight Standard. Step 8 Evidence Block updated to require "Open residuals consulted" with sub-fields: file checked, matching residual IDs, re-evaluation result. A sensitive-component PR may not be pushed, marked ready, or merged without completing this step.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → Step 10 Open Residuals Consultation (added); Step 8 PR Body Evidence Block (updated with "Open residuals consulted" field).
+
+**Verification method:** Before any sensitive-component PR is opened, marked ready, or merged: (1) confirm `docs/governance/OPEN_RESIDUALS.md` was read in this session; (2) confirm each active HARDENING_ONLY entry's trigger list was checked against the PR's changes; (3) confirm the PR Evidence block contains "Open residuals consulted: YES" with matching residual IDs and re-evaluation result, or "Open residuals consulted: NO — PR does not touch sensitive components."
+
+**Affected files:** `CLAUDE.md` (Step 10 added to PR Preflight Standard; Step 8 Evidence Block updated); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Maintenance Rule updated to Steps 1–10; LL-013 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-1 from the gap analysis report. K-RES-01 is the only active HARDENING_ONLY residual at the time of this entry; it must be checked against any PR touching Kernel, Oracle, Reserve, Treasury, TriggerProtocol, PahlaviToken, roles, or deployment wiring.
+
+---
+
+## LL-014
+
+**Date:** 2026-06-18
+**PR:** #97
+**Reviewer:** Self (governance gap analysis)
+**Review comment URL:** N/A — self-identified governance gap; no external review comment
+**Finding:** Gap C-7 — The Red-Team Finding Classification Standard names `DOCUMENTATION_REQUIRED` as a valid downgrade outcome from BLOCKER_P1, but defines no formal resolution pathway. No terminal states are defined. No closure evidence fields are required. No rule specifies when a DOCUMENTATION_REQUIRED finding escalates to BLOCKER or HARDENING_ONLY, when it is superseded by policy, or when it creates a Lessons Learned obligation. A reviewer who correctly classifies a finding as DOCUMENTATION_REQUIRED has no standard for what "closed" means, who verifies it, or where closure is recorded.
+
+**What we assumed:** Naming the three downgrade outcomes (HARDENING_ONLY, DOCUMENTATION_REQUIRED, FALSE_POSITIVE) was sufficient. Implementing the required documentation change and merging the PR constituted closure.
+
+**Why the assumption failed:** Classification without a resolution pathway is half a system. "Edit the documentation and merge" is not a verifiable closure standard — it does not specify what re-verification proves the documentation is correct, what happens if the correction reveals the underlying finding is actually BLOCKER or HARDENING_ONLY, or where the closure is recorded so a future auditor can confirm it occurred. The absence of terminal states means a finding can be simultaneously "closed" in one document and unaddressed in another, producing the same cross-document inconsistency that LL-001 and LL-010 were designed to prevent.
+
+**Evidence that was missing:** (1) Formal terminal states (DOCUMENTATION_REQUIRED_CLOSED, RECLASSIFIED_HARDENING_ONLY, RECLASSIFIED_BLOCKER, SUPERSEDED_BY_POLICY, DUPLICATE_OF_EXISTING_LL, OPEN_PENDING_EVIDENCE). (2) Required closure evidence fields (9 fields: finding ID through terminal state). (3) Rules specifying when a DOCUMENTATION_REQUIRED finding creates an LL entry obligation and when it must update OPEN_RESIDUALS.md.
+
+**Policy created:** DOCUMENTATION_REQUIRED Resolution Pathway subsection added to the Red-Team Finding Classification Standard in CLAUDE.md. Defines: 5 closure conditions, 6 terminal states, 9 required closure evidence fields, LL entry obligation rule, OPEN_RESIDUALS.md obligation rule, and 4 examples (FND-03, FND-04, FND-05, LL registry template corrections).
+
+**CLAUDE.md reference:** `### Red-Team Finding Classification Standard (Mandatory)` → DOCUMENTATION_REQUIRED Resolution Pathway (added after HARDENING_ONLY Re-Evaluation Policy).
+
+**Verification method:** For any finding classified DOCUMENTATION_REQUIRED: (1) confirm the PR description or linked report contains all 9 closure evidence fields; (2) confirm a terminal state other than `OPEN_PENDING_EVIDENCE` is assigned before merge; (3) if the finding affects classification standards, evidence requirements, or governance policy, confirm a new or updated LL entry exists in the same PR.
+
+**Affected files:** `CLAUDE.md` (DOCUMENTATION_REQUIRED Resolution Pathway subsection added to Classification Standard); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-014 added; footer updated)
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Proactive entry from internal governance gap analysis (2026-06-18). Gap C-7 from the gap analysis report. This entry itself satisfies the LL obligation rule introduced by the policy it documents.
+
+---
+
 ## Adding New Entries
 
 When a reviewer finding causes any of the following, a new LL entry is required before the PR is closed:
@@ -493,4 +553,4 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-012*
+*Entries: LL-001 through LL-014*
