@@ -205,19 +205,38 @@ describe("Recognized Backing Integration Boundary", function () {
     expect(await token.canMint(mintAmount)).to.be.false;
     expect(await token.hasRole(await token.MINTER_ROLE(), feeder.address)).to.be.false;
     expect(await token.hasRole(await token.MINTER_ROLE(), await api3Oracle.getAddress())).to.be.false;
-    expect(await token.hasRole(await token.MINTER_ROLE(), await registry.getAddress())).to.be.false;
-    expect(await token.hasRole(await token.MINTER_ROLE(), recognizer.address)).to.be.false;
 
     await expect(
       token.connect(feeder).mint(recipient.address, mintAmount, "feeder autonomous mint attempt")
     ).to.be.reverted;
     await expect(
-      token.connect(recognizer).mint(recipient.address, mintAmount, "recognizer cannot mint")
-    ).to.be.reverted;
-    await expect(
       token.connect(stranger).mint(recipient.address, mintAmount, "stranger autonomous mint attempt")
     ).to.be.reverted;
     expect(await token.totalSupply()).to.equal(supplyBefore);
+  });
+
+  it("RecognizedReserveBacking cannot mint tokens or expand capacity by itself", async function () {
+    await recordIdentity(
+      Class.RecognizedReserveBacking,
+      await swf.getAddress(),
+      "registry-no-mint-authority"
+    );
+
+    const minterRole = await token.MINTER_ROLE();
+    expect(await token.hasRole(minterRole, await registry.getAddress())).to.be.false;
+    expect(await token.hasRole(minterRole, recognizer.address)).to.be.false;
+
+    expect(await token.totalReserves()).to.equal(0n);
+    expect(await token.totalSupply()).to.equal(0n);
+    expect(await token.canMint(mintAmount)).to.be.false;
+
+    await expect(
+      token.connect(recognizer).mint(recipient.address, mintAmount, "recognizer cannot mint")
+    ).to.be.reverted;
+
+    expect(await token.totalReserves()).to.equal(0n);
+    expect(await token.totalSupply()).to.equal(0n);
+    expect(await token.canMint(mintAmount)).to.be.false;
   });
 
   it("token exposes the explicit recognized-backing integration surface", async function () {
