@@ -171,6 +171,18 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
         uint256 timestamp
     );
 
+    /// @notice انتشار می‌شود وقتی Kernel پیوند پشتوانه شناخته‌شده توکن را تنظیم می‌کند
+    event RecognizedReserveBackingLinked(
+        address indexed recognizedReserveBacking,
+        uint256 timestamp
+    );
+
+    /// @notice انتشار می‌شود وقتی Kernel حسابداری ذخایر توکن را با پشتوانه شناخته‌شده همگام می‌کند
+    event RecognizedReserveBackingSynced(
+        address indexed caller,
+        uint256 timestamp
+    );
+
     // ─────────────────────────────────────────
     // تعدیل‌کننده‌ها (Modifiers)
     // ─────────────────────────────────────────
@@ -532,6 +544,38 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
         require(pahlaviToken != address(0), "Kernel: pahlaviToken not set");
         IPahlaviToken(pahlaviToken).updateReserves(newReserves);
         emit ReserveSynced(msg.sender, newReserves, block.timestamp);
+    }
+
+    /**
+     * @notice تنظیم پیوند صریح PahlaviToken به قرارداد RecognizedReserveBacking
+     * @dev مسیر حسابداری توکن را به recognizedBackingTotal محدود می‌کند.
+     * @param recognizedReserveBacking آدرس قرارداد RecognizedReserveBacking
+     */
+    function setPahlaviRecognizedReserveBacking(address recognizedReserveBacking)
+        external
+        onlySovereign
+        notLocked
+        nonReentrant
+    {
+        require(pahlaviToken != address(0), "Kernel: pahlaviToken not set");
+        require(recognizedReserveBacking != address(0), "Kernel: invalid address");
+        IPahlaviToken(pahlaviToken).setRecognizedReserveBacking(recognizedReserveBacking);
+        emit RecognizedReserveBackingLinked(recognizedReserveBacking, block.timestamp);
+    }
+
+    /**
+     * @notice همگام‌سازی صریح ذخایر توکن با recognizedBackingTotal
+     * @dev مقدار شناخته‌شده جایگزین حسابداری ذخایر توکن می‌شود و با داده اوراکل جمع نمی‌شود.
+     */
+    function syncRecognizedBackingTotal()
+        external
+        onlySovereign
+        notLocked
+        nonReentrant
+    {
+        require(pahlaviToken != address(0), "Kernel: pahlaviToken not set");
+        IPahlaviToken(pahlaviToken).syncRecognizedBackingTotal();
+        emit RecognizedReserveBackingSynced(msg.sender, block.timestamp);
     }
 
     // ─────────────────────────────────────────

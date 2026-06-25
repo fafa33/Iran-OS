@@ -5,6 +5,10 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+interface IRecognizedReserveBacking {
+    function recognizedBackingTotal() external view returns (uint256);
+}
+
 /**
  * @title PahlaviToken
  * @dev واحد پول ملی ایران — پهلوی (PAH)
@@ -47,8 +51,9 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
 
     address public sovereignWealthFund;
     address public kernel;
+    address public recognizedReserveBacking;
 
-    /// @notice ذخایر دارایی (ارزش دلاری ثبت‌شده توسط اوراکل — در واحد 1e18)
+    /// @notice ذخایر پشتوانه ثبت‌شده برای حسابداری توکن — در واحد 1e18
     uint256 public totalReserves;
 
     /// @notice وضعیت اضطراری — در صورت فعال بودن، انتقال‌ها متوقف می‌شوند
@@ -86,6 +91,7 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
     event EmergencyModeActivated(uint256 timestamp);
     event EmergencyModeDeactivated(uint256 timestamp);
     event SWFAddressUpdated(address oldSWF, address newSWF);
+    event RecognizedReserveBackingUpdated(address oldBacking, address newBacking);
 
     // ─────────────────────────────────────────
     // تعدیل‌کننده‌ها
@@ -231,6 +237,29 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
      * @param newReserves ارزش دلاری ذخایر در واحد 1e18
      */
     function updateReserves(uint256 newReserves) external onlyKernel {
+        require(
+            recognizedReserveBacking == address(0),
+            "PAH: recognized backing active"
+        );
+        _setReserves(newReserves);
+    }
+
+    /**
+     * @notice همگام‌سازی ذخایر توکن با recognizedBackingTotal
+     * @dev فقط Kernel می‌تواند این مسیر صریح را فراخوانی کند. مقدار totalReserves
+     *      با recognizedBackingTotal جایگزین می‌شود و با ذخایر موجود جمع نمی‌شود.
+     */
+    function syncRecognizedBackingTotal() external onlyKernel {
+        require(
+            recognizedReserveBacking != address(0),
+            "PAH: recognized backing not set"
+        );
+        uint256 recognizedTotal =
+            IRecognizedReserveBacking(recognizedReserveBacking).recognizedBackingTotal();
+        _setReserves(recognizedTotal);
+    }
+
+    function _setReserves(uint256 newReserves) internal {
         uint256 old = totalReserves;
         totalReserves = newReserves;
         uint256 supply = totalSupply();
@@ -283,6 +312,25 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
         _grantRole(MINTER_ROLE, _swf);
         _grantRole(BURNER_ROLE, _swf);
         emit SWFAddressUpdated(old, _swf);
+    }
+
+    /**
+     * @notice تنظیم قرارداد ثبت پشتوانه شناخته‌شده
+     * @dev فقط Kernel می‌تواند این پیوند را برقرار کند. پس از تنظیم، مسیر
+     *      updateReserves دیگر نمی‌تواند داده اوراکل را به ظرفیت ضرب تبدیل کند.
+     * @param _recognizedReserveBacking آدرس قرارداد RecognizedReserveBacking
+     */
+    function setRecognizedReserveBacking(address _recognizedReserveBacking)
+        external
+        onlyKernel
+    {
+        require(
+            _recognizedReserveBacking != address(0),
+            "PAH: invalid recognized backing"
+        );
+        address old = recognizedReserveBacking;
+        recognizedReserveBacking = _recognizedReserveBacking;
+        emit RecognizedReserveBackingUpdated(old, _recognizedReserveBacking);
     }
 
     // ─────────────────────────────────────────
