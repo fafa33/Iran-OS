@@ -135,10 +135,12 @@ describe("Recognized Reserve Backing Boundary Characterization", function () {
     const API3Oracle = await ethers.getContractFactory("API3Oracle");
     api3Oracle = await API3Oracle.deploy(await kernel.getAddress(), [feeder.address]);
     await api3Oracle.waitForDeployment();
+    const ORACLE_ROLE = await kernel.ORACLE_ROLE();
     await kernel.connect(sovereign).grantOfficialAccess(
       await api3Oracle.getAddress(),
-      await kernel.ORACLE_ROLE()
+      ORACLE_ROLE
     );
+    await kernel.connect(sovereign).revokeRole(ORACLE_ROLE, oracle.address);
     await kernel.connect(sovereign).setPahlaviToken(await token.getAddress());
   });
 
@@ -215,6 +217,13 @@ describe("Recognized Reserve Backing Boundary Characterization", function () {
 
     expect(await token.hasRole(swfMinterRole, feeder.address)).to.be.false;
     expect(await token.hasRole(swfMinterRole, await api3Oracle.getAddress())).to.be.false;
+    expect(await kernel.hasRole(await kernel.ORACLE_ROLE(), await api3Oracle.getAddress())).to.be.true;
+    expect(await kernel.hasRole(await kernel.ORACLE_ROLE(), oracle.address)).to.be.false;
+
+    await expect(
+      kernel.connect(oracle).syncReserves(newReserves)
+    ).to.be.revertedWith("Kernel: caller is not an Oracle");
+    expect(await token.totalReserves()).to.equal(0n);
 
     await expect(api3Oracle.connect(feeder).syncReserves(newReserves))
       .to.emit(api3Oracle, "ReserveSyncForwarded")
