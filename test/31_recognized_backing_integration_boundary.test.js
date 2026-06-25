@@ -103,8 +103,8 @@ describe("Recognized Backing Integration Boundary", function () {
     expect(await token.canMint(mintAmount)).to.be.false;
 
     await linkRecognizedBacking();
-    expect(await token.totalReserves()).to.equal(0n);
-    expect(await token.canMint(mintAmount)).to.be.false;
+    expect(await token.totalReserves()).to.equal(backingValue);
+    expect(await token.canMint(mintAmount)).to.be.true;
 
     await expect(kernel.connect(sovereign).syncRecognizedBackingTotal())
       .to.emit(kernel, "RecognizedReserveBackingSynced")
@@ -115,6 +115,31 @@ describe("Recognized Backing Integration Boundary", function () {
     await expect(
       token.connect(swfMinter).mint(recipient.address, mintAmount, "explicit recognized backing")
     ).to.emit(token, "PahlaviMinted");
+  });
+
+  it("activation atomically replaces stale oracle reserves with recognizedBackingTotal", async function () {
+    const staleOracleValue = ethers.parseUnits("5000000", 18);
+
+    await api3Oracle.connect(feeder).syncReserves(staleOracleValue);
+    expect(await token.totalReserves()).to.equal(staleOracleValue);
+
+    await recordIdentity(
+      Class.RecognizedReserveBacking,
+      await swf.getAddress(),
+      "atomic-stale-replace"
+    );
+    expect(await registry.recognizedBackingTotal()).to.equal(backingValue);
+
+    await expect(
+      kernel.connect(sovereign).setPahlaviRecognizedReserveBacking(await registry.getAddress())
+    )
+      .to.emit(kernel, "RecognizedReserveBackingLinked")
+      .and.to.emit(kernel, "RecognizedReserveBackingSynced")
+      .and.to.emit(token, "ReservesUpdated");
+
+    expect(await token.totalReserves()).to.equal(backingValue);
+    expect(await token.totalReserves()).to.not.equal(staleOracleValue);
+    expect(await token.canMint(mintAmount)).to.be.true;
   });
 
   it("SWF, Treasury, and API3 surfaces do not become backing after recognized-backing wiring", async function () {

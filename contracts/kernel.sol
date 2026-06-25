@@ -560,7 +560,9 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
         require(pahlaviToken != address(0), "Kernel: pahlaviToken not set");
         require(recognizedReserveBacking != address(0), "Kernel: invalid address");
         IPahlaviToken(pahlaviToken).setRecognizedReserveBacking(recognizedReserveBacking);
+        IPahlaviToken(pahlaviToken).syncRecognizedBackingTotal();
         emit RecognizedReserveBackingLinked(recognizedReserveBacking, block.timestamp);
+        emit RecognizedReserveBackingSynced(msg.sender, block.timestamp);
     }
 
     /**
