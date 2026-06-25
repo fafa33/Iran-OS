@@ -365,7 +365,7 @@ describe("Recognized Reserve Backing Boundary Characterization", function () {
     expect(await capToken.totalSupply()).to.equal(ethers.parseUnits("900000000000", 18));
   });
 
-  it("documents the current absence of recognized-backing identity storage as the next implementation boundary", async function () {
+  it("documents that recognized-backing integration is explicit and not present on SWF/Treasury surfaces", async function () {
     const tokenFunctions = token.interface.fragments
       .filter(fragment => fragment.type === "function")
       .map(fragment => fragment.name);
@@ -378,7 +378,9 @@ describe("Recognized Reserve Backing Boundary Characterization", function () {
 
     expect(tokenFunctions).to.include("totalReserves");
     expect(tokenFunctions).to.include("updateReserves");
-    expect(tokenFunctions).to.not.include("recognizedReserveBacking");
+    expect(tokenFunctions).to.include("recognizedReserveBacking");
+    expect(tokenFunctions).to.include("setRecognizedReserveBacking");
+    expect(tokenFunctions).to.include("syncRecognizedBackingTotal");
     expect(tokenFunctions).to.not.include("recognizedBackingIdentity");
     expect(swfFunctions).to.not.include("recognizedReserveBacking");
     expect(swfFunctions).to.not.include("recognizedBackingIdentity");
