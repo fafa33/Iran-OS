@@ -17,6 +17,13 @@ describe("Recognized Backing Integration Boundary", function () {
     BudgetAllocation: 4,
     SpeculativeAsset: 5,
     OracleReportedData: 6,
+    SovereignMonetaryReserve: 7,
+    ExplicitlyApprovedMonetaryReserve: 8,
+    AccountingRecord: 9,
+    Report: 10,
+    EventRecord: 11,
+    TemporaryHolding: 12,
+    ReclaimedAsset: 13,
   };
 
   const backingValue = ethers.parseUnits("1000000", 18);
@@ -117,6 +124,29 @@ describe("Recognized Backing Integration Boundary", function () {
     ).to.emit(token, "PahlaviMinted");
   });
 
+  it("explicit recognized monetary reserve classes sync through the existing replacement path", async function () {
+    await recordIdentity(
+      Class.SovereignMonetaryReserve,
+      await swf.getAddress(),
+      "sovereign-monetary-reserve-sync",
+      backingValue
+    );
+    await recordIdentity(
+      Class.ExplicitlyApprovedMonetaryReserve,
+      await swf.getAddress(),
+      "approved-monetary-reserve-sync",
+      backingValue
+    );
+
+    expect(await registry.recognizedBackingTotal()).to.equal(backingValue * 2n);
+    expect(await token.totalReserves()).to.equal(0n);
+
+    await linkRecognizedBacking();
+
+    expect(await token.totalReserves()).to.equal(backingValue * 2n);
+    expect(await token.canMint(mintAmount)).to.be.true;
+  });
+
   it("activation atomically replaces stale oracle reserves with recognizedBackingTotal", async function () {
     const staleOracleValue = ethers.parseUnits("5000000", 18);
 
@@ -172,17 +202,44 @@ describe("Recognized Backing Integration Boundary", function () {
 
   it("non-recognized identities do not affect reserve floor or mint capacity", async function () {
     await linkRecognizedBacking();
-    await recordIdentity(Class.SpeculativeAsset, await swf.getAddress(), "speculative-integration-boundary");
-    await recordIdentity(Class.TreasuryInventory, await treasury.getAddress(), "treasury-inventory-integration-boundary");
-    await recordIdentity(Class.SovereignWealthFundAsset, await swf.getAddress(), "swf-asset-non-recognized");
-    await recordIdentity(Class.BudgetAllocation, await treasury.getAddress(), "budget-allocation-non-recognized");
-    await recordIdentity(Class.OracleReportedData, await api3Oracle.getAddress(), "oracle-report-non-recognized");
+    const rejected = [
+      [Class.SpeculativeAsset, await swf.getAddress(), "speculative-integration-boundary"],
+      [Class.TreasuryInventory, await treasury.getAddress(), "treasury-inventory-integration-boundary"],
+      [Class.SovereignWealthFundAsset, await swf.getAddress(), "swf-asset-non-recognized"],
+      [Class.BudgetAllocation, await treasury.getAddress(), "budget-allocation-non-recognized"],
+      [Class.OracleReportedData, await api3Oracle.getAddress(), "oracle-report-non-recognized"],
+    ];
+
+    for (const [backingClass, sourceContract, sourceLabel] of rejected) {
+      await expect(
+        recordIdentity(backingClass, sourceContract, sourceLabel)
+      ).to.be.revertedWith("RRB: class not recognized");
+    }
 
     await kernel.connect(sovereign).syncRecognizedBackingTotal();
 
     expect(await registry.recognizedBackingTotal()).to.equal(0n);
     expect(await token.totalReserves()).to.equal(0n);
     expect(await token.currentReserveRatio()).to.equal(1000n);
+    expect(await token.canMint(mintAmount)).to.be.false;
+  });
+
+  it("treasury inventory, SWF assets, and oracle observations cannot be recognized by default", async function () {
+    const rejected = [
+      [Class.TreasuryInventory, await treasury.getAddress(), "treasury-inventory-runtime-reject"],
+      [Class.SovereignWealthFundAsset, await swf.getAddress(), "swf-asset-runtime-reject"],
+      [Class.OracleReportedData, await api3Oracle.getAddress(), "oracle-observation-runtime-reject"],
+    ];
+
+    for (const [backingClass, sourceContract, sourceLabel] of rejected) {
+      await expect(
+        recordIdentity(backingClass, sourceContract, sourceLabel)
+      ).to.be.revertedWith("RRB: class not recognized");
+    }
+
+    await linkRecognizedBacking();
+    expect(await registry.recognizedBackingTotal()).to.equal(0n);
+    expect(await token.totalReserves()).to.equal(0n);
     expect(await token.canMint(mintAmount)).to.be.false;
   });
 

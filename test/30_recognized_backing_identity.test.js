@@ -17,6 +17,13 @@ describe("RecognizedReserveBacking", function () {
     BudgetAllocation: 4,
     SpeculativeAsset: 5,
     OracleReportedData: 6,
+    SovereignMonetaryReserve: 7,
+    ExplicitlyApprovedMonetaryReserve: 8,
+    AccountingRecord: 9,
+    Report: 10,
+    EventRecord: 11,
+    TemporaryHolding: 12,
+    ReclaimedAsset: 13,
   };
 
   const value = ethers.parseUnits("1000000", 18);
@@ -110,33 +117,104 @@ describe("RecognizedReserveBacking", function () {
     expect(await registry.recognizedBackingTotal()).to.equal(value);
   });
 
-  it("distinguishes treasury inventory, SWF assets, budget allocations, speculative assets, and oracle reports from recognized backing", async function () {
+  it("accepts only runtime-recognized monetary reserve classifications", async function () {
+    const accepted = [
+      [Class.RecognizedReserveBacking, "recognized-reserve-backing"],
+      [Class.SovereignMonetaryReserve, "sovereign-monetary-reserve"],
+      [Class.ExplicitlyApprovedMonetaryReserve, "explicitly-approved-monetary-reserve"],
+    ];
+
+    for (const [backingClass, label] of accepted) {
+      const sourceId = ethers.id(label);
+      const identityId = await registry.deriveIdentityId(await swf.getAddress(), sourceId);
+
+      await registry.connect(recognizer).recordIdentity(
+        backingClass,
+        value,
+        await swf.getAddress(),
+        sourceId,
+        `${label} evidence`
+      );
+
+      expect(await registry.isRecognizedBacking(identityId)).to.be.true;
+      expect(await registry.recognizedBackingValue(identityId)).to.equal(value);
+    }
+
+    expect(await registry.recognizedBackingTotal()).to.equal(value * 3n);
+  });
+
+  it("rejects treasury inventory, SWF assets, budget allocations, speculative assets, and oracle reports", async function () {
     const entries = [
       [Class.TreasuryInventory, await treasury.getAddress(), ethers.id("treasury-inventory")],
       [Class.SovereignWealthFundAsset, await swf.getAddress(), ethers.id("swf-asset")],
       [Class.BudgetAllocation, await treasury.getAddress(), ethers.id("budget-allocation")],
       [Class.SpeculativeAsset, await swf.getAddress(), ethers.id("speculative-asset")],
       [Class.OracleReportedData, await api3Oracle.getAddress(), ethers.id("oracle-report")],
+      [Class.AccountingRecord, await treasury.getAddress(), ethers.id("accounting-record")],
+      [Class.Report, await treasury.getAddress(), ethers.id("report")],
+      [Class.EventRecord, await api3Oracle.getAddress(), ethers.id("event-record")],
+      [Class.TemporaryHolding, await swf.getAddress(), ethers.id("temporary-holding")],
+      [Class.ReclaimedAsset, await swf.getAddress(), ethers.id("reclaimed-asset")],
     ];
 
     for (const [backingClass, sourceContract, sourceId] of entries) {
       const identityId = await registry.deriveIdentityId(sourceContract, sourceId);
-      await registry.connect(recognizer).recordIdentity(
-        backingClass,
-        value,
-        sourceContract,
-        sourceId,
-        "non-recognized identity evidence"
-      );
+      await expect(
+        registry.connect(recognizer).recordIdentity(
+          backingClass,
+          value,
+          sourceContract,
+          sourceId,
+          "non-recognized identity evidence"
+        )
+      ).to.be.revertedWith("RRB: class not recognized");
 
-      const identity = await registry.identities(identityId);
-      expect(identity.exists).to.be.true;
-      expect(identity.backingClass).to.equal(backingClass);
+      expect((await registry.identities(identityId)).exists).to.be.false;
       expect(await registry.isRecognizedBacking(identityId)).to.be.false;
       expect(await registry.recognizedBackingValue(identityId)).to.equal(0n);
     }
 
     expect(await registry.recognizedBackingTotal()).to.equal(0n);
+  });
+
+  it("allows other classes only after explicit runtime policy recognition", async function () {
+    const sourceId = ethers.id("explicit-policy-reclaimed-asset");
+    const identityId = await registry.deriveIdentityId(await swf.getAddress(), sourceId);
+
+    await expect(
+      registry.connect(recognizer).recordIdentity(
+        Class.ReclaimedAsset,
+        value,
+        await swf.getAddress(),
+        sourceId,
+        "reclaimed asset before policy"
+      )
+    ).to.be.revertedWith("RRB: class not recognized");
+
+    await expect(
+      registry.connect(stranger).setRecognizedClassPolicy(Class.ReclaimedAsset, true)
+    ).to.be.reverted;
+
+    await expect(
+      registry.connect(sovereign).setRecognizedClassPolicy(Class.ReclaimedAsset, false)
+    ).to.be.revertedWith("RRB: cannot disable class");
+
+    await expect(
+      registry.connect(sovereign).setRecognizedClassPolicy(Class.ReclaimedAsset, true)
+    ).to.emit(registry, "RecognizedClassPolicyUpdated")
+      .withArgs(Class.ReclaimedAsset, true, sovereign.address);
+
+    await registry.connect(recognizer).recordIdentity(
+      Class.ReclaimedAsset,
+      value,
+      await swf.getAddress(),
+      sourceId,
+      "explicit runtime policy evidence"
+    );
+
+    expect(await registry.isRecognizedBacking(identityId)).to.be.true;
+    expect(await registry.recognizedBackingValue(identityId)).to.equal(value);
+    expect(await registry.recognizedBackingTotal()).to.equal(value);
   });
 
   it("keeps recognized-backing identity separate from SWF, Treasury, API3, and PahlaviToken runtime accounting", async function () {
