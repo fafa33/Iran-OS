@@ -2,9 +2,10 @@
 
 # چک‌لیست سیم‌کشی نقش‌های بین قراردادی — استقرار IranOS
 
-**نسخه:** 1.3  
+**نسخه:** 1.4  
 **تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
-**مرجع:** CLC-04 (Step 43) — CLC-05 (Step 45) — COURT-01 — G-11  
+**افزودن بخش‌های ح/ط (setPahlaviToken و RecognizedReserveBacking):** ۱۴ تیر ۲۵۸۵ شاهنشاهی / ۵ ژوئیه ۲۰۲۶ میلادی  
+**مرجع:** CLC-04 (Step 43) — CLC-05 (Step 45) — COURT-01 — G-11 — GAP-MEX-05  
 **وضعیت:** مستندات استقرار — بدون تغییر قرارداد
 
 ---
@@ -183,6 +184,34 @@ freeze.grantRole(freeze.COUNCIL_ROLE(), council3)
 | 6 | `kernel` | `PriceOracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز |
 | 7 | `kernel` | `ProductionOracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز |
 
+### ح — بحرانی: پیوند آدرس PahlaviToken به Kernel (GAP-MEX-05)
+
+⚠️ **باید بلافاصله پس از deploy PahlaviToken اجرا شود.** بدون این گام، `kernel.pahlaviToken()` صفر می‌ماند و `syncReserves`، `setPahlaviRecognizedReserveBacking`، و `syncRecognizedBackingTotal` برای همیشه با `"Kernel: pahlaviToken not set"` revert می‌کنند. این گام در سازنده هیچ قراردادی اجرا نمی‌شود و پیش از این نسخه در این چک‌لیست غایب بود.
+
+| # | فراخوان | قرارداد هدف | متد | آرگومان | بدون این فراخوانی |
+|---|---------|------------|-----|---------|-------------------|
+| 8 | `sovereign` | `Kernel` | `setPahlaviToken(address)` | آدرس `PahlaviToken` | تمام مسیرهای ذخایر (اوراکل و پشتوانه شناخته‌شده) revert می‌کنند |
+
+```
+kernel.setPahlaviToken(pahlaviTokenAddress)
+```
+
+### ط — اجباری (در صورت فعال‌سازی مسیر پشتوانه شناخته‌شده): RecognizedReserveBacking
+
+تنها مسیر تولیدی شناخته‌شده برای تبدیل هویت‌های ثبت‌شده به پشتوانه پولی توکن. نیازمند تکمیل بخش ح.
+
+| # | فراخوان | قرارداد هدف | متد | آرگومان | بدون این فراخوانی |
+|---|---------|------------|-----|---------|-------------------|
+| 9 | deployer (در constructor) | `RecognizedReserveBacking` | — | `(sovereign, recognizerAddress)` | `RECOGNIZER_ROLE` اعطا نمی‌شود؛ `recordIdentity()` revert می‌کند |
+| 10 | `sovereign` | `Kernel` | `setPahlaviRecognizedReserveBacking(address)` | آدرس `RecognizedReserveBacking` | `PahlaviToken.totalReserves` هرگز با `recognizedBackingTotal` همگام نمی‌شود |
+
+```
+new RecognizedReserveBacking(sovereignAddress, recognizerAddress)
+kernel.setPahlaviRecognizedReserveBacking(recognizedReserveBackingAddress)
+```
+
+**توجه:** فراخوانی بالا اتمیک است — هم پیوند را برقرار می‌کند و هم بلافاصله `totalReserves` را با `recognizedBackingTotal` همگام می‌کند. `PahlaviToken.updateReserves()` (مسیر اوراکل) از زمان اجرای سیاست طبقه‌بندی پشتوانه (PR #113) دیگر `totalReserves` را تغییر نمی‌دهد — این وضعیت پیش از این فراخوانی هم برقرار است؛ `DEPLOYMENT_MANIFEST_PROTOCOL.md` بخش ۶ را ببینید.
+
 ---
 
 ## چک‌لیست تأیید پس از استقرار
@@ -212,6 +241,10 @@ freeze.grantRole(freeze.COUNCIL_ROLE(), council3)
 - [ ] `freeze.hasRole(freeze.COUNCIL_ROLE(), council1)` → `true` (حداقل ۳ عضو)
 - [ ] `priceOracle.hasRole(priceOracle.FEEDER_ROLE(), feeder)` → `true`
 - [ ] `productionOracle.hasRole(productionOracle.FEEDER_ROLE(), feeder)` → `true`
+- [ ] `kernel.pahlaviToken()` == `pahlaviTokenAddress` ⚠️ **بخش ح — پیش‌نیاز تمام مسیرهای ذخایر (GAP-MEX-05)**
+- [ ] `recognizedReserveBacking.hasRole(recognizedReserveBacking.RECOGNIZER_ROLE(), recognizerAddress)` → `true` (در صورت فعال‌سازی بخش ط)
+- [ ] `token.recognizedReserveBacking()` == `recognizedReserveBackingAddress` (در صورت فعال‌سازی بخش ط)
+- [ ] `token.totalReserves()` == `recognizedReserveBacking.recognizedBackingTotal()` (در صورت فعال‌سازی بخش ط — تأیید همگام‌سازی اتمیک)
 
 ### گروه سوم — وضعیت سیستم
 

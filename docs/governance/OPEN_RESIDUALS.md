@@ -12,12 +12,18 @@
 
 ## Active Residuals
 
+*None currently active. See Superseded Residuals below for K-RES-01.*
+
+---
+
+## Superseded Residuals
+
 ### K-RES-01 — Stale-Reserve Provenance
 
 **Finding ID:** K-RES-01
 **Date classified:** 2026-06-17
 **Classification:** HARDENING_ONLY
-**Status:** Active
+**Status:** Superseded — see Re-Evaluation History (2026-07-05 entry) below. Original attack mechanism closed by PR #113; register entry retained per the "never delete entries" maintenance rule.
 **Source findings:** GAP-MEX-04 FND-01, FND-02, FND-08 (see `docs/reports/GAP_MEX_04_ORACLE_FRESHNESS_REVIEW.md`); disposition in `docs/reports/CF1_BREACH_DETECTION_DISPOSITION.md`
 **PRs:** #85 (Gate A/B implementation), #86/#87 (K-RES-01 documentation)
 
@@ -53,10 +59,29 @@ Expected result: zero matches — the only `.mint(` call is in `contracts/fuzzin
 
 ## Re-Evaluation History
 
-*No re-evaluations recorded.*
+### 2026-07-05 — K-RES-01 re-evaluated (Trigger 11 fired by PR #113)
+
+**Triggering change:** PR #113 ("Enforce reserve backing classification policy") changed `PahlaviToken.updateReserves()` from a function that set `totalReserves` to a pure telemetry no-op. This is exactly the Trigger 11 condition ("Resolution of FND-01 or FND-02 by a contract change ... threaded through the reserve sync path — changes the attack surface and requires full re-evaluation").
+
+**5-criterion re-evaluation against current code:**
+
+| Criterion | Pass / Fail | Evidence |
+|---|---|---|
+| Reachable attack path | **Fail** | `grep -n "totalReserves =" contracts/monetary/PahlaviToken.sol` → single match, at line 262, inside `_setReserves()`. `grep -n "_setReserves(" contracts/monetary/PahlaviToken.sol` → single call site, at line 257 inside `syncRecognizedBackingTotal()` (`onlyKernel`, reads `RecognizedReserveBacking.recognizedBackingTotal()`). `updateReserves()` (the oracle-facing path K-RES-01 originally described) contains no call to `_setReserves` and cannot mutate `totalReserves` under any input. No path from feeder-submitted data to `totalReserves` exists in current code. |
+| Privileges realistically obtainable | Pass (moot — see below) | Unchanged from original classification; `FEEDER_ROLE` compromise remains a realistic scenario in the abstract, but there is no longer a state variable it can corrupt via this path |
+| Concrete state corruption | **Fail** | `updateReserves()` re-emits the current (unchanged) `totalReserves` value in its `ReservesUpdated` event and returns; no state is written |
+| Reachable downstream enforcement consequence | **Fail** | `grep -r '\.mint(' contracts/ --include="*.sol" \| grep -v fuzzing` → zero matches. Unchanged from original classification; still fails independently of criterion 1 |
+| Current doctrine violation | Fail (consequential) | No enforcement consequence reaches current code |
+
+**Re-evaluation result:** The finding's originally described attack mechanism ("feeder submits stale `newReserves` → `Kernel.syncReserves` → `PahlaviToken.updateReserves` → `totalReserves` set to stale value") no longer exists in the current codebase — criterion 1 now fails in addition to criterion 4. **Status changed from `Active` to `Superseded`.** The entry is retained (not deleted) per this register's maintenance rule, since it documents a mechanism that was real prior to PR #113 and the closure is only correct as of the current codebase.
+
+**What changed:** `contracts/monetary/PahlaviToken.sol` — `updateReserves()` no longer calls `_setReserves()`. The sole production path that can write `totalReserves` is `syncRecognizedBackingTotal()`, reading from `RecognizedReserveBacking.recognizedBackingTotal()` (an explicit, Kernel-mediated, non-oracle path introduced by PR #110 and made atomic by PR #112).
+
+**Residual note:** This re-evaluation does not certify `RecognizedReserveBacking.recordIdentity()` itself is free of stale-provenance concerns — `recordIdentity()` accepts an `evidence` string with no on-chain freshness or verification gate. No new finding is opened here because criterion 4 (reachable downstream enforcement consequence) still fails for the same reason as before: `grep -r '\.mint(' contracts/ --include="*.sol" | grep -v fuzzing` → zero matches. If a mint path is ever wired, this data-provenance question should be re-examined as part of that PR's own red-team pass, not reopened under the K-RES-01 identifier (K-RES-01 specifically described the oracle path, which is now closed).
 
 ---
 
 *Register created: 2026-06-18*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Active residuals: K-RES-01*
+*Active residuals: none*
+*Superseded residuals: K-RES-01 (superseded 2026-07-05, see Re-Evaluation History)*
