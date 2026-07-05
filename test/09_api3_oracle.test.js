@@ -303,7 +303,8 @@ describe("API3Oracle", function () {
     const INITIAL_RESERVES = ethers.parseUnits("300000000000", 18);
 
     beforeEach(async function () {
-      // Full wiring required: syncReserves must reach PahlaviToken.updateReserves end-to-end.
+      // Full wiring required: syncReserves must reach PahlaviToken.updateReserves end-to-end
+      // without mutating monetary reserve accounting.
       // Signers sovereign, court, feeder, swf, stranger are already assigned by the outer beforeEach.
       const KernelFactory = await ethers.getContractFactory("IranOS_Kernel");
       gKernel = await KernelFactory.deploy(sovereign.address, court.address, sovereign.address, swf.address);
@@ -369,7 +370,7 @@ describe("API3Oracle", function () {
       const R2 = ethers.parseUnits("210000000000", 18);
       await expect(gOracle.connect(feeder).syncReserves(R2))
         .to.emit(gOracle, "ReserveSyncForwarded");
-      expect(await gToken.totalReserves()).to.equal(R2);
+      expect(await gToken.totalReserves()).to.equal(INITIAL_RESERVES);
     });
 
     it("GM-06 Gate A: syncReserves reverts 'stale data feed' when PAH_USD_KEY is older than MAX_DATA_AGE", async function () {
@@ -394,7 +395,7 @@ describe("API3Oracle", function () {
       const newReserves = ethers.parseUnits("200000000000", 18);
       await expect(gOracle.connect(feeder).syncReserves(newReserves))
         .to.emit(gOracle, "ReserveSyncForwarded");
-      expect(await gToken.totalReserves()).to.equal(newReserves);
+      expect(await gToken.totalReserves()).to.equal(INITIAL_RESERVES);
     });
   });
 });

@@ -78,11 +78,12 @@ describe("PahlaviToken", function () {
     });
 
     it("ضرب بدون ذخایر کافی رد می‌شود", async function () {
-      // ذخایر صفر — هیچ ضربی نباید ممکن باشد
-      await token.connect(kernel).updateReserves(0n);
+      const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+      const zeroReserveToken = await PahlaviToken.deploy(swf.address, kernel.address, 0n);
+      await zeroReserveToken.waitForDeployment();
       const amount = ethers.parseUnits("100", 18);
       await expect(
-        token.connect(swf).mint(user1.address, amount, "test")
+        zeroReserveToken.connect(swf).mint(user1.address, amount, "test")
       ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
     });
 
@@ -182,11 +183,12 @@ describe("PahlaviToken", function () {
       expect(await token.currentReserveRatio()).to.equal(1000n);
     });
 
-    it("Kernel می‌تواند ذخایر را به‌روز کند", async function () {
+    it("Kernel legacy reserve updates no longer mutate monetary backing", async function () {
       const newReserves = ethers.parseUnits("500000000000", 18);
+      const before = await token.totalReserves();
       await expect(token.connect(kernel).updateReserves(newReserves))
         .to.emit(token, "ReservesUpdated");
-      expect(await token.totalReserves()).to.equal(newReserves);
+      expect(await token.totalReserves()).to.equal(before);
     });
 
     it("canMint با ذخایر کافی true برمی‌گرداند", async function () {
@@ -313,27 +315,24 @@ describe("PahlaviToken", function () {
       ).to.be.reverted;
       expect(await pahToken.totalReserves()).to.equal(0n);
 
-      // kernel executes authorized reserve recognition
+      // kernel legacy oracle path remains callable but does not recognize backing
       await expect(
         pahToken.connect(kernelSigner).updateReserves(depositAmount)
       ).to.emit(pahToken, "ReservesUpdated");
 
       const reservesAfter = await pahToken.totalReserves();
-      expect(reservesAfter).to.equal(depositAmount);
-      expect(reservesAfter).to.be.gt(reservesBefore);
+      expect(reservesAfter).to.equal(reservesBefore);
 
-      // mint capacity now available
-      expect(await pahToken.canMint(mintAmount)).to.be.true;
+      // mint capacity is not available until explicit recognized-backing sync
+      expect(await pahToken.canMint(mintAmount)).to.be.false;
 
       await expect(
-        pahToken.connect(minter).mint(recipient.address, mintAmount, "authorized mint post-recognition")
-      ).to.emit(pahToken, "PahlaviMinted");
-      expect(await pahToken.balanceOf(recipient.address)).to.equal(mintAmount);
-      expect(await pahToken.totalSupply()).to.equal(mintAmount);
+        pahToken.connect(minter).mint(recipient.address, mintAmount, "legacy oracle path is not backing")
+      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+      expect(await pahToken.balanceOf(recipient.address)).to.equal(0n);
+      expect(await pahToken.totalSupply()).to.equal(0n);
 
-      // reserve ratio protection still enforced:
-      // with reserves=1M and totalSupply=100 after first mint,
-      // max further mintable ≈ (1M*1000/333) - 100 ≈ 3,002,903; attempt 4M fails
+      // reserve ratio protection still enforced with no recognized backing
       const oversizeMint = ethers.parseUnits("4000000", 18);
       await expect(
         pahToken.connect(minter).mint(recipient.address, oversizeMint, "oversize mint attempt")
@@ -345,8 +344,8 @@ describe("PahlaviToken", function () {
       ).to.be.revertedWith("PAH: exceeds liquidity cap");
 
       // state unchanged after rejected mints
-      expect(await pahToken.balanceOf(recipient.address)).to.equal(mintAmount);
-      expect(await pahToken.totalSupply()).to.equal(mintAmount);
+      expect(await pahToken.balanceOf(recipient.address)).to.equal(0n);
+      expect(await pahToken.totalSupply()).to.equal(0n);
       expect(await pahToken.totalReserves()).to.equal(reservesAfter);
     });
   });
@@ -396,8 +395,9 @@ describe("PahlaviToken", function () {
 
     it("INV-03: updateReserves does not mint tokens; MAX_SUPPLY gate still blocks after reserves maximised", async function () {
       // updateReserves() alone never changes totalSupply
+      const reservesBefore = await token.totalReserves();
       await token.connect(kernel).updateReserves(MAX_SUPPLY_AMOUNT);
-      expect(await token.totalReserves()).to.equal(MAX_SUPPLY_AMOUNT);
+      expect(await token.totalReserves()).to.equal(reservesBefore);
       expect(await token.totalSupply()).to.equal(0n);
       // with reserves == MAX_SUPPLY, ratio would be 1000 for any compliant mint,
       // but the cap guard (newSupply <= MAX_SUPPLY) must still block a 1-wei overflow
@@ -636,10 +636,11 @@ describe("PahlaviToken", function () {
       }
       expect(await token.totalReserves()).to.equal(before);
 
-      // the constructor-configured kernel holder can update reserves
+      // the constructor-configured kernel holder can call the compatibility path,
+      // but oracle-style updates no longer mutate monetary reserve accounting.
       await expect(token.connect(kernel).updateReserves(attempt))
         .to.emit(token, "ReservesUpdated");
-      expect(await token.totalReserves()).to.equal(attempt);
+      expect(await token.totalReserves()).to.equal(before);
 
       // role-based (not address-based) check: grant KERNEL_ROLE to a SECOND signer
       // (kernel holds DEFAULT_ADMIN_ROLE) and verify that signer can now update
@@ -650,38 +651,30 @@ describe("PahlaviToken", function () {
       const secondUpdate = attempt + ethers.parseUnits("1", 18);
       await expect(token.connect(user2).updateReserves(secondUpdate))
         .to.emit(token, "ReservesUpdated");
-      expect(await token.totalReserves()).to.equal(secondUpdate);
+      expect(await token.totalReserves()).to.equal(before);
     });
 
     // ── R-3: CF-1 characterization (§7.2, §10) ──
-    it("INV-02 R-3: post-update reserve drop leaves a reachable sub-floor state (CF-1 characterization)", async function () {
-      // CHARACTERIZATION ONLY. This documents that the reserve floor is a
-      // mint-time gate, not a standing contract invariant: updateReserves is
-      // not ratio-gated, so reserves can be driven below the floor for the
-      // existing supply with no revert. This is a doctrine-recognized
-      // breach-relevant condition whose remediation is UNDECIDED (preventive
-      // guard / soft-signal / TR-05-06 routing / burn — none implemented).
-      // This test asserts current behavior; it is NOT an endorsement and NOT
-      // a defect assertion. No remediation is implemented here.
+    it("INV-02 R-3: legacy updateReserves cannot drive reserves into a sub-floor state", async function () {
       await token.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-02 R-3 mint");
       const supplyAfterMint = await token.totalSupply();
+      const reservesBefore = await token.totalReserves();
+      const ratioBefore = await token.currentReserveRatio();
 
-      // updateReserves(0) succeeds — no floor guard, no post-update ratio re-check
+      // updateReserves(0) succeeds for compatibility but does not alter monetary backing.
       await expect(token.connect(kernel).updateReserves(0n)).to.not.be.reverted;
 
-      // the standing ratio is now below the floor, with no revert having occurred
-      expect(await token.currentReserveRatio()).to.equal(0n);
-      expect(await token.currentReserveRatio()).to.be.lessThan(333n);
-      expect(await token.canMint(ethers.parseUnits("1", 18))).to.be.false;
+      expect(await token.totalReserves()).to.equal(reservesBefore);
+      expect(await token.currentReserveRatio()).to.equal(ratioBefore);
+      expect(await token.canMint(ethers.parseUnits("1", 18))).to.be.true;
 
-      // the mint-time gate still blocks any further expansion from this state
+      // the mint-time gate still blocks actual over-expansion.
       await expect(
-        token.connect(swf).mint(user1.address, ethers.parseUnits("1", 18), "INV-02 R-3 blocked")
-      ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+        token.connect(swf).mint(user1.address, ethers.parseUnits("999999999999", 18), "INV-02 R-3 blocked")
+      ).to.be.revertedWith("PAH: exceeds liquidity cap");
 
-      // state is exactly as expected: supply untouched by the failed mint, reserves at 0
       expect(await token.totalSupply()).to.equal(supplyAfterMint);
-      expect(await token.totalReserves()).to.equal(0n);
+      expect(await token.totalReserves()).to.equal(reservesBefore);
     });
 
     // ── R-4: burn raises ratio; burn never floor-blocked (§7.3) ──
@@ -700,16 +693,15 @@ describe("PahlaviToken", function () {
       expect(await t.currentReserveRatio()).to.equal(666n);
       expect(666n).to.be.greaterThan(500n);
 
-      // drive into a sub-floor state, then confirm burn still succeeds (no floor check on burn)
-      await t.connect(kernel).updateReserves(ethers.parseUnits("100", 18)); // ratio = floor(100000/1500) = 66 < 333
-      const subFloorRatio = await t.currentReserveRatio();
-      expect(subFloorRatio).to.be.lessThan(333n);
+      // legacy updateReserves cannot drive into a sub-floor state; burn still succeeds.
+      await t.connect(kernel).updateReserves(ethers.parseUnits("100", 18));
+      const ratioBeforeBurn = await t.currentReserveRatio();
+      expect(ratioBeforeBurn).to.equal(666n);
       await expect(
         t.connect(swf).burn(user1.address, ethers.parseUnits("1400", 18), "INV-02 R-4 burn subfloor")
       ).to.not.be.reverted;
       expect(await t.totalSupply()).to.equal(ethers.parseUnits("100", 18));
-      // ratio after burn = floor(100*1000/100) = 1000, strictly above the sub-floor value
-      expect(await t.currentReserveRatio()).to.be.greaterThan(subFloorRatio);
+      expect(await t.currentReserveRatio()).to.be.greaterThan(ratioBeforeBurn);
     });
 
     // ── R-5: emergency interaction (§7.4) ──
@@ -719,11 +711,12 @@ describe("PahlaviToken", function () {
       await token.connect(kernel).activateEmergencyMode();
       expect(await token.emergencyMode()).to.be.true;
 
-      // updateReserves carries no notInEmergency guard — succeeds during emergency
+      // updateReserves carries no notInEmergency guard, but no longer mutates backing.
       const newReserves = ethers.parseUnits("600000000000", 18);
+      const reservesBefore = await token.totalReserves();
       await expect(token.connect(kernel).updateReserves(newReserves))
         .to.emit(token, "ReservesUpdated");
-      expect(await token.totalReserves()).to.equal(newReserves);
+      expect(await token.totalReserves()).to.equal(reservesBefore);
 
       // mint is halted by the emergency guard
       await expect(
@@ -732,7 +725,7 @@ describe("PahlaviToken", function () {
 
       // ratio view stays consistent with stored reserves/supply
       const supply = await token.totalSupply();
-      expect(await token.currentReserveRatio()).to.equal((newReserves * 1000n) / supply);
+      expect(await token.currentReserveRatio()).to.equal((reservesBefore * 1000n) / supply);
     });
 
     // ── R-6: view/gate agreement (§6) ──
@@ -785,40 +778,26 @@ describe("PahlaviToken", function () {
     // Uses revertedWithPanic(0x11) (ARITHMETIC_OVERFLOW) from hardhat-chai-matchers.
     const MAX_UINT256 = ethers.MaxUint256;
 
-    it("INV-02 R-8a: updateReserves(MaxUint256) with supply > 0 reverts (checked overflow); reserves unchanged", async function () {
+    it("INV-02 R-8a: updateReserves(MaxUint256) with supply > 0 is non-mutating", async function () {
       await token.connect(swf).mint(user1.address, ethers.parseUnits("1000", 18), "INV-02 R-8a mint");
       const before = await token.totalReserves();
-      // (newReserves * 1000) overflows inside updateReserves when supply > 0
       await expect(
         token.connect(kernel).updateReserves(MAX_UINT256)
-      ).to.be.revertedWithPanic(0x11);
-      // the reverted assignment is rolled back
+      ).to.emit(token, "ReservesUpdated");
       expect(await token.totalReserves()).to.equal(before);
     });
 
-    it("INV-02 R-8b: updateReserves(MaxUint256) at supply == 0 succeeds, then mint/canMint overflow; ratio view returns 1000; recovery works in-fixture", async function () {
+    it("INV-02 R-8b: updateReserves(MaxUint256) at supply == 0 is non-mutating", async function () {
       const F = await PahlaviTokenFactory();
       const t = await F.deploy(swf.address, kernel.address, ethers.parseUnits("300000000000", 18));
       await t.waitForDeployment();
+      const before = await t.totalReserves();
 
-      // supply == 0 → ratio branch short-circuits to 1000, no multiply, so this succeeds
       await expect(t.connect(kernel).updateReserves(MAX_UINT256)).to.not.be.reverted;
-      expect(await t.totalReserves()).to.equal(MAX_UINT256);
-
-      // subsequent mint and canMint compute totalReserves * 1000 → overflow → revert
-      await expect(
-        t.connect(swf).mint(user1.address, ethers.parseUnits("1", 18), "INV-02 R-8b mint")
-      ).to.be.revertedWithPanic(0x11);
-      await expect(t.canMint(ethers.parseUnits("1", 18))).to.be.revertedWithPanic(0x11);
+      expect(await t.totalReserves()).to.equal(before);
 
       // currentReserveRatio() returns 1000 early while supply == 0 (no multiply)
       expect(await t.currentReserveRatio()).to.equal(1000n);
-
-      // recovery is possible ONLY because this fixture's KERNEL_ROLE holder (an EOA)
-      // can call updateReserves. Under production wiring (KERNEL_ROLE held by the
-      // IranOS_Kernel contract, which has no updateReserves call path), this state
-      // is NOT recoverable in-place and the deployment must be replaced.
-      await t.connect(kernel).updateReserves(ethers.parseUnits("300000000000", 18));
       await expect(
         t.connect(swf).mint(user1.address, ethers.parseUnits("1", 18), "INV-02 R-8b recover")
       ).to.not.be.reverted;
@@ -842,15 +821,11 @@ describe("PahlaviToken", function () {
   });
 
   // ─────────────────────────────────────────
-  // CF-1 Option C — Reserve Breach Detection
-  // ردیابی نقض کف پشتوانه و رویداد اطلاع‌رسانی
+  // CF-1 Option C — Reserve Breach Detection Boundary
+  // مسیر اوراکل دیگر ذخایر پولی را تغییر نمی‌دهد؛ ردیابی نقض فقط از مسیر پشتوانه شناخته‌شده فعال می‌شود.
   // Source: docs/reports/CF1_BREACH_DETECTION_DISPOSITION.md
   //
-  // Tests A–C verify the breach-detection contract change:
-  //   A) Compliant update: no breach state, no breach event
-  //   B) Non-compliant update: breach state set, ReserveFloorBreached emitted,
-  //      transaction succeeds, totalReserves updated
-  //   C) Recovery: breach state cleared, ReserveFloorRestored emitted
+  // Tests A–C verify that legacy updateReserves is not a monetary backing path.
   //
   // No revert, no TriggerProtocol, no Kernel call — Option C only.
   // ─────────────────────────────────────────
@@ -878,97 +853,64 @@ describe("PahlaviToken", function () {
       ).to.emit(token, "ReservesUpdated");
     });
 
-    it("CF-1 B: non-compliant updateReserves sets breach state, emits ReserveFloorBreached, succeeds, updates reserves", async function () {
+    it("CF-1 B: non-compliant legacy updateReserves does not set breach state or update reserves", async function () {
       const mintAmt = ethers.parseUnits("1000", 18);
       await token.connect(swf).mint(user1.address, mintAmt, "CF-1 B mint");
 
       const oldReserves = await token.totalReserves();
       const subFloorReserves = 0n;               // post-update ratio = 0 < 333
-      const supply = await token.totalSupply();
-      const expectedRatio = 0n;                  // (0 * 1000) / supply = 0
 
-      // transaction succeeds (no revert) and emits ReserveFloorBreached
       await expect(token.connect(kernel).updateReserves(subFloorReserves))
-        .to.emit(token, "ReserveFloorBreached")
-        .withArgs(oldReserves, subFloorReserves, expectedRatio, supply)
-        .and.to.emit(token, "ReservesUpdated"); // existing event still emitted
+        .to.not.emit(token, "ReserveFloorBreached");
 
-      // breach state recorded
-      expect(await token.reserveFloorBreached()).to.be.true;
-
-      // totalReserves updated correctly
-      expect(await token.totalReserves()).to.equal(subFloorReserves);
-      expect(await token.currentReserveRatio()).to.equal(0n);
+      expect(await token.reserveFloorBreached()).to.be.false;
+      expect(await token.totalReserves()).to.equal(oldReserves);
     });
 
-    it("CF-1 C: breach state clears and ReserveFloorRestored emits when reserves are updated to a compliant ratio", async function () {
+    it("CF-1 C: legacy updateReserves cannot create or restore breach state", async function () {
       const mintAmt = ethers.parseUnits("1000", 18);
       await token.connect(swf).mint(user1.address, mintAmt, "CF-1 C mint");
 
-      // enter breach state
-      await token.connect(kernel).updateReserves(0n);
-      expect(await token.reserveFloorBreached()).to.be.true;
-
-      // restore: (334e18 * 1000) / 1000e18 = 334 >= 333
       const restoredReserves = ethers.parseUnits("334", 18);
-      const supply = await token.totalSupply();
-      const restoredRatio = (restoredReserves * 1000n) / supply;
+      const oldReserves = await token.totalReserves();
 
       await expect(token.connect(kernel).updateReserves(restoredReserves))
-        .to.emit(token, "ReserveFloorRestored")
-        .withArgs(restoredReserves, restoredRatio, supply);
+        .to.not.emit(token, "ReserveFloorRestored");
 
-      // breach state cleared
       expect(await token.reserveFloorBreached()).to.be.false;
-
-      // ratio is compliant
+      expect(await token.totalReserves()).to.equal(oldReserves);
       expect(await token.currentReserveRatio()).to.be.gte(333n);
-
-      // mint gate no longer blocked by ratio (mint-time check passes)
       expect(await token.canMint(ethers.parseUnits("1", 18))).to.be.true;
     });
 
-    it("CF-1 D: burn-based supply contraction clears stale breach state and emits ReserveFloorRestored", async function () {
-      // Setup: mint 1000e18, set reserves to 100e18 → ratio = 100 < 333 → breach
+    it("CF-1 D: burn-based supply contraction has no stale oracle breach state to clear", async function () {
       const mintAmt = ethers.parseUnits("1000", 18);
       await token.connect(swf).mint(user1.address, mintAmt, "CF-1 D mint");
       const subFloorReserves = ethers.parseUnits("100", 18);
       await token.connect(kernel).updateReserves(subFloorReserves);
-      expect(await token.reserveFloorBreached()).to.be.true;
-      // sanity: ratio is currently sub-floor (100e18*1000 / 1000e18 = 100)
-      expect(await token.currentReserveRatio()).to.equal(100n);
-
-      // Burn 700e18 → supply = 300e18 → ratio = (100e18*1000)/300e18 = 333 ≥ 333 → compliant
-      const burnAmt = ethers.parseUnits("700", 18);
-      const supplyAfterBurn = mintAmt - burnAmt;                             // 300e18
-      const ratioAfterBurn = (subFloorReserves * 1000n) / supplyAfterBurn;  // 333
-
-      await expect(token.connect(swf).burn(user1.address, burnAmt, "CF-1 D burn"))
-        .to.emit(token, "ReserveFloorRestored")
-        .withArgs(subFloorReserves, ratioAfterBurn, supplyAfterBurn);
-
-      // breach state cleared
       expect(await token.reserveFloorBreached()).to.be.false;
 
-      // ratio is now compliant
+      const burnAmt = ethers.parseUnits("700", 18);
+
+      await expect(token.connect(swf).burn(user1.address, burnAmt, "CF-1 D burn"))
+        .to.not.emit(token, "ReserveFloorRestored");
+
+      expect(await token.reserveFloorBreached()).to.be.false;
       expect(await token.currentReserveRatio()).to.be.gte(333n);
     });
 
-    it("CF-1 E: burn that does not restore compliance leaves breach state unchanged", async function () {
-      // mint 1000e18, reserves = 0 → ratio = 0 → breach
+    it("CF-1 E: burn after ignored legacy reserve update leaves breach state false", async function () {
       const mintAmt = ethers.parseUnits("1000", 18);
       await token.connect(swf).mint(user1.address, mintAmt, "CF-1 E mint");
       await token.connect(kernel).updateReserves(0n);
-      expect(await token.reserveFloorBreached()).to.be.true;
+      expect(await token.reserveFloorBreached()).to.be.false;
 
-      // burn only 1e18 → supply = 999e18 → ratio = 0 < 333 → still non-compliant
       const burnAmt = ethers.parseUnits("1", 18);
       await expect(token.connect(swf).burn(user1.address, burnAmt, "CF-1 E burn"))
         .to.not.emit(token, "ReserveFloorRestored");
 
-      // breach state must remain true
-      expect(await token.reserveFloorBreached()).to.be.true;
-      expect(await token.currentReserveRatio()).to.equal(0n);
+      expect(await token.reserveFloorBreached()).to.be.false;
+      expect(await token.currentReserveRatio()).to.be.gte(333n);
     });
   });
 });
