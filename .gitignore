@@ -10,3 +10,4 @@ coverage.json
 .claude/
 corpus/
 crytic-export/
+deploy/deployments/*.json
