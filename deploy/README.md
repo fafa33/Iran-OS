@@ -27,8 +27,8 @@ The filenames are grouped by contract/domain, not strict execution order:
 to execute everything in dependency-correct order:
 
 ```
-kernel -> treasury -> swf -> token -> recognized_backing's prerequisite (oracle deploy) ->
-oracle -> recognized_backing -> roles (Court, Group A) ->
+kernel -> treasury -> swf -> token -> oracle -> recognized_backing ->
+roles (Court, Group A) ->
 finalize (Oracle activation, Group E — last per the manifest) -> verify
 ```
 

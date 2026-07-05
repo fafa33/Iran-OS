@@ -144,4 +144,97 @@ describe("Deployment Workflow (deploy/)", function () {
     expect(error).to.exist;
     expect(error.message).to.match(/KERNEL_ADDRESS/);
   });
+
+  it("blocks Oracle activation (08_finalize.js) if Court completion (07_roles.js) has not run yet", async function () {
+    const config = loadConfig();
+    const { deployKernel } = require("../deploy/01_kernel");
+    const { deployOracle } = require("../deploy/04_oracle");
+    const { finalizeOracleActivation } = require("../deploy/08_finalize");
+
+    const { address: kernelAddress } = await deployKernel(hre, config);
+    const addresses = { KERNEL_ADDRESS: kernelAddress };
+    const { address: oracleAddress } = await deployOracle(hre, config, addresses);
+    addresses.API3_ORACLE_ADDRESS = oracleAddress;
+
+    // Only COURT_1 exists at this point (from Kernel's constructor) —
+    // 07_roles.js was never run, so members 2-9 do not hold COURT_ROLE yet.
+    let error;
+    try {
+      await finalizeOracleActivation(hre, config, addresses, sovereign);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).to.exist;
+    expect(error.message).to.match(/07_roles\.js/);
+
+    const kernel = await ethers.getContractAt("IranOS_Kernel", kernelAddress);
+    const ORACLE_ROLE = await kernel.ORACLE_ROLE();
+    expect(await kernel.hasRole(ORACLE_ROLE, oracleAddress)).to.be.false;
+  });
+
+  it("verify script fails if two configured court addresses are not distinct", async function () {
+    const config = loadConfig();
+    const duplicated = {
+      ...config,
+      courtMembers2to9: [config.court1, ...config.courtMembers2to9.slice(1)],
+    };
+
+    // Build the deployment manually through 08_finalize.js — NOT via
+    // runDeployment(), which calls verifyDeployment() as its own last step
+    // and would throw on the duplicate before this test could assert on it.
+    const { deployKernel } = require("../deploy/01_kernel");
+    const { deployTreasury } = require("../deploy/05_treasury");
+    const { deploySwf } = require("../deploy/06_swf");
+    const { deployToken } = require("../deploy/02_token");
+    const { deployOracle } = require("../deploy/04_oracle");
+    const { deployRecognizedBacking } = require("../deploy/03_recognized_backing");
+    const { wireCourtCompletion } = require("../deploy/07_roles");
+    const { finalizeOracleActivation } = require("../deploy/08_finalize");
+    const { verifyDeployment } = require("../deploy/09_verify");
+
+    const addresses = {};
+    addresses.KERNEL_ADDRESS = (await deployKernel(hre, duplicated)).address;
+    addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+    addresses.SWF_ADDRESS = (await deploySwf(hre, duplicated, addresses)).address;
+    addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, duplicated, addresses, sovereign)).address;
+    addresses.API3_ORACLE_ADDRESS = (await deployOracle(hre, duplicated, addresses)).address;
+    addresses.RECOGNIZED_RESERVE_BACKING_ADDRESS = (
+      await deployRecognizedBacking(hre, duplicated, addresses, sovereign)
+    ).address;
+    await wireCourtCompletion(hre, duplicated, addresses, sovereign);
+    await finalizeOracleActivation(hre, duplicated, addresses, sovereign);
+
+    let error;
+    try {
+      await verifyDeployment(hre, duplicated, addresses);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).to.exist;
+    expect(error.message).to.match(/pairwise-distinct/);
+  });
+
+  it("exports the expected function from every deploy/ script (catches CLI-wiring regressions)", function () {
+    const expectedExports = {
+      "../deploy/01_kernel": "deployKernel",
+      "../deploy/02_token": "deployToken",
+      "../deploy/03_recognized_backing": "deployRecognizedBacking",
+      "../deploy/04_oracle": "deployOracle",
+      "../deploy/05_treasury": "deployTreasury",
+      "../deploy/06_swf": "deploySwf",
+      "../deploy/07_roles": "wireCourtCompletion",
+      "../deploy/08_finalize": "finalizeOracleActivation",
+      "../deploy/09_verify": "verifyDeployment",
+      "../deploy/index": "runDeployment",
+    };
+    for (const [modulePath, exportName] of Object.entries(expectedExports)) {
+      const mod = require(modulePath);
+      expect(mod[exportName], `${modulePath} must export ${exportName}`).to.be.a("function");
+    }
+    // Note: this only verifies module.exports shape. The standalone CLI
+    // entry points (the `if (require.main === module)` blocks, invoked via
+    // `npx hardhat run deploy/0N_*.js --network <network>`) are not
+    // exercised by this suite and were verified manually against a
+    // persistent local node — see deploy/README.md.
+  });
 });

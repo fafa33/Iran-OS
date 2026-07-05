@@ -21,6 +21,21 @@ async function finalizeOracleActivation(hre, config, addresses, sovereignSigner)
   const oracleAddress = requireAddress(addresses, "API3_ORACLE_ADDRESS", "04_oracle.js");
 
   const kernel = await ethers.getContractAt("IranOS_Kernel", kernelAddress, sovereignSigner);
+  const COURT_ROLE = await kernel.COURT_ROLE();
+  const allCourtMembers = [config.court1, ...config.courtMembers2to9];
+  const courtRoleChecks = await Promise.all(
+    allCourtMembers.map((member) => kernel.hasRole(COURT_ROLE, member))
+  );
+  if (courtRoleChecks.some((hasRole) => !hasRole)) {
+    throw new Error(
+      "Oracle activation blocked: not all 9 COURT_ROLE members are active yet. " +
+      "Run 07_roles.js (Court completion, Group A) first — " +
+      "docs/deployment/COURT_ROLE_ASSIGNMENT_PROTOCOL.md §4 documents this as " +
+      "a failure scenario without return if Oracle activates before the court " +
+      "quorum is complete."
+    );
+  }
+
   const ORACLE_ROLE = await kernel.ORACLE_ROLE();
 
   await (await kernel.grantOfficialAccess(oracleAddress, ORACLE_ROLE)).wait();

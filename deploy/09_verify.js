@@ -40,6 +40,12 @@ async function verifyDeployment(hre, config, addresses) {
   for (const courtMember of config.courtMembers2to9) {
     check(`kernel.hasRole(COURT_ROLE, ${courtMember})`, await kernel.hasRole(COURT_ROLE, courtMember));
   }
+  const allCourtMembers = [config.court1, ...config.courtMembers2to9];
+  const uniqueCourtMembers = new Set(allCourtMembers.map((a) => a.toLowerCase()));
+  check(
+    "COURT_1..COURT_9 are 9 pairwise-distinct addresses",
+    uniqueCourtMembers.size === allCourtMembers.length
+  );
   check("kernel.emergencyLockActive() === false", (await kernel.emergencyLockActive()) === false);
 
   // Group 3 — Oracle (§9 گروه ۳)
