@@ -2,9 +2,10 @@
 
 # مانیفست استقرار IranOS — پروتکل مستندسازی
 
-**نسخه:** ۱.۱.۰  
+**نسخه:** ۱.۲.۰  
 **تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
 **توسعه به پوشش ۲۵/۲۵:** ۲۴ خرداد ۲۵۸۵ شاهنشاهی / ۱۴ ژوئن ۲۰۲۶ میلادی  
+**افزودن RecognizedReserveBacking و رفع شکاف setPahlaviToken:** ۱۴ تیر ۲۵۸۵ شاهنشاهی / ۵ ژوئیه ۲۰۲۶ میلادی  
 **شناسه شکاف:** G-11  
 **نوع:** مستندات استقرار — بدون تغییر قرارداد  
 **وضعیت:** راهنمای مرجع پیش از استقرار
@@ -24,6 +25,9 @@
 > این اطلاعات صرفاً از **امضای سازنده و ثابت‌های نقشِ موجود در سورس مخزن** استخراج شده‌اند؛ هیچ آدرس، مقدار سازنده، هش، تخمین gas، یا اسکریپت استقراری اضافه نشده است.
 >
 > **هیچ اسکریپت استقراری (`deploy/`) وجود ندارد** و هیچ استقراری اجرا نشده است. پوشش مستندیِ نقشه استقرار اکنون **۲۵/۲۵** است، اما نیمه‌ی اجراییِ G-11 (اسکریپت‌ها، اجرای dry-run، هش‌ها، gas) همچنان باز است. `STEP9-BLOCK-005` همچنان **OPEN/PENDING** است و در این سند بسته نمی‌شود.
+
+> **⚠️ یادداشت دامنه (نسخه ۱.۲.۰):**
+> این نسخه دو شکاف مستندیِ کشف‌شده در بازبینی هم‌ترازی استقرار را می‌بندد: (۱) قرارداد `RecognizedReserveBacking` — که از PR #110 تنها مسیر تولیدیِ تغییر `PahlaviToken.totalReserves` است — در نقشه وابستگی، ترتیب استقرار، و چک‌لیست پس از استقرار غایب بود؛ اکنون در بخش‌های ۲، ۳ (مرحله ۵)، و ۹ مستند شده است. (۲) فراخوانی `kernel.setPahlaviToken()` — پیش‌نیاز GAP-MEX-05 برای تمام مسیرهای `syncReserves`/`setPahlaviRecognizedReserveBacking`/`syncRecognizedBackingTotal` — در چک‌لیست پس از استقرار تأیید می‌شد اما در ترتیب اجباری استقرار (بخش ۳) به عنوان یک گام صریح ذکر نشده بود؛ اکنون به مرحله ۱۳ افزوده شده است. همچنین توضیح بخش ۶ (سیم‌کشی Oracle) به‌روزرسانی شد تا منعکس‌کند `syncReserves`/`updateReserves` پس از سیاست طبقه‌بندی پشتوانه (PR #113) صرفاً تله‌متری است و دیگر `totalReserves` را تغییر نمی‌دهد. شمار تست در چک‌لیست پیش از استقرار (بخش ۸) از ۶۹۳ به ۷۲۶ به‌روزرسانی شد. هیچ تغییر قراردادی در این نسخه اعمال نشده است.
 
 ---
 
@@ -59,6 +63,7 @@
 | `FEEDER_1..N` | آدرس‌های feeder API3Oracle | اجباری — پیش از ORACLE_ROLE |
 | `CRAWLER_ADDRESS` | آدرس SovereignCrawler / AssetFreeze | اجباری |
 | `COUNCIL_1..3` | حداقل ۳ عضو شورا برای AssetFreeze | اجباری |
+| `RECOGNIZER_ADDRESS` | آدرس دارنده `RECOGNIZER_ROLE` در `RecognizedReserveBacking` (ثبت‌کننده هویت‌های پشتوانه) | اجباری — پیش از deploy `RecognizedReserveBacking` |
 
 **هیچ کلید خصوصی، API key، یا آدرس حساس نباید در مخزن عمومی commit شود.**
 
@@ -97,6 +102,15 @@ Layer 3 — وابسته به چند قرارداد Layer 1/2
 ───────────────────────────────────────────
 PriceOracle(kernel)        ← مستقل از Layer 2
 ProductionOracle(kernel)   ← مستقل از Layer 2
+
+Layer 2.5 — مستقل در deploy، اما سیم‌کشی‌اش به Layer 2 (PahlaviToken) نیاز دارد
+──────────────────────────────────────────────────────────────────────────────
+RecognizedReserveBacking(sovereign, recognizer)
+  → constructor به Kernel یا PahlaviToken وابسته نیست
+  → اما kernel.setPahlaviRecognizedReserveBacking() که آن را به PahlaviToken
+    وصل می‌کند، نیازمند deploy شدن PahlaviToken (مرحله ۳) و اجرای
+    kernel.setPahlaviToken() است — در غیر این صورت با
+    "Kernel: pahlaviToken not set" revert می‌کند
 ```
 
 | قرارداد | آرگومان‌های constructor | وابسته به |
@@ -126,6 +140,7 @@ ProductionOracle(kernel)   ← مستقل از Layer 2
 | `SovereignCrawler` | `kernel, swfTempWallet` | Kernel (+ آدرس کیف‌پول موقت SWF از کتاب آدرس) |
 | `Fargard7PolicyAdapter` | `kernel, priceOracle` | Kernel، PriceOracle |
 | `VelocityFee` | `kernel, developmentBank, pahlaviToken` | Kernel، PahlaviToken (+ آدرس بانک توسعه از کتاب آدرس) |
+| `RecognizedReserveBacking` | `admin, recognizer` | هیچ در constructor؛ سیم‌کشی (`setPahlaviRecognizedReserveBacking`) به PahlaviToken deploy‌شده نیاز دارد |
 
 ### ۲.۱. جایگاه لایه قراردادهای افزوده‌شده (استخراج‌شده از امضای سازنده)
 
@@ -213,6 +228,10 @@ VelocityFee(kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken�
 
 13. deploy PahlaviToken(SWF_ADDRESS, KERNEL_ADDRESS, INITIAL_RESERVES)
     → ثبت آدرس: PAHLAVI_TOKEN_ADDRESS
+    → sovereign اجرا کند: kernel.setPahlaviToken(PAHLAVI_TOKEN_ADDRESS)
+      (GAP-MEX-05 — بدون این فراخوانی، pahlaviToken در Kernel صفر می‌ماند و
+      syncReserves، setPahlaviRecognizedReserveBacking، و syncRecognizedBackingTotal
+      برای همیشه با "Kernel: pahlaviToken not set" revert می‌کنند)
 
 14. deploy PenalLabor(KERNEL_ADDRESS, VICTIM_FUND_ADDRESS)
     → ثبت آدرس: PENAL_LABOR_ADDRESS
@@ -242,6 +261,23 @@ VelocityFee(kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken�
 # Layer 3 (پس از PahlaviToken — مرحله ۳)
 25. deploy VelocityFee(KERNEL_ADDRESS, DEVELOPMENT_BANK, PAHLAVI_TOKEN_ADDRESS) → VELOCITY_FEE_ADDRESS
 ```
+
+**مرحله ۵ — RecognizedReserveBacking و پیوند پشتوانه شناخته‌شده (پس از مرحله ۳ — PahlaviToken و setPahlaviToken)**
+
+```
+26. deploy RecognizedReserveBacking(SOVEREIGN_ADDRESS, RECOGNIZER_ADDRESS)
+    → RECOGNIZER_ROLE در سازنده به RECOGNIZER_ADDRESS اعطا می‌شود
+    → ثبت آدرس: RECOGNIZED_RESERVE_BACKING_ADDRESS
+
+27. sovereign اجرا کند: kernel.setPahlaviRecognizedReserveBacking(RECOGNIZED_RESERVE_BACKING_ADDRESS)
+    → این فراخوانی اتمیک است: هم recognizedReserveBacking را در PahlaviToken تنظیم می‌کند
+      و هم بلافاصله totalReserves را با recognizedBackingTotal همگام می‌کند
+      (رویدادهای RecognizedReserveBackingLinked و RecognizedReserveBackingSynced صادر می‌شوند)
+    → پس از این گام، updateReserves() (مسیر اوراکل) دیگر totalReserves را تغییر نمی‌دهد
+      و صرفاً یک مسیر تله‌متری/حسابرسی سازگاری باقی می‌ماند
+```
+
+**⚠️ این تنها مسیر تولیدی شناخته‌شده برای تبدیل مقادیر ثبت‌شده در `RecognizedReserveBacking.recordIdentity()` به پشتوانه پولی `PahlaviToken.totalReserves` است.**
 
 ---
 
@@ -369,6 +405,8 @@ productionOracle.grantRole(productionOracle.FEEDER_ROLE(), PROD_FEEDER)
 
 **توجه — ORACLE_INITIAL revoke:** این گام اجباری است. بدون آن، ORACLE_INITIAL می‌تواند مستقیماً `Kernel.syncReserves()` را فراخوانی کند و مسیر feeder→API3Oracle را دور بزند.
 
+**توجه — Kernel.syncReserves اکنون فقط تله‌متری است:** پس از اجرای سیاست طبقه‌بندی پشتوانه (PR #113)، `PahlaviToken.updateReserves()` دیگر `totalReserves` را تغییر نمی‌دهد؛ تنها یک رویداد `ReservesUpdated` حسابرسی صادر می‌کند. تنها مسیر مجاز تغییر `totalReserves`، `syncRecognizedBackingTotal()` است که از `RecognizedReserveBacking.recognizedBackingTotal()` می‌خواند (بخش ۳، مرحله ۵). سیم‌کشی Oracle در این بخش برای گزارش‌دهی و تشخیص تخلف (`flagViolation`) هنوز لازم است، اما دیگر پشتوانه پولی توکن را تعیین نمی‌کند.
+
 ---
 
 ## ۷. سیم‌کشی SWF و Treasury
@@ -394,7 +432,7 @@ assetFreeze.grantRole(assetFreeze.CRAWLER_ROLE(), CRAWLER_ADDRESS)
 □ کتاب آدرس کامل و در جای امن ذخیره شده
 □ ۹ عضو دادگاه شناسایی شده‌اند (COURT-01)
 □ کیف‌پول‌های سخت‌افزاری همه مقامات آماده
-□ npm test پاس می‌شود (693/693)
+□ npm test پاس می‌شود (726/726)
 □ npx hardhat compile بدون خطا اجرا می‌شود
 □ موجودی gas کافی در آدرس deployer
 □ شبکه هدف (testnet/mainnet) در hardhat.config.js تنظیم شده
@@ -436,7 +474,15 @@ assetFreeze.grantRole(assetFreeze.CRAWLER_ROLE(), CRAWLER_ADDRESS)
 □ api3Oracle.hasRole(FEEDER_ROLE, FEEDER_N) → true (برای هر feeder مجاز — در constructor تنظیم شده)
 □ priceOracle.hasRole(FEEDER_ROLE, PRICE_FEEDER) → true
 □ productionOracle.hasRole(FEEDER_ROLE, PROD_FEEDER) → true
-□ kernel.pahlaviToken() == PAHLAVI_TOKEN_ADDRESS   ← تأیید مسیر reserve sync (GAP-MEX-05)
+□ kernel.pahlaviToken() == PAHLAVI_TOKEN_ADDRESS   ← تأیید سیم‌کشی آدرس توکن (GAP-MEX-05) — پیش‌نیاز syncReserves و مسیر RecognizedReserveBacking
+```
+
+**گروه ۳.۱ — RecognizedReserveBacking (در صورت فعال‌سازی مسیر پشتوانه شناخته‌شده — مرحله ۵)**
+
+```
+□ recognizedReserveBacking.hasRole(RECOGNIZER_ROLE, RECOGNIZER_ADDRESS) → true
+□ token.recognizedReserveBacking() == RECOGNIZED_RESERVE_BACKING_ADDRESS
+□ token.totalReserves() == recognizedReserveBacking.recognizedBackingTotal()   ← تأیید همگام‌سازی اتمیک
 ```
 
 **گروه ۴ — SWF و Reclaim**
@@ -490,12 +536,13 @@ assetFreeze.grantRole(assetFreeze.CRAWLER_ROLE(), CRAWLER_ADDRESS)
 deploy/
 ├── 01_kernel.js            # deploy Kernel
 ├── 02_layer1.js            # deploy Treasury, SWF, VictimFund, ...
-├── 03_layer2.js            # deploy TriggerProtocol, PahlaviToken, ...
+├── 03_layer2.js            # deploy TriggerProtocol, PahlaviToken, ... + kernel.setPahlaviToken()
 ├── 04_court_wiring.js      # grantOfficialAccess × 9
 ├── 05_trigger_wiring.js    # setTriggerProtocol + KERNEL_ROLE
 ├── 06_swf_wiring.js        # RECLAIM_ROLE + COUNCIL_ROLE + CRAWLER_ROLE
 ├── 07_oracle_wiring.js     # grantOfficialAccess(API3Oracle, ORACLE_ROLE) + revokeRole(ORACLE_INITIAL) — FEEDER_ROLE در constructor API3Oracle تنظیم شده
-└── 08_verify.js            # تأیید تمام hasRole ها
+├── 08_recognized_backing_wiring.js  # deploy RecognizedReserveBacking + kernel.setPahlaviRecognizedReserveBacking()
+└── 09_verify.js            # تأیید تمام hasRole ها + kernel.pahlaviToken() + token.totalReserves()
 ```
 
 **توجه:** اسکریپت‌های `deploy/` هنوز در مخزن ایجاد نشده‌اند. این یک باقی‌مانده G-11 است که نیاز به اقدام فنی دارد.

@@ -14,6 +14,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - `CONTRIBUTING.md` — English contributor onboarding (PR #47)
 - `CHANGELOG.md` — this file (PR #47)
 
+### Fixed — Deployment-Path and Documentation Alignment
+- `docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` — added `RecognizedReserveBacking` to the constructor dependency map and deployment order (previously absent despite being the sole production reserve-mutation path since PR #110); added missing `kernel.setPahlaviToken()` deployment step (a GAP-MEX-05 recurrence — the post-deploy checklist verified this invariant but no step instructed performing it); clarified that `Kernel.syncReserves`/`PahlaviToken.updateReserves` are telemetry-only post PR #113; updated stale test count 693→726
+- `docs/deployment/ROLE_WIRING_CHECKLIST.md` — added sections ح (`kernel.setPahlaviToken()`) and ط (`RecognizedReserveBacking` deployment and wiring) with post-deploy verification checks
+- `docs/governance/OPEN_RESIDUALS.md` — re-evaluated K-RES-01 per Trigger 11 (fired by PR #113); reclassified `Active` → `Superseded` with full 5-criterion table and grep evidence; original attack mechanism (`updateReserves` mutating `totalReserves`) no longer exists in current code
+
 ---
 
 ## [0.3.0] — ۱۳ خرداد ۲۵۸۵ شاهنشاهی / 3 June 2026
