@@ -64,9 +64,45 @@ book):
 | `FEEDER_ADDRESSES` | Comma-separated API3Oracle feeder addresses (§1 `FEEDER_1..N`) |
 | `RECOGNIZER_ADDRESS` | `RECOGNIZER_ROLE` holder on `RecognizedReserveBacking` |
 | `INITIAL_RESERVES` | `PahlaviToken` constructor `_initialReserves` value |
+| `ACKNOWLEDGE_RESERVE_RESET` | Optional, defaults to unset/false. Must be `"true"` to proceed if `INITIAL_RESERVES` is nonzero when `03_recognized_backing.js` runs — see "Nonzero INITIAL_RESERVES" below. |
 
 No addresses are hardcoded or defaulted — `deploy/config.js` throws if any
 required variable is missing.
+
+### Nonzero INITIAL_RESERVES
+
+`kernel.setPahlaviRecognizedReserveBacking()` atomically replaces
+`PahlaviToken.totalReserves` with the freshly-deployed
+`RecognizedReserveBacking`'s `recognizedBackingTotal()` — which is `0` until
+identities are recorded via `recordIdentity()`. If `INITIAL_RESERVES` was set
+to a nonzero value, running `03_recognized_backing.js` (or the full
+`deploy/index.js` orchestration) would silently reset it to `0` in the same
+automated run, with no `recordIdentity()` step in between. `03_recognized_backing.js`
+blocks this and throws unless `ACKNOWLEDGE_RESERVE_RESET=true` is set,
+confirming the reset is an intentional operator decision rather than an
+unnoticed side effect. If the nonzero balance should be preserved, record it
+as a recognized identity (`RecognizedReserveBacking.recordIdentity()`)
+before wiring instead.
+
+### Duplicate Court addresses
+
+`08_finalize.js` rejects Oracle activation if `COURT_1..COURT_9` are not 9
+pairwise-distinct addresses — a duplicate silently reduces the number of
+independent signers below 9 while still passing individual `hasRole` checks
+(the duplicate simply re-holds a role it already had). `09_verify.js` also
+checks this independently as defense-in-depth, but the rejection is
+intentionally enforced *before* `ORACLE_ROLE` is ever granted, not just
+reported afterward.
+
+### Resuming after a failed run
+
+`deploy/index.js`'s orchestrated run persists the address book to
+`deploy/deployments/<network>.json` after every successful deployment step,
+not only once at the end — so a mid-run failure (network error, a guard
+throwing, gas exhaustion) leaves an accurate on-disk record of which
+contracts were already deployed on-chain. This does not auto-resume a
+failed run; an operator recovering from a partial run should inspect the
+persisted file and continue with the remaining individual scripts.
 
 ## Signing
 

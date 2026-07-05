@@ -23,6 +23,18 @@ async function finalizeOracleActivation(hre, config, addresses, sovereignSigner)
   const kernel = await ethers.getContractAt("IranOS_Kernel", kernelAddress, sovereignSigner);
   const COURT_ROLE = await kernel.COURT_ROLE();
   const allCourtMembers = [config.court1, ...config.courtMembers2to9];
+
+  const uniqueCourtMembers = new Set(allCourtMembers.map((a) => a.toLowerCase()));
+  if (uniqueCourtMembers.size !== allCourtMembers.length) {
+    throw new Error(
+      "Oracle activation blocked: COURT_1..COURT_9 are not 9 pairwise-distinct " +
+      "addresses. A duplicate address means fewer than 9 independent signers " +
+      "hold COURT_ROLE, undermining the 7-of-9 trigger threshold's intended " +
+      "independence margin. Fix the duplicate COURT_N environment variable " +
+      "before running 07_roles.js and this script."
+    );
+  }
+
   const courtRoleChecks = await Promise.all(
     allCourtMembers.map((member) => kernel.hasRole(COURT_ROLE, member))
   );

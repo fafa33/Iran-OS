@@ -21,26 +21,37 @@ const { wireCourtCompletion } = require("./07_roles");
 const { finalizeOracleActivation } = require("./08_finalize");
 const { verifyDeployment } = require("./09_verify");
 
-async function runDeployment(hre, config, sovereignSigner) {
+// persistStep, if provided, is called with the addresses accumulated so far
+// immediately after each successful deployment/wiring step, so a mid-run
+// failure (network error, a guard throwing, gas exhaustion) does not lose
+// the record of contracts already deployed on-chain. Defaults to a no-op —
+// callers that only need the in-memory result (e.g. tests) are unaffected.
+async function runDeployment(hre, config, sovereignSigner, persistStep = () => {}) {
   const addresses = {};
 
   const { address: kernelAddress } = await deployKernel(hre, config);
   addresses.KERNEL_ADDRESS = kernelAddress;
+  persistStep(addresses);
 
   const { address: treasuryAddress } = await deployTreasury(hre, addresses);
   addresses.TREASURY_ADDRESS = treasuryAddress;
+  persistStep(addresses);
 
   const { address: swfAddress } = await deploySwf(hre, config, addresses);
   addresses.SWF_ADDRESS = swfAddress;
+  persistStep(addresses);
 
   const { address: tokenAddress } = await deployToken(hre, config, addresses, sovereignSigner);
   addresses.PAHLAVI_TOKEN_ADDRESS = tokenAddress;
+  persistStep(addresses);
 
   const { address: oracleAddress } = await deployOracle(hre, config, addresses);
   addresses.API3_ORACLE_ADDRESS = oracleAddress;
+  persistStep(addresses);
 
   const { address: registryAddress } = await deployRecognizedBacking(hre, config, addresses, sovereignSigner);
   addresses.RECOGNIZED_RESERVE_BACKING_ADDRESS = registryAddress;
+  persistStep(addresses);
 
   await wireCourtCompletion(hre, config, addresses, sovereignSigner);
   await finalizeOracleActivation(hre, config, addresses, sovereignSigner);
@@ -60,7 +71,8 @@ if (require.main === module) {
   (async () => {
     const config = loadConfig();
     const [sovereignSigner] = await hre.ethers.getSigners();
-    const { addresses, checks } = await runDeployment(hre, config, sovereignSigner);
+    const persistStep = (addresses) => saveAddresses(hre.network.name, addresses);
+    const { addresses, checks } = await runDeployment(hre, config, sovereignSigner, persistStep);
     saveAddresses(hre.network.name, addresses);
     console.log(`Deployment complete on ${hre.network.name}:`);
     console.log(JSON.stringify(addresses, null, 2));

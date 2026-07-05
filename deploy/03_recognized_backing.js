@@ -20,7 +20,7 @@ async function deployRecognizedBacking(hre, config, addresses, sovereignSigner) 
   const { ethers } = hre;
   const { requireAddress } = require("./lib/addressBook");
   const kernelAddress = requireAddress(addresses, "KERNEL_ADDRESS", "01_kernel.js");
-  requireAddress(addresses, "PAHLAVI_TOKEN_ADDRESS", "02_token.js");
+  const tokenAddress = requireAddress(addresses, "PAHLAVI_TOKEN_ADDRESS", "02_token.js");
 
   const RecognizedReserveBacking = await ethers.getContractFactory("RecognizedReserveBacking");
   const registry = await RecognizedReserveBacking.deploy(
@@ -29,6 +29,23 @@ async function deployRecognizedBacking(hre, config, addresses, sovereignSigner) 
   );
   await registry.waitForDeployment();
   const registryAddress = await registry.getAddress();
+
+  const token = await ethers.getContractAt("PahlaviToken", tokenAddress);
+  const totalReservesBeforeWiring = await token.totalReserves();
+  const recognizedBackingTotal = await registry.recognizedBackingTotal();
+  if (totalReservesBeforeWiring > 0n && recognizedBackingTotal === 0n && !config.acknowledgeReserveReset) {
+    throw new Error(
+      `Reserve reset blocked: PahlaviToken.totalReserves() is currently ${totalReservesBeforeWiring.toString()} ` +
+      "but the freshly-deployed RecognizedReserveBacking has recordIdentity() " +
+      "count 0 (recognizedBackingTotal() == 0). " +
+      "kernel.setPahlaviRecognizedReserveBacking() performs an atomic sync that " +
+      "would replace the current totalReserves with 0. If this nonzero balance " +
+      "(e.g. a nonzero INITIAL_RESERVES) was not yet recorded as a recognized " +
+      "identity, set ACKNOWLEDGE_RESERVE_RESET=true to confirm this reset is " +
+      "intentional, or record matching identities via " +
+      "RecognizedReserveBacking.recordIdentity() before running this script."
+    );
+  }
 
   const kernel = await ethers.getContractAt("IranOS_Kernel", kernelAddress, sovereignSigner);
   await (await kernel.setPahlaviRecognizedReserveBacking(registryAddress)).wait();
