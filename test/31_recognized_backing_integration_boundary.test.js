@@ -17,6 +17,13 @@ describe("Recognized Backing Integration Boundary", function () {
     BudgetAllocation: 4,
     SpeculativeAsset: 5,
     OracleReportedData: 6,
+    SovereignMonetaryReserve: 7,
+    ExplicitlyApprovedMonetaryReserve: 8,
+    AccountingRecord: 9,
+    Report: 10,
+    EventRecord: 11,
+    TemporaryHolding: 12,
+    ReclaimedAsset: 13,
   };
 
   const backingValue = ethers.parseUnits("1000000", 18);
@@ -117,11 +124,58 @@ describe("Recognized Backing Integration Boundary", function () {
     ).to.emit(token, "PahlaviMinted");
   });
 
-  it("activation atomically replaces stale oracle reserves with recognizedBackingTotal", async function () {
+  it("Kernel.syncReserves before recognized backing activation does not change token reserves", async function () {
+    const oracleValue = ethers.parseUnits("5000000", 18);
+    await kernel.connect(sovereign).grantOfficialAccess(oracle.address, await kernel.ORACLE_ROLE());
+
+    await expect(kernel.connect(oracle).syncReserves(oracleValue))
+      .to.emit(kernel, "ReserveSynced")
+      .and.to.emit(token, "ReservesUpdated");
+
+    expect(await token.totalReserves()).to.equal(0n);
+    expect(await token.canMint(mintAmount)).to.be.false;
+  });
+
+  it("PahlaviToken.updateReserves compatibility path does not mutate totalReserves", async function () {
+    const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+    const directToken = await PahlaviToken.deploy(swfMinter.address, oracle.address, 0n);
+    await directToken.waitForDeployment();
+
+    await expect(directToken.connect(oracle).updateReserves(backingValue))
+      .to.emit(directToken, "ReservesUpdated");
+
+    expect(await directToken.totalReserves()).to.equal(0n);
+    expect(await directToken.canMint(mintAmount)).to.be.false;
+  });
+
+  it("explicit recognized monetary reserve classes sync through the existing replacement path", async function () {
+    await recordIdentity(
+      Class.SovereignMonetaryReserve,
+      await swf.getAddress(),
+      "sovereign-monetary-reserve-sync",
+      backingValue
+    );
+    await recordIdentity(
+      Class.ExplicitlyApprovedMonetaryReserve,
+      await swf.getAddress(),
+      "approved-monetary-reserve-sync",
+      backingValue
+    );
+
+    expect(await registry.recognizedBackingTotal()).to.equal(backingValue * 2n);
+    expect(await token.totalReserves()).to.equal(0n);
+
+    await linkRecognizedBacking();
+
+    expect(await token.totalReserves()).to.equal(backingValue * 2n);
+    expect(await token.canMint(mintAmount)).to.be.true;
+  });
+
+  it("activation atomically replaces token reserve accounting with recognizedBackingTotal", async function () {
     const staleOracleValue = ethers.parseUnits("5000000", 18);
 
     await api3Oracle.connect(feeder).syncReserves(staleOracleValue);
-    expect(await token.totalReserves()).to.equal(staleOracleValue);
+    expect(await token.totalReserves()).to.equal(0n);
 
     await recordIdentity(
       Class.RecognizedReserveBacking,
@@ -138,7 +192,6 @@ describe("Recognized Backing Integration Boundary", function () {
       .and.to.emit(token, "ReservesUpdated");
 
     expect(await token.totalReserves()).to.equal(backingValue);
-    expect(await token.totalReserves()).to.not.equal(staleOracleValue);
     expect(await token.canMint(mintAmount)).to.be.true;
   });
 
@@ -161,7 +214,7 @@ describe("Recognized Backing Integration Boundary", function () {
 
     await expect(
       api3Oracle.connect(feeder).syncReserves(backingValue)
-    ).to.be.revertedWith("PAH: recognized backing active");
+    ).to.emit(api3Oracle, "ReserveSyncForwarded");
 
     expect(await token.totalReserves()).to.equal(0n);
     expect(await token.canMint(mintAmount)).to.be.false;
@@ -172,17 +225,44 @@ describe("Recognized Backing Integration Boundary", function () {
 
   it("non-recognized identities do not affect reserve floor or mint capacity", async function () {
     await linkRecognizedBacking();
-    await recordIdentity(Class.SpeculativeAsset, await swf.getAddress(), "speculative-integration-boundary");
-    await recordIdentity(Class.TreasuryInventory, await treasury.getAddress(), "treasury-inventory-integration-boundary");
-    await recordIdentity(Class.SovereignWealthFundAsset, await swf.getAddress(), "swf-asset-non-recognized");
-    await recordIdentity(Class.BudgetAllocation, await treasury.getAddress(), "budget-allocation-non-recognized");
-    await recordIdentity(Class.OracleReportedData, await api3Oracle.getAddress(), "oracle-report-non-recognized");
+    const rejected = [
+      [Class.SpeculativeAsset, await swf.getAddress(), "speculative-integration-boundary"],
+      [Class.TreasuryInventory, await treasury.getAddress(), "treasury-inventory-integration-boundary"],
+      [Class.SovereignWealthFundAsset, await swf.getAddress(), "swf-asset-non-recognized"],
+      [Class.BudgetAllocation, await treasury.getAddress(), "budget-allocation-non-recognized"],
+      [Class.OracleReportedData, await api3Oracle.getAddress(), "oracle-report-non-recognized"],
+    ];
+
+    for (const [backingClass, sourceContract, sourceLabel] of rejected) {
+      await expect(
+        recordIdentity(backingClass, sourceContract, sourceLabel)
+      ).to.be.revertedWith("RRB: class not recognized");
+    }
 
     await kernel.connect(sovereign).syncRecognizedBackingTotal();
 
     expect(await registry.recognizedBackingTotal()).to.equal(0n);
     expect(await token.totalReserves()).to.equal(0n);
     expect(await token.currentReserveRatio()).to.equal(1000n);
+    expect(await token.canMint(mintAmount)).to.be.false;
+  });
+
+  it("treasury inventory, SWF assets, and oracle observations cannot be recognized by default", async function () {
+    const rejected = [
+      [Class.TreasuryInventory, await treasury.getAddress(), "treasury-inventory-runtime-reject"],
+      [Class.SovereignWealthFundAsset, await swf.getAddress(), "swf-asset-runtime-reject"],
+      [Class.OracleReportedData, await api3Oracle.getAddress(), "oracle-observation-runtime-reject"],
+    ];
+
+    for (const [backingClass, sourceContract, sourceLabel] of rejected) {
+      await expect(
+        recordIdentity(backingClass, sourceContract, sourceLabel)
+      ).to.be.revertedWith("RRB: class not recognized");
+    }
+
+    await linkRecognizedBacking();
+    expect(await registry.recognizedBackingTotal()).to.equal(0n);
+    expect(await token.totalReserves()).to.equal(0n);
     expect(await token.canMint(mintAmount)).to.be.false;
   });
 
@@ -223,7 +303,7 @@ describe("Recognized Backing Integration Boundary", function () {
 
     await expect(
       api3Oracle.connect(feeder).syncReserves(backingValue)
-    ).to.be.revertedWith("PAH: recognized backing active");
+    ).to.emit(api3Oracle, "ReserveSyncForwarded");
 
     expect(await token.totalReserves()).to.equal(0n);
     expect(await token.totalSupply()).to.equal(supplyBefore);

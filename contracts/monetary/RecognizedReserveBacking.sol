@@ -5,10 +5,10 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
  * @title RecognizedReserveBacking
- * @dev Minimal identity registry for recognized reserve backing and adjacent
- *      non-recognized accounting surfaces. This contract records identity only:
- *      it does not mint, burn, sync reserves, classify through oracles, or alter
- *      PahlaviToken.totalReserves.
+ * @dev Minimal identity registry for recognized reserve backing. This contract
+ *      enforces a runtime classification policy before any recorded identity can
+ *      become monetary backing. It does not mint, burn, sync reserves, classify
+ *      through oracles, or alter PahlaviToken.totalReserves.
  */
 contract RecognizedReserveBacking is AccessControl {
     bytes32 public constant RECOGNIZER_ROLE = keccak256("RECOGNIZER_ROLE");
@@ -20,7 +20,14 @@ contract RecognizedReserveBacking is AccessControl {
         SovereignWealthFundAsset,
         BudgetAllocation,
         SpeculativeAsset,
-        OracleReportedData
+        OracleReportedData,
+        SovereignMonetaryReserve,
+        ExplicitlyApprovedMonetaryReserve,
+        AccountingRecord,
+        Report,
+        EventRecord,
+        TemporaryHolding,
+        ReclaimedAsset
     }
 
     struct BackingIdentity {
@@ -35,6 +42,7 @@ contract RecognizedReserveBacking is AccessControl {
     }
 
     mapping(bytes32 => BackingIdentity) public identities;
+    mapping(BackingClass => bool) public recognizedClassPolicy;
     uint256 public recognizedBackingTotal;
 
     event BackingIdentityRecorded(
@@ -47,11 +55,20 @@ contract RecognizedReserveBacking is AccessControl {
         string evidence
     );
 
+    event RecognizedClassPolicyUpdated(
+        BackingClass indexed backingClass,
+        bool permitted,
+        address indexed updatedBy
+    );
+
     constructor(address admin, address recognizer) {
         require(admin != address(0), "RRB: invalid admin");
         require(recognizer != address(0), "RRB: invalid recognizer");
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(RECOGNIZER_ROLE, recognizer);
+        recognizedClassPolicy[BackingClass.RecognizedReserveBacking] = true;
+        recognizedClassPolicy[BackingClass.SovereignMonetaryReserve] = true;
+        recognizedClassPolicy[BackingClass.ExplicitlyApprovedMonetaryReserve] = true;
     }
 
     function deriveIdentityId(address sourceContract, bytes32 sourceId)
@@ -74,6 +91,10 @@ contract RecognizedReserveBacking is AccessControl {
         returns (bytes32 identityId)
     {
         require(backingClass != BackingClass.Unset, "RRB: unset class");
+        require(
+            recognizedClassPolicy[backingClass],
+            "RRB: class not recognized"
+        );
         require(value > 0, "RRB: zero value");
         require(sourceContract != address(0), "RRB: invalid source");
         require(sourceId != bytes32(0), "RRB: invalid source id");
@@ -93,9 +114,7 @@ contract RecognizedReserveBacking is AccessControl {
             exists: true
         });
 
-        if (backingClass == BackingClass.RecognizedReserveBacking) {
-            recognizedBackingTotal += value;
-        }
+        recognizedBackingTotal += value;
 
         emit BackingIdentityRecorded(
             identityId,
@@ -110,14 +129,24 @@ contract RecognizedReserveBacking is AccessControl {
 
     function isRecognizedBacking(bytes32 identityId) external view returns (bool) {
         BackingIdentity storage identity = identities[identityId];
-        return identity.exists && identity.backingClass == BackingClass.RecognizedReserveBacking;
+        return identity.exists && recognizedClassPolicy[identity.backingClass];
     }
 
     function recognizedBackingValue(bytes32 identityId) external view returns (uint256) {
         BackingIdentity storage identity = identities[identityId];
-        if (!identity.exists || identity.backingClass != BackingClass.RecognizedReserveBacking) {
+        if (!identity.exists || !recognizedClassPolicy[identity.backingClass]) {
             return 0;
         }
         return identity.value;
+    }
+
+    function setRecognizedClassPolicy(BackingClass backingClass, bool permitted)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        require(backingClass != BackingClass.Unset, "RRB: unset class");
+        require(permitted, "RRB: cannot disable class");
+        recognizedClassPolicy[backingClass] = permitted;
+        emit RecognizedClassPolicyUpdated(backingClass, permitted, msg.sender);
     }
 }

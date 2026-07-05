@@ -4,9 +4,9 @@
 //
 // syncReserves is data-forwarding only. Tests verify:
 //   (a) only ORACLE_ROLE can call
-//   (b) value is forwarded to PahlaviToken.updateReserves
+//   (b) value is forwarded to PahlaviToken.updateReserves without mutating monetary backing
 //   (c) Kernel emits ReserveSynced; PahlaviToken emits ReservesUpdated
-//   (d) breach/restoration events originate from PahlaviToken, not Kernel
+//   (d) legacy oracle sync does not create reserve breach/restoration state
 //   (e) no TriggerProtocol call, no mint/burn, no freeze side effects
 //   (f) callable during emergency lock (notLocked exempt by design)
 //   (g) edge cases: zero, same-value, repeated, increase, decrease
@@ -82,7 +82,7 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       await expect(kernel.connect(oracle).syncReserves(newReserves))
         .to.emit(kernel, "ReserveSynced")
         .withArgs(oracle.address, newReserves, await ethers.provider.getBlock("latest").then(b => b.timestamp + 1));
-      expect(await token.totalReserves()).to.equal(newReserves);
+      expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
     });
 
     it("T02: non-oracle caller cannot call syncReserves", async function () {
@@ -105,18 +105,19 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
   // ─────────────────────────────────────────
 
   describe("reserve propagation", function () {
-    it("T03: syncReserves forwards value to PahlaviToken.updateReserves", async function () {
+    it("T03: syncReserves forwards value without changing PahlaviToken.totalReserves", async function () {
       const newReserves = ethers.parseUnits("150000000000", 18);
+      const before = await token.totalReserves();
       await kernel.connect(oracle).syncReserves(newReserves);
-      expect(await token.totalReserves()).to.equal(newReserves);
+      expect(await token.totalReserves()).to.equal(before);
     });
 
-    it("T04: totalReserves updates after sync", async function () {
+    it("T04: totalReserves remains unchanged after legacy sync", async function () {
       const R0 = await token.totalReserves();
       const R1 = ethers.parseUnits("200000000000", 18);
       expect(R1).to.not.equal(R0);
       await kernel.connect(oracle).syncReserves(R1);
-      expect(await token.totalReserves()).to.equal(R1);
+      expect(await token.totalReserves()).to.equal(R0);
     });
 
     it("T05: Kernel emits ReserveSynced", async function () {
@@ -136,8 +137,8 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
   // Breach and restoration via syncReserves
   // ─────────────────────────────────────────
 
-  describe("breach and restoration events originate from PahlaviToken", function () {
-    it("T07: reserve decrease through sync can set reserveFloorBreached in PahlaviToken", async function () {
+  describe("legacy sync does not create breach or restoration state", function () {
+    it("T07: reserve decrease through sync does not set reserveFloorBreached in PahlaviToken", async function () {
       // Mint supply so ratio is meaningful
       const mintAmt = ethers.parseUnits("1000", 18);
       await token.connect(swf).mint(user1.address, mintAmt, "T07 mint");
@@ -145,13 +146,13 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       // Push sub-floor reserves: ratio = (100 * 1e18 * 1000) / (1000 * 1e18) = 100 < 333
       const subFloor = ethers.parseUnits("100", 18);
       await expect(kernel.connect(oracle).syncReserves(subFloor))
-        .to.emit(token, "ReserveFloorBreached");
+        .to.not.emit(token, "ReserveFloorBreached");
 
-      expect(await token.reserveFloorBreached()).to.be.true;
+      expect(await token.reserveFloorBreached()).to.be.false;
       // Kernel must NOT emit ReserveFloorBreached
     });
 
-    it("T07b: ReserveFloorBreached is emitted by PahlaviToken, not Kernel", async function () {
+    it("T07b: ReserveFloorBreached is emitted by neither PahlaviToken nor Kernel", async function () {
       const mintAmt = ethers.parseUnits("1000", 18);
       await token.connect(swf).mint(user1.address, mintAmt, "T07b mint");
       const subFloor = ethers.parseUnits("100", 18);
@@ -159,12 +160,12 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       const tx = await kernel.connect(oracle).syncReserves(subFloor);
       const receipt = await tx.wait();
 
-      // Find ReserveFloorBreached events in the receipt
       const tokenAddress = await token.getAddress();
       const breachEvents = receipt.logs.filter(
-        log => log.address.toLowerCase() === tokenAddress.toLowerCase()
+        log => log.address.toLowerCase() === tokenAddress.toLowerCase() &&
+               log.topics[0] === ethers.id("ReserveFloorBreached(uint256,uint256,uint256,uint256)")
       );
-      expect(breachEvents.length).to.be.gt(0);
+      expect(breachEvents.length).to.equal(0);
 
       // Kernel address must NOT appear as emitter of ReserveFloorBreached
       const kernelAddress = await kernel.getAddress();
@@ -175,23 +176,22 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       expect(kernelBreachEvents.length).to.equal(0);
     });
 
-    it("T08: reserve increase through sync can clear reserveFloorBreached in PahlaviToken", async function () {
+    it("T08: reserve increase through sync does not clear or set reserveFloorBreached in PahlaviToken", async function () {
       const mintAmt = ethers.parseUnits("1000", 18);
       await token.connect(swf).mint(user1.address, mintAmt, "T08 mint");
 
-      // Set breach state
       await kernel.connect(oracle).syncReserves(ethers.parseUnits("100", 18));
-      expect(await token.reserveFloorBreached()).to.be.true;
+      expect(await token.reserveFloorBreached()).to.be.false;
 
       // Restore: ratio = (400 * 1e18 * 1000) / (1000 * 1e18) = 400 >= 333
       const compliant = ethers.parseUnits("400", 18);
       await expect(kernel.connect(oracle).syncReserves(compliant))
-        .to.emit(token, "ReserveFloorRestored");
+        .to.not.emit(token, "ReserveFloorRestored");
 
       expect(await token.reserveFloorBreached()).to.be.false;
     });
 
-    it("T08b: ReserveFloorRestored is emitted by PahlaviToken, not Kernel", async function () {
+    it("T08b: ReserveFloorRestored is emitted by neither PahlaviToken nor Kernel", async function () {
       const mintAmt = ethers.parseUnits("1000", 18);
       await token.connect(swf).mint(user1.address, mintAmt, "T08b mint");
       await kernel.connect(oracle).syncReserves(ethers.parseUnits("100", 18));
@@ -202,9 +202,10 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
 
       const tokenAddress = await token.getAddress();
       const restoredEvents = receipt.logs.filter(
-        log => log.address.toLowerCase() === tokenAddress.toLowerCase()
+        log => log.address.toLowerCase() === tokenAddress.toLowerCase() &&
+               log.topics[0] === ethers.id("ReserveFloorRestored(uint256,uint256,uint256)")
       );
-      expect(restoredEvents.length).to.be.gt(0);
+      expect(restoredEvents.length).to.equal(0);
 
       const kernelAddress = await kernel.getAddress();
       const kernelRestoredEvents = receipt.logs.filter(
@@ -230,7 +231,7 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       await expect(kernel.connect(oracle).syncReserves(newReserves))
         .to.emit(kernel, "ReserveSynced");
 
-      expect(await token.totalReserves()).to.equal(newReserves);
+      expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
     });
   });
 
@@ -293,9 +294,9 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       const R1 = ethers.parseUnits("100000000000", 18);
       const R2 = ethers.parseUnits("200000000000", 18);
       await kernel.connect(oracle).syncReserves(R1);
-      expect(await token.totalReserves()).to.equal(R1);
+      expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
       await kernel.connect(oracle).syncReserves(R2);
-      expect(await token.totalReserves()).to.equal(R2);
+      expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
     });
 
     it("T14: same-value sync is accepted (no short-circuit)", async function () {
@@ -305,19 +306,19 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       await expect(kernel.connect(oracle).syncReserves(R))
         .to.emit(kernel, "ReserveSynced")
         .and.to.emit(token, "ReservesUpdated");
-      expect(await token.totalReserves()).to.equal(R);
+      expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
     });
 
-    it("T15: zero reserve is accepted and sets breach when supply > 0", async function () {
+    it("T15: zero reserve is accepted and does not set breach when supply > 0", async function () {
       const mintAmt = ethers.parseUnits("1000", 18);
       await token.connect(swf).mint(user1.address, mintAmt, "T15 mint");
 
       // Zero reserve: ratio = 0 < MIN_RESERVE_RATIO
       await expect(kernel.connect(oracle).syncReserves(0n))
-        .to.emit(token, "ReserveFloorBreached");
+        .to.not.emit(token, "ReserveFloorBreached");
 
-      expect(await token.totalReserves()).to.equal(0n);
-      expect(await token.reserveFloorBreached()).to.be.true;
+      expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
+      expect(await token.reserveFloorBreached()).to.be.false;
     });
 
     it("T15b: zero reserve with zero supply does not breach (supply == 0 branch returns 1000)", async function () {
@@ -326,33 +327,24 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       await expect(kernel.connect(oracle).syncReserves(0n))
         .to.not.emit(token, "ReserveFloorBreached");
       expect(await token.reserveFloorBreached()).to.be.false;
-      expect(await token.totalReserves()).to.equal(0n);
-    });
-
-    it("T16 (CF-7 deferred): syncReserves with type(uint256).max reverts when supply > 0 due to overflow in PahlaviToken", async function () {
-      // Overflow guard lives in PahlaviToken.updateReserves ratio computation,
-      // not in Kernel.syncReserves. Kernel is a pure forwarding surface.
-      // This test characterizes CF-7 behavior; no guard exists in Kernel by design.
-      const mintAmt = ethers.parseUnits("1000", 18);
-      await token.connect(swf).mint(user1.address, mintAmt, "T16 mint");
-
-      // type(uint256).max * 1000 overflows in PahlaviToken.updateReserves ratio calc
-      await expect(
-        kernel.connect(oracle).syncReserves(ethers.MaxUint256)
-      ).to.be.reverted; // arithmetic overflow in PahlaviToken
-
-      // totalReserves must remain unchanged (revert rolled back)
       expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
     });
 
-    it("T16b (CF-7 deferred): syncReserves with type(uint256).max when supply == 0 is accepted", async function () {
-      // With zero supply, PahlaviToken.updateReserves takes the else branch (ratio = 1000).
-      // No overflow. Kernel has no guard. This is the CF-7 open risk scenario.
-      // A corrective syncReserves call with a valid value restores the state.
+    it("T16: syncReserves with type(uint256).max is non-mutating when supply > 0", async function () {
+      const mintAmt = ethers.parseUnits("1000", 18);
+      await token.connect(swf).mint(user1.address, mintAmt, "T16 mint");
+
+      await expect(
+        kernel.connect(oracle).syncReserves(ethers.MaxUint256)
+      ).to.emit(kernel, "ReserveSynced");
+
+      expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
+    });
+
+    it("T16b: syncReserves with type(uint256).max when supply == 0 is accepted and non-mutating", async function () {
       expect(await token.totalSupply()).to.equal(0n);
       await kernel.connect(oracle).syncReserves(ethers.MaxUint256);
-      expect(await token.totalReserves()).to.equal(ethers.MaxUint256);
-      // Self-correct:
+      expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
       await kernel.connect(oracle).syncReserves(INITIAL_RESERVES);
       expect(await token.totalReserves()).to.equal(INITIAL_RESERVES);
     });
@@ -520,13 +512,13 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       expect(await wiredToken.totalReserves()).to.equal(INITIAL_RESERVES);
     });
 
-    it("PW-05: API3Oracle.syncReserves updates PahlaviToken.totalReserves", async function () {
+    it("PW-05: API3Oracle.syncReserves does not update PahlaviToken.totalReserves", async function () {
       const newReserves = ethers.parseUnits("150000000000", 18);
       await api3Oracle.connect(feeder).syncReserves(newReserves);
-      expect(await wiredToken.totalReserves()).to.equal(newReserves);
+      expect(await wiredToken.totalReserves()).to.equal(INITIAL_RESERVES);
     });
 
-    it("PW-06: breach and restoration events originate only from PahlaviToken, not API3Oracle or Kernel", async function () {
+    it("PW-06: breach events do not originate from API3Oracle, Kernel, or PahlaviToken", async function () {
       // Mint supply so ratio check is meaningful
       await wiredToken.connect(swf).mint(feeder.address, ethers.parseUnits("1000", 18), "PW-06 mint");
 
@@ -539,13 +531,11 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       const oracleAddr  = (await api3Oracle.getAddress()).toLowerCase();
       const breachSig   = ethers.id("ReserveFloorBreached(uint256,uint256,uint256,uint256)");
 
-      // ReserveFloorBreached MUST come from PahlaviToken
       const fromToken = receipt.logs.filter(
         l => l.address.toLowerCase() === tokenAddr && l.topics[0] === breachSig
       );
-      expect(fromToken.length).to.equal(1);
+      expect(fromToken.length).to.equal(0);
 
-      // Kernel and API3Oracle MUST NOT emit ReserveFloorBreached
       const fromKernel = receipt.logs.filter(
         l => l.address.toLowerCase() === kernelAddr && l.topics[0] === breachSig
       );
@@ -579,16 +569,16 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
       const FEEDER_ROLE = await api3Oracle.FEEDER_ROLE();
       expect(await api3Oracle.hasRole(FEEDER_ROLE, feeder.address)).to.be.true;
       expect(await api3Oracle.hasRole(FEEDER_ROLE, stranger.address)).to.be.false;
-      // Full path functional end-to-end
+      // Full path remains callable end-to-end, but does not mutate monetary backing.
       const newReserves = ethers.parseUnits("250000000000", 18);
       await api3Oracle.connect(feeder).syncReserves(newReserves);
-      expect(await wiredToken.totalReserves()).to.equal(newReserves);
+      expect(await wiredToken.totalReserves()).to.equal(INITIAL_RESERVES);
     });
 
     it("PW-10 (Codex P1 regression): FEEDER_ROLE granted at constructor time — no impersonation used", async function () {
       // This test documents that FEEDER_ROLE is reachable on mainnet without hardhat_impersonateAccount.
       // The constructor accepts initialFeeders and calls _grantRole(FEEDER_ROLE, addr) directly.
-      // Verify the grant is present and the full sync path is functional.
+      // Verify the grant is present and the full sync path remains callable.
       const FEEDER_ROLE = await api3Oracle.FEEDER_ROLE();
       expect(await api3Oracle.hasRole(FEEDER_ROLE, feeder.address)).to.be.true;
 
@@ -599,7 +589,7 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
         .to.emit(api3Oracle, "ReserveSyncForwarded").withArgs(feeder.address, newReserves, await ethers.provider.getBlock("latest").then(b => b.timestamp))
         .and.to.emit(wiredKernel, "ReserveSynced")
         .and.to.emit(wiredToken, "ReservesUpdated");
-      expect(await wiredToken.totalReserves()).to.equal(newReserves);
+      expect(await wiredToken.totalReserves()).to.equal(INITIAL_RESERVES);
     });
   });
 });

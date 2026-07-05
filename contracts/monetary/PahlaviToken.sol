@@ -59,8 +59,8 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
     /// @notice وضعیت اضطراری — در صورت فعال بودن، انتقال‌ها متوقف می‌شوند
     bool public emergencyMode;
 
-    /// @notice وضعیت نقض کف پشتوانه — true وقتی updateReserves نسبت را زیر MIN_RESERVE_RATIO برده باشد
-    /// @dev توسط updateReserves() و burn() تنظیم و پاک می‌شود. CF-1 Option C — ردیابی نقض. GAP-MEX-05 را ببینید.
+    /// @notice وضعیت نقض کف پشتوانه — true وقتی حسابداری ذخایر شناخته‌شده نسبت را زیر MIN_RESERVE_RATIO برده باشد
+    /// @dev توسط syncRecognizedBackingTotal() و burn() تنظیم و پاک می‌شود. مسیر اوراکل دیگر حسابداری ذخایر را تغییر نمی‌دهد.
     bool public reserveFloorBreached;
 
     // ─────────────────────────────────────────
@@ -228,20 +228,18 @@ contract PahlaviToken is ERC20, AccessControl, ReentrancyGuard {
     // ─────────────────────────────────────────
 
     /**
-     * @notice به‌روزرسانی مقدار ذخایر پشتوانه
-     * @dev فراخوانی توسط API3Oracle از طریق Kernel.
-     *      CF-1 Option C: اگر به‌روزرسانی نسبت را زیر MIN_RESERVE_RATIO ببرد،
-     *      وضعیت نقض ثبت و رویداد ReserveFloorBreached منتشر می‌شود (بدون برگشت).
-     *      بازگشت به انطباق، وضعیت را پاک و ReserveFloorRestored را منتشر می‌کند.
-     *      برگشت رویداد یا تماس با TriggerProtocol انجام نمی‌شود — GAP-MEX-05 را ببینید.
-     * @param newReserves ارزش دلاری ذخایر در واحد 1e18
+     * @notice مسیر سازگاری برای گزارش ذخایر اوراکل
+     * @dev این مسیر دیگر حسابداری ذخایر پولی را تغییر نمی‌دهد. تنها مسیر مجاز
+     *      برای تغییر totalReserves، syncRecognizedBackingTotal() از قرارداد
+     *      RecognizedReserveBacking متصل‌شده است.
+     * @param newReserves ارزش گزارش‌شده توسط اوراکل؛ برای حسابداری پولی استفاده نمی‌شود.
      */
     function updateReserves(uint256 newReserves) external onlyKernel {
-        require(
-            recognizedReserveBacking == address(0),
-            "PAH: recognized backing active"
-        );
-        _setReserves(newReserves);
+        newReserves;
+        uint256 currentReserves = totalReserves;
+        uint256 supply = totalSupply();
+        uint256 ratio = supply > 0 ? (currentReserves * 1000) / supply : 1000;
+        emit ReservesUpdated(currentReserves, currentReserves, ratio);
     }
 
     /**
