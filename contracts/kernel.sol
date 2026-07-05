@@ -76,8 +76,8 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
     /// @notice آدرس اوراکل API3
     address public api3Oracle;
 
-    /// @notice آدرس قرارداد توکن پهلوی — تنها برای هدایت داده ذخایر به PahlaviToken.updateReserves استفاده می‌شود
-    /// @dev GAP-MEX-05: این آدرس توسط setPahlaviToken تنظیم می‌شود. توسط syncReserves برای ارسال داده استفاده می‌شود.
+    /// @notice آدرس قرارداد توکن پهلوی — برای مسیر سازگاری اوراکل و همگام‌سازی پشتوانه شناخته‌شده
+    /// @dev syncReserves داده اوراکل را فقط به سطح غیرتغییردهنده updateReserves می‌فرستد.
     address public pahlaviToken;
 
     // ─────────────────────────────────────────
@@ -162,9 +162,8 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
         address newAddress
     );
 
-    /// @notice انتشار می‌شود هر بار که syncReserves داده ذخایر را به PahlaviToken ارسال می‌کند
-    /// @dev ردیابی حسابرسی لایه Kernel. رویدادهای تطابق (ReserveFloorBreached/Restored) از PahlaviToken صادر می‌شوند.
-    ///      GAP-MEX-05.
+    /// @notice انتشار می‌شود هر بار که syncReserves گزارش ذخایر اوراکل را به سطح سازگاری PahlaviToken ارسال می‌کند
+    /// @dev این رویداد ردیابی حسابرسی است و به معنی تغییر totalReserves نیست.
     event ReserveSynced(
         address indexed caller,
         uint256 newReserves,
@@ -521,18 +520,17 @@ contract IranOS_Kernel is AccessControl, ReentrancyGuard {
     }
 
     /**
-     * @notice ارسال داده ذخایر تایید‌شده اوراکل به PahlaviToken
+     * @notice ارسال گزارش ذخایر تایید‌شده اوراکل به سطح سازگاری PahlaviToken
      * @dev سطح ارسال داده خالص. هیچ منطق انطباق، نسبت ذخایر، یا وضعیت نقض
      *      در این تابع محاسبه نمی‌شود.
      *
-     *      تنها مسئولیت: دریافت داده ذخایر تایید‌شده → ارسال مقدار ذخایر
-     *      به PahlaviToken.updateReserves() → انتشار ردیابی حسابرسی.
+     *      تنها مسئولیت: دریافت گزارش ذخایر تایید‌شده → ارسال آن به
+     *      PahlaviToken.updateReserves() غیرتغییردهنده → انتشار ردیابی حسابرسی.
      *
      *      هیچ عمل دیگری در این تابع مجاز نیست.
      *
-     *      عمداً از قفل اضطراری معاف است: حقیقت ذخایر باید در هنگام بحران
-     *      در دسترس بماند. PahlaviToken.updateReserves() نیز بدون نگهبان
-     *      اضطراری قابل فراخوانی است. GAP-MEX-05.
+     *      عمداً از قفل اضطراری معاف است: گزارش ذخایر باید در هنگام بحران
+     *      قابل ثبت حسابرسی بماند، اما به پشتوانه پولی تبدیل نمی‌شود.
      *
      * @param newReserves ارزش ذخایر در واحد 1e18 (گزارش‌شده توسط اوراکل)
      */

@@ -210,7 +210,7 @@ describe("Recognized Reserve Backing Boundary Characterization", function () {
     ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
   });
 
-  it("API3 reserve reports forward reserve data but do not create autonomous minting authority", async function () {
+  it("API3 reserve reports forward data but do not become monetary backing", async function () {
     const newReserves = ethers.parseUnits("1000000", 18);
     const supplyBefore = await token.totalSupply();
     const swfMinterRole = await token.MINTER_ROLE();
@@ -230,7 +230,7 @@ describe("Recognized Reserve Backing Boundary Characterization", function () {
       .and.to.emit(kernel, "ReserveSynced")
       .and.to.emit(token, "ReservesUpdated");
 
-    expect(await token.totalReserves()).to.equal(newReserves);
+    expect(await token.totalReserves()).to.equal(0n);
     expect(await token.totalSupply()).to.equal(supplyBefore);
     expect(await token.hasRole(swfMinterRole, feeder.address)).to.be.false;
     expect(await token.hasRole(swfMinterRole, await api3Oracle.getAddress())).to.be.false;
@@ -246,9 +246,9 @@ describe("Recognized Reserve Backing Boundary Characterization", function () {
     expect(await token.balanceOf(recipient.address)).to.equal(0n);
 
     await expect(
-      token.connect(swfMinter).mint(recipient.address, MINT_AMOUNT, "existing minter after reserve sync")
-    ).to.emit(token, "PahlaviMinted");
-    expect(await token.totalSupply()).to.equal(MINT_AMOUNT);
+      token.connect(swfMinter).mint(recipient.address, MINT_AMOUNT, "oracle report is not backing")
+    ).to.be.revertedWith("PAH: reserve ratio below minimum 33.3%");
+    expect(await token.totalSupply()).to.equal(supplyBefore);
   });
 
   it("failed and unauthorized paths do not mutate token reserves or SWF/Treasury accounting state", async function () {

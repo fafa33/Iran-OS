@@ -124,6 +124,30 @@ describe("Recognized Backing Integration Boundary", function () {
     ).to.emit(token, "PahlaviMinted");
   });
 
+  it("Kernel.syncReserves before recognized backing activation does not change token reserves", async function () {
+    const oracleValue = ethers.parseUnits("5000000", 18);
+    await kernel.connect(sovereign).grantOfficialAccess(oracle.address, await kernel.ORACLE_ROLE());
+
+    await expect(kernel.connect(oracle).syncReserves(oracleValue))
+      .to.emit(kernel, "ReserveSynced")
+      .and.to.emit(token, "ReservesUpdated");
+
+    expect(await token.totalReserves()).to.equal(0n);
+    expect(await token.canMint(mintAmount)).to.be.false;
+  });
+
+  it("PahlaviToken.updateReserves compatibility path does not mutate totalReserves", async function () {
+    const PahlaviToken = await ethers.getContractFactory("PahlaviToken");
+    const directToken = await PahlaviToken.deploy(swfMinter.address, oracle.address, 0n);
+    await directToken.waitForDeployment();
+
+    await expect(directToken.connect(oracle).updateReserves(backingValue))
+      .to.emit(directToken, "ReservesUpdated");
+
+    expect(await directToken.totalReserves()).to.equal(0n);
+    expect(await directToken.canMint(mintAmount)).to.be.false;
+  });
+
   it("explicit recognized monetary reserve classes sync through the existing replacement path", async function () {
     await recordIdentity(
       Class.SovereignMonetaryReserve,
@@ -147,11 +171,11 @@ describe("Recognized Backing Integration Boundary", function () {
     expect(await token.canMint(mintAmount)).to.be.true;
   });
 
-  it("activation atomically replaces stale oracle reserves with recognizedBackingTotal", async function () {
+  it("activation atomically replaces token reserve accounting with recognizedBackingTotal", async function () {
     const staleOracleValue = ethers.parseUnits("5000000", 18);
 
     await api3Oracle.connect(feeder).syncReserves(staleOracleValue);
-    expect(await token.totalReserves()).to.equal(staleOracleValue);
+    expect(await token.totalReserves()).to.equal(0n);
 
     await recordIdentity(
       Class.RecognizedReserveBacking,
@@ -168,7 +192,6 @@ describe("Recognized Backing Integration Boundary", function () {
       .and.to.emit(token, "ReservesUpdated");
 
     expect(await token.totalReserves()).to.equal(backingValue);
-    expect(await token.totalReserves()).to.not.equal(staleOracleValue);
     expect(await token.canMint(mintAmount)).to.be.true;
   });
 
@@ -191,7 +214,7 @@ describe("Recognized Backing Integration Boundary", function () {
 
     await expect(
       api3Oracle.connect(feeder).syncReserves(backingValue)
-    ).to.be.revertedWith("PAH: recognized backing active");
+    ).to.emit(api3Oracle, "ReserveSyncForwarded");
 
     expect(await token.totalReserves()).to.equal(0n);
     expect(await token.canMint(mintAmount)).to.be.false;
@@ -280,7 +303,7 @@ describe("Recognized Backing Integration Boundary", function () {
 
     await expect(
       api3Oracle.connect(feeder).syncReserves(backingValue)
-    ).to.be.revertedWith("PAH: recognized backing active");
+    ).to.emit(api3Oracle, "ReserveSyncForwarded");
 
     expect(await token.totalReserves()).to.equal(0n);
     expect(await token.totalSupply()).to.equal(supplyBefore);

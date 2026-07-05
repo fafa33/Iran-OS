@@ -231,7 +231,7 @@ describe("RecognizedReserveBacking", function () {
     expect((await swf.layerL1()).balance).to.equal(value);
     expect(await treasury.totalBudgetAllocated()).to.equal(value);
     expect(await treasury.txCount()).to.equal(1n);
-    expect(await token.totalReserves()).to.equal(value);
+    expect(await token.totalReserves()).to.equal(0n);
     expect(await registry.recognizedBackingTotal()).to.equal(0n);
 
     await registry.connect(recognizer).recordIdentity(
@@ -246,7 +246,7 @@ describe("RecognizedReserveBacking", function () {
     expect((await swf.layerL1()).balance).to.equal(value);
     expect(await treasury.totalBudgetAllocated()).to.equal(value);
     expect(await treasury.txCount()).to.equal(1n);
-    expect(await token.totalReserves()).to.equal(value);
+    expect(await token.totalReserves()).to.equal(0n);
     expect(await token.totalSupply()).to.equal(0n);
   });
 
