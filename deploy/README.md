@@ -80,9 +80,18 @@ to a nonzero value, running `03_recognized_backing.js` (or the full
 automated run, with no `recordIdentity()` step in between. `03_recognized_backing.js`
 blocks this and throws unless `ACKNOWLEDGE_RESERVE_RESET=true` is set,
 confirming the reset is an intentional operator decision rather than an
-unnoticed side effect. If the nonzero balance should be preserved, record it
-as a recognized identity (`RecognizedReserveBacking.recordIdentity()`)
-before wiring instead.
+unnoticed side effect.
+
+Note: `03_recognized_backing.js` deploys `RecognizedReserveBacking` and wires
+it to `PahlaviToken` in the same function call, so there is no point *within
+this workflow* at which identities could be recorded against that registry
+beforehand — the registry does not exist until this script deploys it.
+`ACKNOWLEDGE_RESERVE_RESET=true` is the only way to proceed past this guard
+in the current deployment workflow. If the nonzero balance should instead be
+preserved as recognized identities, that must happen as a separate, later
+operation — call `RecognizedReserveBacking.recordIdentity()` after this
+script has run and wired the registry, and treat the reserve reset to `0` in
+between as expected and acknowledged.
 
 ### Duplicate Court addresses
 
@@ -103,6 +112,17 @@ throwing, gas exhaustion) leaves an accurate on-disk record of which
 contracts were already deployed on-chain. This does not auto-resume a
 failed run; an operator recovering from a partial run should inspect the
 persisted file and continue with the remaining individual scripts.
+
+`deploy/index.js`'s CLI entry point (`npx hardhat run deploy/index.js`)
+refuses to start if `deploy/deployments/<network>.json` already contains any
+of the 6 core-monetary-path addresses for that network — whether from a
+completed run or a partial one recovered per the above. It does not
+overwrite the file or auto-resume; it stops immediately with an error
+directing the operator to either continue manually with the individual
+scripts or intentionally remove/move aside the persisted file first. This
+guard only applies to the orchestrated `deploy/index.js` entry point — the
+individual scripts (`npx hardhat run deploy/0N_name.js`) always read and
+incrementally update the existing file, by design.
 
 ## Signing
 

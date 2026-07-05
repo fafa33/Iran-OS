@@ -39,11 +39,15 @@ async function deployRecognizedBacking(hre, config, addresses, sovereignSigner) 
       "but the freshly-deployed RecognizedReserveBacking has recordIdentity() " +
       "count 0 (recognizedBackingTotal() == 0). " +
       "kernel.setPahlaviRecognizedReserveBacking() performs an atomic sync that " +
-      "would replace the current totalReserves with 0. If this nonzero balance " +
-      "(e.g. a nonzero INITIAL_RESERVES) was not yet recorded as a recognized " +
-      "identity, set ACKNOWLEDGE_RESERVE_RESET=true to confirm this reset is " +
-      "intentional, or record matching identities via " +
-      "RecognizedReserveBacking.recordIdentity() before running this script."
+      "would replace the current totalReserves with 0. This script deploys the " +
+      "registry and performs the atomic wiring in the same call, so there is no " +
+      "point in this workflow at which recordIdentity() could run against this " +
+      "registry beforehand — the registry does not exist until this script " +
+      "deploys it a few lines above this check. Set ACKNOWLEDGE_RESERVE_RESET=true " +
+      "to confirm the reset to 0 is an intentional operator decision. If the " +
+      "nonzero balance should instead be preserved as recognized identities, do so " +
+      "as a separate, later operation (RecognizedReserveBacking.recordIdentity(), " +
+      "after this script has run and wired the registry)."
     );
   }
 

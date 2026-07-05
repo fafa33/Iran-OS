@@ -8,7 +8,7 @@
 const { expect } = require("chai");
 const hre = require("hardhat");
 const { ethers } = hre;
-const { runDeployment } = require("../deploy/index");
+const { runDeployment, assertNoExistingDeployment } = require("../deploy/index");
 const { loadConfig } = require("../deploy/config");
 
 describe("Deployment Workflow (deploy/)", function () {
@@ -242,6 +242,7 @@ describe("Deployment Workflow (deploy/)", function () {
       "../deploy/09_verify": "verifyDeployment",
       "../deploy/index": "runDeployment",
     };
+    expect(require("../deploy/index").assertNoExistingDeployment, "../deploy/index must export assertNoExistingDeployment").to.be.a("function");
     for (const [modulePath, exportName] of Object.entries(expectedExports)) {
       const mod = require(modulePath);
       expect(mod[exportName], `${modulePath} must export ${exportName}`).to.be.a("function");
@@ -320,6 +321,48 @@ describe("Deployment Workflow (deploy/)", function () {
       const { addresses } = await runDeployment(hre, config, sovereign);
       const token = await ethers.getContractAt("PahlaviToken", addresses.PAHLAVI_TOKEN_ADDRESS);
       expect(await token.totalReserves()).to.equal(0n);
+    });
+  });
+
+  describe("refuses to overwrite an existing deployment (deploy/index.js CLI guard)", function () {
+    it("throws if the address book already contains a core-path address for this network", function () {
+      const existing = { KERNEL_ADDRESS: ethers.ZeroAddress };
+      let error;
+      try {
+        assertNoExistingDeployment(existing, "localhost");
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.exist;
+      expect(error.message).to.match(/already contains deployment artifacts/);
+      expect(error.message).to.match(/KERNEL_ADDRESS/);
+      expect(error.message).to.match(/does not auto-resume/);
+    });
+
+    it("throws listing every core-path key already present, not just the first", function () {
+      const existing = {
+        KERNEL_ADDRESS: ethers.ZeroAddress,
+        TREASURY_ADDRESS: ethers.ZeroAddress,
+        RECOGNIZED_RESERVE_BACKING_ADDRESS: ethers.ZeroAddress,
+      };
+      let error;
+      try {
+        assertNoExistingDeployment(existing, "localhost");
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.exist;
+      expect(error.message).to.match(/KERNEL_ADDRESS/);
+      expect(error.message).to.match(/TREASURY_ADDRESS/);
+      expect(error.message).to.match(/RECOGNIZED_RESERVE_BACKING_ADDRESS/);
+    });
+
+    it("does not throw when the address book is empty (fresh deployment target)", function () {
+      expect(() => assertNoExistingDeployment({}, "localhost")).to.not.throw();
+    });
+
+    it("does not throw when the address book has unrelated keys only", function () {
+      expect(() => assertNoExistingDeployment({ SOME_OTHER_KEY: "0x1" }, "localhost")).to.not.throw();
     });
   });
 
