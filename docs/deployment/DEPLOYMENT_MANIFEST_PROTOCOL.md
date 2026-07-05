@@ -273,8 +273,9 @@ VelocityFee(kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken�
     → این فراخوانی اتمیک است: هم recognizedReserveBacking را در PahlaviToken تنظیم می‌کند
       و هم بلافاصله totalReserves را با recognizedBackingTotal همگام می‌کند
       (رویدادهای RecognizedReserveBackingLinked و RecognizedReserveBackingSynced صادر می‌شوند)
-    → پس از این گام، updateReserves() (مسیر اوراکل) دیگر totalReserves را تغییر نمی‌دهد
-      و صرفاً یک مسیر تله‌متری/حسابرسی سازگاری باقی می‌ماند
+    → updateReserves() (مسیر اوراکل) از زمان اجرای سیاست طبقه‌بندی پشتوانه (PR #113)
+      دیگر totalReserves را تغییر نمی‌دهد — این وضعیت پیش از این گام هم برقرار است؛
+      این گام صرفاً پیوند پشتوانه شناخته‌شده را برقرار و همگام می‌کند (بخش ۶)
 ```
 
 **⚠️ این تنها مسیر تولیدی شناخته‌شده برای تبدیل مقادیر ثبت‌شده در `RecognizedReserveBacking.recordIdentity()` به پشتوانه پولی `PahlaviToken.totalReserves` است.**

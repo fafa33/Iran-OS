@@ -210,7 +210,7 @@ new RecognizedReserveBacking(sovereignAddress, recognizerAddress)
 kernel.setPahlaviRecognizedReserveBacking(recognizedReserveBackingAddress)
 ```
 
-**توجه:** فراخوانی بالا اتمیک است — هم پیوند را برقرار می‌کند و هم بلافاصله `totalReserves` را با `recognizedBackingTotal` همگام می‌کند. پس از این فراخوانی، `PahlaviToken.updateReserves()` (مسیر اوراکل) دیگر `totalReserves` را تغییر نمی‌دهد و صرفاً تله‌متری/حسابرسی باقی می‌ماند.
+**توجه:** فراخوانی بالا اتمیک است — هم پیوند را برقرار می‌کند و هم بلافاصله `totalReserves` را با `recognizedBackingTotal` همگام می‌کند. `PahlaviToken.updateReserves()` (مسیر اوراکل) از زمان اجرای سیاست طبقه‌بندی پشتوانه (PR #113) دیگر `totalReserves` را تغییر نمی‌دهد — این وضعیت پیش از این فراخوانی هم برقرار است؛ `DEPLOYMENT_MANIFEST_PROTOCOL.md` بخش ۶ را ببینید.
 
 ---
 
