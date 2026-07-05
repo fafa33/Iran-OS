@@ -19,6 +19,18 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - `docs/deployment/ROLE_WIRING_CHECKLIST.md` — added sections ح (`kernel.setPahlaviToken()`) and ط (`RecognizedReserveBacking` deployment and wiring) with post-deploy verification checks
 - `docs/governance/OPEN_RESIDUALS.md` — re-evaluated K-RES-01 per Trigger 11 (fired by PR #113); reclassified `Active` → `Superseded` with full 5-criterion table and grep evidence; original attack mechanism (`updateReserves` mutating `totalReserves`) no longer exists in current code
 
+### Added — Executable Deployment Scripts (core monetary/reserve path)
+- `deploy/01_kernel.js` through `deploy/09_verify.js`, `deploy/index.js`, `deploy/config.js`, `deploy/lib/addressBook.js`, `deploy/README.md` — Hardhat deployment scripts implementing the sequence already documented in `DEPLOYMENT_MANIFEST_PROTOCOL.md` §3/§4 for the six core monetary/reserve contracts (`IranOS_Kernel`, `Treasury`, `SovereignWealthFund`, `PahlaviToken`, `API3Oracle`, `RecognizedReserveBacking`). No protocol contract, governance, monetary policy, reserve accounting, or threshold changes. Each script is independently runnable (matching the manifest's operator-checklist style) and also composable via `deploy/index.js` in dependency-correct order. The remaining 19 contracts (welfare, justice, governance, reclaim, `TriggerProtocol`, `AssetFreeze`) are not covered — remains an open G-11 item
+- `test/32_deployment_workflow.test.js` — exercises the deploy scripts end-to-end against a Hardhat network, verifying all applicable §9 post-deploy checks
+- `docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` (v1.2.0 → v1.3.0), `docs/deployment/ROLE_WIRING_CHECKLIST.md` (v1.4 → v1.5) — corrected "no deploy/ scripts exist" claims to reflect the 6/25-contract implementation; documentary coverage (25/25) is explicitly distinguished from executable script coverage (6/25); `STEP9-BLOCK-005` remains OPEN/PENDING
+
+### Fixed — Deployment script self-review findings
+- `deploy/08_finalize.js` — added a guard verifying all 9 `COURT_ROLE` members are active before granting `ORACLE_ROLE`; without it, running `08_finalize.js` before `07_roles.js` (both independently runnable, as documented) could leave the 7-of-9 trigger threshold unreachable if a feeder flags a violation before court completion — the exact failure scenario `COURT_ROLE_ASSIGNMENT_PROTOCOL.md` §4 documents as having no return path
+- `deploy/09_verify.js` — added a check that the 9 configured court addresses are pairwise distinct, catching a copy-paste misconfiguration that would otherwise silently pass verification with fewer than 9 independent signers
+- `deploy/README.md` — fixed a garbled execution-order fragment that didn't match `deploy/index.js`'s actual (correct) dependency order
+- `docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` — qualified an unchanged v1.1.0-era absolute claim ("no `deploy/` scripts exist") that stood uncorrected next to its own v1.3.0 contradiction; reordered the v1.3.0 scope note to appear after v1.2.0's, restoring chronological reading order
+- `test/32_deployment_workflow.test.js` — added 3 tests covering the above two guards plus a module-exports shape check for all 9 scripts and `index.js`
+
 ---
 
 ## [0.3.0] — ۱۳ خرداد ۲۵۸۵ شاهنشاهی / 3 June 2026
