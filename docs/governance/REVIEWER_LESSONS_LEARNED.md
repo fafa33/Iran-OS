@@ -63,7 +63,7 @@ An entry that lacks any of these four fields is incomplete and must be updated b
 A new LL entry must be created whenever a reviewer finding causes any of the following:
 
 - A new section or rule in `CLAUDE.md`
-- A change to the PR preflight checklist (Steps 1–10)
+- A change to the PR preflight checklist (Steps 1–12)
 - A new or modified evidence requirement in the grep evidence table
 - A new entry in the forbidden wording list
 - A new or modified classification rule or criterion
@@ -898,7 +898,68 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 ---
 
+## LL-026
+
+**Date:** 2026-07-06
+**PR:** #120
+**Fix PR:** #121
+**Reviewer:** chatgpt-codex-connector[bot]
+**Review comment URL:** https://github.com/fafa33/Iran-OS/pull/120#discussion_r3532524130
+**Finding:** PR #120 changed `PriceOracle`'s constructor to `constructor(admin, kernel)`, moving `DEFAULT_ADMIN_ROLE` from the Kernel to `SOVEREIGN_ADDRESS`. Step 9 (Deployment Manifest Currency Check) passed — `PriceOracle` and `FEEDER_ROLE` were both still present in `docs/deployment/` — but `docs/deployment/ROLE_WIRING_CHECKLIST.md:187` still named `kernel` as the caller for the mandatory `FEEDER_ROLE` grant, and `DEPLOYMENT_MANIFEST_PROTOCOL.md`'s Oracle wiring pseudocode still showed the old kernel-driven grant flow. An operator following those docs after PR #120 would have the grant revert, since the Kernel no longer holds admin authority on `PriceOracle`, leaving `submitPrice()` unusable until the undocumented sovereign-caller path was discovered.
+
+**What we assumed:** Step 9's grep-based Deployment Manifest Currency Check was sufficient to catch any documentation staleness introduced by an authority-model change, because it forces a search of `docs/deployment/` for every role and contract name touched by the PR.
+
+**Why the assumption failed:** Step 9 verifies only that a role/contract-name **string** is present somewhere in the manifest tree — it does not verify that the **caller or authority described alongside that string** still matches the current code. `PriceOracle` and `FEEDER_ROLE` were both findable by grep in the stale documents, so Step 9 could be marked PASS while the caller identity in the prose (`kernel`) was wrong. A string-presence check and a caller-accuracy check are different properties; satisfying one does not imply the other.
+
+**Evidence that was missing:** A verification step that, for every contract/role whose constructor, `grantRole()` path, or admin authority changed in the PR, re-reads the surrounding prose/pseudocode in every matching `docs/deployment/` location and confirms the named caller matches the current `constructor`/`DEFAULT_ADMIN_ROLE` logic in code — not merely that the name appears.
+
+**Policy created:** New `#### Step 11 — Documentation-Parity Review` added to `CLAUDE.md`'s `### PR Preflight Standard (Mandatory)`. Any PR modifying ownership, `DEFAULT_ADMIN_ROLE`, access control, `grantRole()`, constructor parameters, deployment authority, runtime authority, governance authority, deployment sequence, or deployment wiring must, in the same PR, update all affected deployment manifests, deployment protocols, runbooks, operator guides, role wiring documentation, and deployment checklists so that runtime, deployment scripts, manifests, and operational documentation describe exactly the same authority model. Step 11 is explicitly independent of and additional to Step 9. A required Evidence Block sub-template and an omission rule (equivalent in severity to omitting Step 1 or Step 2) were added alongside it.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → `#### Step 11 — Documentation-Parity Review` (new).
+
+**Verification method:** `grep -n "Step 11 — Documentation-Parity Review" CLAUDE.md` → one match confirms the step exists. For any future PR touching the trigger scope: `grep -rn '<ContractName>\|<ROLE_NAME>' docs/deployment/` to enumerate every doc location naming the affected contract/role, then manually confirm the caller named there matches `grep -n 'DEFAULT_ADMIN_ROLE\|constructor' contracts/<path>/<Contract>.sol`. A mismatch found by this check and left unfixed in the same PR is a Step 11 failure.
+
+**Affected files:** `CLAUDE.md` (Step 11 added to PR Preflight Standard); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Maintenance Rule updated to Steps 1–11; LL-026 added; footer updated); `.github/pull_request_template.md` (new Documentation-Parity Review section, checklist item, and Step 11 Evidence Block sub-fields added); `docs/deployment/ROLE_WIRING_CHECKLIST.md` and `docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` (underlying documentation defect fixed in PR #121, commit `de73f3a`).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Finding arrived on PR #120 after it had already merged; the documentation fix was applied in PR #121 (commit `de73f3a`) and this permanent-rule response (Step 11, LL-026, PR template update) was added in the same PR #121 per the user's explicit instruction not to treat this as a one-off documentation fix.
+
+---
+
+## LL-027
+
+**Date:** 2026-07-06
+**PR:** #121
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** The registry's only enforced touchpoint was entry *creation* (via the Maintenance Rule), not entry *consultation*. Nothing in `CLAUDE.md` or `.github/pull_request_template.md` required a contributor to read the registry, identify applicable LL entries, or verify compliance with them before starting implementation or before marking a PR ready. A contributor could complete an entire implementation and PR without ever opening the registry, and no mechanical gate — no grep, no checklist item, no Evidence Block field — would catch that omission, unlike Steps 1–11, each of which has an explicit checklist/Evidence Block gate.
+
+**What we assumed:** That contributors (including the assistant) would organically consult the registry before implementation because its stated purpose was "institutional memory," and that the existing Maintenance Rule (governing when new entries are added) was sufficient to keep the registry authoritative in practice.
+
+**Why the assumption failed:** "Institutional memory" that is never mechanically required to be read functions as passive documentation, not an enforced specification — the same failure mode this registry exists to prevent in other forms (e.g., LL-001 through LL-026 each documented a case where an unenforced assumption produced a defect). A registry that only gates its own growth, and not its own application, can accumulate 26 entries while a 27th violation of an existing entry ships undetected.
+
+**Evidence that was missing:** A dedicated PR Preflight step (mirroring Steps 1–11) requiring (a) registry consultation before implementation begins, (b) explicit identification of applicable LL IDs, (c) compliance verification before the PR is marked ready, and (d) an Evidence Block field recording which LL IDs were checked and their compliance status — none of which existed prior to this entry.
+
+**Policy created:** New `CLAUDE.md` `#### Step 12 — Lesson-Learned Compliance Consultation` added to `### PR Preflight Standard (Mandatory)`, requiring the registry to be read before implementation, applicable LL IDs to be identified and applied during implementation, and compliance to be re-verified immediately before PR-ready, with a required Evidence Block sub-block. The `### Reviewer Lessons Learned Registry (Mandatory)` section's opening text was also updated to state explicitly that the registry is a mandatory engineering specification with the same authority as the PR Preflight Standard, and must not be treated as documentation only. `.github/pull_request_template.md` updated with a matching checklist item and Evidence Block sub-block.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → `#### Step 12 — Lesson-Learned Compliance Consultation` (new); `### Reviewer Lessons Learned Registry (Mandatory)` (authority statement added).
+
+**Verification method:** `grep -n "Step 12 — Lesson-Learned Compliance" CLAUDE.md .github/pull_request_template.md docs/governance/REVIEWER_LESSONS_LEARNED.md` → confirms the step and its cross-references exist in all three files. On any future PR, the Evidence Block's Step 12 sub-block must name specific LL IDs consulted (or state "none identified — [scope reviewed]"); a block left as an unfilled template placeholder is a Step 12 failure and the PR is not READY.
+
+**Affected files:** `CLAUDE.md` (Step 12 added to PR Preflight Standard; Reviewer Lessons Learned Registry section authority statement added; Maintenance Rule updated to Steps 1–12); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-027 added; footer updated); `.github/pull_request_template.md` (Step 12 checklist item and Evidence Block sub-block added).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Issued as a direct, permanent policy instruction by the repository owner (not a Codex finding), continuing the governance-hardening sequence started by LL-026 in the same open PR #121 / branch `docs/fix-priceoracle-feeder-runbook`.
+
+---
+
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-025*
+*Entries: LL-001 through LL-027*

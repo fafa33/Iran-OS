@@ -52,6 +52,8 @@ If covered, confirm the existing `CLAUDE.md` requirements were followed:
 - [ ] Step 8 Evidence Block included below, including grep evidence, role path evidence, tests, open residuals, and certainty-language scan.
 - [ ] Step 9 Deployment Manifest Currency evidence included below for sensitive-component PRs, or not applicable because this PR is outside Step 9 scope.
 - [ ] Step 10 `docs/governance/OPEN_RESIDUALS.md` consultation completed and recorded below.
+- [ ] Step 11 Documentation-Parity Review completed and recorded below, or not applicable because this PR does not match the Step 11 trigger scope.
+- [ ] Step 12 Lesson-Learned Compliance Consultation completed and recorded below — `docs/governance/REVIEWER_LESSONS_LEARNED.md` was read and applicable LL entries were identified and satisfied before this PR was marked ready.
 - [ ] HARDENING_ONLY re-evaluation triggers checked; any matching active residual was re-evaluated before marking this PR ready.
 
 ### Evidence Block
@@ -87,6 +89,20 @@ Required for PRs covered by the `CLAUDE.md` PR Preflight Standard.
   - Re-verification required: YES / NO
   - Result: PASS / DOCUMENTATION_REQUIRED
   - CET level: CET-1 / below CET-1 / DOCUMENTATION_REQUIRED
+- Step 11 — Documentation-Parity Review:
+  - Trigger scope matched: ___ (ownership / DEFAULT_ADMIN_ROLE / access control / grantRole() / constructor parameters / deployment authority / runtime authority / governance authority / deployment sequence / deployment wiring, or "N/A — none matched")
+  - Contracts/roles affected: ___
+  - Docs greped: ___
+  - Caller/authority description re-verified against code: YES / NO — grep command + result per doc: ___
+  - Documents updated in this PR: ___ (or "N/A — no stale descriptions found")
+  - Result: PASS / DOCUMENTATION_REQUIRED
+  - CET level: CET-1 / below CET-1
+- Step 12 — Lesson-Learned Compliance:
+  - Registry read before implementation: YES / NO
+  - Applicable LL IDs identified: ___ (or "none identified — [scope reviewed]")
+  - Compliance verified per applicable entry: ___ (or "N/A — none applicable")
+  - Re-checked immediately before marking READY: YES / NO
+  - Result: PASS / NOT READY — gap: ___
 
 ---
 
@@ -130,6 +146,26 @@ If deployment-path parity applies, confirm ALL of the following:
 If impersonation appears anywhere in the test file, confirm:
 
 - [ ] It is labeled `// TEST-ONLY — not a production grant path` and is not cited as deployment-path proof.
+
+---
+
+## Documentation-Parity Review
+
+Applies to any PR modifying: ownership · `DEFAULT_ADMIN_ROLE` · access control · `grantRole()` · constructor parameters · deployment authority · runtime authority · governance authority · deployment sequence · deployment wiring.
+
+- [ ] This PR does not modify any of the above (skip this section).
+- [ ] This PR modifies one or more of the above — Documentation-Parity Review required before this PR is READY.
+
+If Documentation-Parity Review applies, confirm ALL of the following:
+
+- [ ] All affected deployment manifests are updated in this PR.
+- [ ] All affected deployment protocols are updated in this PR.
+- [ ] All affected runbooks are updated in this PR.
+- [ ] All affected operator guides are updated in this PR.
+- [ ] All affected role wiring documentation is updated in this PR.
+- [ ] All affected deployment checklists are updated in this PR.
+- [ ] Runtime, deployment scripts, manifests, and operational documentation describe exactly the same authority model — the caller named in every doc location found by `grep -rn '<ContractName>\|<ROLE_NAME>' docs/deployment/` matches the current `constructor`/`DEFAULT_ADMIN_ROLE`/`grantRole()` logic in code.
+- [ ] Step 11 Evidence Block above is filled in (not left as template placeholders).
 
 ---
 
