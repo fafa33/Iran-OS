@@ -215,6 +215,30 @@ describe("Deployment Workflow (deploy/)", function () {
         .to.emit(constitutionGuard, "LawApproved");
       expect(await constitutionGuard.isLawApproved(lawHash)).to.be.true;
     });
+
+    it("verifyDeployment passes when SOVEREIGN_ADDRESS is supplied in non-checksummed (lower-case) form", async function () {
+      // Codex review finding on PR #119: 09_verify.js compared
+      // constitutionGuard.admin() (always checksummed by ethers) against the
+      // raw config.sovereignAddress string via strict `===`. deploy/config.js
+      // does no normalization, so a syntactically-valid, on-chain-correct
+      // deployment using a lower-case SOVEREIGN_ADDRESS would fail
+      // verification with no actual on-chain problem. Reproduces that exact
+      // scenario end-to-end through runDeployment()'s own verifyDeployment
+      // call, not just the isolated check function.
+      const originalSovereignAddress = process.env.SOVEREIGN_ADDRESS;
+      try {
+        process.env.SOVEREIGN_ADDRESS = sovereign.address.toLowerCase();
+        const lowerCaseConfig = loadConfig();
+        expect(lowerCaseConfig.sovereignAddress).to.equal(sovereign.address.toLowerCase());
+
+        const { checks } = await runDeployment(hre, lowerCaseConfig, sovereign);
+        for (const c of checks) {
+          expect(c.pass, `check failed: ${c.name}`).to.be.true;
+        }
+      } finally {
+        process.env.SOVEREIGN_ADDRESS = originalSovereignAddress;
+      }
+    });
   });
 
   it("leaves the deployed system in the documented clean initial state", async function () {

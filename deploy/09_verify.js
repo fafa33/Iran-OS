@@ -108,7 +108,16 @@ async function verifyDeployment(hre, config, addresses) {
     check(`${name}.hasRole(DEFAULT_ADMIN_ROLE, SOVEREIGN_ADDRESS)`, await contract.hasRole(DEFAULT_ADMIN_ROLE, config.sovereignAddress));
     check(`${name}.hasRole(KERNEL_ROLE, KERNEL_ADDRESS)`, await contract.hasRole(KERNEL_ROLE, kernelAddress));
   }
-  check("constitutionGuard.admin() === SOVEREIGN_ADDRESS", (await constitutionGuard.admin()) === config.sovereignAddress);
+  // config.sovereignAddress is a raw, unchecksummed operator-supplied string
+  // (deploy/config.js does no normalization) while contract.admin() always
+  // returns ethers' checksummed form -- normalize both sides via
+  // ethers.getAddress() before comparing, or a valid, correctly-deployed
+  // lower-case SOVEREIGN_ADDRESS would fail this check with no on-chain
+  // problem at all (Codex review finding on PR #119).
+  check(
+    "constitutionGuard.admin() === SOVEREIGN_ADDRESS",
+    (await constitutionGuard.admin()) === ethers.getAddress(config.sovereignAddress)
+  );
   check("constitutionGuard.kernel() === KERNEL_ADDRESS", (await constitutionGuard.kernel()) === kernelAddress);
 
   // Group 5 — System status (§9 گروه ۵, applicable subset)
