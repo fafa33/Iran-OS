@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 
 describe("PriceOracle", function () {
 let oracle;
-let kernel, feeder1, feeder2, feeder3;
+let admin, kernel, feeder1, feeder2, feeder3;
 let attacker;
 
 const FEEDER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("FEEDER_ROLE"));
@@ -15,13 +15,13 @@ const KEY_INFLATION = ethers.keccak256(ethers.toUtf8Bytes("GLOBAL_CPI"));
 const ONE_USD = ethers.parseUnits("1", 18);
 
 beforeEach(async function () {
-[kernel, feeder1, feeder2, feeder3, attacker] = await ethers.getSigners();
+[admin, kernel, feeder1, feeder2, feeder3, attacker] = await ethers.getSigners();
 const Oracle = await ethers.getContractFactory("PriceOracle");
-oracle = await Oracle.deploy(kernel.address);
+oracle = await Oracle.deploy(admin.address, kernel.address);
 await oracle.waitForDeployment();
-await oracle.connect(kernel).grantRole(FEEDER_ROLE, feeder1.address);
-await oracle.connect(kernel).grantRole(FEEDER_ROLE, feeder2.address);
-await oracle.connect(kernel).grantRole(FEEDER_ROLE, feeder3.address);
+await oracle.connect(admin).grantRole(FEEDER_ROLE, feeder1.address);
+await oracle.connect(admin).grantRole(FEEDER_ROLE, feeder2.address);
+await oracle.connect(admin).grantRole(FEEDER_ROLE, feeder3.address);
 });
 
 describe("Deployment", function () {

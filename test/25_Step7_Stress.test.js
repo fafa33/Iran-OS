@@ -17,7 +17,7 @@ describe("Step7 Stress Baseline", function () {
     [kernel, ...feeders] = signers;
 
     const Oracle = await ethers.getContractFactory("PriceOracle");
-    oracle = await Oracle.deploy(kernel.address);
+    oracle = await Oracle.deploy(kernel.address, kernel.address);
     await oracle.waitForDeployment();
 
     for (const feeder of feeders.slice(0, 6)) {

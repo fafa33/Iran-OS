@@ -3,9 +3,9 @@
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §9 for the contracts
 // deployed by this workflow: the six core-monetary-path contracts (Kernel,
 // Treasury, SovereignWealthFund, PahlaviToken, API3Oracle,
-// RecognizedReserveBacking) plus the five Layer 1, constructor-only-on-Kernel
-// contracts added afterward (VictimFund, ConstitutionGuard, JurySelection,
-// JusticeProtocol, CitizenCard).
+// RecognizedReserveBacking) plus the six Layer 1 contracts added afterward
+// (VictimFund, ConstitutionGuard, JurySelection, JusticeProtocol,
+// CitizenCard, PriceOracle).
 //
 // §9 Group 2 (TriggerProtocol) and the AssetFreeze/CRAWLER_ROLE/COUNCIL_ROLE
 // checks in Group 4 are not applicable — those contracts are not part of
@@ -32,6 +32,7 @@ async function verifyDeployment(hre, config, addresses) {
   const jurySelectionAddress = requireAddress(addresses, "JURY_SELECTION_ADDRESS", "12_jury_selection.js");
   const justiceProtocolAddress = requireAddress(addresses, "JUSTICE_PROTOCOL_ADDRESS", "13_justice_protocol.js");
   const citizenCardAddress = requireAddress(addresses, "CITIZEN_CARD_ADDRESS", "14_citizen_card.js");
+  const priceOracleAddress = requireAddress(addresses, "PRICE_ORACLE_ADDRESS", "15_price_oracle.js");
 
   const kernel = await ethers.getContractAt("IranOS_Kernel", kernelAddress);
   const swf = await ethers.getContractAt("SovereignWealthFund", swfAddress);
@@ -43,6 +44,7 @@ async function verifyDeployment(hre, config, addresses) {
   const jurySelection = await ethers.getContractAt("JurySelection", jurySelectionAddress);
   const justiceProtocol = await ethers.getContractAt("JusticeProtocol", justiceProtocolAddress);
   const citizenCard = await ethers.getContractAt("CitizenCard", citizenCardAddress);
+  const priceOracle = await ethers.getContractAt("PriceOracle", priceOracleAddress);
 
   const checks = [];
   const check = (name, pass) => checks.push({ name, pass });
@@ -88,20 +90,22 @@ async function verifyDeployment(hre, config, addresses) {
     totalReserves === recognizedBackingTotal
   );
 
-  // Batch 2 — Layer 1 constructor-only-on-Kernel contracts (VictimFund,
-  // ConstitutionGuard, JurySelection, JusticeProtocol, CitizenCard). Not a
-  // named group in §9 (that section predates this batch); these checks
-  // verify the constructor-guaranteed invariant each contract's source
-  // documents: DEFAULT_ADMIN_ROLE held by SOVEREIGN_ADDRESS (a real signer —
-  // the Kernel contract cannot exercise DEFAULT_ADMIN_ROLE itself, having no
+  // Batch 2/3 — Layer 1 contracts (VictimFund, ConstitutionGuard,
+  // JurySelection, JusticeProtocol, CitizenCard, PriceOracle). Not a named
+  // group in §9 (that section predates these batches); these checks verify
+  // the constructor-guaranteed invariant each contract's source documents:
+  // DEFAULT_ADMIN_ROLE held by SOVEREIGN_ADDRESS (a real signer — the
+  // Kernel contract cannot exercise DEFAULT_ADMIN_ROLE itself, having no
   // call-forwarding mechanism to these contracts) and KERNEL_ROLE recorded
   // against KERNEL_ADDRESS; for ConstitutionGuard, its plain `admin`/`kernel`
-  // address getters.
+  // address getters. FEEDER_ROLE on PriceOracle is intentionally NOT checked
+  // here — it is not granted by this workflow (see 15_price_oracle.js).
   for (const [name, contract] of [
     ["victimFund", victimFund],
     ["jurySelection", jurySelection],
     ["justiceProtocol", justiceProtocol],
     ["citizenCard", citizenCard],
+    ["priceOracle", priceOracle],
   ]) {
     const DEFAULT_ADMIN_ROLE = await contract.DEFAULT_ADMIN_ROLE();
     const KERNEL_ROLE = await contract.KERNEL_ROLE();

@@ -29,7 +29,7 @@ describe("Step7 Policy Layer", function () {
     const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
 
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
-    const priceOracle = await PriceOracle.deploy(kernel.address);
+    const priceOracle = await PriceOracle.deploy(kernel.address, kernel.address);
     await priceOracle.waitForDeployment();
 
     for (const feeder of [feeder1, feeder2, feeder3]) {
@@ -159,7 +159,7 @@ describe("Step7 Policy Layer", function () {
     const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
 
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
-    const priceOracle = await PriceOracle.deploy(kernel.address);
+    const priceOracle = await PriceOracle.deploy(kernel.address, kernel.address);
     await priceOracle.waitForDeployment();
 
     for (const feeder of [feeder1, feeder2, feeder3]) {
@@ -502,7 +502,7 @@ describe("Step7 Policy Layer", function () {
     const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
 
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
-    const priceOracle = await PriceOracle.deploy(kernel.address);
+    const priceOracle = await PriceOracle.deploy(kernel.address, kernel.address);
     await priceOracle.waitForDeployment();
 
     for (const feeder of [feeder1, feeder2, feeder3]) {
@@ -680,7 +680,7 @@ describe("Step7 Policy Layer", function () {
     const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
 
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
-    const priceOracle = await PriceOracle.deploy(kernel.address);
+    const priceOracle = await PriceOracle.deploy(kernel.address, kernel.address);
     await priceOracle.waitForDeployment();
 
     for (const feeder of [feeder1, feeder2, feeder3]) {
@@ -833,7 +833,7 @@ describe("Step7 Policy Layer", function () {
     const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
 
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
-    const priceOracle = await PriceOracle.deploy(kernel.address);
+    const priceOracle = await PriceOracle.deploy(kernel.address, kernel.address);
     await priceOracle.waitForDeployment();
 
     for (const feeder of [feeder1, feeder2, feeder3]) {
@@ -962,7 +962,7 @@ describe("Step7 Policy Layer", function () {
     const KEY_GAS_USD = ethers.keccak256(ethers.toUtf8Bytes("GAS_USD"));
 
     const PriceOracle = await ethers.getContractFactory("PriceOracle");
-    const priceOracle = await PriceOracle.deploy(kernel.address);
+    const priceOracle = await PriceOracle.deploy(kernel.address, kernel.address);
     await priceOracle.waitForDeployment();
 
     for (const feeder of [feeder1, feeder2, feeder3]) {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Orchestrates the deploy/ scripts in dependency-correct order. The
-// filenames (01_kernel.js .. 14_citizen_card.js) are grouped by
+// filenames (01_kernel.js .. 15_price_oracle.js) are grouped by
 // contract/domain, not strict execution order: PahlaviToken (02_token.js)
 // requires SovereignWealthFund's address, so SWF (06_swf.js) must run
 // before it.
@@ -10,16 +10,18 @@
 //
 // Actual order: kernel -> treasury -> swf -> victim_fund ->
 // constitution_guard -> jury_selection -> justice_protocol -> citizen_card ->
-// token -> oracle -> recognized_backing -> roles (Court, Group A) ->
-// finalize (Oracle activation, Group E — documented as the last thing
-// activated) -> verify.
+// price_oracle -> token -> oracle -> recognized_backing -> roles (Court,
+// Group A) -> finalize (Oracle activation, Group E — documented as the last
+// thing activated) -> verify.
 //
 // victim_fund/constitution_guard/jury_selection/justice_protocol/
-// citizen_card (10-14) are Layer 1, constructor-only-on-Kernel contracts
-// per docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3 Stage 2 ("ترتیب
-// اهمیت ندارد" — order does not matter within Layer 1), so their position
-// here relative to treasury/swf/oracle is arbitrary; they are placed after
-// kernel and before token only because token (Layer 2) depends on swf.
+// citizen_card/price_oracle (10-15) are Layer 1 (price_oracle: "مستقل از
+// Layer 2" per §2) contracts whose constructors depend only on
+// SOVEREIGN_ADDRESS/KERNEL_ADDRESS per
+// docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3 Stage 2 ("ترتیب اهمیت
+// ندارد" — order does not matter within Layer 1), so their position here
+// relative to treasury/swf/oracle is arbitrary; they are placed after kernel
+// and before token only because token (Layer 2) depends on swf.
 
 const { deployKernel } = require("./01_kernel");
 const { deployToken } = require("./02_token");
@@ -35,6 +37,7 @@ const { deployConstitutionGuard } = require("./11_constitution_guard");
 const { deployJurySelection } = require("./12_jury_selection");
 const { deployJusticeProtocol } = require("./13_justice_protocol");
 const { deployCitizenCard } = require("./14_citizen_card");
+const { deployPriceOracle } = require("./15_price_oracle");
 
 // persistStep, if provided, is called with the addresses accumulated so far
 // immediately after each successful deployment/wiring step, so a mid-run
@@ -76,6 +79,10 @@ async function runDeployment(hre, config, sovereignSigner, persistStep = () => {
   addresses.CITIZEN_CARD_ADDRESS = citizenCardAddress;
   persistStep(addresses);
 
+  const { address: priceOracleAddress } = await deployPriceOracle(hre, config, addresses);
+  addresses.PRICE_ORACLE_ADDRESS = priceOracleAddress;
+  persistStep(addresses);
+
   const { address: tokenAddress } = await deployToken(hre, config, addresses, sovereignSigner);
   addresses.PAHLAVI_TOKEN_ADDRESS = tokenAddress;
   persistStep(addresses);
@@ -110,6 +117,7 @@ const CORE_ADDRESS_KEYS = [
   "JURY_SELECTION_ADDRESS",
   "JUSTICE_PROTOCOL_ADDRESS",
   "CITIZEN_CARD_ADDRESS",
+  "PRICE_ORACLE_ADDRESS",
   "PAHLAVI_TOKEN_ADDRESS",
   "API3_ORACLE_ADDRESS",
   "RECOGNIZED_RESERVE_BACKING_ADDRESS",

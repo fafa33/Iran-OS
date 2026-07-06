@@ -2,13 +2,14 @@
 
 # مانیفست استقرار IranOS — پروتکل مستندسازی
 
-**نسخه:** ۱.۳.۲  
+**نسخه:** ۱.۳.۳  
 **تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
 **توسعه به پوشش ۲۵/۲۵:** ۲۴ خرداد ۲۵۸۵ شاهنشاهی / ۱۴ ژوئن ۲۰۲۶ میلادی  
 **افزودن RecognizedReserveBacking و رفع شکاف setPahlaviToken:** ۱۴ تیر ۲۵۸۵ شاهنشاهی / ۵ ژوئیه ۲۰۲۶ میلادی  
 **افزودن اسکریپت‌های اجرایی deploy/ برای مسیر اصلی پولی (۶ قرارداد):** ۱۴ تیر ۲۵۸۵ شاهنشاهی / ۵ ژوئیه ۲۰۲۶ میلادی  
 **افزودن اسکریپت‌های اجرایی deploy/ برای ۵ قرارداد Layer 1 اضافی (VictimFund، ConstitutionGuard، JurySelection، JusticeProtocol، CitizenCard — مجموعاً ۱۱ از ۲۵ قرارداد):** ۱۵ تیر ۲۵۸۵ شاهنشاهی / ۶ ژوئیه ۲۰۲۶ میلادی  
 **رفع P0 هم‌ترازی مسیر استقرار — sovereign به‌جای kernel در ۵ قرارداد Layer 1:** ۱۵ تیر ۲۵۸۵ شاهنشاهی / ۶ ژوئیه ۲۰۲۶ میلادی  
+**افزودن اسکریپت اجرایی deploy/ برای PriceOracle (مجموعاً ۱۲ از ۲۵ قرارداد):** ۱۶ تیر ۲۵۸۵ شاهنشاهی / ۷ ژوئیه ۲۰۲۶ میلادی  
 **شناسه شکاف:** G-11  
 **نوع:** مستندات استقرار — بدون تغییر قرارداد  
 **وضعیت:** راهنمای مرجع پیش از استقرار
@@ -37,6 +38,8 @@
 > **⚠️ به‌روزرسانی (نسخه ۱.۳.۱):** اسکریپت‌های `deploy/` اکنون برای **۱۱ از ۲۵ قرارداد** موجودند — ۶ قرارداد مسیر اصلی پولی/پشتوانه (بالا) به‌علاوه ۵ قرارداد Layer 1 که constructor آن‌ها تنها به `KERNEL_ADDRESS` وابسته است و هیچ سیم‌کشی نقش پس از استقرار در بخش‌های ۴ تا ۷ برای آن‌ها مستند نشده: `VictimFund`، `ConstitutionGuard`، `JurySelection`، `JusticeProtocol`، `CitizenCard` (به `deploy/10_victim_fund.js` تا `deploy/14_citizen_card.js` و `deploy/README.md` مراجعه کنید). `PriceOracle`/`ProductionOracle` عمداً از این دسته حذف شدند: سیم‌کشی مستند آن‌ها (اعطای `FEEDER_ROLE` به `PRICE_FEEDER`/`PROD_FEEDER`، بخش‌های ۴ و ۹) به متغیرهای کتاب آدرسی نیاز دارد که در جدول بخش ۱ فهرست نشده‌اند — افزودن آن‌ها بدون این مستندسازی، اختراع پیکربندی مستندنشده خواهد بود. اسکریپت برای ۱۴ قرارداد باقی‌مانده (`PriceOracle`، `ProductionOracle`، `TriggerProtocol`، `AssetFreeze`، `PenalLabor`، `Provincial`، و ۹ قرارداد افزوده‌شده) هنوز ایجاد نشده است. هیچ تغییر قراردادی، پروتکلی، یا حاکمیتی در این نسخه اعمال نشده. `STEP9-BLOCK-005` همچنان **OPEN/PENDING** است.
 >
 > **⚠️ به‌روزرسانی (نسخه ۱.۳.۲) — رفع P0:** یک بازبینی خصمانه معماری تأیید کرد که ۵ قرارداد افزوده‌شده در نسخه ۱.۳.۱ (`VictimFund`، `ConstitutionGuard`، `JurySelection`، `JusticeProtocol`، `CitizenCard`) با `KERNEL_ADDRESS` به‌عنوان تنها دارنده `DEFAULT_ADMIN_ROLE`/`admin` deploy می‌شدند، اما قرارداد `Kernel` (`contracts/kernel.sol`) هیچ مکانیزم forwarding، `call`/`delegatecall`، یا ارجاعی به این ۵ قرارداد ندارد — بنابراین Kernel هرگز نمی‌توانست `grantRole()`/`approveLaw()`/`registerEmployer()` و توابع مشابه را روی آن‌ها فراخوانی کند و این قراردادها پس از استقرار برای همیشه از نظر عملیاتی غیرقابل‌استفاده می‌ماندند (تأیید‌شده با grep کامل `contracts/kernel.sol` و مقایسه با تست‌های واحد موجود که به‌جای قرارداد واقعی Kernel از یک EOA آزمایشی استفاده می‌کردند). سازنده هر ۵ قرارداد اکنون یک آرگومان `_admin` جداگانه می‌پذیرد (`sovereign`) که `DEFAULT_ADMIN_ROLE` را دریافت می‌کند، دقیقاً مطابق الگوی already-established در `SovereignWealthFund.sol` (`constructor(sovereign, kernel)`)؛ `KERNEL_ROLE`/`kernel` همچنان صرفاً به‌عنوان هویت ثبت‌شده باقی می‌ماند. هیچ backdoor عمومی، هیچ تابع execute/delegatecall جدید در Kernel، و هیچ تغییر در سایر قراردادها یا حاکمیت اعمال نشده. تست‌های هم‌ترازی مسیر استقرار جدید (`test/32_deployment_workflow.test.js`) با آدرس واقعی قرارداد Kernel deploy‌شده (نه یک EOA جایگزین) این رفع را تأیید می‌کنند.
+>
+> **⚠️ به‌روزرسانی (نسخه ۱.۳.۳):** اسکریپت `deploy/15_price_oracle.js` اکنون `PriceOracle` را deploy می‌کند — مجموعاً **۱۲ از ۲۵ قرارداد**. سازنده از ابتدا با الگوی `constructor(_admin, _kernel)` نوشته شده (بدون نیاز به رفع بعدی): `SOVEREIGN_ADDRESS` (`admin`) `DEFAULT_ADMIN_ROLE` را دریافت می‌کند، `KERNEL_ADDRESS` (`kernel`) صرفاً `KERNEL_ROLE` را — دقیقاً مطابق رفع P0 نسخه ۱.۳.۲ برای ۵ قرارداد قبلی؛ بدون این الگو، `invalidatePrice()` (`onlyRole(KERNEL_ROLE)`) و `submitPrice()` (`onlyRole(FEEDER_ROLE)`, هرگز در سازنده اعطا نشده) برای همیشه غیرقابل‌فراخوانی می‌ماندند. `FEEDER_ROLE` توسط این اسکریپت اعطا **نمی‌شود**: چک §۹ گروه ۳ (`priceOracle.hasRole(FEEDER_ROLE, PRICE_FEEDER)`) به متغیر کتاب آدرس `PRICE_FEEDER` نیاز دارد که در جدول بخش ۱ فهرست نشده — این همان دلیلی است که `ProductionOracle` همچنان خارج از دامنه این workflow باقی می‌ماند. هیچ تغییر قراردادی، پروتکلی، حاکمیتی، یا پولی در این نسخه اعمال نشده. `STEP9-BLOCK-005` همچنان **OPEN/PENDING** است.
 
 ---
 
@@ -114,7 +117,8 @@ AssetFreeze(kernel, swfTempWallet, swfContract)
 
 Layer 3 — وابسته به چند قرارداد Layer 1/2
 ───────────────────────────────────────────
-PriceOracle(kernel)        ← مستقل از Layer 2
+PriceOracle(sovereign, kernel)   ← مستقل از Layer 2؛ سازنده در نسخه ۱.۳.۳ اصلاح شد:
+                                    sovereign = DEFAULT_ADMIN_ROLE واقعی، kernel = صرفاً KERNEL_ROLE
 ProductionOracle(kernel)   ← مستقل از Layer 2
 
 Layer 2.5 — مستقل در deploy، اما سیم‌کشی‌اش به Layer 2 (PahlaviToken) نیاز دارد
@@ -143,7 +147,7 @@ RecognizedReserveBacking(sovereign, recognizer)
 | `VictimFund` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۲) |
 | `CitizenCard` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۲) |
 | `Provincial` | `kernel, treasury` | Kernel، Treasury |
-| `PriceOracle` | `kernel` | Kernel |
+| `PriceOracle` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۳) |
 | `ProductionOracle` | `kernel` | Kernel |
 | `VotingSystem` | `kernel` | Kernel |
 | `Parliament` | `kernel` | Kernel |
@@ -232,7 +236,8 @@ VelocityFee(kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken�
     → DEFAULT_ADMIN_ROLE به SOVEREIGN_ADDRESS، KERNEL_ROLE به KERNEL_ADDRESS (نسخه ۱.۳.۲)
     → ثبت آدرس: CITIZEN_CARD_ADDRESS
 
-10. deploy PriceOracle(KERNEL_ADDRESS)
+10. deploy PriceOracle(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)
+    → DEFAULT_ADMIN_ROLE به SOVEREIGN_ADDRESS، KERNEL_ROLE به KERNEL_ADDRESS (نسخه ۱.۳.۳)
     → ثبت آدرس: PRICE_ORACLE_ADDRESS
 
 11. deploy ProductionOracle(KERNEL_ADDRESS)
@@ -533,7 +538,7 @@ assetFreeze.grantRole(assetFreeze.CRAWLER_ROLE(), CRAWLER_ADDRESS)
 
 ```
 □ hardhat.config.js با شبکه هدف تنظیم شده و در مخزن موجود است
-□ اسکریپت‌های deploy/ با ترتیب مشخص موجود هستند — برای ۱۱ از ۲۵ قرارداد (مسیر اصلی پولی/پشتوانه + ۵ قرارداد Layer 1 وابسته صرفاً به Kernel) برقرار است؛ برای ۱۴ قرارداد باقی‌مانده هنوز نه (`deploy/README.md`)
+□ اسکریپت‌های deploy/ با ترتیب مشخص موجود هستند — برای ۱۲ از ۲۵ قرارداد (مسیر اصلی پولی/پشتوانه + ۶ قرارداد Layer 1) برقرار است؛ برای ۱۳ قرارداد باقی‌مانده هنوز نه (`deploy/README.md`)
 □ آدرس‌های deploy‌شده در یک فایل artifacts/ مستند شده‌اند
 □ تمام تراکنش‌های گروه‌بندی نقش‌ها در یک اسکریپت قابل تکرار هستند
 □ bytecode قراردادهای deploy‌شده با کد کامپایل‌شده از مخزن مطابقت دارد
@@ -565,7 +570,7 @@ deploy/
 └── 09_verify.js            # تأیید تمام hasRole ها + kernel.pahlaviToken() + token.totalReserves()
 ```
 
-**وضعیت واقعی (نسخه ۱.۳.۲):** اسکریپت‌های طرح‌شده در بالا برای پوشش کامل ۲۵/۲۵ هنوز طرح (پیشنهاد نام‌گذاری فایل) هستند، نه پیاده‌سازی. آنچه **واقعاً در مخزن پیاده‌سازی شده** ساختاری متفاوت با نام‌گذاری متفاوت است که ۱۱ قرارداد را پوشش می‌دهد — مسیر اصلی پولی/پشتوانه به‌علاوه ۵ قرارداد Layer 1:
+**وضعیت واقعی (نسخه ۱.۳.۳):** اسکریپت‌های طرح‌شده در بالا برای پوشش کامل ۲۵/۲۵ هنوز طرح (پیشنهاد نام‌گذاری فایل) هستند، نه پیاده‌سازی. آنچه **واقعاً در مخزن پیاده‌سازی شده** ساختاری متفاوت با نام‌گذاری متفاوت است که ۱۲ قرارداد را پوشش می‌دهد — مسیر اصلی پولی/پشتوانه به‌علاوه ۶ قرارداد Layer 1:
 
 ```
 deploy/
@@ -583,6 +588,7 @@ deploy/
 ├── 12_jury_selection.js         # deploy JurySelection(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)
 ├── 13_justice_protocol.js       # deploy JusticeProtocol(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)
 ├── 14_citizen_card.js           # deploy CitizenCard(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)
+├── 15_price_oracle.js           # deploy PriceOracle(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)
 ├── index.js                     # orchestrator — ترتیب اجرای وابستگی‌محور
 ├── config.js، lib/addressBook.js # بارگذاری پیکربندی و ماندگاری آدرس
 └── README.md                    # مستندات استفاده و دامنه
@@ -590,7 +596,9 @@ deploy/
 
 **نسخه ۱.۳.۲:** اسکریپت‌های ۱۰ تا ۱۴ اکنون `SOVEREIGN_ADDRESS` را به‌عنوان آرگومان اول (`admin`/`DEFAULT_ADMIN_ROLE`) و `KERNEL_ADDRESS` را به‌عنوان آرگومان دوم (`KERNEL_ROLE`/هویت) ارسال می‌کنند — رفع P0 هم‌ترازی مسیر استقرار (بالا را ببینید).
 
-PriceOracle، ProductionOracle، PenalLabor، Provincial، TriggerProtocol، AssetFreeze، و ۹ قرارداد افزوده‌شده (۱۴ قرارداد در مجموع) در این پیاده‌سازی پوشش داده نشده‌اند — `deploy/README.md` فهرست کامل را مستند می‌کند. هیچ dry-run روی testnet/mainnet، هش bytecode، یا تخمین gas ثبت نشده است. `STEP9-BLOCK-005` همچنان یک باقی‌مانده G-11 فنی است.
+**نسخه ۱.۳.۳:** اسکریپت ۱۵ (`PriceOracle`) از ابتدا با همین الگوی `(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)` نوشته شده — بدون نیاز به رفع بعدی. `FEEDER_ROLE` توسط این اسکریپت اعطا نمی‌شود (بالا را ببینید).
+
+ProductionOracle، PenalLabor، Provincial، TriggerProtocol، AssetFreeze، و ۹ قرارداد افزوده‌شده (۱۳ قرارداد در مجموع) در این پیاده‌سازی پوشش داده نشده‌اند — `deploy/README.md` فهرست کامل را مستند می‌کند. هیچ dry-run روی testnet/mainnet، هش bytecode، یا تخمین gas ثبت نشده است. `STEP9-BLOCK-005` همچنان یک باقی‌مانده G-11 فنی است.
 
 ---
 
@@ -603,7 +611,7 @@ PriceOracle، ProductionOracle، PenalLabor، Provincial، TriggerProtocol، Ass
 - Step 12 یا Step 13 بسته نمی‌شود
 - هیچ حسابرسی امنیتی (Slither / Mythril / Echidna) انجام نشده
 - هیچ بررسی خارجی یا signoff وجود ندارد
-- اسکریپت‌های `deploy/` برای ۱۱ از ۲۵ قرارداد (مسیر اصلی پولی/پشتوانه + ۵ قرارداد Layer 1 وابسته صرفاً به Kernel: VictimFund، ConstitutionGuard، JurySelection، JusticeProtocol، CitizenCard) در مخزن پیاده‌سازی شده‌اند (`deploy/README.md`)؛ برای ۱۴ قرارداد باقی‌مانده (PriceOracle، ProductionOracle، PenalLabor، Provincial، TriggerProtocol، AssetFreeze، و ۹ قرارداد افزوده‌شده) هنوز ایجاد نشده‌اند — باقی‌مانده G-11 فنی
+- اسکریپت‌های `deploy/` برای ۱۲ از ۲۵ قرارداد (مسیر اصلی پولی/پشتوانه + ۶ قرارداد Layer 1: VictimFund، ConstitutionGuard، JurySelection، JusticeProtocol، CitizenCard، PriceOracle) در مخزن پیاده‌سازی شده‌اند (`deploy/README.md`)؛ برای ۱۳ قرارداد باقی‌مانده (ProductionOracle، PenalLabor، Provincial، TriggerProtocol، AssetFreeze، و ۹ قرارداد افزوده‌شده) هنوز ایجاد نشده‌اند — باقی‌مانده G-11 فنی
 - هیچ dry-run روی testnet/mainnet، هش bytecode، یا تخمین gas ثبت نشده است؛ `STEP9-BLOCK-005` همچنان **OPEN/PENDING** است و این نسخه بسته شدن آن را ادعا نمی‌کند
 - پوشش مستندیِ نقشه استقرار (۲۵/۲۵) از پوشش اجرایی اسکریپت‌ها (۶/۲۵) متمایز است — این دو رقم را نباید یکسان تلقی کرد
 - این سند نقطه شروع برای بررسی خارجی است، نه تأییدیه آن

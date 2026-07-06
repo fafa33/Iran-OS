@@ -54,9 +54,20 @@ contract PriceOracle is AccessControl, ReentrancyGuard {
     event PriceInvalidated(bytes32 indexed key, string reason);
     event DeviationDetected(bytes32 indexed key, int256 existing, int256 submitted, uint256 deviation);
 
-    constructor(address _kernel) {
+    // _admin receives DEFAULT_ADMIN_ROLE (real signer — e.g. the Sovereign —
+    // so post-deploy role wiring, such as granting FEEDER_ROLE, is reachable
+    // on mainnet). _kernel receives only KERNEL_ROLE, recording the Kernel
+    // contract's identity without relying on it to ever originate a
+    // transaction here (Kernel has no call-forwarding mechanism to this
+    // contract, so invalidatePrice() would otherwise be permanently
+    // unreachable). Mirrors SovereignWealthFund.sol's constructor(sovereign,
+    // kernel) split — see CHANGELOG "P0 deployment-path parity" for the
+    // originating finding on VictimFund/JurySelection/JusticeProtocol/
+    // CitizenCard/ConstitutionGuard.
+    constructor(address _admin, address _kernel) {
+        require(_admin != address(0), "PriceOracle: invalid admin");
         require(_kernel != address(0), "PriceOracle: invalid kernel");
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(KERNEL_ROLE, _kernel);
         prices[KEY_PAH_USD] = PriceData({ value: 1 * int256(1e18), timestamp: block.timestamp, confidence: 1000, feederCount: 1, isValid: true });
     }
