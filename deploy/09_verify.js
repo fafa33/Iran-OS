@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 // Read-only post-deploy verification. Matches the applicable subset of
-// docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §9 for the six contracts
-// deployed by this workflow (Kernel, Treasury, SovereignWealthFund,
-// PahlaviToken, API3Oracle, RecognizedReserveBacking).
+// docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §9 for the contracts
+// deployed by this workflow: the six core-monetary-path contracts (Kernel,
+// Treasury, SovereignWealthFund, PahlaviToken, API3Oracle,
+// RecognizedReserveBacking) plus the five Layer 1, constructor-only-on-Kernel
+// contracts added afterward (VictimFund, ConstitutionGuard, JurySelection,
+// JusticeProtocol, CitizenCard).
 //
 // §9 Group 2 (TriggerProtocol) and the AssetFreeze/CRAWLER_ROLE/COUNCIL_ROLE
 // checks in Group 4 are not applicable — those contracts are not part of
@@ -24,12 +27,22 @@ async function verifyDeployment(hre, config, addresses) {
   const tokenAddress = requireAddress(addresses, "PAHLAVI_TOKEN_ADDRESS", "02_token.js");
   const oracleAddress = requireAddress(addresses, "API3_ORACLE_ADDRESS", "04_oracle.js");
   const registryAddress = requireAddress(addresses, "RECOGNIZED_RESERVE_BACKING_ADDRESS", "03_recognized_backing.js");
+  const victimFundAddress = requireAddress(addresses, "VICTIM_FUND_ADDRESS", "10_victim_fund.js");
+  const constitutionGuardAddress = requireAddress(addresses, "CONSTITUTION_GUARD_ADDRESS", "11_constitution_guard.js");
+  const jurySelectionAddress = requireAddress(addresses, "JURY_SELECTION_ADDRESS", "12_jury_selection.js");
+  const justiceProtocolAddress = requireAddress(addresses, "JUSTICE_PROTOCOL_ADDRESS", "13_justice_protocol.js");
+  const citizenCardAddress = requireAddress(addresses, "CITIZEN_CARD_ADDRESS", "14_citizen_card.js");
 
   const kernel = await ethers.getContractAt("IranOS_Kernel", kernelAddress);
   const swf = await ethers.getContractAt("SovereignWealthFund", swfAddress);
   const token = await ethers.getContractAt("PahlaviToken", tokenAddress);
   const oracle = await ethers.getContractAt("API3Oracle", oracleAddress);
   const registry = await ethers.getContractAt("RecognizedReserveBacking", registryAddress);
+  const victimFund = await ethers.getContractAt("VictimFund", victimFundAddress);
+  const constitutionGuard = await ethers.getContractAt("ConstitutionGuard", constitutionGuardAddress);
+  const jurySelection = await ethers.getContractAt("JurySelection", jurySelectionAddress);
+  const justiceProtocol = await ethers.getContractAt("JusticeProtocol", justiceProtocolAddress);
+  const citizenCard = await ethers.getContractAt("CitizenCard", citizenCardAddress);
 
   const checks = [];
   const check = (name, pass) => checks.push({ name, pass });
@@ -74,6 +87,25 @@ async function verifyDeployment(hre, config, addresses) {
     "token.totalReserves() === registry.recognizedBackingTotal()",
     totalReserves === recognizedBackingTotal
   );
+
+  // Batch 2 — Layer 1 constructor-only-on-Kernel contracts (VictimFund,
+  // ConstitutionGuard, JurySelection, JusticeProtocol, CitizenCard). Not a
+  // named group in §9 (that section predates this batch); these checks
+  // verify the constructor-guaranteed invariant each contract's source
+  // documents (DEFAULT_ADMIN_ROLE + KERNEL_ROLE granted to Kernel, or, for
+  // ConstitutionGuard, its plain `kernel` address getter).
+  for (const [name, contract] of [
+    ["victimFund", victimFund],
+    ["jurySelection", jurySelection],
+    ["justiceProtocol", justiceProtocol],
+    ["citizenCard", citizenCard],
+  ]) {
+    const DEFAULT_ADMIN_ROLE = await contract.DEFAULT_ADMIN_ROLE();
+    const KERNEL_ROLE = await contract.KERNEL_ROLE();
+    check(`${name}.hasRole(DEFAULT_ADMIN_ROLE, KERNEL_ADDRESS)`, await contract.hasRole(DEFAULT_ADMIN_ROLE, kernelAddress));
+    check(`${name}.hasRole(KERNEL_ROLE, KERNEL_ADDRESS)`, await contract.hasRole(KERNEL_ROLE, kernelAddress));
+  }
+  check("constitutionGuard.kernel() === KERNEL_ADDRESS", (await constitutionGuard.kernel()) === kernelAddress);
 
   // Group 5 — System status (§9 گروه ۵, applicable subset)
   check("kernel.isSystemHealthy() === true", await kernel.isSystemHealthy());

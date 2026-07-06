@@ -6,18 +6,26 @@ documented in `docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` and
 
 ## Scope
 
-This deploys six contracts and wires the reserve accounting path between
-them: `IranOS_Kernel`, `Treasury`, `SovereignWealthFund`, `PahlaviToken`,
-`API3Oracle`, `RecognizedReserveBacking`.
+This deploys eleven contracts: the core monetary/reserve path (`IranOS_Kernel`,
+`Treasury`, `SovereignWealthFund`, `PahlaviToken`, `API3Oracle`,
+`RecognizedReserveBacking`) and five Layer 1, constructor-only-on-Kernel
+contracts (`VictimFund`, `ConstitutionGuard`, `JurySelection`,
+`JusticeProtocol`, `CitizenCard`). The latter five have no constructor
+dependency beyond `KERNEL_ADDRESS` and no further role-wiring documented in
+`docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` §4-§7.
 
-**Not included:** `TriggerProtocol`, `AssetFreeze`, `VictimFund`,
-`ConstitutionGuard`, `JurySelection`, `JusticeProtocol`, `CitizenCard`,
+**Not included:** `TriggerProtocol`, `AssetFreeze`,
 `PriceOracle`, `ProductionOracle`, `PenalLabor`, `Provincial`,
 `VotingSystem`, `Parliament`, `BudgetAllocation`, `Fargard7PolicyAdapter`,
 `VelocityFee`, `BaseIncome`, `HealthCoverage`, `DisabilitySupport`,
-`SovereignCrawler` — these 19 contracts are documented in the manifest
+`SovereignCrawler` — these 14 contracts are documented in the manifest
 (§2/§3, all 25/25 contracts) but are outside this workflow's scope. Their
-deploy scripts remain an open item.
+deploy scripts remain an open item. (`PriceOracle`/`ProductionOracle` are
+deferred because their documented post-deploy wiring — `FEEDER_ROLE` grants
+to `PRICE_FEEDER`/`PROD_FEEDER`, §4 Group E, §9 Group 3 — depends on address
+book variables not listed in §1's table; adding them here would require
+inventing an undocumented configuration surface rather than implementing
+what is already specified.)
 
 ## Execution order
 
@@ -27,10 +35,16 @@ The filenames are grouped by contract/domain, not strict execution order:
 to execute everything in dependency-correct order:
 
 ```
-kernel -> treasury -> swf -> token -> oracle -> recognized_backing ->
-roles (Court, Group A) ->
+kernel -> treasury -> swf -> victim_fund -> constitution_guard ->
+jury_selection -> justice_protocol -> citizen_card -> token -> oracle ->
+recognized_backing -> roles (Court, Group A) ->
 finalize (Oracle activation, Group E — last per the manifest) -> verify
 ```
+
+`victim_fund`/`constitution_guard`/`jury_selection`/`justice_protocol`/
+`citizen_card` are Layer 1 per the manifest ("ترتیب اهمیت ندارد" — order
+does not matter within Layer 1); their position here relative to
+`treasury`/`swf` is arbitrary.
 
 ```bash
 npx hardhat run deploy/index.js --network <network>
@@ -42,6 +56,7 @@ the manifest's operator-checklist style:
 ```bash
 npx hardhat run deploy/01_kernel.js --network <network>
 npx hardhat run deploy/05_treasury.js --network <network>
+npx hardhat run deploy/10_victim_fund.js --network <network>
 # ... in dependency order (see above)
 ```
 
