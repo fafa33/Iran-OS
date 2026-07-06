@@ -720,6 +720,55 @@ For any PR touching sensitive components — Kernel, PahlaviToken, Treasury, Sov
 
 **A sensitive-component PR may not be pushed, marked ready, or merged without completing this step.** Omitting the Open Residuals Consultation is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
 
+#### Step 11 — Documentation-Parity Review
+
+**Lesson learned:** PR #120 changed `PriceOracle`'s constructor to `constructor(admin, kernel)`, moving `DEFAULT_ADMIN_ROLE` from the Kernel to `SOVEREIGN_ADDRESS`. Step 9 (Deployment Manifest Currency Check) passed mechanically — `PriceOracle` and `FEEDER_ROLE` were both still present in `docs/deployment/`. But Step 9 only greps for the ROLE_NAME/ContractName **string**; it does not verify that the **caller/authority described alongside that string** is still accurate. `docs/deployment/ROLE_WIRING_CHECKLIST.md:187` still named `kernel` as the caller for the `FEEDER_ROLE` grant, and `DEPLOYMENT_MANIFEST_PROTOCOL.md`'s wiring pseudocode still showed the old flow. An operator following those docs after PR #120 would have the grant revert, since the Kernel no longer holds admin authority on `PriceOracle` — leaving `submitPrice()` unusable until the undocumented sovereign-caller path was discovered. Codex identified this gap in review of PR #120 (`https://github.com/fafa33/Iran-OS/pull/120#discussion_r3532524130`); fixed in PR #121.
+
+**Trigger scope.** Whenever any change modifies:
+- ownership
+- `DEFAULT_ADMIN_ROLE`
+- access control
+- `grantRole()`
+- constructor parameters
+- deployment authority
+- runtime authority
+- governance authority
+- deployment sequence
+- deployment wiring
+
+the **same PR** MUST update all affected:
+- deployment manifests
+- deployment protocols
+- runbooks
+- operator guides
+- role wiring documentation
+- deployment checklists
+
+**A Documentation-Parity Review is mandatory before every PR in the trigger scope is considered READY.** Runtime, deployment scripts, manifests, and operational documentation must describe exactly the same authority model. A PR that changes who can call a function without updating every document that names a caller for that function fails this step.
+
+**How Step 11 differs from Step 9.** Step 9 confirms a role or contract **name** is present somewhere in `docs/deployment/` (`grep -r 'ROLE_NAME\|ContractName' docs/deployment/`). Step 11 confirms the **caller named alongside that role/contract in prose or pseudocode** still matches the current constructor/grant logic in code. Passing Step 9 does not satisfy Step 11 — the two checks are independent and both required.
+
+**Verification method:**
+1. For every contract or role touched by the PR, run `grep -rn '<ContractName>\|<ROLE_NAME>' docs/deployment/` to enumerate every document location that describes it.
+2. For each match, read the surrounding prose/pseudocode and confirm the named caller (e.g., `kernel`, `sovereign`, `SOVEREIGN_ADDRESS`) matches the actual `msg.sender` requirement in the current constructor/role-grant code (`grep -n 'DEFAULT_ADMIN_ROLE\|constructor' contracts/<path>/<Contract>.sol`).
+3. If any documented caller no longer matches the code, update that document in this PR — do not defer to a follow-up PR.
+4. Re-run `npm test` after documentation edits to confirm no fixture drift.
+
+**Required evidence block entry for Step 11:**
+
+```
+Step 11 — Documentation-Parity Review:
+- Trigger scope matched: [list which of: ownership / DEFAULT_ADMIN_ROLE / access control / grantRole() / constructor parameters / deployment authority / runtime authority / governance authority / deployment sequence / deployment wiring, or "N/A — none matched"]
+- Contracts/roles affected: [list, or "N/A"]
+- Docs greped: [file paths + grep command, or "N/A"]
+- Caller/authority description re-verified against code: [YES / NO, with grep command + result per doc]
+- Documents updated in this PR: [list, or "N/A — no stale descriptions found"]
+- Result: [PASS / DOCUMENTATION_REQUIRED]
+- CET level: [CET-1 / below CET-1]
+```
+
+**Omission rule:** for any PR matching the trigger scope above, omitting the Documentation-Parity Review is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
+
 #### Before Responding to Codex
 
 1. Never respond from memory. Run the grep the comment implies before writing any reply.
