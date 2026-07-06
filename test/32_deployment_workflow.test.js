@@ -292,6 +292,45 @@ describe("Deployment Workflow (deploy/)", function () {
       expect(await token.recognizedReserveBacking()).to.equal(ethers.ZeroAddress);
     });
 
+    it("does not deploy a RecognizedReserveBacking contract on the blocked path (guard runs before deployment, not after)", async function () {
+      const { deployKernel } = require("../deploy/01_kernel");
+      const { deployTreasury } = require("../deploy/05_treasury");
+      const { deploySwf } = require("../deploy/06_swf");
+      const { deployToken } = require("../deploy/02_token");
+      const { deployRecognizedBacking } = require("../deploy/03_recognized_backing");
+
+      const addresses = {};
+      addresses.KERNEL_ADDRESS = (await deployKernel(hre, nonzeroConfig)).address;
+      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+      addresses.SWF_ADDRESS = (await deploySwf(hre, nonzeroConfig, addresses)).address;
+      addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, nonzeroConfig, addresses, sovereign)).address;
+
+      // The default signer used by ethers.getContractFactory (no explicit
+      // signer passed in deployRecognizedBacking) is the first configured
+      // account -- the same signer index sovereign was destructured from in
+      // this suite's before() hook. If the guard rejects before deploying
+      // the registry, that signer's transaction count must be unchanged: no
+      // deployment (or any other) transaction was ever broadcast.
+      const [deployer] = await ethers.getSigners();
+      const nonceBefore = await ethers.provider.getTransactionCount(deployer.address);
+
+      let error;
+      try {
+        await deployRecognizedBacking(hre, nonzeroConfig, addresses, sovereign);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.exist;
+
+      const nonceAfter = await ethers.provider.getTransactionCount(deployer.address);
+      expect(
+        nonceAfter,
+        "guard must reject before any contract-deployment transaction is sent -- " +
+        "a nonce increase here would mean RecognizedReserveBacking was deployed " +
+        "(and orphaned) on the blocked path"
+      ).to.equal(nonceBefore);
+    });
+
     it("proceeds with the reset when ACKNOWLEDGE_RESERVE_RESET is explicitly set", async function () {
       nonzeroConfig.acknowledgeReserveReset = true;
 
