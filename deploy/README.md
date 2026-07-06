@@ -6,34 +6,41 @@ documented in `docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` and
 
 ## Scope
 
-This deploys eleven contracts: the core monetary/reserve path (`IranOS_Kernel`,
+This deploys twelve contracts: the core monetary/reserve path (`IranOS_Kernel`,
 `Treasury`, `SovereignWealthFund`, `PahlaviToken`, `API3Oracle`,
-`RecognizedReserveBacking`) and five Layer 1 contracts (`VictimFund`,
-`ConstitutionGuard`, `JurySelection`, `JusticeProtocol`, `CitizenCard`). The
-latter five take `(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)` as constructor
-arguments — `SOVEREIGN_ADDRESS` receives `DEFAULT_ADMIN_ROLE` (a real signer,
-so post-deploy role wiring is reachable on mainnet), `KERNEL_ADDRESS`
-receives only `KERNEL_ROLE` (recorded identity; the Kernel contract has no
-call-forwarding mechanism to these contracts and cannot exercise
-`DEFAULT_ADMIN_ROLE` itself — see "Layer 1 admin binding" below). No further
-role-wiring beyond the constructor grant is documented in
-`docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` §4-§7; granting the
-operational roles each contract needs (`COURT_ROLE`, `VRF_ROLE`,
+`RecognizedReserveBacking`) and six Layer 1 contracts (`VictimFund`,
+`ConstitutionGuard`, `JurySelection`, `JusticeProtocol`, `CitizenCard`,
+`PriceOracle`). The latter six take `(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)` as
+constructor arguments — `SOVEREIGN_ADDRESS` receives `DEFAULT_ADMIN_ROLE` (a
+real signer, so post-deploy role wiring is reachable on mainnet),
+`KERNEL_ADDRESS` receives only `KERNEL_ROLE` (recorded identity; the Kernel
+contract has no call-forwarding mechanism to these contracts and cannot
+exercise `DEFAULT_ADMIN_ROLE` itself — see "Layer 1 admin binding" below). No
+further role-wiring beyond the constructor grant is documented in
+`docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` §4-§7 for the first five;
+granting the operational roles each contract needs (`COURT_ROLE`, `VRF_ROLE`,
 `ISSUER_ROLE`, etc.) is left to the operator via `SOVEREIGN_ADDRESS`'s
-`DEFAULT_ADMIN_ROLE`, post-deploy.
+`DEFAULT_ADMIN_ROLE`, post-deploy. `PriceOracle`'s `FEEDER_ROLE` is handled
+the same way — see the note below.
+
+**`PriceOracle`'s `FEEDER_ROLE` is not granted by this workflow.** The
+manifest's §9 Group 3 check (`priceOracle.hasRole(FEEDER_ROLE, PRICE_FEEDER)`)
+depends on a `PRICE_FEEDER` address book variable not listed in §1's table.
+Granting it here would invent an undocumented configuration surface rather
+than implement what is already specified — the same reason `ProductionOracle`
+remains excluded below. Once a real feeder address is chosen, `SOVEREIGN_ADDRESS`
+(holding `DEFAULT_ADMIN_ROLE` on `PriceOracle`) can grant `FEEDER_ROLE` to it
+post-deploy, exactly like the other operational roles in this batch.
 
 **Not included:** `TriggerProtocol`, `AssetFreeze`,
-`PriceOracle`, `ProductionOracle`, `PenalLabor`, `Provincial`,
+`ProductionOracle`, `PenalLabor`, `Provincial`,
 `VotingSystem`, `Parliament`, `BudgetAllocation`, `Fargard7PolicyAdapter`,
 `VelocityFee`, `BaseIncome`, `HealthCoverage`, `DisabilitySupport`,
-`SovereignCrawler` — these 14 contracts are documented in the manifest
+`SovereignCrawler` — these 13 contracts are documented in the manifest
 (§2/§3, all 25/25 contracts) but are outside this workflow's scope. Their
-deploy scripts remain an open item. (`PriceOracle`/`ProductionOracle` are
-deferred because their documented post-deploy wiring — `FEEDER_ROLE` grants
-to `PRICE_FEEDER`/`PROD_FEEDER`, §4 Group E, §9 Group 3 — depends on address
-book variables not listed in §1's table; adding them here would require
-inventing an undocumented configuration surface rather than implementing
-what is already specified.)
+deploy scripts remain an open item. (`ProductionOracle` is deferred for the
+same reason described above for `PriceOracle`'s `FEEDER_ROLE` — its
+`PROD_FEEDER` address book variable is likewise not listed in §1's table.)
 
 ## Execution order
 
@@ -44,14 +51,15 @@ to execute everything in dependency-correct order:
 
 ```
 kernel -> treasury -> swf -> victim_fund -> constitution_guard ->
-jury_selection -> justice_protocol -> citizen_card -> token -> oracle ->
-recognized_backing -> roles (Court, Group A) ->
+jury_selection -> justice_protocol -> citizen_card -> price_oracle ->
+token -> oracle -> recognized_backing -> roles (Court, Group A) ->
 finalize (Oracle activation, Group E — last per the manifest) -> verify
 ```
 
 `victim_fund`/`constitution_guard`/`jury_selection`/`justice_protocol`/
-`citizen_card` are Layer 1 per the manifest ("ترتیب اهمیت ندارد" — order
-does not matter within Layer 1); their position here relative to
+`citizen_card`/`price_oracle` are Layer 1 per the manifest ("ترتیب اهمیت
+ندارد" — order does not matter within Layer 1; `PriceOracle` is additionally
+noted as "مستقل از Layer 2"); their position here relative to
 `treasury`/`swf` is arbitrary.
 
 ```bash
@@ -157,6 +165,14 @@ No Solidity change was made to any monetary-core contract (`Treasury`,
 `IranOS_Kernel`) or to any governance/protocol logic — only the admin-role
 binding in these 5 already-non-monetary contracts.
 
+**`PriceOracle` (added as coverage 12/25)** uses the identical
+`constructor(_admin, _kernel)` pattern from the outset — its deploy script
+(`15_price_oracle.js`) was authored after the finding above, so it applies
+the same fix proactively rather than needing a retrofit. Without it,
+`invalidatePrice()` (`onlyRole(KERNEL_ROLE)`) and `submitPrice()`
+(`onlyRole(FEEDER_ROLE)`, never granted in the constructor) would have been
+permanently unreachable for the same reason as the other 5 contracts.
+
 ### Duplicate Court addresses
 
 `08_finalize.js` rejects Oracle activation if `COURT_1..COURT_9` are not 9
@@ -179,7 +195,7 @@ persisted file and continue with the remaining individual scripts.
 
 `deploy/index.js`'s CLI entry point (`npx hardhat run deploy/index.js`)
 refuses to start if `deploy/deployments/<network>.json` already contains any
-of the 11 addresses this workflow produces for that network — whether from a
+of the 12 addresses this workflow produces for that network — whether from a
 completed run or a partial one recovered per the above. It does not
 overwrite the file or auto-resume; it stops immediately with an error
 directing the operator to either continue manually with the individual

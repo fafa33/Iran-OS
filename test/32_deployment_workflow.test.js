@@ -136,6 +136,51 @@ describe("Deployment Workflow (deploy/)", function () {
     expect(await constitutionGuard.kernel()).to.equal(addresses.KERNEL_ADDRESS);
   });
 
+  it("deploys PriceOracle successfully, with a non-zero address, without altering monetary runtime state, and preserving all other deployment invariants", async function () {
+    const config = loadConfig();
+    const { addresses, checks } = await runDeployment(hre, config, sovereign);
+
+    // Existing deployment invariants remain intact (§9 checks, extended in
+    // deploy/09_verify.js to include PriceOracle's constructor-role checks).
+    for (const c of checks) {
+      expect(c.pass, `check failed: ${c.name}`).to.be.true;
+    }
+
+    // Deploys successfully, with a non-zero address.
+    expect(ethers.isAddress(addresses.PRICE_ORACLE_ADDRESS)).to.be.true;
+    expect(addresses.PRICE_ORACLE_ADDRESS).to.not.equal(ethers.ZeroAddress);
+
+    const priceOracle = await ethers.getContractAt("PriceOracle", addresses.PRICE_ORACLE_ADDRESS);
+    const DEFAULT_ADMIN_ROLE = await priceOracle.DEFAULT_ADMIN_ROLE();
+    const KERNEL_ROLE = await priceOracle.KERNEL_ROLE();
+    expect(await priceOracle.hasRole(DEFAULT_ADMIN_ROLE, config.sovereignAddress)).to.be.true;
+    expect(await priceOracle.hasRole(DEFAULT_ADMIN_ROLE, addresses.KERNEL_ADDRESS)).to.be.false;
+    expect(await priceOracle.hasRole(KERNEL_ROLE, addresses.KERNEL_ADDRESS)).to.be.true;
+
+    // Does not alter monetary runtime state: PriceOracle's constructor only
+    // writes to its own storage (an initial KEY_PAH_USD price point). Deploy
+    // it a second time, directly, and confirm PahlaviToken/SWF/Treasury
+    // monetary state captured immediately beforehand is bit-for-bit
+    // unchanged immediately afterward.
+    const token = await ethers.getContractAt("PahlaviToken", addresses.PAHLAVI_TOKEN_ADDRESS);
+    const swf = await ethers.getContractAt("SovereignWealthFund", addresses.SWF_ADDRESS);
+    const treasury = await ethers.getContractAt("Treasury", addresses.TREASURY_ADDRESS);
+
+    const totalReservesBefore = await token.totalReserves();
+    const totalAssetsBefore = await swf.totalAssets();
+    const budgetAllocatedBefore = await treasury.totalBudgetAllocated();
+
+    const { deployPriceOracle } = require("../deploy/15_price_oracle");
+    const { address: secondPriceOracleAddress } = await deployPriceOracle(hre, config, addresses);
+    expect(ethers.isAddress(secondPriceOracleAddress)).to.be.true;
+    expect(secondPriceOracleAddress).to.not.equal(ethers.ZeroAddress);
+    expect(secondPriceOracleAddress).to.not.equal(addresses.PRICE_ORACLE_ADDRESS);
+
+    expect(await token.totalReserves()).to.equal(totalReservesBefore);
+    expect(await swf.totalAssets()).to.equal(totalAssetsBefore);
+    expect(await treasury.totalBudgetAllocated()).to.equal(budgetAllocatedBefore);
+  });
+
   describe("Layer 1 contract deployment-path parity (real Kernel contract address, not an EOA stand-in)", function () {
     // Hostile-review finding: PR #118 deployed VictimFund, ConstitutionGuard,
     // JurySelection, JusticeProtocol, and CitizenCard with KERNEL_ADDRESS as
@@ -379,6 +424,7 @@ describe("Deployment Workflow (deploy/)", function () {
       "../deploy/12_jury_selection": "deployJurySelection",
       "../deploy/13_justice_protocol": "deployJusticeProtocol",
       "../deploy/14_citizen_card": "deployCitizenCard",
+      "../deploy/15_price_oracle": "deployPriceOracle",
       "../deploy/index": "runDeployment",
     };
     expect(require("../deploy/index").assertNoExistingDeployment, "../deploy/index must export assertNoExistingDeployment").to.be.a("function");
@@ -552,13 +598,13 @@ describe("Deployment Workflow (deploy/)", function () {
 
       await runDeployment(hre, config, sovereign, persistStep);
 
-      // 11 deploy steps (kernel, treasury, swf, victim_fund,
+      // 12 deploy steps (kernel, treasury, swf, victim_fund,
       // constitution_guard, jury_selection, justice_protocol, citizen_card,
-      // token, oracle, recognized_backing) each call persistStep once,
-      // before the role-wiring/verify steps run.
-      expect(snapshots.length).to.equal(11);
+      // price_oracle, token, oracle, recognized_backing) each call
+      // persistStep once, before the role-wiring/verify steps run.
+      expect(snapshots.length).to.equal(12);
       expect(Object.keys(snapshots[0])).to.deep.equal(["KERNEL_ADDRESS"]);
-      expect(Object.keys(snapshots[10]).sort()).to.deep.equal(
+      expect(Object.keys(snapshots[11]).sort()).to.deep.equal(
         [
           "KERNEL_ADDRESS",
           "TREASURY_ADDRESS",
@@ -568,6 +614,7 @@ describe("Deployment Workflow (deploy/)", function () {
           "JURY_SELECTION_ADDRESS",
           "JUSTICE_PROTOCOL_ADDRESS",
           "CITIZEN_CARD_ADDRESS",
+          "PRICE_ORACLE_ADDRESS",
           "PAHLAVI_TOKEN_ADDRESS",
           "API3_ORACLE_ADDRESS",
           "RECOGNIZED_RESERVE_BACKING_ADDRESS",
@@ -587,7 +634,7 @@ describe("Deployment Workflow (deploy/)", function () {
       let error;
       try {
         // wireCourtCompletion/finalizeOracleActivation will fail on the
-        // duplicate court member, after all 11 deploy steps already
+        // duplicate court member, after all 12 deploy steps already
         // succeeded and persisted.
         await runDeployment(hre, duplicated, sovereign, persistStep);
       } catch (e) {
@@ -606,12 +653,13 @@ describe("Deployment Workflow (deploy/)", function () {
           "JURY_SELECTION_ADDRESS",
           "JUSTICE_PROTOCOL_ADDRESS",
           "CITIZEN_CARD_ADDRESS",
+          "PRICE_ORACLE_ADDRESS",
           "PAHLAVI_TOKEN_ADDRESS",
           "API3_ORACLE_ADDRESS",
           "RECOGNIZED_RESERVE_BACKING_ADDRESS",
         ].sort()
       );
-      // All 11 addresses are real, non-zero deployed contract addresses,
+      // All 12 addresses are real, non-zero deployed contract addresses,
       // even though the overall run() call above threw.
       for (const [name, address] of Object.entries(lastSnapshot)) {
         expect(ethers.isAddress(address), `${name} is not a valid address`).to.be.true;
