@@ -107,6 +107,29 @@ describe("Deployment Workflow (deploy/)", function () {
     expect(await token.totalReserves()).to.equal(await registry.recognizedBackingTotal());
   });
 
+  it("deploys VictimFund, ConstitutionGuard, JurySelection, JusticeProtocol, and CitizenCard with Kernel holding the documented constructor-granted roles", async function () {
+    const config = loadConfig();
+    const { addresses, checks } = await runDeployment(hre, config, sovereign);
+
+    for (const c of checks) {
+      expect(c.pass, `check failed: ${c.name}`).to.be.true;
+    }
+
+    const victimFund = await ethers.getContractAt("VictimFund", addresses.VICTIM_FUND_ADDRESS);
+    const constitutionGuard = await ethers.getContractAt("ConstitutionGuard", addresses.CONSTITUTION_GUARD_ADDRESS);
+    const jurySelection = await ethers.getContractAt("JurySelection", addresses.JURY_SELECTION_ADDRESS);
+    const justiceProtocol = await ethers.getContractAt("JusticeProtocol", addresses.JUSTICE_PROTOCOL_ADDRESS);
+    const citizenCard = await ethers.getContractAt("CitizenCard", addresses.CITIZEN_CARD_ADDRESS);
+
+    for (const contract of [victimFund, jurySelection, justiceProtocol, citizenCard]) {
+      const DEFAULT_ADMIN_ROLE = await contract.DEFAULT_ADMIN_ROLE();
+      const KERNEL_ROLE = await contract.KERNEL_ROLE();
+      expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, addresses.KERNEL_ADDRESS)).to.be.true;
+      expect(await contract.hasRole(KERNEL_ROLE, addresses.KERNEL_ADDRESS)).to.be.true;
+    }
+    expect(await constitutionGuard.kernel()).to.equal(addresses.KERNEL_ADDRESS);
+  });
+
   it("leaves the deployed system in the documented clean initial state", async function () {
     const config = loadConfig();
     const { addresses } = await runDeployment(hre, config, sovereign);
@@ -240,6 +263,11 @@ describe("Deployment Workflow (deploy/)", function () {
       "../deploy/07_roles": "wireCourtCompletion",
       "../deploy/08_finalize": "finalizeOracleActivation",
       "../deploy/09_verify": "verifyDeployment",
+      "../deploy/10_victim_fund": "deployVictimFund",
+      "../deploy/11_constitution_guard": "deployConstitutionGuard",
+      "../deploy/12_jury_selection": "deployJurySelection",
+      "../deploy/13_justice_protocol": "deployJusticeProtocol",
+      "../deploy/14_citizen_card": "deployCitizenCard",
       "../deploy/index": "runDeployment",
     };
     expect(require("../deploy/index").assertNoExistingDeployment, "../deploy/index must export assertNoExistingDeployment").to.be.a("function");
@@ -413,15 +441,22 @@ describe("Deployment Workflow (deploy/)", function () {
 
       await runDeployment(hre, config, sovereign, persistStep);
 
-      // 6 deploy steps (kernel, treasury, swf, token, oracle, recognized_backing)
-      // each call persistStep once, before the role-wiring/verify steps run.
-      expect(snapshots.length).to.equal(6);
+      // 11 deploy steps (kernel, treasury, swf, victim_fund,
+      // constitution_guard, jury_selection, justice_protocol, citizen_card,
+      // token, oracle, recognized_backing) each call persistStep once,
+      // before the role-wiring/verify steps run.
+      expect(snapshots.length).to.equal(11);
       expect(Object.keys(snapshots[0])).to.deep.equal(["KERNEL_ADDRESS"]);
-      expect(Object.keys(snapshots[5]).sort()).to.deep.equal(
+      expect(Object.keys(snapshots[10]).sort()).to.deep.equal(
         [
           "KERNEL_ADDRESS",
           "TREASURY_ADDRESS",
           "SWF_ADDRESS",
+          "VICTIM_FUND_ADDRESS",
+          "CONSTITUTION_GUARD_ADDRESS",
+          "JURY_SELECTION_ADDRESS",
+          "JUSTICE_PROTOCOL_ADDRESS",
+          "CITIZEN_CARD_ADDRESS",
           "PAHLAVI_TOKEN_ADDRESS",
           "API3_ORACLE_ADDRESS",
           "RECOGNIZED_RESERVE_BACKING_ADDRESS",
@@ -441,7 +476,7 @@ describe("Deployment Workflow (deploy/)", function () {
       let error;
       try {
         // wireCourtCompletion/finalizeOracleActivation will fail on the
-        // duplicate court member, after all 6 deploy steps already
+        // duplicate court member, after all 11 deploy steps already
         // succeeded and persisted.
         await runDeployment(hre, duplicated, sovereign, persistStep);
       } catch (e) {
@@ -455,12 +490,17 @@ describe("Deployment Workflow (deploy/)", function () {
           "KERNEL_ADDRESS",
           "TREASURY_ADDRESS",
           "SWF_ADDRESS",
+          "VICTIM_FUND_ADDRESS",
+          "CONSTITUTION_GUARD_ADDRESS",
+          "JURY_SELECTION_ADDRESS",
+          "JUSTICE_PROTOCOL_ADDRESS",
+          "CITIZEN_CARD_ADDRESS",
           "PAHLAVI_TOKEN_ADDRESS",
           "API3_ORACLE_ADDRESS",
           "RECOGNIZED_RESERVE_BACKING_ADDRESS",
         ].sort()
       );
-      // All 6 addresses are real, non-zero deployed contract addresses,
+      // All 11 addresses are real, non-zero deployed contract addresses,
       // even though the overall run() call above threw.
       for (const [name, address] of Object.entries(lastSnapshot)) {
         expect(ethers.isAddress(address), `${name} is not a valid address`).to.be.true;

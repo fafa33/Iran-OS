@@ -1,15 +1,25 @@
 // SPDX-License-Identifier: MIT
 // Orchestrates the deploy/ scripts in dependency-correct order. The
-// filenames (01_kernel.js .. 09_verify.js) are grouped by contract/domain,
-// not strict execution order: PahlaviToken (02_token.js) requires
-// SovereignWealthFund's address, so SWF (06_swf.js) must run before it.
+// filenames (01_kernel.js .. 14_citizen_card.js) are grouped by
+// contract/domain, not strict execution order: PahlaviToken (02_token.js)
+// requires SovereignWealthFund's address, so SWF (06_swf.js) must run
+// before it.
 // Each script also remains independently runnable via
 // `npx hardhat run deploy/0N_name.js --network <network>`, reading and
 // writing the shared address book at deploy/deployments/<network>.json.
 //
-// Actual order: kernel -> treasury -> swf -> token -> oracle ->
-// recognized_backing -> roles (Court, Group A) -> finalize (Oracle
-// activation, Group E — documented as the last thing activated) -> verify.
+// Actual order: kernel -> treasury -> swf -> victim_fund ->
+// constitution_guard -> jury_selection -> justice_protocol -> citizen_card ->
+// token -> oracle -> recognized_backing -> roles (Court, Group A) ->
+// finalize (Oracle activation, Group E — documented as the last thing
+// activated) -> verify.
+//
+// victim_fund/constitution_guard/jury_selection/justice_protocol/
+// citizen_card (10-14) are Layer 1, constructor-only-on-Kernel contracts
+// per docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3 Stage 2 ("ترتیب
+// اهمیت ندارد" — order does not matter within Layer 1), so their position
+// here relative to treasury/swf/oracle is arbitrary; they are placed after
+// kernel and before token only because token (Layer 2) depends on swf.
 
 const { deployKernel } = require("./01_kernel");
 const { deployToken } = require("./02_token");
@@ -20,6 +30,11 @@ const { deploySwf } = require("./06_swf");
 const { wireCourtCompletion } = require("./07_roles");
 const { finalizeOracleActivation } = require("./08_finalize");
 const { verifyDeployment } = require("./09_verify");
+const { deployVictimFund } = require("./10_victim_fund");
+const { deployConstitutionGuard } = require("./11_constitution_guard");
+const { deployJurySelection } = require("./12_jury_selection");
+const { deployJusticeProtocol } = require("./13_justice_protocol");
+const { deployCitizenCard } = require("./14_citizen_card");
 
 // persistStep, if provided, is called with the addresses accumulated so far
 // immediately after each successful deployment/wiring step, so a mid-run
@@ -39,6 +54,26 @@ async function runDeployment(hre, config, sovereignSigner, persistStep = () => {
 
   const { address: swfAddress } = await deploySwf(hre, config, addresses);
   addresses.SWF_ADDRESS = swfAddress;
+  persistStep(addresses);
+
+  const { address: victimFundAddress } = await deployVictimFund(hre, addresses);
+  addresses.VICTIM_FUND_ADDRESS = victimFundAddress;
+  persistStep(addresses);
+
+  const { address: constitutionGuardAddress } = await deployConstitutionGuard(hre, addresses);
+  addresses.CONSTITUTION_GUARD_ADDRESS = constitutionGuardAddress;
+  persistStep(addresses);
+
+  const { address: jurySelectionAddress } = await deployJurySelection(hre, addresses);
+  addresses.JURY_SELECTION_ADDRESS = jurySelectionAddress;
+  persistStep(addresses);
+
+  const { address: justiceProtocolAddress } = await deployJusticeProtocol(hre, addresses);
+  addresses.JUSTICE_PROTOCOL_ADDRESS = justiceProtocolAddress;
+  persistStep(addresses);
+
+  const { address: citizenCardAddress } = await deployCitizenCard(hre, addresses);
+  addresses.CITIZEN_CARD_ADDRESS = citizenCardAddress;
   persistStep(addresses);
 
   const { address: tokenAddress } = await deployToken(hre, config, addresses, sovereignSigner);
@@ -61,13 +96,20 @@ async function runDeployment(hre, config, sovereignSigner, persistStep = () => {
   return { addresses, checks };
 }
 
-// The 6 core-monetary-path address keys produced by a full orchestrated run
-// (see runDeployment above). Used by assertNoExistingDeployment to detect a
-// prior run's artifacts before starting a new one.
+// The 11 address keys produced by a full orchestrated run (see
+// runDeployment above): the 6 core-monetary-path contracts plus the 5
+// constructor-only-on-Kernel Layer 1 contracts added in this batch. Used by
+// assertNoExistingDeployment to detect a prior run's artifacts before
+// starting a new one.
 const CORE_ADDRESS_KEYS = [
   "KERNEL_ADDRESS",
   "TREASURY_ADDRESS",
   "SWF_ADDRESS",
+  "VICTIM_FUND_ADDRESS",
+  "CONSTITUTION_GUARD_ADDRESS",
+  "JURY_SELECTION_ADDRESS",
+  "JUSTICE_PROTOCOL_ADDRESS",
+  "CITIZEN_CARD_ADDRESS",
   "PAHLAVI_TOKEN_ADDRESS",
   "API3_ORACLE_ADDRESS",
   "RECOGNIZED_RESERVE_BACKING_ADDRESS",
@@ -86,7 +128,7 @@ function assertNoExistingDeployment(existingAddresses, networkName) {
   if (found.length > 0) {
     throw new Error(
       `Refusing to run the full orchestrated deployment: deploy/deployments/${networkName}.json ` +
-      `already contains deployment artifacts for the core monetary path (${found.join(", ")}). ` +
+      `already contains deployment artifacts for this workflow (${found.join(", ")}). ` +
       "Running deploy/index.js again would overwrite this file and orphan the " +
       "already-deployed (still-live) contracts it currently records, with no way to " +
       "recover their addresses afterward. This script does not auto-resume a prior " +
