@@ -107,7 +107,7 @@ describe("Deployment Workflow (deploy/)", function () {
     expect(await token.totalReserves()).to.equal(await registry.recognizedBackingTotal());
   });
 
-  it("deploys VictimFund, ConstitutionGuard, JurySelection, JusticeProtocol, and CitizenCard with Kernel holding the documented constructor-granted roles", async function () {
+  it("deploys VictimFund, ConstitutionGuard, JurySelection, JusticeProtocol, and CitizenCard with the documented constructor-granted roles", async function () {
     const config = loadConfig();
     const { addresses, checks } = await runDeployment(hre, config, sovereign);
 
@@ -121,13 +121,124 @@ describe("Deployment Workflow (deploy/)", function () {
     const justiceProtocol = await ethers.getContractAt("JusticeProtocol", addresses.JUSTICE_PROTOCOL_ADDRESS);
     const citizenCard = await ethers.getContractAt("CitizenCard", addresses.CITIZEN_CARD_ADDRESS);
 
+    // DEFAULT_ADMIN_ROLE is held by SOVEREIGN_ADDRESS (a real signer), not
+    // KERNEL_ADDRESS: the Kernel contract has no call-forwarding mechanism to
+    // these contracts and could never exercise DEFAULT_ADMIN_ROLE itself.
+    // KERNEL_ROLE continues to record the Kernel contract's identity.
     for (const contract of [victimFund, jurySelection, justiceProtocol, citizenCard]) {
       const DEFAULT_ADMIN_ROLE = await contract.DEFAULT_ADMIN_ROLE();
       const KERNEL_ROLE = await contract.KERNEL_ROLE();
-      expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, addresses.KERNEL_ADDRESS)).to.be.true;
+      expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, config.sovereignAddress)).to.be.true;
+      expect(await contract.hasRole(DEFAULT_ADMIN_ROLE, addresses.KERNEL_ADDRESS)).to.be.false;
       expect(await contract.hasRole(KERNEL_ROLE, addresses.KERNEL_ADDRESS)).to.be.true;
     }
+    expect(await constitutionGuard.admin()).to.equal(config.sovereignAddress);
     expect(await constitutionGuard.kernel()).to.equal(addresses.KERNEL_ADDRESS);
+  });
+
+  describe("Layer 1 contract deployment-path parity (real Kernel contract address, not an EOA stand-in)", function () {
+    // Hostile-review finding: PR #118 deployed VictimFund, ConstitutionGuard,
+    // JurySelection, JusticeProtocol, and CitizenCard with KERNEL_ADDRESS as
+    // sole admin/kernel. Confirmed (see contracts/kernel.sol) that the Kernel
+    // contract has no generic call-forwarding, delegatecall, or any function
+    // referencing these 5 contracts -- so it could never itself exercise
+    // DEFAULT_ADMIN_ROLE/KERNEL_ROLE-gated privileges against them. This
+    // block proves the fix end-to-end using the *actual* deployed Kernel
+    // contract's address (addresses.KERNEL_ADDRESS from deployKernel, not a
+    // plain EOA standing in for "kernel"), and the real SOVEREIGN_ADDRESS
+    // signer already used throughout this suite -- not test-only shortcuts.
+    let addresses;
+
+    beforeEach(async function () {
+      const config = loadConfig();
+      ({ addresses } = await runDeployment(hre, config, sovereign));
+    });
+
+    it("Sovereign (real signer) can grant operational roles post-deploy against the real Kernel-contract-backed VictimFund", async function () {
+      const victimFund = await ethers.getContractAt("VictimFund", addresses.VICTIM_FUND_ADDRESS);
+      const COURT_ROLE = await victimFund.COURT_ROLE();
+
+      // Would have been impossible under the pre-fix deployment: only
+      // KERNEL_ADDRESS (a contract with no forwarding mechanism) held
+      // DEFAULT_ADMIN_ROLE, so no COURT_ROLE grant -- and therefore no
+      // registerVictim() call -- could ever reach mainnet.
+      await victimFund.connect(sovereign).grantRole(COURT_ROLE, court1.address);
+      expect(await victimFund.hasRole(COURT_ROLE, court1.address)).to.be.true;
+
+      await expect(
+        victimFund.connect(court1).registerVictim(courtMembers2to9[0].address, 0, 1, 1000n)
+      ).to.emit(victimFund, "VictimRegistered");
+    });
+
+    it("Sovereign (real signer) can grant VRF_ROLE post-deploy against the real Kernel-contract-backed JurySelection", async function () {
+      const jurySelection = await ethers.getContractAt("JurySelection", addresses.JURY_SELECTION_ADDRESS);
+      const VRF_ROLE = await jurySelection.VRF_ROLE();
+
+      await jurySelection.connect(sovereign).grantRole(VRF_ROLE, court1.address);
+      expect(await jurySelection.hasRole(VRF_ROLE, court1.address)).to.be.true;
+
+      const commitments = Array.from({ length: 12 }, (_, i) =>
+        ethers.keccak256(ethers.toUtf8Bytes(`parity_juror_${i}`))
+      );
+      await expect(jurySelection.connect(court1).selectJury(1, commitments))
+        .to.emit(jurySelection, "JurySelected");
+    });
+
+    it("Sovereign (real signer) can call approveJudge (KERNEL_ROLE-gated) via a role it grants post-deploy on the real Kernel-contract-backed JusticeProtocol", async function () {
+      const justiceProtocol = await ethers.getContractAt("JusticeProtocol", addresses.JUSTICE_PROTOCOL_ADDRESS);
+      const KERNEL_ROLE = await justiceProtocol.KERNEL_ROLE();
+
+      // Demonstrates the general escape hatch DEFAULT_ADMIN_ROLE now provides:
+      // Sovereign can delegate KERNEL_ROLE itself to any real operational
+      // address, not only the specific roles already granted in this test.
+      await justiceProtocol.connect(sovereign).grantRole(KERNEL_ROLE, court1.address);
+      await expect(justiceProtocol.connect(court1).approveJudge(courtMembers2to9[0].address))
+        .to.not.be.reverted;
+      expect(await justiceProtocol.approvedJudges(courtMembers2to9[0].address)).to.be.true;
+    });
+
+    it("Sovereign (real signer) can register an employer via KERNEL_ROLE it grants post-deploy on the real Kernel-contract-backed CitizenCard", async function () {
+      const citizenCard = await ethers.getContractAt("CitizenCard", addresses.CITIZEN_CARD_ADDRESS);
+      const KERNEL_ROLE = await citizenCard.KERNEL_ROLE();
+
+      await citizenCard.connect(sovereign).grantRole(KERNEL_ROLE, court1.address);
+      await expect(citizenCard.connect(court1).registerEmployer(courtMembers2to9[0].address))
+        .to.emit(citizenCard, "EmployerRegistered");
+    });
+
+    it("Sovereign (real signer, not an EOA standing in for Kernel) can approveLaw directly on the real Kernel-contract-backed ConstitutionGuard", async function () {
+      const constitutionGuard = await ethers.getContractAt("ConstitutionGuard", addresses.CONSTITUTION_GUARD_ADDRESS);
+      const lawHash = ethers.keccak256(ethers.toUtf8Bytes("deployment-path-parity law"));
+      await constitutionGuard.connect(court1).proposeLaw(lawHash, 0x18); // bits 3+4, non-immutable
+
+      await expect(constitutionGuard.connect(sovereign).approveLaw(lawHash))
+        .to.emit(constitutionGuard, "LawApproved");
+      expect(await constitutionGuard.isLawApproved(lawHash)).to.be.true;
+    });
+
+    it("verifyDeployment passes when SOVEREIGN_ADDRESS is supplied in non-checksummed (lower-case) form", async function () {
+      // Codex review finding on PR #119: 09_verify.js compared
+      // constitutionGuard.admin() (always checksummed by ethers) against the
+      // raw config.sovereignAddress string via strict `===`. deploy/config.js
+      // does no normalization, so a syntactically-valid, on-chain-correct
+      // deployment using a lower-case SOVEREIGN_ADDRESS would fail
+      // verification with no actual on-chain problem. Reproduces that exact
+      // scenario end-to-end through runDeployment()'s own verifyDeployment
+      // call, not just the isolated check function.
+      const originalSovereignAddress = process.env.SOVEREIGN_ADDRESS;
+      try {
+        process.env.SOVEREIGN_ADDRESS = sovereign.address.toLowerCase();
+        const lowerCaseConfig = loadConfig();
+        expect(lowerCaseConfig.sovereignAddress).to.equal(sovereign.address.toLowerCase());
+
+        const { checks } = await runDeployment(hre, lowerCaseConfig, sovereign);
+        for (const c of checks) {
+          expect(c.pass, `check failed: ${c.name}`).to.be.true;
+        }
+      } finally {
+        process.env.SOVEREIGN_ADDRESS = originalSovereignAddress;
+      }
+    });
   });
 
   it("leaves the deployed system in the documented clean initial state", async function () {

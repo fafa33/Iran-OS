@@ -73,9 +73,17 @@ contract JusticeProtocol is AccessControl, ReentrancyGuard {
     event AppealFiled(uint256 indexed caseId, uint256 timestamp);
     event CaseFinalised(uint256 indexed caseId, uint256 timestamp);
 
-    constructor(address _kernel) {
+    // _admin receives DEFAULT_ADMIN_ROLE (real signer — e.g. the Sovereign —
+    // so post-deploy role wiring, such as granting COURT_ROLE/APPEAL_ROLE, is
+    // reachable on mainnet). _kernel receives only KERNEL_ROLE, recording the
+    // Kernel contract's identity without relying on it to ever originate a
+    // transaction here (Kernel has no call-forwarding mechanism to this
+    // contract, so approveJudge() would otherwise be permanently unreachable).
+    // Mirrors SovereignWealthFund.sol's constructor(sovereign, kernel) split.
+    constructor(address _admin, address _kernel) {
+        require(_admin != address(0), "JusticeProtocol: invalid admin");
         require(_kernel != address(0), "JusticeProtocol: invalid kernel");
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(KERNEL_ROLE, _kernel);
     }
 

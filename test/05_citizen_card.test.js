@@ -5,24 +5,24 @@ const { ethers }  = require("hardhat");
 
 describe("CitizenCard", function () {
   let card;
-  let kernel, issuer, health, welfare, employer, citizen1, citizen2, stranger;
+  let admin, kernel, issuer, health, welfare, employer, citizen1, citizen2, stranger;
 
   const biometric1 = ethers.keccak256(ethers.toUtf8Bytes("biometric_citizen_1"));
   const nationalId1 = ethers.keccak256(ethers.toUtf8Bytes("national_id_1"));
 
   beforeEach(async function () {
-    [kernel, issuer, health, welfare, employer, citizen1, citizen2, stranger] = await ethers.getSigners();
+    [admin, kernel, issuer, health, welfare, employer, citizen1, citizen2, stranger] = await ethers.getSigners();
 
     const CitizenCard = await ethers.getContractFactory("CitizenCard");
-    card = await CitizenCard.deploy(kernel.address);
+    card = await CitizenCard.deploy(admin.address, kernel.address);
 
     const ISSUER  = await card.ISSUER_ROLE();
     const HEALTH  = await card.HEALTH_ROLE();
     const WELFARE = await card.WELFARE_ROLE();
 
-    await card.connect(kernel).grantRole(ISSUER,  issuer.address);
-    await card.connect(kernel).grantRole(HEALTH,  health.address);
-    await card.connect(kernel).grantRole(WELFARE, welfare.address);
+    await card.connect(admin).grantRole(ISSUER,  issuer.address);
+    await card.connect(admin).grantRole(HEALTH,  health.address);
+    await card.connect(admin).grantRole(WELFARE, welfare.address);
     await card.connect(kernel).registerEmployer(employer.address);
   });
 

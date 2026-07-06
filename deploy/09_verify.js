@@ -92,8 +92,11 @@ async function verifyDeployment(hre, config, addresses) {
   // ConstitutionGuard, JurySelection, JusticeProtocol, CitizenCard). Not a
   // named group in §9 (that section predates this batch); these checks
   // verify the constructor-guaranteed invariant each contract's source
-  // documents (DEFAULT_ADMIN_ROLE + KERNEL_ROLE granted to Kernel, or, for
-  // ConstitutionGuard, its plain `kernel` address getter).
+  // documents: DEFAULT_ADMIN_ROLE held by SOVEREIGN_ADDRESS (a real signer —
+  // the Kernel contract cannot exercise DEFAULT_ADMIN_ROLE itself, having no
+  // call-forwarding mechanism to these contracts) and KERNEL_ROLE recorded
+  // against KERNEL_ADDRESS; for ConstitutionGuard, its plain `admin`/`kernel`
+  // address getters.
   for (const [name, contract] of [
     ["victimFund", victimFund],
     ["jurySelection", jurySelection],
@@ -102,9 +105,19 @@ async function verifyDeployment(hre, config, addresses) {
   ]) {
     const DEFAULT_ADMIN_ROLE = await contract.DEFAULT_ADMIN_ROLE();
     const KERNEL_ROLE = await contract.KERNEL_ROLE();
-    check(`${name}.hasRole(DEFAULT_ADMIN_ROLE, KERNEL_ADDRESS)`, await contract.hasRole(DEFAULT_ADMIN_ROLE, kernelAddress));
+    check(`${name}.hasRole(DEFAULT_ADMIN_ROLE, SOVEREIGN_ADDRESS)`, await contract.hasRole(DEFAULT_ADMIN_ROLE, config.sovereignAddress));
     check(`${name}.hasRole(KERNEL_ROLE, KERNEL_ADDRESS)`, await contract.hasRole(KERNEL_ROLE, kernelAddress));
   }
+  // config.sovereignAddress is a raw, unchecksummed operator-supplied string
+  // (deploy/config.js does no normalization) while contract.admin() always
+  // returns ethers' checksummed form -- normalize both sides via
+  // ethers.getAddress() before comparing, or a valid, correctly-deployed
+  // lower-case SOVEREIGN_ADDRESS would fail this check with no on-chain
+  // problem at all (Codex review finding on PR #119).
+  check(
+    "constitutionGuard.admin() === SOVEREIGN_ADDRESS",
+    (await constitutionGuard.admin()) === ethers.getAddress(config.sovereignAddress)
+  );
   check("constitutionGuard.kernel() === KERNEL_ADDRESS", (await constitutionGuard.kernel()) === kernelAddress);
 
   // Group 5 — System status (§9 گروه ۵, applicable subset)
