@@ -53,6 +53,7 @@ If covered, confirm the existing `CLAUDE.md` requirements were followed:
 - [ ] Step 9 Deployment Manifest Currency evidence included below for sensitive-component PRs, or not applicable because this PR is outside Step 9 scope.
 - [ ] Step 10 `docs/governance/OPEN_RESIDUALS.md` consultation completed and recorded below.
 - [ ] Step 11 Documentation-Parity Review completed and recorded below, or not applicable because this PR does not match the Step 11 trigger scope.
+- [ ] Step 12 Lesson-Learned Compliance Consultation completed and recorded below — `docs/governance/REVIEWER_LESSONS_LEARNED.md` was read and applicable LL entries were identified and satisfied before this PR was marked ready.
 - [ ] HARDENING_ONLY re-evaluation triggers checked; any matching active residual was re-evaluated before marking this PR ready.
 
 ### Evidence Block
@@ -96,6 +97,12 @@ Required for PRs covered by the `CLAUDE.md` PR Preflight Standard.
   - Documents updated in this PR: ___ (or "N/A — no stale descriptions found")
   - Result: PASS / DOCUMENTATION_REQUIRED
   - CET level: CET-1 / below CET-1
+- Step 12 — Lesson-Learned Compliance:
+  - Registry read before implementation: YES / NO
+  - Applicable LL IDs identified: ___ (or "none identified — [scope reviewed]")
+  - Compliance verified per applicable entry: ___ (or "N/A — none applicable")
+  - Re-checked immediately before marking READY: YES / NO
+  - Result: PASS / NOT READY — gap: ___
 
 ---
 

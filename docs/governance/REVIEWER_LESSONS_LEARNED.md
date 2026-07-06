@@ -63,7 +63,7 @@ An entry that lacks any of these four fields is incomplete and must be updated b
 A new LL entry must be created whenever a reviewer finding causes any of the following:
 
 - A new section or rule in `CLAUDE.md`
-- A change to the PR preflight checklist (Steps 1–11)
+- A change to the PR preflight checklist (Steps 1–12)
 - A new or modified evidence requirement in the grep evidence table
 - A new entry in the forbidden wording list
 - A new or modified classification rule or criterion
@@ -929,7 +929,37 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 ---
 
+## LL-027
+
+**Date:** 2026-07-06
+**PR:** #121
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** The registry's only enforced touchpoint was entry *creation* (via the Maintenance Rule), not entry *consultation*. Nothing in `CLAUDE.md` or `.github/pull_request_template.md` required a contributor to read the registry, identify applicable LL entries, or verify compliance with them before starting implementation or before marking a PR ready. A contributor could complete an entire implementation and PR without ever opening the registry, and no mechanical gate — no grep, no checklist item, no Evidence Block field — would catch that omission, unlike Steps 1–11, each of which has an explicit checklist/Evidence Block gate.
+
+**What we assumed:** That contributors (including the assistant) would organically consult the registry before implementation because its stated purpose was "institutional memory," and that the existing Maintenance Rule (governing when new entries are added) was sufficient to keep the registry authoritative in practice.
+
+**Why the assumption failed:** "Institutional memory" that is never mechanically required to be read functions as passive documentation, not an enforced specification — the same failure mode this registry exists to prevent in other forms (e.g., LL-001 through LL-026 each documented a case where an unenforced assumption produced a defect). A registry that only gates its own growth, and not its own application, can accumulate 26 entries while a 27th violation of an existing entry ships undetected.
+
+**Evidence that was missing:** A dedicated PR Preflight step (mirroring Steps 1–11) requiring (a) registry consultation before implementation begins, (b) explicit identification of applicable LL IDs, (c) compliance verification before the PR is marked ready, and (d) an Evidence Block field recording which LL IDs were checked and their compliance status — none of which existed prior to this entry.
+
+**Policy created:** New `CLAUDE.md` `#### Step 12 — Lesson-Learned Compliance Consultation` added to `### PR Preflight Standard (Mandatory)`, requiring the registry to be read before implementation, applicable LL IDs to be identified and applied during implementation, and compliance to be re-verified immediately before PR-ready, with a required Evidence Block sub-block. The `### Reviewer Lessons Learned Registry (Mandatory)` section's opening text was also updated to state explicitly that the registry is a mandatory engineering specification with the same authority as the PR Preflight Standard, and must not be treated as documentation only. `.github/pull_request_template.md` updated with a matching checklist item and Evidence Block sub-block.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → `#### Step 12 — Lesson-Learned Compliance Consultation` (new); `### Reviewer Lessons Learned Registry (Mandatory)` (authority statement added).
+
+**Verification method:** `grep -n "Step 12 — Lesson-Learned Compliance" CLAUDE.md .github/pull_request_template.md docs/governance/REVIEWER_LESSONS_LEARNED.md` → confirms the step and its cross-references exist in all three files. On any future PR, the Evidence Block's Step 12 sub-block must name specific LL IDs consulted (or state "none identified — [scope reviewed]"); a block left as an unfilled template placeholder is a Step 12 failure and the PR is not READY.
+
+**Affected files:** `CLAUDE.md` (Step 12 added to PR Preflight Standard; Reviewer Lessons Learned Registry section authority statement added; Maintenance Rule updated to Steps 1–12); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-027 added; footer updated); `.github/pull_request_template.md` (Step 12 checklist item and Evidence Block sub-block added).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Issued as a direct, permanent policy instruction by the repository owner (not a Codex finding), continuing the governance-hardening sequence started by LL-026 in the same open PR #121 / branch `docs/fix-priceoracle-feeder-runbook`.
+
+---
+
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-026*
+*Entries: LL-001 through LL-027*

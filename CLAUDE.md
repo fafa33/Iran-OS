@@ -769,6 +769,41 @@ Step 11 — Documentation-Parity Review:
 
 **Omission rule:** for any PR matching the trigger scope above, omitting the Documentation-Parity Review is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
 
+#### Step 12 — Lesson-Learned Compliance Consultation
+
+`docs/governance/REVIEWER_LESSONS_LEARNED.md` is a mandatory engineering specification with the same authority as this PR Preflight Standard — not a documentation-only record. No implementation, deployment, documentation change, governance change, runtime modification, deployment wiring, security change, or production change may begin, continue, or be marked ready without satisfying this step.
+
+**Before starting any task:**
+1. Read `docs/governance/REVIEWER_LESSONS_LEARNED.md` (in full, or at minimum every entry whose `Affected files` or subject matter overlaps the planned change).
+2. Identify every LL entry whose `Policy created` applies to the work about to be done.
+3. Apply each applicable LL entry's policy during implementation — not as an afterthought at PR time.
+
+**Before opening any PR:**
+1. Re-list every LL entry identified as applicable in step 1 above.
+2. Verify the implementation satisfies each one's `Policy created` and `Verification method`.
+3. If any applicable LL requirement is not satisfied, the PR is **not READY** — fix the gap before opening or before removing draft status, whichever is later.
+
+**Before declaring READY:**
+1. Re-check the finished implementation against every applicable LL entry one final time (LL entries can be added by other contributors between task start and PR-ready).
+2. Record the applicable LL IDs and an explicit compliance confirmation in the Evidence Block (below) — an unfilled placeholder is treated as non-compliance.
+
+**Every new Codex (or other reviewer) finding must, per the existing Reviewer Lessons Learned Registry rules below:** be fixed; have its root cause identified; become a new LL entry with a verification method; be integrated into the engineering workflow (`CLAUDE.md` and/or `.github/pull_request_template.md` as the finding requires); and become part of future pre-merge validation via this same Step 12 mechanism, so the same finding class is caught by consultation on every subsequent PR, not only remembered by whoever fixed it.
+
+**Verification method:** `grep -c '^## LL-' docs/governance/REVIEWER_LESSONS_LEARNED.md` confirms the registry is present and its entry count; that alone is not sufficient evidence of consultation — the Evidence Block below must name the specific LL IDs reviewed (or state "none identified — [scope reviewed]"), not merely the count.
+
+**Required evidence block entry for Step 12:**
+
+```
+Step 12 — Lesson-Learned Compliance:
+- Registry read before implementation: [YES / NO]
+- Applicable LL IDs identified: [list of LL-XXX IDs, or "none identified — [scope reviewed, e.g. 'documentation-only change, no code/role/authority path touched']"]
+- Compliance verified per applicable entry: [per-LL-ID PASS/gap note, or "N/A — none applicable"]
+- Re-checked immediately before marking READY: [YES / NO]
+- Result: [PASS / NOT READY — gap: <description>]
+```
+
+**Omission rule:** omitting the Lesson-Learned Compliance Consultation, or leaving its Evidence Block as an unfilled template, is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
+
 #### Before Responding to Codex
 
 1. Never respond from memory. Run the grep the comment implies before writing any reply.
@@ -788,6 +823,8 @@ Step 11 — Documentation-Parity Review:
 ### Reviewer Lessons Learned Registry (Mandatory)
 
 Any reviewer finding that causes a new CLAUDE.md policy, a preflight step change, a new evidence requirement, or a governance workflow change must receive a new entry in `docs/governance/REVIEWER_LESSONS_LEARNED.md`.
+
+**This registry is a mandatory engineering specification, not documentation.** It has the same authority as this PR Preflight Standard. Existing LL entries must be actively consulted and applied before any implementation begins, before any PR is opened, and before any PR is marked READY — see Step 12 above. Treating the registry as a passive historical record, rather than an enforced pre-implementation gate, is itself the class of failure Step 12 exists to prevent.
 
 **Registry location:** `docs/governance/REVIEWER_LESSONS_LEARNED.md`
 
