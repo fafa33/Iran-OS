@@ -10,6 +10,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### Fixed — Codex review finding on PR #116 (guard/deployment ordering)
+- `deploy/03_recognized_backing.js` — the `ACKNOWLEDGE_RESERVE_RESET` reserve-reset guard read `registry.recognizedBackingTotal()` from a `RecognizedReserveBacking` instance already deployed a few lines earlier, so a blocked (rejected) call still deployed and orphaned a live, unrecorded registry contract — confirmed valid: `RecognizedReserveBacking.sol`'s constructor (lines 64-72) never sets `recognizedBackingTotal` (it stays at its default `0`); only `recordIdentity()` (line 117), gated by `RECOGNIZER_ROLE`, can increase it, and that role cannot be exercised before the contract exists — so a freshly-deployed registry's `recognizedBackingTotal()` is deterministically `0` and the guard never needed to read it from a live contract. Moved the guard to evaluate `PahlaviToken.totalReserves()` alone, before `RecognizedReserveBacking` is deployed; a rejection now leaves no on-chain registry contract at all. No change to the guard's trigger condition, message content (`Reserve reset blocked`/`ACKNOWLEDGE_RESERVE_RESET` regexes preserved), deployment order, or incremental persistence. No Solidity, protocol, governance, or monetary changes
+- `deploy/README.md` — "Nonzero INITIAL_RESERVES" section now states the guard is evaluated before the registry is deployed
+- `test/32_deployment_workflow.test.js` — added a regression test asserting the deployer signer's transaction count is unchanged when the guard rejects (proving no `RecognizedReserveBacking` deployment transaction was ever sent); 748 passing (up from 747)
+
 ### Added
 - `CONTRIBUTING.md` — English contributor onboarding (PR #47)
 - `CHANGELOG.md` — this file (PR #47)

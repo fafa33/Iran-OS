@@ -80,7 +80,9 @@ to a nonzero value, running `03_recognized_backing.js` (or the full
 automated run, with no `recordIdentity()` step in between. `03_recognized_backing.js`
 blocks this and throws unless `ACKNOWLEDGE_RESERVE_RESET=true` is set,
 confirming the reset is an intentional operator decision rather than an
-unnoticed side effect.
+unnoticed side effect. This check is evaluated from `PahlaviToken.totalReserves()`
+alone, before `RecognizedReserveBacking` is deployed — a rejection leaves no
+orphaned registry contract on-chain.
 
 Note: `03_recognized_backing.js` deploys `RecognizedReserveBacking` and wires
 it to `PahlaviToken` in the same function call, so there is no point *within
