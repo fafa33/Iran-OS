@@ -377,8 +377,15 @@ kernel.grantOfficialAccess(API3_ORACLE_ADDRESS, ORACLE_ROLE)
 # تنها مسیر مجاز feeder→API3Oracle→Kernel باشد.
 kernel.revokeRole(ORACLE_ROLE, ORACLE_INITIAL)
 
-# گام ۳: feeder‌های PriceOracle و ProductionOracle (این oracle‌ها constructor ساده دارند)
-priceOracle.grantRole(FEEDER_ROLE, PRICE_FEEDER)
+# گام ۳: feeder‌های PriceOracle و ProductionOracle
+# PriceOracle: سازنده در نسخه ۱.۳.۳ به constructor(admin, kernel) اصلاح شد —
+# DEFAULT_ADMIN_ROLE به SOVEREIGN_ADDRESS تعلق دارد، نه kernel؛ فراخوانی این
+# گام باید توسط sovereign امضا شود، نه kernel (kernel هیچ نقش ادمینی روی
+# PriceOracle ندارد و grantRole آن revert می‌کند)
+sovereign اجرا کند: priceOracle.grantRole(FEEDER_ROLE, PRICE_FEEDER)
+# ProductionOracle: هنوز deploy نشده؛ سازنده‌اش (constructor ساده — تنها kernel)
+# تغییر نکرده، پس این فراخوانی همچنان توسط kernel (DEFAULT_ADMIN_ROLE) خواهد بود
+# مگر اینکه هنگام deploy همین اصلاح روی آن هم اعمال شود
 productionOracle.grantRole(FEEDER_ROLE, PROD_FEEDER)
 ```
 
@@ -422,11 +429,18 @@ kernel.grantOfficialAccess(API3_ORACLE_ADDRESS, kernel.ORACLE_ROLE())
 kernel.revokeRole(kernel.ORACLE_ROLE(), ORACLE_INITIAL)
 
 # گام ۴: feeder‌های PriceOracle و ProductionOracle
-priceOracle.grantRole(priceOracle.FEEDER_ROLE(), PRICE_FEEDER)
+# PriceOracle: sovereign اجرا کند (DEFAULT_ADMIN_ROLE به SOVEREIGN_ADDRESS تعلق
+# دارد از نسخه ۱.۳.۳ — constructor(admin, kernel)، deploy/15_price_oracle.js).
+# kernel هیچ نقش ادمینی روی PriceOracle ندارد؛ فراخوانی این گام توسط kernel
+# revert می‌کند.
+sovereign اجرا کند: priceOracle.grantRole(priceOracle.FEEDER_ROLE(), PRICE_FEEDER)
+# ProductionOracle: هنوز deploy نشده؛ سازنده‌اش (تنها kernel) تغییر نکرده.
 productionOracle.grantRole(productionOracle.FEEDER_ROLE(), PROD_FEEDER)
 ```
 
 **توجه — FEEDER_ROLE روی API3Oracle:** FEEDER_ROLE در constructor اعطا می‌شود. هیچ `api3Oracle.grantRole(FEEDER_ROLE, ...)` پس از deploy لازم نیست. همه feeder‌های مجاز باید در زمان deploy مشخص باشند. `DEFAULT_ADMIN_ROLE` در API3Oracle به `Kernel` اعطا می‌شود.
+
+**توجه — FEEDER_ROLE روی PriceOracle:** برخلاف API3Oracle، سازنده `PriceOracle` در نسخه ۱.۳.۳ اصلاح شد تا `DEFAULT_ADMIN_ROLE` را به `SOVEREIGN_ADDRESS` بدهد، نه `KERNEL_ADDRESS` (رفع همان یافته P0 که برای ۵ قرارداد Layer 1 دیگر اعمال شد — بخش ۲ و ۳ مرحله ۲ را ببینید). این گام توسط این workflow اجرا نمی‌شود (`deploy/15_price_oracle.js` عمداً `FEEDER_ROLE` را اعطا نمی‌کند، چون `PRICE_FEEDER` در بخش ۱ مستند نشده)؛ اگر بعداً به‌صورت دستی اجرا شود، باید توسط `sovereign` امضا شود.
 
 **توجه — ORACLE_INITIAL revoke:** این گام اجباری است. بدون آن، ORACLE_INITIAL می‌تواند مستقیماً `Kernel.syncReserves()` را فراخوانی کند و مسیر feeder→API3Oracle را دور بزند.
 

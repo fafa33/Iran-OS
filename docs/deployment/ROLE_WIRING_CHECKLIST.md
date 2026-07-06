@@ -182,10 +182,12 @@ freeze.grantRole(freeze.COUNCIL_ROLE(), council3)
 
 ### ز — اجباری: Feeder‌های PriceOracle و ProductionOracle
 
+⚠️ **`PriceOracle` سازنده‌اش در نسخه ۱.۳.۳ (به `constructor(admin, kernel)` — `deploy/15_price_oracle.js`) اصلاح شد: `DEFAULT_ADMIN_ROLE` به `SOVEREIGN_ADDRESS` تعلق دارد، نه به `kernel`.** فراخوان ردیف زیر برای `PriceOracle` بر همین اساس اصلاح شده — `kernel` دیگر هیچ نقش ادمینی روی `PriceOracle` ندارد و فراخوانی `kernel.grantRole(...)` روی آن revert می‌کند. `ProductionOracle` هنوز deploy نشده و سازنده‌اش (`constructor(kernel)`) تغییر نکرده؛ ردیف آن همچنان `kernel` را به‌عنوان فراخوان صحیح مستند می‌کند تا زمانی که deploy شود و همین اصلاح روی آن هم اعمال گردد.
+
 | # | فراخوان | قرارداد هدف | نقش | دریافت‌کننده |
 |---|---------|------------|-----|-------------|
-| 6 | `kernel` | `PriceOracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز |
-| 7 | `kernel` | `ProductionOracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز |
+| 6 | `sovereign` (SOVEREIGN_ADDRESS) | `PriceOracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز |
+| 7 | `kernel` | `ProductionOracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز (هنوز deploy نشده — نسخه ۱.۳.۳ constructor(admin, kernel) روی این قرارداد اعمال نشده) |
 
 ### ح — بحرانی: پیوند آدرس PahlaviToken به Kernel (GAP-MEX-05)
 
