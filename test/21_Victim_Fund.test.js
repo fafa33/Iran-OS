@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 
 describe("VictimFund", function () {
 let fund;
-let kernel, court, council, penalLabor;
+let admin, kernel, court, council, penalLabor;
 let victim1, victim2, attacker;
 
 const COURT_ROLE       = ethers.keccak256(ethers.toUtf8Bytes("COURT_ROLE"));
@@ -11,13 +11,13 @@ const COUNCIL_ROLE     = ethers.keccak256(ethers.toUtf8Bytes("COUNCIL_ROLE"));
 const PENAL_LABOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("PENAL_LABOR_ROLE"));
 
 beforeEach(async function () {
-[kernel, court, council, penalLabor, victim1, victim2, attacker] = await ethers.getSigners();
+[admin, kernel, court, council, penalLabor, victim1, victim2, attacker] = await ethers.getSigners();
 const Fund = await ethers.getContractFactory("VictimFund");
-fund = await Fund.deploy(kernel.address);
+fund = await Fund.deploy(admin.address, kernel.address);
 await fund.waitForDeployment();
-await fund.connect(kernel).grantRole(COURT_ROLE, court.address);
-await fund.connect(kernel).grantRole(COUNCIL_ROLE, council.address);
-await fund.connect(kernel).grantRole(PENAL_LABOR_ROLE, penalLabor.address);
+await fund.connect(admin).grantRole(COURT_ROLE, court.address);
+await fund.connect(admin).grantRole(COUNCIL_ROLE, council.address);
+await fund.connect(admin).grantRole(PENAL_LABOR_ROLE, penalLabor.address);
 });
 
 describe("Deployment", function () {
@@ -125,9 +125,9 @@ it("نباید مبلغ صفر پرداخت شود", async function () {
   ).to.be.revertedWith("VictimFund: zero amount");
 });
 it("نباید بیشتر از موجودی پرداخت شود", async function () {
-  const newFund = await (await ethers.getContractFactory("VictimFund")).deploy(kernel.address);
-  await newFund.connect(kernel).grantRole(COURT_ROLE, court.address);
-  await newFund.connect(kernel).grantRole(COUNCIL_ROLE, council.address);
+  const newFund = await (await ethers.getContractFactory("VictimFund")).deploy(admin.address, kernel.address);
+  await newFund.connect(admin).grantRole(COURT_ROLE, court.address);
+  await newFund.connect(admin).grantRole(COUNCIL_ROLE, council.address);
   await newFund.connect(court).registerVictim(victim1.address, 0, 1, approved);
   await expect(
     newFund.connect(council).payCompensation(1, approved)

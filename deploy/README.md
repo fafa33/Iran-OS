@@ -8,11 +8,19 @@ documented in `docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` and
 
 This deploys eleven contracts: the core monetary/reserve path (`IranOS_Kernel`,
 `Treasury`, `SovereignWealthFund`, `PahlaviToken`, `API3Oracle`,
-`RecognizedReserveBacking`) and five Layer 1, constructor-only-on-Kernel
-contracts (`VictimFund`, `ConstitutionGuard`, `JurySelection`,
-`JusticeProtocol`, `CitizenCard`). The latter five have no constructor
-dependency beyond `KERNEL_ADDRESS` and no further role-wiring documented in
-`docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` §4-§7.
+`RecognizedReserveBacking`) and five Layer 1 contracts (`VictimFund`,
+`ConstitutionGuard`, `JurySelection`, `JusticeProtocol`, `CitizenCard`). The
+latter five take `(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)` as constructor
+arguments — `SOVEREIGN_ADDRESS` receives `DEFAULT_ADMIN_ROLE` (a real signer,
+so post-deploy role wiring is reachable on mainnet), `KERNEL_ADDRESS`
+receives only `KERNEL_ROLE` (recorded identity; the Kernel contract has no
+call-forwarding mechanism to these contracts and cannot exercise
+`DEFAULT_ADMIN_ROLE` itself — see "Layer 1 admin binding" below). No further
+role-wiring beyond the constructor grant is documented in
+`docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md` §4-§7; granting the
+operational roles each contract needs (`COURT_ROLE`, `VRF_ROLE`,
+`ISSUER_ROLE`, etc.) is left to the operator via `SOVEREIGN_ADDRESS`'s
+`DEFAULT_ADMIN_ROLE`, post-deploy.
 
 **Not included:** `TriggerProtocol`, `AssetFreeze`,
 `PriceOracle`, `ProductionOracle`, `PenalLabor`, `Provincial`,
@@ -110,6 +118,45 @@ operation — call `RecognizedReserveBacking.recordIdentity()` after this
 script has run and wired the registry, and treat the reserve reset to `0` in
 between as expected and acknowledged.
 
+### Layer 1 admin binding (VictimFund, ConstitutionGuard, JurySelection, JusticeProtocol, CitizenCard)
+
+A hostile architecture review found that these 5 contracts, as originally
+deployed, granted `DEFAULT_ADMIN_ROLE`/`admin` solely to `KERNEL_ADDRESS`.
+`contracts/kernel.sol` has no generic call-forwarding, `delegatecall`, or any
+reference to these 5 contracts anywhere in its source — its only outbound
+call to another contract is a single hardcoded `ITriggerProtocol.executeTrigger()`
+invocation, unrelated to this batch. That meant the Kernel contract could
+never itself call `grantRole()`, `approveLaw()`/`rejectLaw()`, or any
+privileged function on these contracts, making their entire operational
+surface (`registerVictim`, `selectJury`, `approveJudge`, `registerEmployer`,
+`approveLaw`/`rejectLaw`, etc.) permanently unreachable in production —
+confirmed against the actual Solidity source, not assumed.
+
+Fixed by mirroring `SovereignWealthFund.sol`'s already-established
+`constructor(sovereign, kernel)` split: these 5 contracts' constructors now
+take `(_admin, _kernel)`, granting `DEFAULT_ADMIN_ROLE` to `_admin`
+(`SOVEREIGN_ADDRESS`, a real signer) instead of `_kernel`. `KERNEL_ROLE`
+continues to be granted to `_kernel` unchanged, recording the Kernel
+contract's identity without relying on it to ever originate a transaction.
+`ConstitutionGuard`'s `onlyKernel` modifier now accepts either `kernel` or
+the new `admin` address as caller — additive only, the original `kernel`
+path is unchanged.
+
+This makes post-deploy role wiring (`COURT_ROLE`, `COUNCIL_ROLE`,
+`PENAL_LABOR_ROLE`, `VRF_ROLE`, `ISSUER_ROLE`, `HEALTH_ROLE`,
+`WELFARE_ROLE`, or delegating `KERNEL_ROLE` itself to a real operational
+address) reachable via `SOVEREIGN_ADDRESS`, exactly matching how
+`swf.grantRole(RECLAIM_ROLE, ASSET_FREEZE_ADDRESS)` (Group C) already works.
+`test/32_deployment_workflow.test.js`'s "Layer 1 contract deployment-path
+parity" tests prove this end-to-end using the actual deployed Kernel
+contract address (not an EOA standing in for it) and the real Sovereign
+signer.
+
+No Solidity change was made to any monetary-core contract (`Treasury`,
+`SovereignWealthFund`, `PahlaviToken`, `RecognizedReserveBacking`,
+`IranOS_Kernel`) or to any governance/protocol logic — only the admin-role
+binding in these 5 already-non-monetary contracts.
+
 ### Duplicate Court addresses
 
 `08_finalize.js` rejects Oracle activation if `COURT_1..COURT_9` are not 9
@@ -132,7 +179,7 @@ persisted file and continue with the remaining individual scripts.
 
 `deploy/index.js`'s CLI entry point (`npx hardhat run deploy/index.js`)
 refuses to start if `deploy/deployments/<network>.json` already contains any
-of the 6 core-monetary-path addresses for that network — whether from a
+of the 11 addresses this workflow produces for that network — whether from a
 completed run or a partial one recovered per the above. It does not
 overwrite the file or auto-resume; it stops immediately with an error
 directing the operator to either continue manually with the individual

@@ -67,9 +67,18 @@ contract CitizenCard is AccessControl, ReentrancyGuard {
     event CardDeactivated(address indexed citizen, string reason);
     event EmployerRegistered(address indexed employer);
 
-    constructor(address _kernel) {
+    // _admin receives DEFAULT_ADMIN_ROLE (real signer — e.g. the Sovereign —
+    // so post-deploy role wiring, such as granting ISSUER_ROLE/HEALTH_ROLE/
+    // WELFARE_ROLE, is reachable on mainnet). _kernel receives only
+    // KERNEL_ROLE, recording the Kernel contract's identity without relying
+    // on it to ever originate a transaction here (Kernel has no
+    // call-forwarding mechanism to this contract, so registerEmployer()/
+    // deactivateCard() would otherwise be permanently unreachable). Mirrors
+    // SovereignWealthFund.sol's constructor(sovereign, kernel) split.
+    constructor(address _admin, address _kernel) {
+        require(_admin != address(0), "CitizenCard: invalid admin");
         require(_kernel != address(0), "CitizenCard: invalid kernel");
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(KERNEL_ROLE, _kernel);
     }
 

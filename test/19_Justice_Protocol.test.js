@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 
 describe("JusticeProtocol", function () {
 let justice;
-let kernel, court, judge, appeal;
+let admin, kernel, court, judge, appeal;
 let defendant, attacker;
 
 const COURT_ROLE  = ethers.keccak256(ethers.toUtf8Bytes("COURT_ROLE"));
@@ -11,12 +11,12 @@ const JUDGE_ROLE  = ethers.keccak256(ethers.toUtf8Bytes("JUDGE_ROLE"));
 const APPEAL_ROLE = ethers.keccak256(ethers.toUtf8Bytes("APPEAL_ROLE"));
 
 beforeEach(async function () {
-[kernel, court, judge, appeal, defendant, attacker] = await ethers.getSigners();
+[admin, kernel, court, judge, appeal, defendant, attacker] = await ethers.getSigners();
 const Justice = await ethers.getContractFactory("JusticeProtocol");
-justice = await Justice.deploy(kernel.address);
+justice = await Justice.deploy(admin.address, kernel.address);
 await justice.waitForDeployment();
-await justice.connect(kernel).grantRole(COURT_ROLE, court.address);
-await justice.connect(kernel).grantRole(APPEAL_ROLE, appeal.address);
+await justice.connect(admin).grantRole(COURT_ROLE, court.address);
+await justice.connect(admin).grantRole(APPEAL_ROLE, appeal.address);
 await justice.connect(kernel).approveJudge(judge.address);
 });
 

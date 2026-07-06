@@ -12,6 +12,13 @@ pragma solidity ^0.8.20;
 contract ConstitutionGuard {
 
     address public kernel;
+    // Real signer (e.g. the Sovereign) able to exercise the same
+    // approveLaw/rejectLaw authority as `kernel`. Added because the Kernel
+    // contract has no call-forwarding mechanism to this contract, so
+    // `kernel` alone can never be msg.sender in practice — `admin` is
+    // Kernel's real-world signing delegate for this authority, not a new
+    // decision-maker; `onlyKernel` accepts either address unchanged.
+    address public admin;
 
     // اصول پنج‌گانه منشور رفاه و عدالت
     uint8 public constant PRINCIPLE_SECULAR     = 1; // سکولاریسم ساختاری (فرگرد ۱)
@@ -45,12 +52,14 @@ contract ConstitutionGuard {
     event PrincipleViolationDetected(bytes32 indexed hash, uint8 violatedPrinciple, uint256 timestamp);
 
     modifier onlyKernel() {
-        require(msg.sender == kernel, "ConstitutionGuard: caller is not the Kernel");
+        require(msg.sender == kernel || msg.sender == admin, "ConstitutionGuard: caller is not the Kernel");
         _;
     }
 
-    constructor(address _kernel) {
+    constructor(address _admin, address _kernel) {
+        require(_admin != address(0), "ConstitutionGuard: invalid admin");
         require(_kernel != address(0), "ConstitutionGuard: invalid kernel");
+        admin = _admin;
         kernel = _kernel;
     }
 

@@ -5,17 +5,21 @@ const { ethers }  = require("hardhat");
 
 describe("ConstitutionGuard", function () {
   let guard;
-  let kernel, proposer, stranger;
+  let admin, kernel, proposer, stranger;
 
   beforeEach(async function () {
-    [kernel, proposer, stranger] = await ethers.getSigners();
+    [admin, kernel, proposer, stranger] = await ethers.getSigners();
     const Guard = await ethers.getContractFactory("ConstitutionGuard");
-    guard = await Guard.deploy(kernel.address);
+    guard = await Guard.deploy(admin.address, kernel.address);
   });
 
   describe("استقرار", function () {
     it("آدرس Kernel صحیح ثبت شده", async function () {
       expect(await guard.kernel()).to.equal(kernel.address);
+    });
+
+    it("آدرس admin صحیح ثبت شده", async function () {
+      expect(await guard.admin()).to.equal(admin.address);
     });
 
     it("ثوابت اصول منشور صحیح است", async function () {
@@ -127,6 +131,16 @@ describe("ConstitutionGuard", function () {
       await expect(guard.connect(kernel).approveLaw(unknownHash))
         .to.be.revertedWith("ConstitutionGuard: proposal not found");
     });
+
+    it("admin (نماینده امضاکننده واقعی Kernel) نیز می‌تواند قانون را تایید کند", async function () {
+      // Kernel is a contract with no call-forwarding mechanism to this
+      // contract, so `admin` (a real signer, e.g. the Sovereign) is the
+      // path that actually exercises this authority in production.
+      await expect(guard.connect(admin).approveLaw(lawHash))
+        .to.emit(guard, "LawApproved");
+
+      expect(await guard.isLawApproved(lawHash)).to.be.true;
+    });
   });
 
   // ─────────────────────────────────────────
@@ -172,6 +186,12 @@ describe("ConstitutionGuard", function () {
 
       await expect(guard.connect(kernel).rejectLaw(approvedHash, "تلاش برای رد پس از تایید", 1))
         .to.be.revertedWith("ConstitutionGuard: already executed");
+    });
+
+    it("admin (نماینده امضاکننده واقعی Kernel) نیز می‌تواند قانون را رد کند", async function () {
+      const tx = await guard.connect(admin).rejectLaw(lawHash, "نقض سکولاریسم ساختاری", 1);
+      await expect(tx).to.emit(guard, "PrincipleViolationDetected");
+      expect(await guard.isLawApproved(lawHash)).to.be.false;
     });
   });
 

@@ -56,23 +56,23 @@ async function runDeployment(hre, config, sovereignSigner, persistStep = () => {
   addresses.SWF_ADDRESS = swfAddress;
   persistStep(addresses);
 
-  const { address: victimFundAddress } = await deployVictimFund(hre, addresses);
+  const { address: victimFundAddress } = await deployVictimFund(hre, config, addresses);
   addresses.VICTIM_FUND_ADDRESS = victimFundAddress;
   persistStep(addresses);
 
-  const { address: constitutionGuardAddress } = await deployConstitutionGuard(hre, addresses);
+  const { address: constitutionGuardAddress } = await deployConstitutionGuard(hre, config, addresses);
   addresses.CONSTITUTION_GUARD_ADDRESS = constitutionGuardAddress;
   persistStep(addresses);
 
-  const { address: jurySelectionAddress } = await deployJurySelection(hre, addresses);
+  const { address: jurySelectionAddress } = await deployJurySelection(hre, config, addresses);
   addresses.JURY_SELECTION_ADDRESS = jurySelectionAddress;
   persistStep(addresses);
 
-  const { address: justiceProtocolAddress } = await deployJusticeProtocol(hre, addresses);
+  const { address: justiceProtocolAddress } = await deployJusticeProtocol(hre, config, addresses);
   addresses.JUSTICE_PROTOCOL_ADDRESS = justiceProtocolAddress;
   persistStep(addresses);
 
-  const { address: citizenCardAddress } = await deployCitizenCard(hre, addresses);
+  const { address: citizenCardAddress } = await deployCitizenCard(hre, config, addresses);
   addresses.CITIZEN_CARD_ADDRESS = citizenCardAddress;
   persistStep(addresses);
 

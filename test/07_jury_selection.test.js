@@ -6,7 +6,7 @@ const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 
 describe("JurySelection", function () {
   let jury;
-  let kernel, vrf, court, stranger;
+  let admin, kernel, vrf, court, stranger;
 
   const JURY_SIZE = 12;
   const caseId    = 1001n;
@@ -23,15 +23,15 @@ describe("JurySelection", function () {
   const fakeZkProof = "0x" + "aa".repeat(256);
 
   beforeEach(async function () {
-    [kernel, vrf, court, stranger] = await ethers.getSigners();
+    [admin, kernel, vrf, court, stranger] = await ethers.getSigners();
 
     const JurySelection = await ethers.getContractFactory("JurySelection");
-    jury = await JurySelection.deploy(kernel.address);
+    jury = await JurySelection.deploy(admin.address, kernel.address);
 
     const VRF_ROLE  = await jury.VRF_ROLE();
     const COURT_ROLE = await jury.COURT_ROLE();
-    await jury.connect(kernel).grantRole(VRF_ROLE,  vrf.address);
-    await jury.connect(kernel).grantRole(COURT_ROLE, court.address);
+    await jury.connect(admin).grantRole(VRF_ROLE,  vrf.address);
+    await jury.connect(admin).grantRole(COURT_ROLE, court.address);
   });
 
   // ─────────────────────────────────────────
