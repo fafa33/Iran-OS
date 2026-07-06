@@ -45,6 +45,16 @@ function loadConfig() {
     feederAddresses: requiredFeeders(),
     recognizerAddress: required("RECOGNIZER_ADDRESS"),
     initialReserves: required("INITIAL_RESERVES"),
+    // Optional. When wiring RecognizedReserveBacking to a PahlaviToken that
+    // already holds a nonzero totalReserves (e.g. a nonzero INITIAL_RESERVES),
+    // the atomic sync in Kernel.setPahlaviRecognizedReserveBacking() replaces
+    // totalReserves with the freshly-deployed (empty) registry's
+    // recognizedBackingTotal(), i.e. 0 -- by design (DEPLOYMENT_MANIFEST_PROTOCOL.md
+    // section 3, Stage 5). deploy/03_recognized_backing.js requires this flag
+    // set to "true" before proceeding in that scenario, so the reset is an
+    // explicit operator decision rather than a silent side effect of running
+    // deploy/index.js.
+    acknowledgeReserveReset: process.env.ACKNOWLEDGE_RESERVE_RESET === "true",
   };
 }
 

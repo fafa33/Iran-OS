@@ -20,7 +20,7 @@ async function deployRecognizedBacking(hre, config, addresses, sovereignSigner) 
   const { ethers } = hre;
   const { requireAddress } = require("./lib/addressBook");
   const kernelAddress = requireAddress(addresses, "KERNEL_ADDRESS", "01_kernel.js");
-  requireAddress(addresses, "PAHLAVI_TOKEN_ADDRESS", "02_token.js");
+  const tokenAddress = requireAddress(addresses, "PAHLAVI_TOKEN_ADDRESS", "02_token.js");
 
   const RecognizedReserveBacking = await ethers.getContractFactory("RecognizedReserveBacking");
   const registry = await RecognizedReserveBacking.deploy(
@@ -29,6 +29,27 @@ async function deployRecognizedBacking(hre, config, addresses, sovereignSigner) 
   );
   await registry.waitForDeployment();
   const registryAddress = await registry.getAddress();
+
+  const token = await ethers.getContractAt("PahlaviToken", tokenAddress);
+  const totalReservesBeforeWiring = await token.totalReserves();
+  const recognizedBackingTotal = await registry.recognizedBackingTotal();
+  if (totalReservesBeforeWiring > 0n && recognizedBackingTotal === 0n && !config.acknowledgeReserveReset) {
+    throw new Error(
+      `Reserve reset blocked: PahlaviToken.totalReserves() is currently ${totalReservesBeforeWiring.toString()} ` +
+      "but the freshly-deployed RecognizedReserveBacking has recordIdentity() " +
+      "count 0 (recognizedBackingTotal() == 0). " +
+      "kernel.setPahlaviRecognizedReserveBacking() performs an atomic sync that " +
+      "would replace the current totalReserves with 0. This script deploys the " +
+      "registry and performs the atomic wiring in the same call, so there is no " +
+      "point in this workflow at which recordIdentity() could run against this " +
+      "registry beforehand — the registry does not exist until this script " +
+      "deploys it a few lines above this check. Set ACKNOWLEDGE_RESERVE_RESET=true " +
+      "to confirm the reset to 0 is an intentional operator decision. If the " +
+      "nonzero balance should instead be preserved as recognized identities, do so " +
+      "as a separate, later operation (RecognizedReserveBacking.recordIdentity(), " +
+      "after this script has run and wired the registry)."
+    );
+  }
 
   const kernel = await ethers.getContractAt("IranOS_Kernel", kernelAddress, sovereignSigner);
   await (await kernel.setPahlaviRecognizedReserveBacking(registryAddress)).wait();

@@ -8,7 +8,7 @@
 const { expect } = require("chai");
 const hre = require("hardhat");
 const { ethers } = hre;
-const { runDeployment } = require("../deploy/index");
+const { runDeployment, assertNoExistingDeployment } = require("../deploy/index");
 const { loadConfig } = require("../deploy/config");
 
 describe("Deployment Workflow (deploy/)", function () {
@@ -172,38 +172,53 @@ describe("Deployment Workflow (deploy/)", function () {
     expect(await kernel.hasRole(ORACLE_ROLE, oracleAddress)).to.be.false;
   });
 
-  it("verify script fails if two configured court addresses are not distinct", async function () {
+  it("blocks Oracle activation (08_finalize.js) if two configured court addresses are not distinct", async function () {
     const config = loadConfig();
     const duplicated = {
       ...config,
       courtMembers2to9: [config.court1, ...config.courtMembers2to9.slice(1)],
     };
 
-    // Build the deployment manually through 08_finalize.js — NOT via
-    // runDeployment(), which calls verifyDeployment() as its own last step
-    // and would throw on the duplicate before this test could assert on it.
     const { deployKernel } = require("../deploy/01_kernel");
-    const { deployTreasury } = require("../deploy/05_treasury");
-    const { deploySwf } = require("../deploy/06_swf");
-    const { deployToken } = require("../deploy/02_token");
     const { deployOracle } = require("../deploy/04_oracle");
-    const { deployRecognizedBacking } = require("../deploy/03_recognized_backing");
     const { wireCourtCompletion } = require("../deploy/07_roles");
     const { finalizeOracleActivation } = require("../deploy/08_finalize");
-    const { verifyDeployment } = require("../deploy/09_verify");
 
     const addresses = {};
     addresses.KERNEL_ADDRESS = (await deployKernel(hre, duplicated)).address;
-    addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
-    addresses.SWF_ADDRESS = (await deploySwf(hre, duplicated, addresses)).address;
-    addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, duplicated, addresses, sovereign)).address;
     addresses.API3_ORACLE_ADDRESS = (await deployOracle(hre, duplicated, addresses)).address;
-    addresses.RECOGNIZED_RESERVE_BACKING_ADDRESS = (
-      await deployRecognizedBacking(hre, duplicated, addresses, sovereign)
-    ).address;
+    // wireCourtCompletion grants COURT_ROLE to the (duplicated) list; the
+    // duplicate is a no-op re-grant, so this itself does not throw -- the
+    // rejection must happen in finalizeOracleActivation, before ORACLE_ROLE
+    // is ever granted.
     await wireCourtCompletion(hre, duplicated, addresses, sovereign);
-    await finalizeOracleActivation(hre, duplicated, addresses, sovereign);
 
+    let error;
+    try {
+      await finalizeOracleActivation(hre, duplicated, addresses, sovereign);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).to.exist;
+    expect(error.message).to.match(/pairwise-distinct/);
+
+    const kernel = await ethers.getContractAt("IranOS_Kernel", addresses.KERNEL_ADDRESS);
+    const ORACLE_ROLE = await kernel.ORACLE_ROLE();
+    expect(await kernel.hasRole(ORACLE_ROLE, addresses.API3_ORACLE_ADDRESS)).to.be.false;
+  });
+
+  it("verifyDeployment still rejects duplicate court addresses as defense-in-depth", async function () {
+    // Exercises 09_verify.js's own independent uniqueness check directly,
+    // in case it is ever invoked standalone against a config that was not
+    // first screened by 08_finalize.js's guard.
+    const config = loadConfig();
+    const { addresses } = await runDeployment(hre, config, sovereign);
+    const duplicated = {
+      ...config,
+      courtMembers2to9: [config.court1, ...config.courtMembers2to9.slice(1)],
+    };
+
+    const { verifyDeployment } = require("../deploy/09_verify");
     let error;
     try {
       await verifyDeployment(hre, duplicated, addresses);
@@ -227,6 +242,7 @@ describe("Deployment Workflow (deploy/)", function () {
       "../deploy/09_verify": "verifyDeployment",
       "../deploy/index": "runDeployment",
     };
+    expect(require("../deploy/index").assertNoExistingDeployment, "../deploy/index must export assertNoExistingDeployment").to.be.a("function");
     for (const [modulePath, exportName] of Object.entries(expectedExports)) {
       const mod = require(modulePath);
       expect(mod[exportName], `${modulePath} must export ${exportName}`).to.be.a("function");
@@ -236,5 +252,181 @@ describe("Deployment Workflow (deploy/)", function () {
     // `npx hardhat run deploy/0N_*.js --network <network>`) are not
     // exercised by this suite and were verified manually against a
     // persistent local node — see deploy/README.md.
+  });
+
+  describe("nonzero INITIAL_RESERVES reset guard (03_recognized_backing.js)", function () {
+    let nonzeroConfig;
+
+    beforeEach(function () {
+      nonzeroConfig = { ...loadConfig(), initialReserves: "5000" };
+    });
+
+    it("blocks wiring a fresh (empty) registry to a token with nonzero totalReserves unless acknowledged", async function () {
+      const { deployKernel } = require("../deploy/01_kernel");
+      const { deployTreasury } = require("../deploy/05_treasury");
+      const { deploySwf } = require("../deploy/06_swf");
+      const { deployToken } = require("../deploy/02_token");
+      const { deployRecognizedBacking } = require("../deploy/03_recognized_backing");
+
+      const addresses = {};
+      addresses.KERNEL_ADDRESS = (await deployKernel(hre, nonzeroConfig)).address;
+      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+      addresses.SWF_ADDRESS = (await deploySwf(hre, nonzeroConfig, addresses)).address;
+      addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, nonzeroConfig, addresses, sovereign)).address;
+
+      const token = await ethers.getContractAt("PahlaviToken", addresses.PAHLAVI_TOKEN_ADDRESS);
+      expect(await token.totalReserves()).to.equal(5000n);
+
+      let error;
+      try {
+        await deployRecognizedBacking(hre, nonzeroConfig, addresses, sovereign);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.exist;
+      expect(error.message).to.match(/Reserve reset blocked/);
+      expect(error.message).to.match(/ACKNOWLEDGE_RESERVE_RESET/);
+
+      // Nothing was mutated on-chain by the blocked attempt.
+      expect(await token.totalReserves()).to.equal(5000n);
+      expect(await token.recognizedReserveBacking()).to.equal(ethers.ZeroAddress);
+    });
+
+    it("proceeds with the reset when ACKNOWLEDGE_RESERVE_RESET is explicitly set", async function () {
+      nonzeroConfig.acknowledgeReserveReset = true;
+
+      const { deployKernel } = require("../deploy/01_kernel");
+      const { deployTreasury } = require("../deploy/05_treasury");
+      const { deploySwf } = require("../deploy/06_swf");
+      const { deployToken } = require("../deploy/02_token");
+      const { deployRecognizedBacking } = require("../deploy/03_recognized_backing");
+
+      const addresses = {};
+      addresses.KERNEL_ADDRESS = (await deployKernel(hre, nonzeroConfig)).address;
+      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+      addresses.SWF_ADDRESS = (await deploySwf(hre, nonzeroConfig, addresses)).address;
+      addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, nonzeroConfig, addresses, sovereign)).address;
+
+      const token = await ethers.getContractAt("PahlaviToken", addresses.PAHLAVI_TOKEN_ADDRESS);
+      expect(await token.totalReserves()).to.equal(5000n);
+
+      const { address: registryAddress } = await deployRecognizedBacking(hre, nonzeroConfig, addresses, sovereign);
+
+      expect(await token.recognizedReserveBacking()).to.equal(registryAddress);
+      expect(await token.totalReserves()).to.equal(0n);
+    });
+
+    it("does not block wiring when INITIAL_RESERVES is zero (the documented default flow)", async function () {
+      const config = loadConfig(); // process.env.INITIAL_RESERVES === "0" from the outer before()
+      const { addresses } = await runDeployment(hre, config, sovereign);
+      const token = await ethers.getContractAt("PahlaviToken", addresses.PAHLAVI_TOKEN_ADDRESS);
+      expect(await token.totalReserves()).to.equal(0n);
+    });
+  });
+
+  describe("refuses to overwrite an existing deployment (deploy/index.js CLI guard)", function () {
+    it("throws if the address book already contains a core-path address for this network", function () {
+      const existing = { KERNEL_ADDRESS: ethers.ZeroAddress };
+      let error;
+      try {
+        assertNoExistingDeployment(existing, "localhost");
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.exist;
+      expect(error.message).to.match(/already contains deployment artifacts/);
+      expect(error.message).to.match(/KERNEL_ADDRESS/);
+      expect(error.message).to.match(/does not auto-resume/);
+    });
+
+    it("throws listing every core-path key already present, not just the first", function () {
+      const existing = {
+        KERNEL_ADDRESS: ethers.ZeroAddress,
+        TREASURY_ADDRESS: ethers.ZeroAddress,
+        RECOGNIZED_RESERVE_BACKING_ADDRESS: ethers.ZeroAddress,
+      };
+      let error;
+      try {
+        assertNoExistingDeployment(existing, "localhost");
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.exist;
+      expect(error.message).to.match(/KERNEL_ADDRESS/);
+      expect(error.message).to.match(/TREASURY_ADDRESS/);
+      expect(error.message).to.match(/RECOGNIZED_RESERVE_BACKING_ADDRESS/);
+    });
+
+    it("does not throw when the address book is empty (fresh deployment target)", function () {
+      expect(() => assertNoExistingDeployment({}, "localhost")).to.not.throw();
+    });
+
+    it("does not throw when the address book has unrelated keys only", function () {
+      expect(() => assertNoExistingDeployment({ SOME_OTHER_KEY: "0x1" }, "localhost")).to.not.throw();
+    });
+  });
+
+  describe("incremental address persistence (deploy/index.js)", function () {
+    it("calls persistStep after every successful deployment step, not just once at the end", async function () {
+      const config = loadConfig();
+      const snapshots = [];
+      const persistStep = (addresses) => snapshots.push({ ...addresses });
+
+      await runDeployment(hre, config, sovereign, persistStep);
+
+      // 6 deploy steps (kernel, treasury, swf, token, oracle, recognized_backing)
+      // each call persistStep once, before the role-wiring/verify steps run.
+      expect(snapshots.length).to.equal(6);
+      expect(Object.keys(snapshots[0])).to.deep.equal(["KERNEL_ADDRESS"]);
+      expect(Object.keys(snapshots[5]).sort()).to.deep.equal(
+        [
+          "KERNEL_ADDRESS",
+          "TREASURY_ADDRESS",
+          "SWF_ADDRESS",
+          "PAHLAVI_TOKEN_ADDRESS",
+          "API3_ORACLE_ADDRESS",
+          "RECOGNIZED_RESERVE_BACKING_ADDRESS",
+        ].sort()
+      );
+    });
+
+    it("preserves already-deployed addresses via persistStep even when a later step throws", async function () {
+      const config = loadConfig();
+      const duplicated = {
+        ...config,
+        courtMembers2to9: [config.court1, ...config.courtMembers2to9.slice(1)],
+      };
+      let lastSnapshot = null;
+      const persistStep = (addresses) => { lastSnapshot = { ...addresses }; };
+
+      let error;
+      try {
+        // wireCourtCompletion/finalizeOracleActivation will fail on the
+        // duplicate court member, after all 6 deploy steps already
+        // succeeded and persisted.
+        await runDeployment(hre, duplicated, sovereign, persistStep);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.exist;
+
+      expect(lastSnapshot).to.not.be.null;
+      expect(Object.keys(lastSnapshot).sort()).to.deep.equal(
+        [
+          "KERNEL_ADDRESS",
+          "TREASURY_ADDRESS",
+          "SWF_ADDRESS",
+          "PAHLAVI_TOKEN_ADDRESS",
+          "API3_ORACLE_ADDRESS",
+          "RECOGNIZED_RESERVE_BACKING_ADDRESS",
+        ].sort()
+      );
+      // All 6 addresses are real, non-zero deployed contract addresses,
+      // even though the overall run() call above threw.
+      for (const [name, address] of Object.entries(lastSnapshot)) {
+        expect(ethers.isAddress(address), `${name} is not a valid address`).to.be.true;
+        expect(address, `${name} must not be the zero address`).to.not.equal(ethers.ZeroAddress);
+      }
+    });
   });
 });
