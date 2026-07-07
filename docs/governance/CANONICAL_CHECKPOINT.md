@@ -14,9 +14,9 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 
 | Field | Value |
 |---|---|
-| Latest merged PR | #122 — see "Latest Merged PR" below |
-| Latest merged commit | `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c` (squash-merge of PR #122 into `main`) |
-| Current baseline | `main` @ `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c` |
+| Latest merged PR | #123 — see "Latest Merged PR" below; this PR is pending |
+| Latest merged commit | `fc1794d024d15bd670b9239b3486e0e96a7d5f57` (squash-merge of PR #123 into `main`) |
+| Current baseline | `main` @ `fc1794d024d15bd670b9239b3486e0e96a7d5f57` |
 | Current roadmap position | Roadmap Step-12 (Evidence execution & blocker disposition) — open; Roadmap Step-13 (Whitepaper-to-system mapping) — open |
 | Current deployment coverage | 12/25 contracts have executable `deploy/` scripts (13 remaining) |
 | Current test count | 759 passing (`npm test`) |
@@ -25,7 +25,8 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 | Open residual work | `docs/governance/OPEN_RESIDUALS.md` Active Residuals: none currently active |
 | Applicable governance version | PR Preflight Standard: Steps 1–15; Canonical Development Workflow: 11 stages (established PR #122); Reviewer Lessons Learned Registry: governance standard formalized 2026-06-17 |
 | Latest Lesson Learned ID | LL-031 |
-| Last updated (timestamp) | 2026-07-07T13:06:47Z (post-merge sync, branch `governance/checkpoint-post-merge-sync`) |
+| **Governance Framework Status** | **STABLE (v1.0)** — see "Governance Status" section below |
+| Last updated (timestamp) | 2026-07-07T13:56:49Z (branch `governance/status-declaration-v1`) |
 
 The table above is the fast-read summary. Detail and evidence for each field follow below — this file is the authoritative source for these fields; the sections below exist to substantiate the table, not to introduce separate competing values.
 
@@ -34,18 +35,18 @@ The table above is the fast-read summary. Detail and evidence for each field fol
 ## Current Merged Baseline
 
 - Branch: `main`
-- Head commit: `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c`
+- Head commit: `fc1794d024d15bd670b9239b3486e0e96a7d5f57`
 - Merge date: 2026-07-07
 
 ## Latest Merged PR
 
-- PR #122 — "docs(governance): Canonical Development Workflow + Checkpoint SSOT + Synchronization + Minimalism (Steps 13-15, LL-028..031)"
+- PR #123 — "docs(governance): sync Canonical Checkpoint to PR #122's actual post-merge state"
 - Merged: 2026-07-07
-- Confirmed via `git log origin/main -1 --format="%H %ad %s" --date=short` → `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c 2026-07-07 ...(#122)` — this is the disclosed post-merge verification the prior (pre-merge) version of this file said would be needed; it has now been performed and this section corrected, closing out that known structural limitation for this specific merge.
+- **Pending:** this PR (governance status declaration) — will become the new Latest Merged PR once merged. Per Step 13's disclosed squash-merge-SHA limitation, its exact merge commit SHA is not knowable before merge; confirm via `git log origin/main -1` immediately after merging, per the same pattern already followed for PR #122/#123.
 
 ## Latest Commit
 
-- `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c` — squash-merge commit of PR #122 into `main` (latest **merged** commit as of this update)
+- `fc1794d024d15bd670b9239b3486e0e96a7d5f57` — squash-merge commit of PR #123 into `main` (latest **merged** commit as of this update)
 
 ## Roadmap Position
 
@@ -65,7 +66,7 @@ Note: roadmap "Step-N" is a different numbering scheme from `CLAUDE.md`'s PR Pre
 
 ## Test Count
 
-- 759 passing (`npm test`, run on commit `e9fab34`).
+- 759 passing (`npm test`, run on commit `fc1794d`).
 
 ## Current Production Status
 
@@ -94,6 +95,23 @@ Note: roadmap "Step-N" is a different numbering scheme from `CLAUDE.md`'s PR Pre
 ## Latest Lesson Learned ID
 
 - **LL-031** — Governance Minimalism Review (see `docs/governance/REVIEWER_LESSONS_LEARNED.md`).
+
+## Governance Status
+
+**Governance Framework: STABLE (v1.0)** — declared 2026-07-07.
+
+**Meaning:** the current governance framework (`CLAUDE.md`'s Canonical Development Workflow, PR Preflight Standard Steps 1–15, and the Reviewer Lessons Learned Registry) is considered complete for normal development. Future governance evolution is evidence-driven only — this is an operational status, not a new permanent rule; the enforcement mechanism is the existing `#### Step 15 — Governance Minimalism Review` and Governance Minimalism Principle already in `CLAUDE.md`, applied to any proposed future change. This status does not introduce any new CLAUDE.md section, LL entry, checklist, or Evidence Block.
+
+**Operational implications, from this declaration forward:**
+
+1. Governance PRs opened solely to improve governance, with no external trigger, are not warranted by default.
+2. A governance change is permitted only if at least one applies: Codex identifies a new class of finding not prevented by the existing framework; CI exposes a process gap; production or deployment reveals an uncovered governance failure; or a documented engineering failure cannot be resolved by extending an existing rule. (This operationalizes the existing 7-criterion gate's first criterion — "closes a demonstrated engineering failure, not a hypothetical one" — it does not add a new criterion.)
+3. `#### Step 15 — Governance Minimalism Review` (already in `CLAUDE.md`) still applies to any new governance artifact — this status changes the *default expectation* going in, not the review procedure itself.
+4. Extending an existing rule, LL entry, or workflow stage remains preferred over creating a new permanent artifact — this restates, and does not modify, the existing Governance Duplication Review's four questions.
+5. Default assumption: no governance change required. The burden of proof is on introducing a new governance rule, consistent with the existing "Governance grows only by necessity" language in the Governance Minimalism Principle.
+6. Governance improvements must be justified with evidence (a specific Codex finding, CI failure, production incident, or documented unresolvable failure), not preference — consistent with the CET (Claim Evidence Tier) system and Certainty Language Rule already governing every other claim in this project.
+
+**Re-declaration trigger:** this status should be revisited (not automatically invalidated) if a governance change is made under item 2 above — record the outcome here rather than treating STABLE (v1.0) as requiring a version bump for every future entry; a version bump is warranted only if the framework's structure changes materially (e.g., a new Step is added, an existing Step is removed or substantially rewritten).
 
 ---
 
@@ -127,4 +145,4 @@ This file must be refreshed whenever any recorded field changes materially — a
 
 *Registry created: 2026-07-07*
 *CLAUDE.md reference: `## Canonical Development Workflow (Mandatory)`, Stage 1; `#### Step 13 — Canonical Checkpoint Currency`; `#### Step 14 — Governance Synchronization Review`*
-*Last updated: 2026-07-07T13:06:47Z*
+*Last updated: 2026-07-07T13:56:49Z*
