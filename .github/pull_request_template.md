@@ -58,6 +58,7 @@ If covered, confirm the existing `CLAUDE.md` requirements were followed:
 - [ ] Step 12 Lesson-Learned Compliance Consultation completed and recorded below — `docs/governance/REVIEWER_LESSONS_LEARNED.md` was read and applicable LL entries were identified and satisfied before this PR was marked ready.
 - [ ] Step 13 Canonical Checkpoint Currency completed and recorded below — `docs/governance/CANONICAL_CHECKPOINT.md` reflects the state this PR will produce once merged; this PR is not READY until it does.
 - [ ] Step 14 Governance Synchronization Review completed and recorded below — all three authoritative artifacts (Canonical Checkpoint, Lesson Learned Registry, CHANGELOG) were independently considered, not inferred from one another; this PR is not READY until each is marked Updated or No update required (with reason).
+- [ ] Step 15 Governance Minimalism Review completed and recorded below, or not applicable because this PR adds no new permanent governance artifact — if it does, the 7-criterion gate and Governance Duplication Review must be recorded before this PR is READY.
 - [ ] HARDENING_ONLY re-evaluation triggers checked; any matching active residual was re-evaluated before marking this PR ready.
 
 ### Evidence Block
@@ -118,6 +119,15 @@ Required for PRs covered by the `CLAUDE.md` PR Preflight Standard.
   - Canonical Checkpoint: ___ (Updated — fields changed: ___ / No update required — reason: ___)
   - Lesson Learned Registry: ___ (Updated — LL-XXX added/modified / No update required — reason: ___)
   - CHANGELOG: ___ (Updated — entry added / No update required — reason: ___)
+  - Result: PASS / NOT READY — gap: ___
+- Step 15 — Governance Minimalism Review:
+  - New permanent governance artifact proposed in this PR: ___ (or "N/A — no new permanent governance artifact")
+  - 7-criterion gate: ___ (completed table, or "N/A")
+  - Can an existing rule be extended instead? ___ (YES — extended: ___ / NO — reason: ___)
+  - Can an existing LL entry be amended instead? ___ (YES — amended: LL-XXX / NO — reason: ___)
+  - Can an existing checklist be extended instead? ___ (YES — extended: ___ / NO — reason: ___)
+  - Can an existing workflow stage absorb this responsibility? ___ (YES — absorbed by: ___ / NO — reason: ___)
+  - Refactoring candidates identified: ___ (or "none identified")
   - Result: PASS / NOT READY — gap: ___
 
 ---

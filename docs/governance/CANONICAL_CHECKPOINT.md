@@ -23,9 +23,9 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 | Current production status | Not production-ready. Roadmap Step-9/Step-10 (production governance doctrine / readiness planning) are marked Complete as *planning* phases only — actual production blockers `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain open (`CHANGELOG.md`); no external audit, no formal verification, no release signoff |
 | Remaining deployment targets | 13/25 contracts without executable `deploy/` scripts — see `deploy/README.md` actual-status listing |
 | Open residual work | `docs/governance/OPEN_RESIDUALS.md` Active Residuals: none currently active |
-| Applicable governance version | PR Preflight Standard: Steps 1–14; Canonical Development Workflow: 11 stages (established PR #122); Reviewer Lessons Learned Registry: governance standard formalized 2026-06-17 |
-| Latest Lesson Learned ID | LL-030 |
-| Last updated (timestamp) | 2026-07-07T12:51:14Z (branch `governance/canonical-development-workflow`, pre-merge head — see `git log -1` on this branch at commit time) |
+| Applicable governance version | PR Preflight Standard: Steps 1–15; Canonical Development Workflow: 11 stages (established PR #122); Reviewer Lessons Learned Registry: governance standard formalized 2026-06-17 |
+| Latest Lesson Learned ID | LL-031 |
+| Last updated (timestamp) | 2026-07-07T12:59:14Z (branch `governance/canonical-development-workflow`, pre-merge head — see `git log -1` on this branch at commit time) |
 
 The table above is the fast-read summary. Detail and evidence for each field follow below — this file is the authoritative source for these fields; the sections below exist to substantiate the table, not to introduce separate competing values.
 
@@ -41,7 +41,7 @@ The table above is the fast-read summary. Detail and evidence for each field fol
 
 - PR #121 — "docs(deployment/governance): fix stale PriceOracle caller + Step 11 Documentation-Parity Review + Step 12 LL Compliance Consultation (LL-026, LL-027)"
 - Merged: 2026-07-07
-- **Pending:** PR #122 — "docs(governance): add Canonical Development Workflow + enforce Canonical Checkpoint as SSOT + Governance Synchronization Review (LL-028, LL-029, LL-030)" — will become the new Latest Merged PR once merged. Its exact merge commit SHA is assigned by GitHub at squash-merge time and is not knowable before merge (this file has been amended across several commits on that branch, so its pre-merge head SHA is not repeated here to avoid a self-referential value going stale one commit later — confirm the actual pre-merge head via `git log -1` on branch `governance/canonical-development-workflow`). Confirm the true post-merge SHA via the Verification Method below immediately after merging, and update this section in the same follow-up if it has not already been corrected by a subsequent Step 13 update.
+- **Pending:** PR #122 — "docs(governance): add Canonical Development Workflow + enforce Canonical Checkpoint as SSOT + Governance Synchronization Review (LL-028, LL-029, LL-030, LL-031)" — will become the new Latest Merged PR once merged. Its exact merge commit SHA is assigned by GitHub at squash-merge time and is not knowable before merge (this file has been amended across several commits on that branch, so its pre-merge head SHA is not repeated here to avoid a self-referential value going stale one commit later — confirm the actual pre-merge head via `git log -1` on branch `governance/canonical-development-workflow`). Confirm the true post-merge SHA via the Verification Method below immediately after merging, and update this section in the same follow-up if it has not already been corrected by a subsequent Step 13 update.
 
 ## Latest Commit
 
@@ -88,13 +88,13 @@ Note: roadmap "Step-N" is a different numbering scheme from `CLAUDE.md`'s PR Pre
 
 ## Applicable Governance Version
 
-- PR Preflight Standard (`CLAUDE.md` → `### PR Preflight Standard (Mandatory)`): Steps 1–14.
+- PR Preflight Standard (`CLAUDE.md` → `### PR Preflight Standard (Mandatory)`): Steps 1–15.
 - Canonical Development Workflow (`CLAUDE.md` → `## Canonical Development Workflow (Mandatory)`): 11 stages, established in PR #122.
 - Reviewer Lessons Learned Registry (`docs/governance/REVIEWER_LESSONS_LEARNED.md`): governance standard formalized 2026-06-17.
 
 ## Latest Lesson Learned ID
 
-- **LL-030** — Governance Synchronization Review (see `docs/governance/REVIEWER_LESSONS_LEARNED.md`).
+- **LL-031** — Governance Minimalism Review (see `docs/governance/REVIEWER_LESSONS_LEARNED.md`).
 
 ---
 
@@ -128,4 +128,4 @@ This file must be refreshed whenever any recorded field changes materially — a
 
 *Registry created: 2026-07-07*
 *CLAUDE.md reference: `## Canonical Development Workflow (Mandatory)`, Stage 1; `#### Step 13 — Canonical Checkpoint Currency`; `#### Step 14 — Governance Synchronization Review`*
-*Last updated: 2026-07-07T12:51:14Z*
+*Last updated: 2026-07-07T12:59:14Z*

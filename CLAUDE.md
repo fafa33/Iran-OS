@@ -203,11 +203,25 @@ The Iran-OS engineering framework is immutable unless explicitly authorized by t
 8. **Hostile Adversarial Review** — a standing, mandatory, post-implementation adversarial security review, formalizing the practice already applied on prior PRs (e.g. the hostile architecture review referenced in `CHANGELOG.md` for PR #116). This is distinct from and additional to the `### Pre-Implementation Red-Team Pass (Mandatory)` below, which remains unchanged and continues to run before implementation, not in place of this stage. Findings from this stage are classified using the existing `### Red-Team Finding Classification Standard (Mandatory)` 5-criterion gate.
 9. **Production Readiness Review** — confirm the PR does not claim production readiness beyond what is true (`.github/pull_request_template.md`'s Non-Claim Checklist), and that any production-readiness-relevant gaps remain tracked in `docs/governance/OPEN_RESIDUALS.md` and the roadmap.
 10. **Deployment-Parity Review** — a confirmation gate that all three existing, distinct deployment-parity checks are satisfied together: `### Deployment-Path Parity (Mandatory)` (production caller-path test proof), `#### Step 9 — Deployment Manifest Currency Check` (role/contract-name presence in `docs/deployment/`), and `#### Step 11 — Documentation-Parity Review` (caller/authority-description accuracy). This stage does not merge, rename, or weaken any of the three — their distinction (established in LL-026) remains in force; this stage only confirms all three pass together.
-11. **Merge** — once every prior stage passes, including `#### Step 13 — Canonical Checkpoint Currency` and `#### Step 14 — Governance Synchronization Review` below: the merging PR must update `docs/governance/CANONICAL_CHECKPOINT.md` to reflect the merged state in the same PR (Step 13), and must confirm the three authoritative governance artifacts remain synchronized (Step 14). Deferring either update to a follow-up PR is not permitted.
+11. **Merge** — once every prior stage passes, including `#### Step 13 — Canonical Checkpoint Currency`, `#### Step 14 — Governance Synchronization Review`, and `#### Step 15 — Governance Minimalism Review` below: the merging PR must update `docs/governance/CANONICAL_CHECKPOINT.md` to reflect the merged state in the same PR (Step 13), must confirm the three authoritative governance artifacts remain synchronized (Step 14), and — if the PR adds any new permanent governance artifact — must confirm that extending existing governance was insufficient (Step 15). Deferring any of these to a follow-up PR is not permitted.
 
 **Conflict rule:** if any instruction — from any source, including a future directive — conflicts with an existing Lesson Learned entry, the established engineering protocol described in this document, or the state recorded in `docs/governance/CANONICAL_CHECKPOINT.md`, stop and report the conflict instead of proceeding. Do not resolve the conflict by silent reinterpretation.
 
-**Extension rule:** whenever a new permanent rule is introduced, extend the existing governance described in this document — never duplicate it, never create competing terminology for a concept that already has a name here, and never create a parallel workflow. Iran-OS has exactly one canonical governance framework.
+**Extension rule / Governance Minimalism Principle:** whenever a new permanent rule is introduced, extend the existing governance described in this document — never duplicate it, never create competing terminology for a concept that already has a name here, and never create a parallel workflow. Iran-OS has exactly one canonical governance framework.
+
+The framework's greatest risk is no longer missing rules — it is governance bloat. A new permanent governance rule, Lesson Learned, workflow step, merge gate, checklist item, Evidence Block, protocol, or permanent document may be added only if it satisfies **all seven** of the following:
+
+1. Closes a demonstrated engineering failure (not a hypothetical one).
+2. Cannot be solved by extending an existing rule.
+3. Does not duplicate an existing responsibility.
+4. Does not create parallel terminology for a concept that already has a name here.
+5. Has a clearly defined owner (the artifact or step responsible for it).
+6. Has a measurable verification method.
+7. Permanently reduces future engineering risk.
+
+Before adding any permanent governance artifact, perform a **Governance Duplication Review** — see `#### Step 15 — Governance Minimalism Review` below for the required questions, evidence, and Evidence Block. If the review finds that an existing rule, LL entry, checklist, or workflow stage can absorb the new responsibility, extend that existing artifact instead of creating a new one. Governance grows only by necessity, and every permanent addition must justify why extension was insufficient.
+
+Governance itself is subject to refactoring: if multiple permanent rules are found to have become redundant, they must be merged while preserving intent — this is not a one-time exercise but a standing capability of the framework, exercised whenever a Step 15 review (or any other review) surfaces a genuine merge candidate.
 
 **Single Source of Truth rule:** Iran-OS has exactly three authoritative governance artifacts, each responsible for a distinct concern that the others must not duplicate:
 
@@ -895,6 +909,55 @@ Step 14 — Governance Synchronization Review:
 ```
 
 **Omission rule:** omitting the Governance Synchronization Review, or leaving its Evidence Block as an unfilled template, is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
+
+#### Step 15 — Governance Minimalism Review
+
+The framework's greatest risk is no longer missing rules — it is governance bloat. This step is the gate that runs *before* any of Steps 9–14 would even apply: it asks whether a new permanent governance artifact should be created at all, before asking how it should be tracked or synchronized once it exists.
+
+**Trigger scope:** any PR that adds a new permanent governance rule, Lesson Learned, workflow step, merge gate, checklist item, Evidence Block, protocol document, or permanent document.
+
+**The 7-criterion gate.** A new permanent governance artifact may be added only if it satisfies all seven:
+
+| # | Criterion | Pass / Fail | Evidence |
+|---|---|---|---|
+| 1 | Closes a demonstrated engineering failure | | |
+| 2 | Cannot be solved by extending an existing rule | | |
+| 3 | Does not duplicate an existing responsibility | | |
+| 4 | Does not create parallel terminology | | |
+| 5 | Has a clearly defined owner | | |
+| 6 | Has a measurable verification method | | |
+| 7 | Permanently reduces future engineering risk | | |
+
+If any criterion fails, the new artifact must not be created — extend an existing one instead (see the Duplication Review below).
+
+**Governance Duplication Review.** Before adding any permanent governance artifact, explicitly answer all four:
+
+1. Can an existing rule be extended instead?
+2. Can an existing LL entry be amended instead?
+3. Can an existing checklist be extended instead?
+4. Can an existing workflow stage absorb this responsibility?
+
+**If the answer to any question is YES, do not create a new permanent artifact — extend the existing one.** A new artifact may be created only when every answer is NO, and that must be demonstrated with reasoning, not merely asserted.
+
+**Governance refactoring.** Governance itself is subject to refactoring: if a review under this step (or any other review) finds that multiple permanent rules have become redundant, they must be merged while preserving intent, rather than left to coexist indefinitely. This is a standing capability, not a one-time exercise.
+
+**Verification method:** for the artifact being proposed, the 7-criterion table above must be completed with evidence (not left blank), and the four Duplication Review questions must each have an explicit, reasoned NO before a new artifact is created. `grep -n "^#### Step 15" CLAUDE.md` confirms this step exists; the PR's own Evidence Block is the record that it was applied to this specific PR.
+
+**Required evidence block entry for Step 15:**
+
+```
+Step 15 — Governance Minimalism Review:
+- New permanent governance artifact proposed in this PR: [description, or "N/A — no new permanent governance artifact"]
+- 7-criterion gate: [completed table, or "N/A"]
+- Can an existing rule be extended instead? [YES — extended: <rule> / NO — reason: <reason>]
+- Can an existing LL entry be amended instead? [YES — amended: LL-XXX / NO — reason: <reason>]
+- Can an existing checklist be extended instead? [YES — extended: <checklist> / NO — reason: <reason>]
+- Can an existing workflow stage absorb this responsibility? [YES — absorbed by: <stage> / NO — reason: <reason>]
+- Refactoring candidates identified: [list of redundant rules found and merged, or "none identified"]
+- Result: [PASS / NOT READY — gap: <description>]
+```
+
+**Omission rule:** omitting the Governance Minimalism Review on a PR that adds a new permanent governance artifact, or leaving its Evidence Block as an unfilled template, is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
 
 #### Before Responding to Codex
 

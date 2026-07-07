@@ -63,7 +63,7 @@ An entry that lacks any of these four fields is incomplete and must be updated b
 A new LL entry must be created whenever a reviewer finding causes any of the following:
 
 - A new section or rule in `CLAUDE.md`
-- A change to the PR preflight checklist (Steps 1–14)
+- A change to the PR preflight checklist (Steps 1–15)
 - A new or modified evidence requirement in the grep evidence table
 - A new entry in the forbidden wording list
 - A new or modified classification rule or criterion
@@ -1049,7 +1049,45 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 ---
 
+## LL-031
+
+**Date:** 2026-07-07
+**PR:** #122
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** Governance systems naturally accumulate duplicate rules over time unless simplicity is explicitly protected. Five governance-hardening rounds landed on this branch in quick succession (LL-026 through LL-030, Steps 9–14), each individually justified — but nothing in the framework asked, before any of them was added, whether an existing rule could have been extended instead of a new one created. Left unchecked, this pattern compounds: each new rule adds its own checklist item, Evidence Block, and omission clause, and the framework's total surface area grows without a corresponding check on whether that growth was necessary.
+
+**What we assumed:** That the existing Extension rule ("extend the existing governance... never duplicate it... never create a parallel workflow") was sufficient on its own to prevent bloat, because it stated the *value* of minimalism in one sentence.
+
+**Why the assumption failed:** A one-sentence value statement with no accompanying procedure is not a gate — it relies on the implementer noticing the tension between "this looks new" and "this might be an extension" without any structured prompt to check. Every other permanent rule added in this session (Steps 9 through 14) has its own dedicated verification method and Evidence Block; the Extension rule alone had neither. A principle stated once in prose, with no required review step and no measurable criteria, degrades into something read once and then forgotten on every subsequent PR — exactly the failure mode this registry exists to prevent for every other class of finding.
+
+**Evidence that was missing:** (1) A concrete, checkable gate (the 7-criterion test: closes a demonstrated failure, cannot be solved by an existing rule, no duplicated responsibility, no parallel terminology, clearly defined owner, measurable verification method, permanently reduces risk) that a proposed new artifact must pass before it may be created. (2) A required Governance Duplication Review — four explicit questions (extend an existing rule? amend an existing LL? extend an existing checklist? let an existing workflow stage absorb it?) that must each be answered NO, with reasoning, before a new artifact is created. (3) An explicit statement that governance itself may be refactored — that redundant rules discovered later should be merged, not left to accumulate.
+
+**Governance Duplication Review performed for this very entry (dogfooding):**
+1. *Can an existing rule be extended instead?* Partially — the underlying value ("extend, don't duplicate") already existed as the Extension rule and was extended (grown into the full Governance Minimalism Principle) rather than replaced. But the **operational enforcement mechanism** (the 7-criterion gate, the four Duplication Review questions, a required Evidence Block) did not exist in any form and could not be expressed as a further extension of a one-sentence rule without giving it the same procedural weight every other Step already has — so a new Step was still necessary for the mechanism, even though the prose principle itself was extended, not duplicated.
+2. *Can an existing LL entry be amended instead?* No — bloat-prevention is a distinct failure class from doc-parity (LL-026), LL-registry-consultation (LL-027), workflow-terminology-collision (LL-028), checkpoint-currency (LL-029), and cross-artifact-synchronization (LL-030). None of those five addresses "should this be added in the first place."
+3. *Can an existing checklist be extended instead?* Yes — the Step 15 checklist item and Evidence Block sub-block were added to the existing `## Governance Preflight Synchronization` section in `.github/pull_request_template.md`, the same section housing Steps 8–14. No new top-level PR-template section was created for Step 15, unlike Step 11 (Documentation-Parity Review) and Step 14 (Governance Synchronization Review), which each needed their own component-touch trigger-scope gate; Step 15's narrower "does this PR add a new permanent artifact" trigger fits the existing section's pattern without a dedicated section.
+4. *Can an existing workflow stage absorb this responsibility?* Yes — `## Canonical Development Workflow (Mandatory)` Stage 11 (Merge) was extended once more to reference Step 15, exactly as it already referenced Step 13 and Step 14. No 12th Stage was added.
+
+Applying the same review to the Step 13/Step 14 pair already on this branch (retroactive check, not a new change): Step 13 (Canonical Checkpoint Currency) applies to *every* merge to `main` regardless of governance scope, while Step 14 (Governance Synchronization Review) applies only within the narrower governance-relevant trigger scope but spans all three artifacts, not only the Checkpoint. These scopes are not identical — no merge candidate identified at this time.
+
+**Policy created:** New `CLAUDE.md` `#### Step 15 — Governance Minimalism Review` added to `### PR Preflight Standard (Mandatory)`. The existing Extension rule (in `## Canonical Development Workflow (Mandatory)`) is grown into the full Governance Minimalism Principle: the 7-criterion gate, the four-question Governance Duplication Review, and an explicit governance-refactoring clause. `## Canonical Development Workflow (Mandatory)` Stage 11 extended once more to reference Step 15. No new PR-template top-level section was created — Step 15's checklist item and Evidence Block were added to the existing `## Governance Preflight Synchronization` section, per the Duplication Review's own third answer above.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → `#### Step 15 — Governance Minimalism Review` (new); `## Canonical Development Workflow (Mandatory)` → Extension rule / Governance Minimalism Principle (grown), Stage 11 (extended).
+
+**Verification method:** `grep -n "^#### Step 15" CLAUDE.md` → one match confirms the step exists. On any future PR proposing a new permanent governance artifact, the Evidence Block's Step 15 sub-block must contain a completed 7-criterion table and four explicitly-reasoned Duplication Review answers — a block left as an unfilled template, or one that creates a new artifact without all four Duplication Review answers being NO with stated reasoning, is a Step 15 failure.
+
+**Affected files:** `CLAUDE.md` (Step 15 added; Extension rule grown into Governance Minimalism Principle; Stage 11 extended); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Maintenance Rule updated to Steps 1–15; LL-031 added; footer updated); `.github/pull_request_template.md` (Step 15 checklist item and Evidence Block sub-block added to the existing Governance Preflight Synchronization section — no new top-level section); `docs/governance/CANONICAL_CHECKPOINT.md` (Applicable Governance Version and Latest Lesson Learned ID fields updated).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Directive issued as a permanent policy refinement by the repository owner, continuing directly from LL-028/LL-029/LL-030 in the same open PR #122 / branch `governance/canonical-development-workflow`. This entry is itself the first applied instance of the Governance Duplication Review it introduces — see the dogfooding section above — and demonstrates the review's intended outcome: growing an existing rule (the Extension rule) and extending an existing checklist and workflow stage, while still justifying the one genuinely new element (the Step 15 procedure itself) against all four questions.
+
+---
+
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-030*
+*Entries: LL-001 through LL-031*
