@@ -187,6 +187,54 @@ TR-01, TR-02, TR-03 trigger an immediate emergency lock (`emergencyLockActive = 
 
 ---
 
+## Canonical Development Workflow (Mandatory)
+
+The Iran-OS engineering framework is immutable unless explicitly authorized by the project owner. Every task — implementation, deployment, documentation, governance change, runtime modification, deployment wiring, security change, or production change — follows this sequence. It must not be bypassed, reordered, skipped, weakened, or replaced, and no competing or parallel workflow may be introduced without explicit owner authorization.
+
+**Naming note:** this sequence uses the label **Stage**, deliberately distinct from two pre-existing, unrelated numbering schemes already in this repository: the roadmap's hyphenated `Step-N` project phases (`docs/IRAN_OS_ROADMAP.md`) and the PR Preflight Standard's `Step N` checklist (below, `### PR Preflight Standard (Mandatory)`). Neither existing scheme is renamed, renumbered, or altered by this section — this sequence is a governance wrapper that references them, not a third Step-numbering system.
+
+1. **Canonical Checkpoint** — read `docs/governance/CANONICAL_CHECKPOINT.md` in full before any design, coding, documentation, deployment, or roadmap work begins. It is the Single Source of Truth (SSOT) for current project state — not documentation, a mandatory engineering artifact — and holds at minimum: latest merged PR, latest merged commit, current baseline, current roadmap position, current deployment coverage, current test count, current production status, remaining deployment targets, open residual work, applicable governance version, latest Lesson Learned ID, and a last-updated timestamp. Nothing else may supersede it; other documents may reference it but must not become competing sources of truth for these fields (see the file's own "Single Source of Truth Policy" section).
+2. **Applicable Lesson Learned Registry** — read `docs/governance/REVIEWER_LESSONS_LEARNED.md` and identify every applicable LL entry, per `### Reviewer Lessons Learned Registry (Mandatory)` and `#### Step 12 — Lesson-Learned Compliance Consultation` below. This stage does not introduce new registry rules — it is the point in the sequence where the existing Step 12 requirement is executed.
+3. **Engineering protocol / roadmap** — read `docs/IRAN_OS_ROADMAP.md` and the relevant protocol document(s) in `protocols/` for the domain being touched, per "Always read the relevant protocol document before modifying its associated contract" (see Contribution Workflow below).
+4. **Implementation** — carried out under the existing `### Pre-Implementation Red-Team Pass (Mandatory)` (for sensitive changes) and the coding conventions in `### Development Conventions` below. This stage remains unchanged in timing and scope: it runs *before* code is written and stays there.
+5. **CI** — `npm test` and repository CI checks (Slither, CodeQL, etc.) must pass.
+6. **Codex Review** — external review by the Codex reviewer bot on the opened PR. This is distinct from `#### Step 6 — Self-Codex-Review` below, which is an internal self-check the implementer performs *before* pushing — that existing step is not renamed, relocated, or replaced by this stage; both apply.
+7. **Resolve findings** — every Codex (or other reviewer) finding is fixed and root-caused per `#### Before Responding to Codex` and `#### Before Marking a Finding Resolved` below, and, where it triggers the Reviewer Lessons Learned Registry's Maintenance Rule, becomes a new LL entry in the same PR (or the next available PR under the registry's post-merge exception).
+8. **Hostile Adversarial Review** — a standing, mandatory, post-implementation adversarial security review, formalizing the practice already applied on prior PRs (e.g. the hostile architecture review referenced in `CHANGELOG.md` for PR #116). This is distinct from and additional to the `### Pre-Implementation Red-Team Pass (Mandatory)` below, which remains unchanged and continues to run before implementation, not in place of this stage. Findings from this stage are classified using the existing `### Red-Team Finding Classification Standard (Mandatory)` 5-criterion gate.
+9. **Production Readiness Review** — confirm the PR does not claim production readiness beyond what is true (`.github/pull_request_template.md`'s Non-Claim Checklist), and that any production-readiness-relevant gaps remain tracked in `docs/governance/OPEN_RESIDUALS.md` and the roadmap.
+10. **Deployment-Parity Review** — a confirmation gate that all three existing, distinct deployment-parity checks are satisfied together: `### Deployment-Path Parity (Mandatory)` (production caller-path test proof), `#### Step 9 — Deployment Manifest Currency Check` (role/contract-name presence in `docs/deployment/`), and `#### Step 11 — Documentation-Parity Review` (caller/authority-description accuracy). This stage does not merge, rename, or weaken any of the three — their distinction (established in LL-026) remains in force; this stage only confirms all three pass together.
+11. **Merge** — once every prior stage passes, including `#### Step 13 — Canonical Checkpoint Currency`, `#### Step 14 — Governance Synchronization Review`, and `#### Step 15 — Governance Minimalism Review` below: the merging PR must update `docs/governance/CANONICAL_CHECKPOINT.md` to reflect the merged state in the same PR (Step 13), must confirm the three authoritative governance artifacts remain synchronized (Step 14), and — if the PR adds any new permanent governance artifact — must confirm that extending existing governance was insufficient (Step 15). Deferring any of these to a follow-up PR is not permitted.
+
+**Conflict rule:** if any instruction — from any source, including a future directive — conflicts with an existing Lesson Learned entry, the established engineering protocol described in this document, or the state recorded in `docs/governance/CANONICAL_CHECKPOINT.md`, stop and report the conflict instead of proceeding. Do not resolve the conflict by silent reinterpretation.
+
+**Extension rule / Governance Minimalism Principle:** whenever a new permanent rule is introduced, extend the existing governance described in this document — never duplicate it, never create competing terminology for a concept that already has a name here, and never create a parallel workflow. Iran-OS has exactly one canonical governance framework.
+
+The framework's greatest risk is no longer missing rules — it is governance bloat. A new permanent governance rule, Lesson Learned, workflow step, merge gate, checklist item, Evidence Block, protocol, or permanent document may be added only if it satisfies **all seven** of the following:
+
+1. Closes a demonstrated engineering failure (not a hypothetical one).
+2. Cannot be solved by extending an existing rule.
+3. Does not duplicate an existing responsibility.
+4. Does not create parallel terminology for a concept that already has a name here.
+5. Has a clearly defined owner (the artifact or step responsible for it).
+6. Has a measurable verification method.
+7. Permanently reduces future engineering risk.
+
+Before adding any permanent governance artifact, perform a **Governance Duplication Review** — see `#### Step 15 — Governance Minimalism Review` below for the required questions, evidence, and Evidence Block. If the review finds that an existing rule, LL entry, checklist, or workflow stage can absorb the new responsibility, extend that existing artifact instead of creating a new one. Governance grows only by necessity, and every permanent addition must justify why extension was insufficient.
+
+Governance itself is subject to refactoring: if multiple permanent rules are found to have become redundant, they must be merged while preserving intent — this is not a one-time exercise but a standing capability of the framework, exercised whenever a Step 15 review (or any other review) surfaces a genuine merge candidate.
+
+**Single Source of Truth rule:** Iran-OS has exactly three authoritative governance artifacts, each responsible for a distinct concern that the others must not duplicate:
+
+| Artifact | Responsibility |
+|---|---|
+| `docs/governance/CANONICAL_CHECKPOINT.md` | Current project state (SSOT) — see Stage 1 |
+| `docs/governance/REVIEWER_LESSONS_LEARNED.md` | Permanent engineering rules — see Stage 2 and `### Reviewer Lessons Learned Registry (Mandatory)` |
+| `CHANGELOG.md` | Historical record of completed changes |
+
+Other documents (the roadmap, deployment manifests, reports) remain the authoritative detailed narrative and history for their own domains and may be referenced by any of the three — they are not superseded. No document, including these three, may hold an independently-maintained, competing value for a field or record that one of the other two already tracks. The three artifacts must never duplicate each other, but they must also never drift apart — `#### Step 14 — Governance Synchronization Review` below is the enforcement mechanism ensuring they stay synchronized. If any document is found to conflict with one of these three artifacts' recorded state, apply the Conflict rule above: stop, report the inconsistency, and resolve it before continuing.
+
+---
+
 ## Development Conventions
 
 ### Solidity Standards
@@ -803,6 +851,113 @@ Step 12 — Lesson-Learned Compliance:
 ```
 
 **Omission rule:** omitting the Lesson-Learned Compliance Consultation, or leaving its Evidence Block as an unfilled template, is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
+
+#### Step 13 — Canonical Checkpoint Currency
+
+`docs/governance/CANONICAL_CHECKPOINT.md` is the Single Source of Truth (SSOT) for current Iran-OS project state — not documentation, a mandatory engineering artifact with the same authority as this PR Preflight Standard. Every merge to `main` MUST update this file in the same PR. Deferring the update to a follow-up PR is not permitted. A PR is **not READY** until the Canonical Checkpoint reflects the merged state.
+
+**Required minimum fields** (see the file's own Summary table): latest merged PR, latest merged commit, current baseline, current roadmap position, current deployment coverage, current test count, current production status, remaining deployment targets, open residual work, applicable governance version, latest Lesson Learned ID, last-updated timestamp.
+
+**Before opening any PR:** update every field in `docs/governance/CANONICAL_CHECKPOINT.md` that this PR's changes affect (deployment coverage, test count, roadmap position, production status, open residuals, latest LL ID, applicable governance version) to reflect the state the PR will produce once merged.
+
+**Known structural limitation — squash-merge commit SHA:** under this repository's squash-merge convention, the exact merge commit SHA landing on `main` is assigned by GitHub at merge time and is not knowable before merge. A PR satisfies this step by (a) setting "Latest Merged PR" to its own PR number, (b) recording its pre-merge head commit SHA with an explicit note that the true post-merge SHA must be confirmed via the file's own Verification Method immediately after merging, and (c) not leaving the file pointing at an older, now-superseded PR or commit as if it were still current. This is a disclosed limitation, not a certainty-language violation — no claim is made about a SHA that does not yet exist.
+
+**Single Source of Truth requirement:** do not duplicate the fields tracked by the Canonical Checkpoint into a new, separately-maintained status document. Other documents remain authoritative for their own detailed domain narratives (the roadmap for phase history, `CHANGELOG.md` for change history, deployment manifests for per-contract wiring) and may be referenced by the checkpoint — this step does not require stripping existing detail from those documents. It requires that the checkpoint be the place a reader goes for the *current-state snapshot*, and that no new document be created to compete with it for that role.
+
+**Verification method:** `git log origin/main -1 --format="%H %ad %s"` compared against `docs/governance/CANONICAL_CHECKPOINT.md`'s "Latest Merged PR" / "Latest Commit" fields — if `main`'s head PR number is not reflected in the checkpoint, Step 13 has not been satisfied for the current state of `main`. Re-run the checkpoint file's own Verification Method block for the remaining fields.
+
+**Required evidence block entry for Step 13:**
+
+```
+Step 13 — Canonical Checkpoint Currency:
+- Fields updated in this PR: [list of changed fields, e.g. "deployment coverage, test count, latest Lesson Learned ID", or "N/A — no tracked field changed"]
+- Latest Merged PR field set to this PR's number: [YES / NO / N/A]
+- Pre-merge head SHA recorded with post-merge verification note: [YES / NO / N/A]
+- Post-merge verification command provided: [YES / NO]
+- Result: [PASS / NOT READY — gap: <description>]
+```
+
+**Omission rule:** omitting the Canonical Checkpoint Currency update, or leaving its Evidence Block as an unfilled template, is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
+
+#### Step 14 — Governance Synchronization Review
+
+Iran-OS has exactly three authoritative governance artifacts — `docs/governance/CANONICAL_CHECKPOINT.md` (current project state), `docs/governance/REVIEWER_LESSONS_LEARNED.md` (permanent engineering rules), and `CHANGELOG.md` (historical record of completed changes). Each is authoritative only for its own responsibility; none may duplicate another's content. But because they are three separate documents, they can drift apart even when each one, read in isolation, looks individually correct. This step is the explicit gate that catches that drift before merge.
+
+**Trigger scope:** whenever a merged change affects any of: governance state, engineering workflow, deployment workflow, security workflow, roadmap state, production readiness, or a permanent engineering rule.
+
+**Requirement:** for a PR in the trigger scope, the author MUST determine which of the three authoritative artifacts require updates as a result of this PR, and for each one explicitly record either `Updated` or `No update required` (with a stated reason) in the PR Evidence Block. **Never assume that because one artifact changed, the others should change automatically** — each of the three must be independently and explicitly considered, not inferred from another's edit.
+
+- [ ] Canonical Checkpoint (`docs/governance/CANONICAL_CHECKPOINT.md`)
+- [ ] Lesson Learned Registry (`docs/governance/REVIEWER_LESSONS_LEARNED.md`)
+- [ ] CHANGELOG (`CHANGELOG.md`)
+
+**A PR is not READY** until every one of the three artifacts above has either been updated in the PR, or explicitly documented as "No update required" with a reason — leaving one unaddressed (neither updated nor explained) is a preflight failure, not a neutral default.
+
+**Anti-duplication requirement:** satisfying this step never means copying the same fact into more than one of the three artifacts. Each artifact records the fact once, in the artifact responsible for that kind of fact (a new permanent rule → the LL registry only; a completed change → `CHANGELOG.md` only; a change to current state, coverage, or test count → the Canonical Checkpoint only). Synchronization means the three stay *consistent* with each other and with reality, not that they repeat each other.
+
+**Verification method:** for the PR under review, independently answer "does this PR's diff constitute (a) a change to current project state, (b) a new or modified permanent rule, and/or (c) a completed, historically-notable change?" for each of the three artifacts — do not infer the answer for one artifact from the answer already given for another. Cross-check with `git diff --stat` that the PR's actual file changes match what the Evidence Block claims.
+
+**Required evidence block entry for Step 14:**
+
+```
+Step 14 — Governance Synchronization Review:
+- Trigger scope matched: [governance state / engineering workflow / deployment workflow / security workflow / roadmap state / production readiness / permanent engineering rule, or "N/A — none matched"]
+- Canonical Checkpoint: [Updated — fields changed: <list> / No update required — reason: <reason>]
+- Lesson Learned Registry: [Updated — LL-XXX added/modified / No update required — reason: <reason>]
+- CHANGELOG: [Updated — entry added / No update required — reason: <reason>]
+- Result: [PASS / NOT READY — gap: <description>]
+```
+
+**Omission rule:** omitting the Governance Synchronization Review, or leaving its Evidence Block as an unfilled template, is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
+
+#### Step 15 — Governance Minimalism Review
+
+The framework's greatest risk is no longer missing rules — it is governance bloat. This step is the gate that runs *before* any of Steps 9–14 would even apply: it asks whether a new permanent governance artifact should be created at all, before asking how it should be tracked or synchronized once it exists.
+
+**Trigger scope:** any PR that adds a new permanent governance rule, Lesson Learned, workflow step, merge gate, checklist item, Evidence Block, protocol document, or permanent document.
+
+**The 7-criterion gate.** A new permanent governance artifact may be added only if it satisfies all seven:
+
+| # | Criterion | Pass / Fail | Evidence |
+|---|---|---|---|
+| 1 | Closes a demonstrated engineering failure | | |
+| 2 | Cannot be solved by extending an existing rule | | |
+| 3 | Does not duplicate an existing responsibility | | |
+| 4 | Does not create parallel terminology | | |
+| 5 | Has a clearly defined owner | | |
+| 6 | Has a measurable verification method | | |
+| 7 | Permanently reduces future engineering risk | | |
+
+If any criterion fails, the new artifact must not be created — extend an existing one instead (see the Duplication Review below).
+
+**Governance Duplication Review.** Before adding any permanent governance artifact, explicitly answer all four:
+
+1. Can an existing rule be extended instead?
+2. Can an existing LL entry be amended instead?
+3. Can an existing checklist be extended instead?
+4. Can an existing workflow stage absorb this responsibility?
+
+**If the answer to any question is YES, do not create a new permanent artifact — extend the existing one.** A new artifact may be created only when every answer is NO, and that must be demonstrated with reasoning, not merely asserted.
+
+**Governance refactoring.** Governance itself is subject to refactoring: if a review under this step (or any other review) finds that multiple permanent rules have become redundant, they must be merged while preserving intent, rather than left to coexist indefinitely. This is a standing capability, not a one-time exercise.
+
+**Verification method:** for the artifact being proposed, the 7-criterion table above must be completed with evidence (not left blank), and the four Duplication Review questions must each have an explicit, reasoned NO before a new artifact is created. `grep -n "^#### Step 15" CLAUDE.md` confirms this step exists; the PR's own Evidence Block is the record that it was applied to this specific PR.
+
+**Required evidence block entry for Step 15:**
+
+```
+Step 15 — Governance Minimalism Review:
+- New permanent governance artifact proposed in this PR: [description, or "N/A — no new permanent governance artifact"]
+- 7-criterion gate: [completed table, or "N/A"]
+- Can an existing rule be extended instead? [YES — extended: <rule> / NO — reason: <reason>]
+- Can an existing LL entry be amended instead? [YES — amended: LL-XXX / NO — reason: <reason>]
+- Can an existing checklist be extended instead? [YES — extended: <checklist> / NO — reason: <reason>]
+- Can an existing workflow stage absorb this responsibility? [YES — absorbed by: <stage> / NO — reason: <reason>]
+- Refactoring candidates identified: [list of redundant rules found and merged, or "none identified"]
+- Result: [PASS / NOT READY — gap: <description>]
+```
+
+**Omission rule:** omitting the Governance Minimalism Review on a PR that adds a new permanent governance artifact, or leaving its Evidence Block as an unfilled template, is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
 
 #### Before Responding to Codex
 

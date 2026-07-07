@@ -63,7 +63,7 @@ An entry that lacks any of these four fields is incomplete and must be updated b
 A new LL entry must be created whenever a reviewer finding causes any of the following:
 
 - A new section or rule in `CLAUDE.md`
-- A change to the PR preflight checklist (Steps 1–12)
+- A change to the PR preflight checklist (Steps 1–15)
 - A new or modified evidence requirement in the grep evidence table
 - A new entry in the forbidden wording list
 - A new or modified classification rule or criterion
@@ -959,7 +959,135 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 ---
 
+## LL-028
+
+**Date:** 2026-07-07
+**PR:** #122
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** The repository owner directed a permanent 11-stage mandatory development order (Canonical Checkpoint → Applicable Lesson Learned Registry → Engineering protocol/roadmap → Implementation → CI → Codex Review → Resolve findings → Hostile Adversarial Review → Production Readiness Review → Deployment-Parity Review → Merge). Before encoding it, research found no existing "Canonical Checkpoint" artifact, and found that several of the directive's terms (`Step N`, `Codex Review`, `Hostile Adversarial Review`, `Deployment-Parity Review`) risked colliding with or silently collapsing pre-existing, deliberately distinct concepts already in `CLAUDE.md` — most notably the roadmap's `Step-N` phases, the PR Preflight Standard's `Step N` checklist, `Step 6 — Self-Codex-Review` (an internal pre-push check, not an external review), the `Pre-Implementation Red-Team Pass` (which runs before implementation, not after), and the three separately-justified deployment checks (`Deployment-Path Parity`, `Step 9 — Deployment Manifest Currency Check`, `Step 11 — Documentation-Parity Review`) whose distinction LL-026 specifically established.
+
+**What we assumed:** That the directive's terms could be mapped onto the existing framework without first confirming, with the repository owner, which existing concepts each new term was meant to reference versus replace — given the framework was just declared "immutable unless explicitly authorized," guessing wrong on a foundational, permanent ordering would itself constitute an unauthorized workflow change.
+
+**Why the assumption failed:** Several of the directive's terms were name-adjacent to existing, hard-won distinctions (the Step 9/Step 11 split from LL-026 being the clearest case) without being identical to them. Proceeding on assumption risked either inventing an ungrounded new artifact (a "Canonical Checkpoint" with no defined content) or silently collapsing an existing distinction the registry had just gone to the effort of separating and documenting.
+
+**Evidence that was missing:** Explicit confirmation from the repository owner, obtained via `AskUserQuestion`, on: (1) what the Canonical Checkpoint file should contain and where it lives; (2) whether the new sequence should use "Step N" or a distinct label to avoid a third colliding numbering scheme; (3) whether "Hostile Adversarial Review" is a new, additional, post-implementation gate or a relocation of the existing pre-implementation Red-Team Pass; (4) whether "Deployment-Parity Review" is a confirmation gate over the three existing checks or a genuinely new, fourth check.
+
+**Policy created:** New `CLAUDE.md` `## Canonical Development Workflow (Mandatory)` section added (placed between `## Violation Codes (TR-01 to TR-06)` and `## Development Conventions`), defining the 11-stage sequence using the label **Stage** (not "Step") to avoid colliding with the roadmap's `Step-N` phases or the PR Preflight Standard's `Step N` checklist — both of which remain unchanged. Each stage is explicitly mapped onto an existing CLAUDE.md concept where one exists (Stage 2 → existing Step 12; Stage 4 → existing Pre-Implementation Red-Team Pass, unchanged in timing; Stage 6 → new, distinct from existing Step 6 Self-Codex-Review; Stage 8 → new, additional to, not a replacement of, the Pre-Implementation Red-Team Pass; Stage 10 → confirmation gate over the three existing, still-distinct deployment checks) and none renames, relocates, or weakens an existing rule. New `docs/governance/CANONICAL_CHECKPOINT.md` created as the sole authoritative project-state snapshot (merged baseline, latest merged PR, latest commit, roadmap position, deployment coverage, test count, remaining work, open residuals), with its own verification method and staleness/maintenance rule.
+
+**CLAUDE.md reference:** `## Canonical Development Workflow (Mandatory)` (new, entire section).
+
+**Verification method:** `grep -n "## Canonical Development Workflow (Mandatory)" CLAUDE.md` → one match confirms the section exists. `grep -c "^Stage" CLAUDE.md` (or equivalent) → 11 numbered stages present. `grep -n "Step-N\|Step N" CLAUDE.md` cross-checked to confirm the roadmap and PR Preflight Standard numbering are unchanged (same line counts/headers as before this entry). `ls docs/governance/CANONICAL_CHECKPOINT.md` → file exists.
+
+**Affected files:** `CLAUDE.md` (`## Canonical Development Workflow (Mandatory)` added); `docs/governance/CANONICAL_CHECKPOINT.md` (new); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-028 added; footer updated).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Directive issued as a permanent, immutable-unless-authorized policy by the repository owner. Ambiguities were resolved via `AskUserQuestion` before implementation, per the directive's own instruction to "stop and report the conflict instead of proceeding" rather than guess on a framework declared permanent. Implemented in PR #122 on branch `governance/canonical-development-workflow`.
+
+---
+
+## LL-029
+
+**Date:** 2026-07-07
+**PR:** #122
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** `docs/governance/CANONICAL_CHECKPOINT.md`, as introduced by LL-028, had no rule forcing it to stay current: nothing required a merging PR to update it, its minimum required fields were incomplete (no production status, no governance-version pointer, no latest-LL-ID field, no explicit timestamp requirement), and nothing prevented other documents from independently maintaining competing current-state summaries. A file created as "the sole authoritative snapshot" without a currency-enforcement mechanism or an explicit anti-duplication rule can silently go stale or be undermined by a competing document the moment the next PR lands.
+
+**What we assumed:** That declaring the checkpoint "authoritative" in prose (LL-028) was sufficient, and that its own Maintenance Rule ("update it in the same PR that causes the change") would be followed voluntarily without a corresponding PR Preflight Standard gate and Evidence Block requirement forcing verification.
+
+**Why the assumption failed:** Every other "stay current" requirement in this framework (Step 9 Deployment Manifest Currency, Step 11 Documentation-Parity Review, Step 12 Lesson-Learned Compliance) is backed by a numbered PR Preflight step with a mandatory Evidence Block and an omission rule of equal severity to Step 1/2. A prose-only maintenance rule with no matching preflight gate is exactly the pattern this registry exists to catch — LL-026 made this same point about deployment-doc staleness, and it applies equally to the checkpoint file itself.
+
+**Evidence that was missing:** (1) A numbered PR Preflight step requiring the checkpoint to be updated in the same PR as any merge to `main`, with an Evidence Block. (2) The checkpoint file's own explicit enumeration of all twelve required minimum fields (it previously covered eight; missing: current production status, applicable governance version, latest Lesson Learned ID, and an explicit last-updated timestamp). (3) An explicit anti-duplication / Single Source of Truth statement in `CLAUDE.md` itself, not only in the checkpoint file, so the rule is discoverable from the governance rulebook and not only from the artifact it governs.
+
+**Policy created:** New `CLAUDE.md` `#### Step 13 — Canonical Checkpoint Currency` added to `### PR Preflight Standard (Mandatory)`, requiring every merging PR to update the checkpoint in the same PR (no deferral), with a required Evidence Block and an omission rule equivalent to Step 1/2. `## Canonical Development Workflow (Mandatory)` Stage 1 and Stage 11 updated to reference Step 13 and the full field list; a new Single Source of Truth rule and an extended Conflict rule (now also covering conflicts with the checkpoint's recorded state, not only LL entries/protocol) were added to that section. `docs/governance/CANONICAL_CHECKPOINT.md` rewritten with all twelve required fields in a Summary table, an explicit "Single Source of Truth Policy" section, and a documented, disclosed resolution for the squash-merge commit-SHA knowability problem (a PR references its own PR number and pre-merge head SHA, with a required post-merge verification step, rather than fabricating a SHA that does not yet exist).
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → `#### Step 13 — Canonical Checkpoint Currency` (new); `## Canonical Development Workflow (Mandatory)` (Stage 1, Stage 11, Conflict rule, and new Single Source of Truth rule updated).
+
+**Verification method:** `grep -n "Step 13 — Canonical Checkpoint Currency" CLAUDE.md docs/governance/CANONICAL_CHECKPOINT.md .github/pull_request_template.md` → present in all three files. `grep -n "Latest Lesson Learned ID\|Current Production Status\|Applicable Governance Version" docs/governance/CANONICAL_CHECKPOINT.md` → all three previously-missing fields now present. On any future PR: if `docs/governance/CANONICAL_CHECKPOINT.md`'s "Latest Merged PR" does not match `main`'s actual latest merged PR number, Step 13 has not been satisfied.
+
+**Affected files:** `CLAUDE.md` (Step 13 added; Canonical Development Workflow section updated; Maintenance-adjacent references updated); `docs/governance/CANONICAL_CHECKPOINT.md` (rewritten — Summary table, all 12 fields, SSOT Policy section); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Maintenance Rule updated to Steps 1–13; LL-029 added; footer updated); `.github/pull_request_template.md` (Step 13 checklist item and Evidence Block sub-block added).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Directive issued as a permanent policy refinement by the repository owner, continuing directly from LL-028 in the same open PR #122 / branch `governance/canonical-development-workflow`.
+
+---
+
+## LL-030
+
+**Date:** 2026-07-07
+**PR:** #122
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** Iran-OS now has three authoritative governance artifacts with distinct responsibilities — `docs/governance/CANONICAL_CHECKPOINT.md` (current state), `docs/governance/REVIEWER_LESSONS_LEARNED.md` (permanent rules), `CHANGELOG.md` (history). Each was independently correct and internally consistent (LL-026 through LL-029 all closed cleanly), but nothing required a contributor to check, on any given PR, whether a change to one of the three should have produced a corresponding change in one or both of the others. Governance artifacts remained individually correct but synchronization between authoritative governance documents was not explicitly verified.
+
+**What we assumed:** That because each artifact had its own well-defined responsibility and its own currency/maintenance rule (Step 9-style manifest currency reasoning for the Checkpoint via Step 13; the LL registry's own Maintenance Rule for when a new entry is mandatory; `CHANGELOG.md`'s informal convention of an entry per notable change), the three would stay synchronized as a byproduct of each rule being followed individually.
+
+**Why the assumption failed:** Each rule only looks inward at its own artifact — Step 13 asks "does the Checkpoint reflect the merged state," the LL Maintenance Rule asks "does this finding require a new LL entry," and nothing asks the cross-cutting question "given everything this PR changed, which of the *other* artifacts also need an update, and did I check all three, or only the one I was already editing?" A contributor fixing a bug and correctly adding an LL entry could still leave the Checkpoint's "latest Lesson Learned ID" field one behind, or leave `CHANGELOG.md` silent on a governance-relevant change, without violating any single existing rule — because no existing rule asked the synchronization question explicitly, only the per-artifact currency questions.
+
+**Evidence that was missing:** A dedicated PR Preflight step requiring the author to explicitly consider all three artifacts together for any PR in a defined trigger scope (governance state, engineering workflow, deployment workflow, security workflow, roadmap state, production readiness, or a permanent engineering rule), and to record `Updated` or `No update required` (with reason) for each of the three independently — not inferred from whichever one was already being edited.
+
+**Policy created:** New `CLAUDE.md` `#### Step 14 — Governance Synchronization Review` added to `### PR Preflight Standard (Mandatory)`, requiring an explicit, independent Updated/No-update-required determination for all three authoritative artifacts on every PR in the trigger scope, with a required Evidence Block and an omission rule equivalent to Step 1/2. The rule is explicit that "never assume that because one artifact changed the others should change automatically" — each of the three must be independently checked. `## Canonical Development Workflow (Mandatory)` Stage 11 and the Single Source of Truth rule updated to name all three artifacts and their distinct responsibilities (previously the rule named only the Checkpoint). Anti-duplication is preserved explicitly: satisfying Step 14 never means copying the same fact into more than one artifact — each fact lives in exactly the artifact responsible for that kind of fact.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → `#### Step 14 — Governance Synchronization Review` (new); `## Canonical Development Workflow (Mandatory)` (Stage 11 and Single Source of Truth rule updated to cover all three artifacts).
+
+**Verification method:** `grep -n "Step 14 — Governance Synchronization Review" CLAUDE.md docs/governance/CANONICAL_CHECKPOINT.md .github/pull_request_template.md` (Checkpoint reference optional, template and CLAUDE.md required) → present. On any future governance-scope PR, the Evidence Block's Step 14 sub-block must independently record Updated/No-update-required for all three artifacts by name — a block that only addresses one or two, or that infers one from another without a stated reason, is a Step 14 failure.
+
+**Affected files:** `CLAUDE.md` (Step 14 added; Stage 11 and Single Source of Truth rule extended to three artifacts); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Maintenance Rule updated to Steps 1–14; LL-030 added; footer updated); `.github/pull_request_template.md` (Governance Synchronization Review section, checklist items, and Evidence Block sub-block added); `docs/governance/CANONICAL_CHECKPOINT.md` (Applicable Governance Version and Latest Lesson Learned ID fields updated to reflect this entry).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Directive issued as a permanent policy refinement by the repository owner, continuing directly from LL-028/LL-029 in the same open PR #122 / branch `governance/canonical-development-workflow`. This entry is itself an example of the Step 14 review it introduces: all three artifacts (this registry, the Checkpoint, and `CHANGELOG.md`) are updated in the same commit.
+
+---
+
+## LL-031
+
+**Date:** 2026-07-07
+**PR:** #122
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** Governance systems naturally accumulate duplicate rules over time unless simplicity is explicitly protected. Five governance-hardening rounds landed on this branch in quick succession (LL-026 through LL-030, Steps 9–14), each individually justified — but nothing in the framework asked, before any of them was added, whether an existing rule could have been extended instead of a new one created. Left unchecked, this pattern compounds: each new rule adds its own checklist item, Evidence Block, and omission clause, and the framework's total surface area grows without a corresponding check on whether that growth was necessary.
+
+**What we assumed:** That the existing Extension rule ("extend the existing governance... never duplicate it... never create a parallel workflow") was sufficient on its own to prevent bloat, because it stated the *value* of minimalism in one sentence.
+
+**Why the assumption failed:** A one-sentence value statement with no accompanying procedure is not a gate — it relies on the implementer noticing the tension between "this looks new" and "this might be an extension" without any structured prompt to check. Every other permanent rule added in this session (Steps 9 through 14) has its own dedicated verification method and Evidence Block; the Extension rule alone had neither. A principle stated once in prose, with no required review step and no measurable criteria, degrades into something read once and then forgotten on every subsequent PR — exactly the failure mode this registry exists to prevent for every other class of finding.
+
+**Evidence that was missing:** (1) A concrete, checkable gate (the 7-criterion test: closes a demonstrated failure, cannot be solved by an existing rule, no duplicated responsibility, no parallel terminology, clearly defined owner, measurable verification method, permanently reduces risk) that a proposed new artifact must pass before it may be created. (2) A required Governance Duplication Review — four explicit questions (extend an existing rule? amend an existing LL? extend an existing checklist? let an existing workflow stage absorb it?) that must each be answered NO, with reasoning, before a new artifact is created. (3) An explicit statement that governance itself may be refactored — that redundant rules discovered later should be merged, not left to accumulate.
+
+**Governance Duplication Review performed for this very entry (dogfooding):**
+1. *Can an existing rule be extended instead?* Partially — the underlying value ("extend, don't duplicate") already existed as the Extension rule and was extended (grown into the full Governance Minimalism Principle) rather than replaced. But the **operational enforcement mechanism** (the 7-criterion gate, the four Duplication Review questions, a required Evidence Block) did not exist in any form and could not be expressed as a further extension of a one-sentence rule without giving it the same procedural weight every other Step already has — so a new Step was still necessary for the mechanism, even though the prose principle itself was extended, not duplicated.
+2. *Can an existing LL entry be amended instead?* No — bloat-prevention is a distinct failure class from doc-parity (LL-026), LL-registry-consultation (LL-027), workflow-terminology-collision (LL-028), checkpoint-currency (LL-029), and cross-artifact-synchronization (LL-030). None of those five addresses "should this be added in the first place."
+3. *Can an existing checklist be extended instead?* Yes — the Step 15 checklist item and Evidence Block sub-block were added to the existing `## Governance Preflight Synchronization` section in `.github/pull_request_template.md`, the same section housing Steps 8–14. No new top-level PR-template section was created for Step 15, unlike Step 11 (Documentation-Parity Review) and Step 14 (Governance Synchronization Review), which each needed their own component-touch trigger-scope gate; Step 15's narrower "does this PR add a new permanent artifact" trigger fits the existing section's pattern without a dedicated section.
+4. *Can an existing workflow stage absorb this responsibility?* Yes — `## Canonical Development Workflow (Mandatory)` Stage 11 (Merge) was extended once more to reference Step 15, exactly as it already referenced Step 13 and Step 14. No 12th Stage was added.
+
+Applying the same review to the Step 13/Step 14 pair already on this branch (retroactive check, not a new change): Step 13 (Canonical Checkpoint Currency) applies to *every* merge to `main` regardless of governance scope, while Step 14 (Governance Synchronization Review) applies only within the narrower governance-relevant trigger scope but spans all three artifacts, not only the Checkpoint. These scopes are not identical — no merge candidate identified at this time.
+
+**Policy created:** New `CLAUDE.md` `#### Step 15 — Governance Minimalism Review` added to `### PR Preflight Standard (Mandatory)`. The existing Extension rule (in `## Canonical Development Workflow (Mandatory)`) is grown into the full Governance Minimalism Principle: the 7-criterion gate, the four-question Governance Duplication Review, and an explicit governance-refactoring clause. `## Canonical Development Workflow (Mandatory)` Stage 11 extended once more to reference Step 15. No new PR-template top-level section was created — Step 15's checklist item and Evidence Block were added to the existing `## Governance Preflight Synchronization` section, per the Duplication Review's own third answer above.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → `#### Step 15 — Governance Minimalism Review` (new); `## Canonical Development Workflow (Mandatory)` → Extension rule / Governance Minimalism Principle (grown), Stage 11 (extended).
+
+**Verification method:** `grep -n "^#### Step 15" CLAUDE.md` → one match confirms the step exists. On any future PR proposing a new permanent governance artifact, the Evidence Block's Step 15 sub-block must contain a completed 7-criterion table and four explicitly-reasoned Duplication Review answers — a block left as an unfilled template, or one that creates a new artifact without all four Duplication Review answers being NO with stated reasoning, is a Step 15 failure.
+
+**Affected files:** `CLAUDE.md` (Step 15 added; Extension rule grown into Governance Minimalism Principle; Stage 11 extended); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Maintenance Rule updated to Steps 1–15; LL-031 added; footer updated); `.github/pull_request_template.md` (Step 15 checklist item and Evidence Block sub-block added to the existing Governance Preflight Synchronization section — no new top-level section); `docs/governance/CANONICAL_CHECKPOINT.md` (Applicable Governance Version and Latest Lesson Learned ID fields updated).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Directive issued as a permanent policy refinement by the repository owner, continuing directly from LL-028/LL-029/LL-030 in the same open PR #122 / branch `governance/canonical-development-workflow`. This entry is itself the first applied instance of the Governance Duplication Review it introduces — see the dogfooding section above — and demonstrates the review's intended outcome: growing an existing rule (the Extension rule) and extending an existing checklist and workflow stage, while still justifying the one genuinely new element (the Step 15 procedure itself) against all four questions.
+
+---
+
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-027*
+*Entries: LL-001 through LL-031*
