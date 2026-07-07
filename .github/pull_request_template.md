@@ -57,6 +57,7 @@ If covered, confirm the existing `CLAUDE.md` requirements were followed:
 - [ ] Step 11 Documentation-Parity Review completed and recorded below, or not applicable because this PR does not match the Step 11 trigger scope.
 - [ ] Step 12 Lesson-Learned Compliance Consultation completed and recorded below — `docs/governance/REVIEWER_LESSONS_LEARNED.md` was read and applicable LL entries were identified and satisfied before this PR was marked ready.
 - [ ] Step 13 Canonical Checkpoint Currency completed and recorded below — `docs/governance/CANONICAL_CHECKPOINT.md` reflects the state this PR will produce once merged; this PR is not READY until it does.
+- [ ] Step 14 Governance Synchronization Review completed and recorded below — all three authoritative artifacts (Canonical Checkpoint, Lesson Learned Registry, CHANGELOG) were independently considered, not inferred from one another; this PR is not READY until each is marked Updated or No update required (with reason).
 - [ ] HARDENING_ONLY re-evaluation triggers checked; any matching active residual was re-evaluated before marking this PR ready.
 
 ### Evidence Block
@@ -112,6 +113,29 @@ Required for PRs covered by the `CLAUDE.md` PR Preflight Standard.
   - Pre-merge head SHA recorded with post-merge verification note: YES / NO / N/A
   - Post-merge verification command provided: YES / NO
   - Result: PASS / NOT READY — gap: ___
+- Step 14 — Governance Synchronization Review:
+  - Trigger scope matched: ___ (governance state / engineering workflow / deployment workflow / security workflow / roadmap state / production readiness / permanent engineering rule, or "N/A — none matched")
+  - Canonical Checkpoint: ___ (Updated — fields changed: ___ / No update required — reason: ___)
+  - Lesson Learned Registry: ___ (Updated — LL-XXX added/modified / No update required — reason: ___)
+  - CHANGELOG: ___ (Updated — entry added / No update required — reason: ___)
+  - Result: PASS / NOT READY — gap: ___
+
+---
+
+## Governance Synchronization Review
+
+Applies to any PR affecting: governance state · engineering workflow · deployment workflow · security workflow · roadmap state · production readiness · a permanent engineering rule.
+
+- [ ] This PR does not affect any of the above (skip this section).
+- [ ] This PR affects one or more of the above — Governance Synchronization Review required before this PR is READY.
+
+If it applies, independently determine — do not infer one from another — whether each of the three authoritative governance artifacts requires an update, and record the result in the Step 14 Evidence Block above:
+
+- [ ] Canonical Checkpoint (`docs/governance/CANONICAL_CHECKPOINT.md`) — Updated, or No update required (reason recorded above).
+- [ ] Lesson Learned Registry (`docs/governance/REVIEWER_LESSONS_LEARNED.md`) — Updated, or No update required (reason recorded above).
+- [ ] CHANGELOG (`CHANGELOG.md`) — Updated, or No update required (reason recorded above).
+
+None of the three duplicates another: a new permanent rule belongs only in the Lesson Learned Registry, a completed change belongs only in `CHANGELOG.md`, and current project state belongs only in the Canonical Checkpoint.
 
 ---
 

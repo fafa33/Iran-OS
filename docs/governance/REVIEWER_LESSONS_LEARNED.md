@@ -63,7 +63,7 @@ An entry that lacks any of these four fields is incomplete and must be updated b
 A new LL entry must be created whenever a reviewer finding causes any of the following:
 
 - A new section or rule in `CLAUDE.md`
-- A change to the PR preflight checklist (Steps 1–13)
+- A change to the PR preflight checklist (Steps 1–14)
 - A new or modified evidence requirement in the grep evidence table
 - A new entry in the forbidden wording list
 - A new or modified classification rule or criterion
@@ -1019,7 +1019,37 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 ---
 
+## LL-030
+
+**Date:** 2026-07-07
+**PR:** #122
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** Iran-OS now has three authoritative governance artifacts with distinct responsibilities — `docs/governance/CANONICAL_CHECKPOINT.md` (current state), `docs/governance/REVIEWER_LESSONS_LEARNED.md` (permanent rules), `CHANGELOG.md` (history). Each was independently correct and internally consistent (LL-026 through LL-029 all closed cleanly), but nothing required a contributor to check, on any given PR, whether a change to one of the three should have produced a corresponding change in one or both of the others. Governance artifacts remained individually correct but synchronization between authoritative governance documents was not explicitly verified.
+
+**What we assumed:** That because each artifact had its own well-defined responsibility and its own currency/maintenance rule (Step 9-style manifest currency reasoning for the Checkpoint via Step 13; the LL registry's own Maintenance Rule for when a new entry is mandatory; `CHANGELOG.md`'s informal convention of an entry per notable change), the three would stay synchronized as a byproduct of each rule being followed individually.
+
+**Why the assumption failed:** Each rule only looks inward at its own artifact — Step 13 asks "does the Checkpoint reflect the merged state," the LL Maintenance Rule asks "does this finding require a new LL entry," and nothing asks the cross-cutting question "given everything this PR changed, which of the *other* artifacts also need an update, and did I check all three, or only the one I was already editing?" A contributor fixing a bug and correctly adding an LL entry could still leave the Checkpoint's "latest Lesson Learned ID" field one behind, or leave `CHANGELOG.md` silent on a governance-relevant change, without violating any single existing rule — because no existing rule asked the synchronization question explicitly, only the per-artifact currency questions.
+
+**Evidence that was missing:** A dedicated PR Preflight step requiring the author to explicitly consider all three artifacts together for any PR in a defined trigger scope (governance state, engineering workflow, deployment workflow, security workflow, roadmap state, production readiness, or a permanent engineering rule), and to record `Updated` or `No update required` (with reason) for each of the three independently — not inferred from whichever one was already being edited.
+
+**Policy created:** New `CLAUDE.md` `#### Step 14 — Governance Synchronization Review` added to `### PR Preflight Standard (Mandatory)`, requiring an explicit, independent Updated/No-update-required determination for all three authoritative artifacts on every PR in the trigger scope, with a required Evidence Block and an omission rule equivalent to Step 1/2. The rule is explicit that "never assume that because one artifact changed the others should change automatically" — each of the three must be independently checked. `## Canonical Development Workflow (Mandatory)` Stage 11 and the Single Source of Truth rule updated to name all three artifacts and their distinct responsibilities (previously the rule named only the Checkpoint). Anti-duplication is preserved explicitly: satisfying Step 14 never means copying the same fact into more than one artifact — each fact lives in exactly the artifact responsible for that kind of fact.
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → `#### Step 14 — Governance Synchronization Review` (new); `## Canonical Development Workflow (Mandatory)` (Stage 11 and Single Source of Truth rule updated to cover all three artifacts).
+
+**Verification method:** `grep -n "Step 14 — Governance Synchronization Review" CLAUDE.md docs/governance/CANONICAL_CHECKPOINT.md .github/pull_request_template.md` (Checkpoint reference optional, template and CLAUDE.md required) → present. On any future governance-scope PR, the Evidence Block's Step 14 sub-block must independently record Updated/No-update-required for all three artifacts by name — a block that only addresses one or two, or that infers one from another without a stated reason, is a Step 14 failure.
+
+**Affected files:** `CLAUDE.md` (Step 14 added; Stage 11 and Single Source of Truth rule extended to three artifacts); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Maintenance Rule updated to Steps 1–14; LL-030 added; footer updated); `.github/pull_request_template.md` (Governance Synchronization Review section, checklist items, and Evidence Block sub-block added); `docs/governance/CANONICAL_CHECKPOINT.md` (Applicable Governance Version and Latest Lesson Learned ID fields updated to reflect this entry).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Directive issued as a permanent policy refinement by the repository owner, continuing directly from LL-028/LL-029 in the same open PR #122 / branch `governance/canonical-development-workflow`. This entry is itself an example of the Step 14 review it introduces: all three artifacts (this registry, the Checkpoint, and `CHANGELOG.md`) are updated in the same commit.
+
+---
+
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-029*
+*Entries: LL-001 through LL-030*
