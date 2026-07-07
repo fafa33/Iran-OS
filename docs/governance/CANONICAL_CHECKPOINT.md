@@ -25,7 +25,7 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 | Open residual work | `docs/governance/OPEN_RESIDUALS.md` Active Residuals: none currently active |
 | Applicable governance version | PR Preflight Standard: Steps 1–13; Canonical Development Workflow: 11 stages (established PR #122); Reviewer Lessons Learned Registry: governance standard formalized 2026-06-17 |
 | Latest Lesson Learned ID | LL-029 |
-| Last updated (timestamp) | 2026-07-07T12:35:04Z (branch `governance/canonical-development-workflow`, pre-merge head `0160c2e147132bc760abf38c8b241689de7c497e`) |
+| Last updated (timestamp) | 2026-07-07T12:38:53Z (branch `governance/canonical-development-workflow`, pre-merge head `d6170dd6a65d35ba6cf7fbed1cfe65b1d1283bc1`) |
 
 The table above is the fast-read summary. Detail and evidence for each field follow below — this file is the authoritative source for these fields; the sections below exist to substantiate the table, not to introduce separate competing values.
 
@@ -41,12 +41,12 @@ The table above is the fast-read summary. Detail and evidence for each field fol
 
 - PR #121 — "docs(deployment/governance): fix stale PriceOracle caller + Step 11 Documentation-Parity Review + Step 12 LL Compliance Consultation (LL-026, LL-027)"
 - Merged: 2026-07-07
-- **Pending:** PR #122 — "docs(governance): add Canonical Development Workflow + Canonical Checkpoint (LL-028)" plus this SSOT-hardening commit (LL-029) — will become the new Latest Merged PR once merged. Its exact merge commit SHA is assigned by GitHub at squash-merge time and is not knowable before merge; this PR's pre-merge head commit is `0160c2e147132bc760abf38c8b241689de7c497e`. Confirm the true post-merge SHA via the Verification Method below immediately after merging, and update this section in the same follow-up if it has not already been corrected by a subsequent Step 13 update.
+- **Pending:** PR #122 — "docs(governance): add Canonical Development Workflow + Canonical Checkpoint (LL-028)" plus this SSOT-hardening commit (LL-029) — will become the new Latest Merged PR once merged. Its exact merge commit SHA is assigned by GitHub at squash-merge time and is not knowable before merge; this PR's pre-merge head commit is `d6170dd6a65d35ba6cf7fbed1cfe65b1d1283bc1`. Confirm the true post-merge SHA via the Verification Method below immediately after merging, and update this section in the same follow-up if it has not already been corrected by a subsequent Step 13 update.
 
 ## Latest Commit
 
 - `e9fab3453a9e9489f2a970640c02ef5dbe53a159` — merge commit of PR #121 into `main` (latest **merged** commit as of this update)
-- `0160c2e147132bc760abf38c8b241689de7c497e` — pre-merge head of the branch carrying PR #122, for reference only; not yet on `main`
+- `d6170dd6a65d35ba6cf7fbed1cfe65b1d1283bc1` — pre-merge head of the branch carrying PR #122, for reference only; not yet on `main`
 
 ## Roadmap Position
 
@@ -127,4 +127,4 @@ This file must be refreshed whenever any recorded field changes materially — a
 
 *Registry created: 2026-07-07*
 *CLAUDE.md reference: `## Canonical Development Workflow (Mandatory)`, Stage 1; `#### Step 13 — Canonical Checkpoint Currency`*
-*Last updated: 2026-07-07T12:35:04Z*
+*Last updated: 2026-07-07T12:38:53Z*
