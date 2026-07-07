@@ -14,9 +14,9 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 
 | Field | Value |
 |---|---|
-| Latest merged PR | #121 — see "Latest Merged PR" below; PR #122 will become latest merged PR once it merges |
-| Latest merged commit | `e9fab3453a9e9489f2a970640c02ef5dbe53a159` (squash-merge of PR #121 into `main`) |
-| Current baseline | `main` @ `e9fab3453a9e9489f2a970640c02ef5dbe53a159` |
+| Latest merged PR | #122 — see "Latest Merged PR" below |
+| Latest merged commit | `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c` (squash-merge of PR #122 into `main`) |
+| Current baseline | `main` @ `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c` |
 | Current roadmap position | Roadmap Step-12 (Evidence execution & blocker disposition) — open; Roadmap Step-13 (Whitepaper-to-system mapping) — open |
 | Current deployment coverage | 12/25 contracts have executable `deploy/` scripts (13 remaining) |
 | Current test count | 759 passing (`npm test`) |
@@ -25,7 +25,7 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 | Open residual work | `docs/governance/OPEN_RESIDUALS.md` Active Residuals: none currently active |
 | Applicable governance version | PR Preflight Standard: Steps 1–15; Canonical Development Workflow: 11 stages (established PR #122); Reviewer Lessons Learned Registry: governance standard formalized 2026-06-17 |
 | Latest Lesson Learned ID | LL-031 |
-| Last updated (timestamp) | 2026-07-07T12:59:14Z (branch `governance/canonical-development-workflow`, pre-merge head — see `git log -1` on this branch at commit time) |
+| Last updated (timestamp) | 2026-07-07T13:06:47Z (post-merge sync, branch `governance/checkpoint-post-merge-sync`) |
 
 The table above is the fast-read summary. Detail and evidence for each field follow below — this file is the authoritative source for these fields; the sections below exist to substantiate the table, not to introduce separate competing values.
 
@@ -34,19 +34,18 @@ The table above is the fast-read summary. Detail and evidence for each field fol
 ## Current Merged Baseline
 
 - Branch: `main`
-- Head commit: `e9fab3453a9e9489f2a970640c02ef5dbe53a159`
+- Head commit: `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c`
 - Merge date: 2026-07-07
 
 ## Latest Merged PR
 
-- PR #121 — "docs(deployment/governance): fix stale PriceOracle caller + Step 11 Documentation-Parity Review + Step 12 LL Compliance Consultation (LL-026, LL-027)"
+- PR #122 — "docs(governance): Canonical Development Workflow + Checkpoint SSOT + Synchronization + Minimalism (Steps 13-15, LL-028..031)"
 - Merged: 2026-07-07
-- **Pending:** PR #122 — "docs(governance): add Canonical Development Workflow + enforce Canonical Checkpoint as SSOT + Governance Synchronization Review (LL-028, LL-029, LL-030, LL-031)" — will become the new Latest Merged PR once merged. Its exact merge commit SHA is assigned by GitHub at squash-merge time and is not knowable before merge (this file has been amended across several commits on that branch, so its pre-merge head SHA is not repeated here to avoid a self-referential value going stale one commit later — confirm the actual pre-merge head via `git log -1` on branch `governance/canonical-development-workflow`). Confirm the true post-merge SHA via the Verification Method below immediately after merging, and update this section in the same follow-up if it has not already been corrected by a subsequent Step 13 update.
+- Confirmed via `git log origin/main -1 --format="%H %ad %s" --date=short` → `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c 2026-07-07 ...(#122)` — this is the disclosed post-merge verification the prior (pre-merge) version of this file said would be needed; it has now been performed and this section corrected, closing out that known structural limitation for this specific merge.
 
 ## Latest Commit
 
-- `e9fab3453a9e9489f2a970640c02ef5dbe53a159` — merge commit of PR #121 into `main` (latest **merged** commit as of this update)
-- Pre-merge head of the branch carrying PR #122: not repeated here (see note above) — confirm via `git log -1 governance/canonical-development-workflow` before relying on it; not yet on `main` regardless of exact value
+- `8033b0b9dabd35e15281fe06165c4a2eb53ccf5c` — squash-merge commit of PR #122 into `main` (latest **merged** commit as of this update)
 
 ## Roadmap Position
 
@@ -128,4 +127,4 @@ This file must be refreshed whenever any recorded field changes materially — a
 
 *Registry created: 2026-07-07*
 *CLAUDE.md reference: `## Canonical Development Workflow (Mandatory)`, Stage 1; `#### Step 13 — Canonical Checkpoint Currency`; `#### Step 14 — Governance Synchronization Review`*
-*Last updated: 2026-07-07T12:59:14Z*
+*Last updated: 2026-07-07T13:06:47Z*
