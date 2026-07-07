@@ -4,11 +4,19 @@ All notable changes to IranOS are documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-> **Non-claim notice:** Entries in this changelog do not claim production readiness, release approval, completed external audit, or completed formal verification. Step 12 and Step 13 remain open.
+> **Non-claim notice:** Entries in this changelog do not claim production readiness, release approval, completed external audit, or completed formal verification. Roadmap Step-12 and Step-13 (`docs/IRAN_OS_ROADMAP.md`) remain open — distinct from `CLAUDE.md`'s PR Preflight Standard `Step 12`/`Step 13`, a different numbering scheme; see `CLAUDE.md` → `## Canonical Development Workflow (Mandatory)` naming note.
 
 ---
 
 ## [Unreleased]
+
+### Added — Governance: Canonical Checkpoint SSOT hardening (permanent rule, Step 13, LL-029)
+- `CLAUDE.md` — new `#### Step 13 — Canonical Checkpoint Currency` added to `### PR Preflight Standard (Mandatory)`: every merge to `main` must update `docs/governance/CANONICAL_CHECKPOINT.md` in the same PR (no deferral); a PR is not READY until the checkpoint reflects the merged state. Includes a required Evidence Block and a disclosed, non-fabricating resolution for the squash-merge commit-SHA-not-known-before-merge problem. `## Canonical Development Workflow (Mandatory)` Stage 1/Stage 11 updated to reference Step 13 and the full 12-field minimum; Conflict rule extended to cover conflicts with the checkpoint's recorded state; new Single Source of Truth rule added
+- `docs/governance/CANONICAL_CHECKPOINT.md` — rewritten with a Summary table covering all twelve required minimum fields (previously eight; added current production status, applicable governance version, latest Lesson Learned ID, and an explicit last-updated timestamp), plus an explicit "Single Source of Truth Policy" section
+- `docs/governance/REVIEWER_LESSONS_LEARNED.md` — added `LL-029`; Maintenance Rule updated "Steps 1–12" → "Steps 1–13"; footer updated to "LL-001 through LL-029"
+- `.github/pull_request_template.md` — new Step 13 checklist line and Evidence Block sub-block
+- This non-claim notice above was also corrected: "Step 12 and Step 13 remain open" was ambiguous now that `CLAUDE.md` has its own Step 12/13 — reworded to specify it refers to the roadmap's `Step-N` phases, distinct from the PR Preflight Standard's `Step N`
+- Governance-registry and documentation changes only; no changes to `contracts/`, `deploy/*.js`, or test behavior. 759 passing (unchanged)
 
 ### Added — Governance: Canonical Development Workflow + Canonical Checkpoint (permanent rule, LL-028)
 - `CLAUDE.md` — new `## Canonical Development Workflow (Mandatory)` section (placed between `## Violation Codes` and `## Development Conventions`), declaring the engineering framework immutable unless explicitly authorized and defining an 11-stage mandatory sequence (Canonical Checkpoint → Applicable Lesson Learned Registry → Engineering protocol/roadmap → Implementation → CI → Codex Review → Resolve findings → Hostile Adversarial Review → Production Readiness Review → Deployment-Parity Review → Merge). Uses the label "Stage" (not "Step") to avoid colliding with the roadmap's `Step-N` phases or the PR Preflight Standard's `Step N` checklist, both of which are unchanged. Each stage maps onto existing CLAUDE.md concepts without renaming, relocating, or weakening any of them — the Pre-Implementation Red-Team Pass stays pre-implementation, Step 6 Self-Codex-Review stays the internal pre-push check, and the three deployment-parity checks (Deployment-Path Parity / Step 9 / Step 11) remain distinct per LL-026

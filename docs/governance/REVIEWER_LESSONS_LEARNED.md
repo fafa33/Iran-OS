@@ -63,7 +63,7 @@ An entry that lacks any of these four fields is incomplete and must be updated b
 A new LL entry must be created whenever a reviewer finding causes any of the following:
 
 - A new section or rule in `CLAUDE.md`
-- A change to the PR preflight checklist (Steps 1–12)
+- A change to the PR preflight checklist (Steps 1–13)
 - A new or modified evidence requirement in the grep evidence table
 - A new entry in the forbidden wording list
 - A new or modified classification rule or criterion
@@ -989,7 +989,37 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 ---
 
+## LL-029
+
+**Date:** 2026-07-07
+**PR:** #122
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** `docs/governance/CANONICAL_CHECKPOINT.md`, as introduced by LL-028, had no rule forcing it to stay current: nothing required a merging PR to update it, its minimum required fields were incomplete (no production status, no governance-version pointer, no latest-LL-ID field, no explicit timestamp requirement), and nothing prevented other documents from independently maintaining competing current-state summaries. A file created as "the sole authoritative snapshot" without a currency-enforcement mechanism or an explicit anti-duplication rule can silently go stale or be undermined by a competing document the moment the next PR lands.
+
+**What we assumed:** That declaring the checkpoint "authoritative" in prose (LL-028) was sufficient, and that its own Maintenance Rule ("update it in the same PR that causes the change") would be followed voluntarily without a corresponding PR Preflight Standard gate and Evidence Block requirement forcing verification.
+
+**Why the assumption failed:** Every other "stay current" requirement in this framework (Step 9 Deployment Manifest Currency, Step 11 Documentation-Parity Review, Step 12 Lesson-Learned Compliance) is backed by a numbered PR Preflight step with a mandatory Evidence Block and an omission rule of equal severity to Step 1/2. A prose-only maintenance rule with no matching preflight gate is exactly the pattern this registry exists to catch — LL-026 made this same point about deployment-doc staleness, and it applies equally to the checkpoint file itself.
+
+**Evidence that was missing:** (1) A numbered PR Preflight step requiring the checkpoint to be updated in the same PR as any merge to `main`, with an Evidence Block. (2) The checkpoint file's own explicit enumeration of all twelve required minimum fields (it previously covered eight; missing: current production status, applicable governance version, latest Lesson Learned ID, and an explicit last-updated timestamp). (3) An explicit anti-duplication / Single Source of Truth statement in `CLAUDE.md` itself, not only in the checkpoint file, so the rule is discoverable from the governance rulebook and not only from the artifact it governs.
+
+**Policy created:** New `CLAUDE.md` `#### Step 13 — Canonical Checkpoint Currency` added to `### PR Preflight Standard (Mandatory)`, requiring every merging PR to update the checkpoint in the same PR (no deferral), with a required Evidence Block and an omission rule equivalent to Step 1/2. `## Canonical Development Workflow (Mandatory)` Stage 1 and Stage 11 updated to reference Step 13 and the full field list; a new Single Source of Truth rule and an extended Conflict rule (now also covering conflicts with the checkpoint's recorded state, not only LL entries/protocol) were added to that section. `docs/governance/CANONICAL_CHECKPOINT.md` rewritten with all twelve required fields in a Summary table, an explicit "Single Source of Truth Policy" section, and a documented, disclosed resolution for the squash-merge commit-SHA knowability problem (a PR references its own PR number and pre-merge head SHA, with a required post-merge verification step, rather than fabricating a SHA that does not yet exist).
+
+**CLAUDE.md reference:** `### PR Preflight Standard (Mandatory)` → `#### Step 13 — Canonical Checkpoint Currency` (new); `## Canonical Development Workflow (Mandatory)` (Stage 1, Stage 11, Conflict rule, and new Single Source of Truth rule updated).
+
+**Verification method:** `grep -n "Step 13 — Canonical Checkpoint Currency" CLAUDE.md docs/governance/CANONICAL_CHECKPOINT.md .github/pull_request_template.md` → present in all three files. `grep -n "Latest Lesson Learned ID\|Current Production Status\|Applicable Governance Version" docs/governance/CANONICAL_CHECKPOINT.md` → all three previously-missing fields now present. On any future PR: if `docs/governance/CANONICAL_CHECKPOINT.md`'s "Latest Merged PR" does not match `main`'s actual latest merged PR number, Step 13 has not been satisfied.
+
+**Affected files:** `CLAUDE.md` (Step 13 added; Canonical Development Workflow section updated; Maintenance-adjacent references updated); `docs/governance/CANONICAL_CHECKPOINT.md` (rewritten — Summary table, all 12 fields, SSOT Policy section); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (Maintenance Rule updated to Steps 1–13; LL-029 added; footer updated); `.github/pull_request_template.md` (Step 13 checklist item and Evidence Block sub-block added).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Directive issued as a permanent policy refinement by the repository owner, continuing directly from LL-028 in the same open PR #122 / branch `governance/canonical-development-workflow`.
+
+---
+
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-028*
+*Entries: LL-001 through LL-029*

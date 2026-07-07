@@ -56,6 +56,7 @@ If covered, confirm the existing `CLAUDE.md` requirements were followed:
 - [ ] Step 10 `docs/governance/OPEN_RESIDUALS.md` consultation completed and recorded below.
 - [ ] Step 11 Documentation-Parity Review completed and recorded below, or not applicable because this PR does not match the Step 11 trigger scope.
 - [ ] Step 12 Lesson-Learned Compliance Consultation completed and recorded below — `docs/governance/REVIEWER_LESSONS_LEARNED.md` was read and applicable LL entries were identified and satisfied before this PR was marked ready.
+- [ ] Step 13 Canonical Checkpoint Currency completed and recorded below — `docs/governance/CANONICAL_CHECKPOINT.md` reflects the state this PR will produce once merged; this PR is not READY until it does.
 - [ ] HARDENING_ONLY re-evaluation triggers checked; any matching active residual was re-evaluated before marking this PR ready.
 
 ### Evidence Block
@@ -104,6 +105,12 @@ Required for PRs covered by the `CLAUDE.md` PR Preflight Standard.
   - Applicable LL IDs identified: ___ (or "none identified — [scope reviewed]")
   - Compliance verified per applicable entry: ___ (or "N/A — none applicable")
   - Re-checked immediately before marking READY: YES / NO
+  - Result: PASS / NOT READY — gap: ___
+- Step 13 — Canonical Checkpoint Currency:
+  - Fields updated in this PR: ___ (or "N/A — no tracked field changed")
+  - Latest Merged PR field set to this PR's number: YES / NO / N/A
+  - Pre-merge head SHA recorded with post-merge verification note: YES / NO / N/A
+  - Post-merge verification command provided: YES / NO
   - Result: PASS / NOT READY — gap: ___
 
 ---

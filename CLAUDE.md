@@ -193,7 +193,7 @@ The Iran-OS engineering framework is immutable unless explicitly authorized by t
 
 **Naming note:** this sequence uses the label **Stage**, deliberately distinct from two pre-existing, unrelated numbering schemes already in this repository: the roadmap's hyphenated `Step-N` project phases (`docs/IRAN_OS_ROADMAP.md`) and the PR Preflight Standard's `Step N` checklist (below, `### PR Preflight Standard (Mandatory)`). Neither existing scheme is renamed, renumbered, or altered by this section — this sequence is a governance wrapper that references them, not a third Step-numbering system.
 
-1. **Canonical Checkpoint** — read `docs/governance/CANONICAL_CHECKPOINT.md` in full before starting any task. It is the sole authoritative snapshot of current project state (merged baseline, latest merged PR, latest commit, roadmap position, deployment coverage, test count, remaining work, open residuals).
+1. **Canonical Checkpoint** — read `docs/governance/CANONICAL_CHECKPOINT.md` in full before any design, coding, documentation, deployment, or roadmap work begins. It is the Single Source of Truth (SSOT) for current project state — not documentation, a mandatory engineering artifact — and holds at minimum: latest merged PR, latest merged commit, current baseline, current roadmap position, current deployment coverage, current test count, current production status, remaining deployment targets, open residual work, applicable governance version, latest Lesson Learned ID, and a last-updated timestamp. Nothing else may supersede it; other documents may reference it but must not become competing sources of truth for these fields (see the file's own "Single Source of Truth Policy" section).
 2. **Applicable Lesson Learned Registry** — read `docs/governance/REVIEWER_LESSONS_LEARNED.md` and identify every applicable LL entry, per `### Reviewer Lessons Learned Registry (Mandatory)` and `#### Step 12 — Lesson-Learned Compliance Consultation` below. This stage does not introduce new registry rules — it is the point in the sequence where the existing Step 12 requirement is executed.
 3. **Engineering protocol / roadmap** — read `docs/IRAN_OS_ROADMAP.md` and the relevant protocol document(s) in `protocols/` for the domain being touched, per "Always read the relevant protocol document before modifying its associated contract" (see Contribution Workflow below).
 4. **Implementation** — carried out under the existing `### Pre-Implementation Red-Team Pass (Mandatory)` (for sensitive changes) and the coding conventions in `### Development Conventions` below. This stage remains unchanged in timing and scope: it runs *before* code is written and stays there.
@@ -203,11 +203,13 @@ The Iran-OS engineering framework is immutable unless explicitly authorized by t
 8. **Hostile Adversarial Review** — a standing, mandatory, post-implementation adversarial security review, formalizing the practice already applied on prior PRs (e.g. the hostile architecture review referenced in `CHANGELOG.md` for PR #116). This is distinct from and additional to the `### Pre-Implementation Red-Team Pass (Mandatory)` below, which remains unchanged and continues to run before implementation, not in place of this stage. Findings from this stage are classified using the existing `### Red-Team Finding Classification Standard (Mandatory)` 5-criterion gate.
 9. **Production Readiness Review** — confirm the PR does not claim production readiness beyond what is true (`.github/pull_request_template.md`'s Non-Claim Checklist), and that any production-readiness-relevant gaps remain tracked in `docs/governance/OPEN_RESIDUALS.md` and the roadmap.
 10. **Deployment-Parity Review** — a confirmation gate that all three existing, distinct deployment-parity checks are satisfied together: `### Deployment-Path Parity (Mandatory)` (production caller-path test proof), `#### Step 9 — Deployment Manifest Currency Check` (role/contract-name presence in `docs/deployment/`), and `#### Step 11 — Documentation-Parity Review` (caller/authority-description accuracy). This stage does not merge, rename, or weaken any of the three — their distinction (established in LL-026) remains in force; this stage only confirms all three pass together.
-11. **Merge** — once every prior stage passes.
+11. **Merge** — once every prior stage passes, including `#### Step 13 — Canonical Checkpoint Currency` below: the merging PR must update `docs/governance/CANONICAL_CHECKPOINT.md` to reflect the merged state in the same PR. Deferring that update to a follow-up PR is not permitted.
 
-**Conflict rule:** if any instruction — from any source, including a future directive — conflicts with an existing Lesson Learned entry or the established engineering protocol described in this document, stop and report the conflict instead of proceeding. Do not resolve the conflict by silent reinterpretation.
+**Conflict rule:** if any instruction — from any source, including a future directive — conflicts with an existing Lesson Learned entry, the established engineering protocol described in this document, or the state recorded in `docs/governance/CANONICAL_CHECKPOINT.md`, stop and report the conflict instead of proceeding. Do not resolve the conflict by silent reinterpretation.
 
 **Extension rule:** whenever a new permanent rule is introduced, extend the existing governance described in this document — never duplicate it, never create competing terminology for a concept that already has a name here, and never create a parallel workflow. Iran-OS has exactly one canonical governance framework.
+
+**Single Source of Truth rule:** `docs/governance/CANONICAL_CHECKPOINT.md` is the sole authoritative snapshot of current project state. Other documents (the roadmap, `CHANGELOG.md`, deployment manifests, reports) remain the authoritative detailed narrative and history for their own domains and may be referenced from the checkpoint — they are not superseded — but no document may hold an independently-maintained, competing value for a field the checkpoint tracks. If a document is found to conflict with the checkpoint's recorded state, apply the Conflict rule above: stop, report the inconsistency, and resolve it before continuing.
 
 ---
 
@@ -827,6 +829,33 @@ Step 12 — Lesson-Learned Compliance:
 ```
 
 **Omission rule:** omitting the Lesson-Learned Compliance Consultation, or leaving its Evidence Block as an unfilled template, is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
+
+#### Step 13 — Canonical Checkpoint Currency
+
+`docs/governance/CANONICAL_CHECKPOINT.md` is the Single Source of Truth (SSOT) for current Iran-OS project state — not documentation, a mandatory engineering artifact with the same authority as this PR Preflight Standard. Every merge to `main` MUST update this file in the same PR. Deferring the update to a follow-up PR is not permitted. A PR is **not READY** until the Canonical Checkpoint reflects the merged state.
+
+**Required minimum fields** (see the file's own Summary table): latest merged PR, latest merged commit, current baseline, current roadmap position, current deployment coverage, current test count, current production status, remaining deployment targets, open residual work, applicable governance version, latest Lesson Learned ID, last-updated timestamp.
+
+**Before opening any PR:** update every field in `docs/governance/CANONICAL_CHECKPOINT.md` that this PR's changes affect (deployment coverage, test count, roadmap position, production status, open residuals, latest LL ID, applicable governance version) to reflect the state the PR will produce once merged.
+
+**Known structural limitation — squash-merge commit SHA:** under this repository's squash-merge convention, the exact merge commit SHA landing on `main` is assigned by GitHub at merge time and is not knowable before merge. A PR satisfies this step by (a) setting "Latest Merged PR" to its own PR number, (b) recording its pre-merge head commit SHA with an explicit note that the true post-merge SHA must be confirmed via the file's own Verification Method immediately after merging, and (c) not leaving the file pointing at an older, now-superseded PR or commit as if it were still current. This is a disclosed limitation, not a certainty-language violation — no claim is made about a SHA that does not yet exist.
+
+**Single Source of Truth requirement:** do not duplicate the fields tracked by the Canonical Checkpoint into a new, separately-maintained status document. Other documents remain authoritative for their own detailed domain narratives (the roadmap for phase history, `CHANGELOG.md` for change history, deployment manifests for per-contract wiring) and may be referenced by the checkpoint — this step does not require stripping existing detail from those documents. It requires that the checkpoint be the place a reader goes for the *current-state snapshot*, and that no new document be created to compete with it for that role.
+
+**Verification method:** `git log origin/main -1 --format="%H %ad %s"` compared against `docs/governance/CANONICAL_CHECKPOINT.md`'s "Latest Merged PR" / "Latest Commit" fields — if `main`'s head PR number is not reflected in the checkpoint, Step 13 has not been satisfied for the current state of `main`. Re-run the checkpoint file's own Verification Method block for the remaining fields.
+
+**Required evidence block entry for Step 13:**
+
+```
+Step 13 — Canonical Checkpoint Currency:
+- Fields updated in this PR: [list of changed fields, e.g. "deployment coverage, test count, latest Lesson Learned ID", or "N/A — no tracked field changed"]
+- Latest Merged PR field set to this PR's number: [YES / NO / N/A]
+- Pre-merge head SHA recorded with post-merge verification note: [YES / NO / N/A]
+- Post-merge verification command provided: [YES / NO]
+- Result: [PASS / NOT READY — gap: <description>]
+```
+
+**Omission rule:** omitting the Canonical Checkpoint Currency update, or leaving its Evidence Block as an unfilled template, is a preflight failure equivalent to omitting Step 1 (Rebase) or Step 2 (Test).
 
 #### Before Responding to Codex
 
