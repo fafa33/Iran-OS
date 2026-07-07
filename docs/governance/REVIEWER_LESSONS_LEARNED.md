@@ -959,7 +959,37 @@ When a reviewer finding causes any of the following, a new LL entry is required 
 
 ---
 
+## LL-028
+
+**Date:** 2026-07-07
+**PR:** #122
+**Reviewer:** User directive — repository owner (direct chat instruction, not a Codex/reviewer finding)
+**Review comment URL:** N/A — issued as a direct instruction to the assistant in the session conversation, not a GitHub PR/issue comment; no external review comment exists to link
+**Finding:** The repository owner directed a permanent 11-stage mandatory development order (Canonical Checkpoint → Applicable Lesson Learned Registry → Engineering protocol/roadmap → Implementation → CI → Codex Review → Resolve findings → Hostile Adversarial Review → Production Readiness Review → Deployment-Parity Review → Merge). Before encoding it, research found no existing "Canonical Checkpoint" artifact, and found that several of the directive's terms (`Step N`, `Codex Review`, `Hostile Adversarial Review`, `Deployment-Parity Review`) risked colliding with or silently collapsing pre-existing, deliberately distinct concepts already in `CLAUDE.md` — most notably the roadmap's `Step-N` phases, the PR Preflight Standard's `Step N` checklist, `Step 6 — Self-Codex-Review` (an internal pre-push check, not an external review), the `Pre-Implementation Red-Team Pass` (which runs before implementation, not after), and the three separately-justified deployment checks (`Deployment-Path Parity`, `Step 9 — Deployment Manifest Currency Check`, `Step 11 — Documentation-Parity Review`) whose distinction LL-026 specifically established.
+
+**What we assumed:** That the directive's terms could be mapped onto the existing framework without first confirming, with the repository owner, which existing concepts each new term was meant to reference versus replace — given the framework was just declared "immutable unless explicitly authorized," guessing wrong on a foundational, permanent ordering would itself constitute an unauthorized workflow change.
+
+**Why the assumption failed:** Several of the directive's terms were name-adjacent to existing, hard-won distinctions (the Step 9/Step 11 split from LL-026 being the clearest case) without being identical to them. Proceeding on assumption risked either inventing an ungrounded new artifact (a "Canonical Checkpoint" with no defined content) or silently collapsing an existing distinction the registry had just gone to the effort of separating and documenting.
+
+**Evidence that was missing:** Explicit confirmation from the repository owner, obtained via `AskUserQuestion`, on: (1) what the Canonical Checkpoint file should contain and where it lives; (2) whether the new sequence should use "Step N" or a distinct label to avoid a third colliding numbering scheme; (3) whether "Hostile Adversarial Review" is a new, additional, post-implementation gate or a relocation of the existing pre-implementation Red-Team Pass; (4) whether "Deployment-Parity Review" is a confirmation gate over the three existing checks or a genuinely new, fourth check.
+
+**Policy created:** New `CLAUDE.md` `## Canonical Development Workflow (Mandatory)` section added (placed between `## Violation Codes (TR-01 to TR-06)` and `## Development Conventions`), defining the 11-stage sequence using the label **Stage** (not "Step") to avoid colliding with the roadmap's `Step-N` phases or the PR Preflight Standard's `Step N` checklist — both of which remain unchanged. Each stage is explicitly mapped onto an existing CLAUDE.md concept where one exists (Stage 2 → existing Step 12; Stage 4 → existing Pre-Implementation Red-Team Pass, unchanged in timing; Stage 6 → new, distinct from existing Step 6 Self-Codex-Review; Stage 8 → new, additional to, not a replacement of, the Pre-Implementation Red-Team Pass; Stage 10 → confirmation gate over the three existing, still-distinct deployment checks) and none renames, relocates, or weakens an existing rule. New `docs/governance/CANONICAL_CHECKPOINT.md` created as the sole authoritative project-state snapshot (merged baseline, latest merged PR, latest commit, roadmap position, deployment coverage, test count, remaining work, open residuals), with its own verification method and staleness/maintenance rule.
+
+**CLAUDE.md reference:** `## Canonical Development Workflow (Mandatory)` (new, entire section).
+
+**Verification method:** `grep -n "## Canonical Development Workflow (Mandatory)" CLAUDE.md` → one match confirms the section exists. `grep -c "^Stage" CLAUDE.md` (or equivalent) → 11 numbered stages present. `grep -n "Step-N\|Step N" CLAUDE.md` cross-checked to confirm the roadmap and PR Preflight Standard numbering are unchanged (same line counts/headers as before this entry). `ls docs/governance/CANONICAL_CHECKPOINT.md` → file exists.
+
+**Affected files:** `CLAUDE.md` (`## Canonical Development Workflow (Mandatory)` added); `docs/governance/CANONICAL_CHECKPOINT.md` (new); `docs/governance/REVIEWER_LESSONS_LEARNED.md` (LL-028 added; footer updated).
+
+**Status:** Prevented
+
+**Repeat allowed?** NO
+
+**Notes:** Directive issued as a permanent, immutable-unless-authorized policy by the repository owner. Ambiguities were resolved via `AskUserQuestion` before implementation, per the directive's own instruction to "stop and report the conflict instead of proceeding" rather than guess on a framework declared permanent. Implemented in PR #122 on branch `governance/canonical-development-workflow`.
+
+---
+
 *Registry created: 2026-06-17*
 *Governance standard formalized: 2026-06-17*
 *Branch: claude/codex-adversarial-review-fyu0nb*
-*Entries: LL-001 through LL-027*
+*Entries: LL-001 through LL-028*

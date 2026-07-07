@@ -44,6 +44,8 @@ Applies to every PR covered by the `CLAUDE.md` PR Preflight Standard: sensitive-
 - [ ] This PR is outside the `CLAUDE.md` PR Preflight Standard scope.
 - [ ] This PR is covered by the `CLAUDE.md` PR Preflight Standard.
 
+- [ ] Canonical Development Workflow followed (`CLAUDE.md` → `## Canonical Development Workflow (Mandatory)`): `docs/governance/CANONICAL_CHECKPOINT.md` and the applicable Lesson Learned entries were loaded before implementation began, in that order.
+
 If covered, confirm the existing `CLAUDE.md` requirements were followed:
 
 - [ ] CET applied: all PR claims and red-team conclusions are CET-1 before push; no CET-2, CET-3, or CET-4 claim remains.

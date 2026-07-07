@@ -187,6 +187,30 @@ TR-01, TR-02, TR-03 trigger an immediate emergency lock (`emergencyLockActive = 
 
 ---
 
+## Canonical Development Workflow (Mandatory)
+
+The Iran-OS engineering framework is immutable unless explicitly authorized by the project owner. Every task — implementation, deployment, documentation, governance change, runtime modification, deployment wiring, security change, or production change — follows this sequence. It must not be bypassed, reordered, skipped, weakened, or replaced, and no competing or parallel workflow may be introduced without explicit owner authorization.
+
+**Naming note:** this sequence uses the label **Stage**, deliberately distinct from two pre-existing, unrelated numbering schemes already in this repository: the roadmap's hyphenated `Step-N` project phases (`docs/IRAN_OS_ROADMAP.md`) and the PR Preflight Standard's `Step N` checklist (below, `### PR Preflight Standard (Mandatory)`). Neither existing scheme is renamed, renumbered, or altered by this section — this sequence is a governance wrapper that references them, not a third Step-numbering system.
+
+1. **Canonical Checkpoint** — read `docs/governance/CANONICAL_CHECKPOINT.md` in full before starting any task. It is the sole authoritative snapshot of current project state (merged baseline, latest merged PR, latest commit, roadmap position, deployment coverage, test count, remaining work, open residuals).
+2. **Applicable Lesson Learned Registry** — read `docs/governance/REVIEWER_LESSONS_LEARNED.md` and identify every applicable LL entry, per `### Reviewer Lessons Learned Registry (Mandatory)` and `#### Step 12 — Lesson-Learned Compliance Consultation` below. This stage does not introduce new registry rules — it is the point in the sequence where the existing Step 12 requirement is executed.
+3. **Engineering protocol / roadmap** — read `docs/IRAN_OS_ROADMAP.md` and the relevant protocol document(s) in `protocols/` for the domain being touched, per "Always read the relevant protocol document before modifying its associated contract" (see Contribution Workflow below).
+4. **Implementation** — carried out under the existing `### Pre-Implementation Red-Team Pass (Mandatory)` (for sensitive changes) and the coding conventions in `### Development Conventions` below. This stage remains unchanged in timing and scope: it runs *before* code is written and stays there.
+5. **CI** — `npm test` and repository CI checks (Slither, CodeQL, etc.) must pass.
+6. **Codex Review** — external review by the Codex reviewer bot on the opened PR. This is distinct from `#### Step 6 — Self-Codex-Review` below, which is an internal self-check the implementer performs *before* pushing — that existing step is not renamed, relocated, or replaced by this stage; both apply.
+7. **Resolve findings** — every Codex (or other reviewer) finding is fixed and root-caused per `#### Before Responding to Codex` and `#### Before Marking a Finding Resolved` below, and, where it triggers the Reviewer Lessons Learned Registry's Maintenance Rule, becomes a new LL entry in the same PR (or the next available PR under the registry's post-merge exception).
+8. **Hostile Adversarial Review** — a standing, mandatory, post-implementation adversarial security review, formalizing the practice already applied on prior PRs (e.g. the hostile architecture review referenced in `CHANGELOG.md` for PR #116). This is distinct from and additional to the `### Pre-Implementation Red-Team Pass (Mandatory)` below, which remains unchanged and continues to run before implementation, not in place of this stage. Findings from this stage are classified using the existing `### Red-Team Finding Classification Standard (Mandatory)` 5-criterion gate.
+9. **Production Readiness Review** — confirm the PR does not claim production readiness beyond what is true (`.github/pull_request_template.md`'s Non-Claim Checklist), and that any production-readiness-relevant gaps remain tracked in `docs/governance/OPEN_RESIDUALS.md` and the roadmap.
+10. **Deployment-Parity Review** — a confirmation gate that all three existing, distinct deployment-parity checks are satisfied together: `### Deployment-Path Parity (Mandatory)` (production caller-path test proof), `#### Step 9 — Deployment Manifest Currency Check` (role/contract-name presence in `docs/deployment/`), and `#### Step 11 — Documentation-Parity Review` (caller/authority-description accuracy). This stage does not merge, rename, or weaken any of the three — their distinction (established in LL-026) remains in force; this stage only confirms all three pass together.
+11. **Merge** — once every prior stage passes.
+
+**Conflict rule:** if any instruction — from any source, including a future directive — conflicts with an existing Lesson Learned entry or the established engineering protocol described in this document, stop and report the conflict instead of proceeding. Do not resolve the conflict by silent reinterpretation.
+
+**Extension rule:** whenever a new permanent rule is introduced, extend the existing governance described in this document — never duplicate it, never create competing terminology for a concept that already has a name here, and never create a parallel workflow. Iran-OS has exactly one canonical governance framework.
+
+---
+
 ## Development Conventions
 
 ### Solidity Standards
