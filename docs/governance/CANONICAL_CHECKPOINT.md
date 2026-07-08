@@ -14,9 +14,9 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 
 | Field | Value |
 |---|---|
-| Latest merged PR | #123 — see "Latest Merged PR" below; this PR is pending |
-| Latest merged commit | `fc1794d024d15bd670b9239b3486e0e96a7d5f57` (squash-merge of PR #123 into `main`) |
-| Current baseline | `main` @ `fc1794d024d15bd670b9239b3486e0e96a7d5f57` |
+| Latest merged PR | #124 — see "Latest Merged PR" below; this PR is pending |
+| Latest merged commit | `3fb0f20348e63c8556349384c15346dd476f307b` (squash-merge of PR #124 into `main`) |
+| Current baseline | `main` @ `3fb0f20348e63c8556349384c15346dd476f307b` |
 | Current roadmap position | Roadmap Step-12 (Evidence execution & blocker disposition) — open; Roadmap Step-13 (Whitepaper-to-system mapping) — open |
 | Current deployment coverage | 12 contracts have executable `deploy/` scripts. Denominator flagged: commonly cited as "12/25" but a direct file count shows 26 deployable contracts, not 25 — see "Deployment Coverage" section below, unresolved |
 | Current test count | 759 passing (`npm test`) |
