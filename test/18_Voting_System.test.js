@@ -14,7 +14,7 @@ let startTime, endTime;
 beforeEach(async function () {
 [kernel, oracle, electionAdmin, voter1, voter2, candidate1, candidate2, attacker] = await ethers.getSigners();
 const Voting = await ethers.getContractFactory("VotingSystem");
-voting = await Voting.deploy(kernel.address);
+voting = await Voting.deploy(kernel.address, kernel.address);
 await voting.waitForDeployment();
 await voting.connect(kernel).grantRole(ORACLE_ROLE, oracle.address);
 await voting.connect(kernel).grantRole(ELECTION_ROLE, electionAdmin.address);

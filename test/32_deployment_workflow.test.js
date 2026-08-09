@@ -455,7 +455,7 @@ describe("Deployment Workflow (deploy/)", function () {
 
       const addresses = {};
       addresses.KERNEL_ADDRESS = (await deployKernel(hre, nonzeroConfig)).address;
-      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, nonzeroConfig, addresses)).address;
       addresses.SWF_ADDRESS = (await deploySwf(hre, nonzeroConfig, addresses)).address;
       addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, nonzeroConfig, addresses, sovereign)).address;
 
@@ -486,7 +486,7 @@ describe("Deployment Workflow (deploy/)", function () {
 
       const addresses = {};
       addresses.KERNEL_ADDRESS = (await deployKernel(hre, nonzeroConfig)).address;
-      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, nonzeroConfig, addresses)).address;
       addresses.SWF_ADDRESS = (await deploySwf(hre, nonzeroConfig, addresses)).address;
       addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, nonzeroConfig, addresses, sovereign)).address;
 
@@ -527,7 +527,7 @@ describe("Deployment Workflow (deploy/)", function () {
 
       const addresses = {};
       addresses.KERNEL_ADDRESS = (await deployKernel(hre, nonzeroConfig)).address;
-      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, nonzeroConfig, addresses)).address;
       addresses.SWF_ADDRESS = (await deploySwf(hre, nonzeroConfig, addresses)).address;
       addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, nonzeroConfig, addresses, sovereign)).address;
 

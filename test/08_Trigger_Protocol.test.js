@@ -14,7 +14,7 @@ const { ethers } = require("hardhat");
 beforeEach(async function () {
 [kernel, , swf, attacker, replacement, user1, user2] = await ethers.getSigners();
 const TreasuryFactory = await ethers.getContractFactory("Treasury");
-treasury = await TreasuryFactory.deploy(kernel.address);
+treasury = await TreasuryFactory.deploy(kernel.address, kernel.address);
 await treasury.waitForDeployment();
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
 trigger = await Trigger.deploy(kernel.address, await treasury.getAddress(), swf.address);
@@ -199,7 +199,7 @@ expectExecutionRecord(await trigger.executions(2), secondSnapshot);
 
 it("executeTrigger propagates Treasury block when TriggerProtocol holds KERNEL_ROLE", async function () {
 const Treasury = await ethers.getContractFactory("Treasury");
-const externalTreasury = await Treasury.deploy(kernel.address);
+const externalTreasury = await Treasury.deploy(kernel.address, kernel.address);
 await externalTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -245,7 +245,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -255,6 +255,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -331,7 +333,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -341,6 +343,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -417,7 +421,14 @@ expect(await realTreasury.getRemainingCapacity()).to.equal(treasuryRemainingCapa
 expect(await realTreasury.hasRole(treasuryKernelRole, await realTrigger.getAddress())).to.equal(
 triggerHasTreasuryAuthoritySnapshot
 );
-expect(triggerHasTreasuryAuthoritySnapshot).to.be.false;
+// TG-01: the fixture now grants KERNEL_ROLE to realTrigger on realTreasury
+// immediately after deployment (line 347 above), matching the real
+// production wiring sequence — so this snapshot, taken afterward, is
+// correctly true. The actual invariant this test asserts (that a
+// non-terminal/partial-signature trigger state does not mutate Treasury
+// authority) is the equality check directly above, comparing the
+// before/after snapshot; that check is unchanged.
+expect(triggerHasTreasuryAuthoritySnapshot).to.be.true;
 expect(l1.balance).to.equal(l1Snapshot.balance);
 expect(l1.totalDeposited).to.equal(l1Snapshot.totalDeposited);
 expect(l1.totalWithdrawn).to.equal(l1Snapshot.totalWithdrawn);
@@ -445,7 +456,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -455,6 +466,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -577,7 +590,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -587,6 +600,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -688,7 +703,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -698,6 +713,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -707,13 +724,6 @@ await kernelContract.connect(sovereign).grantOfficialAccess(offender.address, GU
 for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
-
-const kernelContractAddr0 = await kernelContract.getAddress();
-await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr0]);
-await ethers.provider.send("hardhat_setBalance", [kernelContractAddr0, "0x1000000000000000000"]);
-const kernelAsSigner0 = await ethers.getSigner(kernelContractAddr0);
-await realTreasury.connect(kernelAsSigner0).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
-await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr0]);
 
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "trigger lifecycle integrity audit");
 
@@ -859,7 +869,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -869,6 +879,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -892,13 +904,6 @@ const initialTreasuryBlocked = await realTreasury.isBlocked(offender.address);
 const initialSwfL1 = await realSwf.layerL1();
 const initialSwfTotalAssets = await realSwf.totalAssets();
 const initialSwfTxCount = await realSwf.txCount();
-
-const kernelContractAddr1 = await kernelContract.getAddress();
-await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr1]);
-await ethers.provider.send("hardhat_setBalance", [kernelContractAddr1, "0x1000000000000000000"]);
-const kernelAsSigner1 = await ethers.getSigner(kernelContractAddr1);
-await realTreasury.connect(kernelAsSigner1).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
-await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr1]);
 
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "reserve invariant lifecycle audit");
 
@@ -1027,7 +1032,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -1037,6 +1042,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -1046,13 +1053,6 @@ await kernelContract.connect(sovereign).grantOfficialAccess(offender.address, GU
 for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
-
-const kernelContractAddr2 = await kernelContract.getAddress();
-await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr2]);
-await ethers.provider.send("hardhat_setBalance", [kernelContractAddr2, "0x1000000000000000000"]);
-const kernelAsSigner2 = await ethers.getSigner(kernelContractAddr2);
-await realTreasury.connect(kernelAsSigner2).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
-await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr2]);
 
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "terminal immutability audit");
 
@@ -1215,7 +1215,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -1225,6 +1225,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -1234,13 +1236,6 @@ await kernelContract.connect(sovereign).grantOfficialAccess(offender.address, GU
 for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
-
-const kernelContractAddr3 = await kernelContract.getAddress();
-await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr3]);
-await ethers.provider.send("hardhat_setBalance", [kernelContractAddr3, "0x1000000000000000000"]);
-const kernelAsSigner3 = await ethers.getSigner(kernelContractAddr3);
-await realTreasury.connect(kernelAsSigner3).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
-await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr3]);
 
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "deterministic execution audit");
 
@@ -1363,7 +1358,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -1373,6 +1368,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -1383,13 +1380,6 @@ await kernelContract.connect(sovereign).grantOfficialAccess(offenderTwo.address,
 for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
-
-const kernelContractAddr4 = await kernelContract.getAddress();
-await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr4]);
-await ethers.provider.send("hardhat_setBalance", [kernelContractAddr4, "0x1000000000000000000"]);
-const kernelAsSigner4 = await ethers.getSigner(kernelContractAddr4);
-await realTreasury.connect(kernelAsSigner4).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
-await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr4]);
 
 await kernelContract.connect(oracle).flagViolation(4, offenderOne.address, "first isolated trigger");
 await kernelContract.connect(oracle).flagViolation(4, offenderTwo.address, "second isolated trigger");
@@ -1503,7 +1493,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -1513,6 +1503,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -1523,13 +1515,6 @@ await kernelContract.connect(sovereign).grantOfficialAccess(offenderTwo.address,
 for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
-
-const kernelContractAddr5 = await kernelContract.getAddress();
-await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr5]);
-await ethers.provider.send("hardhat_setBalance", [kernelContractAddr5, "0x1000000000000000000"]);
-const kernelAsSigner5 = await ethers.getSigner(kernelContractAddr5);
-await realTreasury.connect(kernelAsSigner5).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
-await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr5]);
 
 await kernelContract.connect(oracle).flagViolation(4, offenderOne.address, "concurrent terminal trigger");
 await kernelContract.connect(oracle).flagViolation(4, offenderTwo.address, "concurrent non-terminal trigger");
@@ -1647,7 +1632,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -1657,6 +1642,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -1666,13 +1653,6 @@ await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, 
 }
 
 // TG-01: grant KERNEL_ROLE to TriggerProtocol BEFORE snapshot so matrix is consistent pre/post trigger
-const kernelContractAddrEsc = await kernelContract.getAddress();
-await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddrEsc]);
-await ethers.provider.send("hardhat_setBalance", [kernelContractAddrEsc, "0x1000000000000000000"]);
-const kernelAsSignerEsc = await ethers.getSigner(kernelContractAddrEsc);
-await realTreasury.connect(kernelAsSignerEsc).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
-await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddrEsc]);
-
 const kernelRoles = [
 await kernelContract.SOVEREIGN_ROLE(),
 await kernelContract.COURT_ROLE(),
@@ -1865,7 +1845,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -1875,6 +1855,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "failed trigger neutrality audit");
@@ -1959,7 +1941,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -1969,6 +1951,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -1978,13 +1962,6 @@ await kernelContract.connect(sovereign).grantOfficialAccess(offender.address, GU
 for (const extraCourt of extraCourts) {
 await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, COURT_ROLE);
 }
-
-const kernelContractAddr7 = await kernelContract.getAddress();
-await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr7]);
-await ethers.provider.send("hardhat_setBalance", [kernelContractAddr7, "0x1000000000000000000"]);
-const kernelAsSigner7 = await ethers.getSigner(kernelContractAddr7);
-await realTreasury.connect(kernelAsSigner7).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
-await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr7]);
 
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "trigger replay audit");
 const violationId = 1n;
@@ -2075,7 +2052,7 @@ const realSwf = await SWF.deploy(swfOwner.address, await kernelContract.getAddre
 await realSwf.waitForDeployment();
 
 const Treasury = await ethers.getContractFactory("Treasury");
-const realTreasury = await Treasury.deploy(await kernelContract.getAddress());
+const realTreasury = await Treasury.deploy(sovereign.address, await kernelContract.getAddress());
 await realTreasury.waitForDeployment();
 
 const Trigger = await ethers.getContractFactory("TriggerProtocol");
@@ -2085,6 +2062,8 @@ await realTreasury.getAddress(),
 await realSwf.getAddress()
 );
 await realTrigger.waitForDeployment();
+// TG-01: sovereign holds DEFAULT_ADMIN_ROLE on Treasury post-fix; grant KERNEL_ROLE so executeTrigger can call blockAddressByTrigger
+await realTreasury.connect(sovereign).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
 
 await kernelContract.connect(sovereign).setTriggerProtocol(await realTrigger.getAddress());
 
@@ -2101,13 +2080,6 @@ await kernelContract.connect(sovereign).grantOfficialAccess(extraCourt.address, 
 expect(await kernelContract.hasRole(COURT_ROLE, offender.address)).to.be.true;
 expect(await realSwf.hasRole(COUNCIL_ROLE, offender.address)).to.be.true;
 expect((await kernelContract.officialAccess(offender.address)).isActive).to.be.true;
-
-const kernelContractAddr8 = await kernelContract.getAddress();
-await ethers.provider.send("hardhat_impersonateAccount", [kernelContractAddr8]);
-await ethers.provider.send("hardhat_setBalance", [kernelContractAddr8, "0x1000000000000000000"]);
-const kernelAsSigner8 = await ethers.getSigner(kernelContractAddr8);
-await realTreasury.connect(kernelAsSigner8).grantRole(await realTreasury.KERNEL_ROLE(), await realTrigger.getAddress());
-await ethers.provider.send("hardhat_stopImpersonatingAccount", [kernelContractAddr8]);
 
 await kernelContract.connect(oracle).flagViolation(4, offender.address, "P-07 authority boundary test");
 
@@ -2144,7 +2116,7 @@ describe("TG-01 Treasury Auto-Block", function () {
 it("TG-01: executeTrigger automatically propagates Treasury block in the same transaction", async function () {
 // Deploy Treasury with kernel EOA — kernel gets KERNEL_ROLE + DEFAULT_ADMIN_ROLE
 const Treasury = await ethers.getContractFactory("Treasury");
-const tg01Treasury = await Treasury.deploy(kernel.address);
+const tg01Treasury = await Treasury.deploy(kernel.address, kernel.address);
 await tg01Treasury.waitForDeployment();
 
 // Deploy TriggerProtocol wired to the same Treasury
@@ -2227,7 +2199,7 @@ describe("INV-03 Authority Boundary Follow-Up (R-1..R-5)", function () {
 
     // Treasury: inv03Admin is DEFAULT_ADMIN + KERNEL_ROLE
     const TreasuryFactory = await ethers.getContractFactory("Treasury");
-    inv03Treasury = await TreasuryFactory.deploy(inv03Admin.address);
+    inv03Treasury = await TreasuryFactory.deploy(inv03Admin.address, inv03Admin.address);
     await inv03Treasury.waitForDeployment();
 
     // IranOS_Kernel: real role assignments

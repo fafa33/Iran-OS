@@ -76,9 +76,18 @@ contract Treasury is AccessControl, ReentrancyGuard {
         _;
     }
 
-    constructor(address _kernel) {
+    // _admin receives DEFAULT_ADMIN_ROLE (a real signer, e.g. the Sovereign,
+    // so post-deploy role wiring — such as granting KERNEL_ROLE to
+    // TriggerProtocol so it can call blockAddressByTrigger() — is reachable
+    // on mainnet). _kernel continues to receive only KERNEL_ROLE, recording
+    // the Kernel contract's identity without relying on it to ever originate
+    // a transaction here (contracts/kernel.sol has no call-forwarding
+    // mechanism to this contract). Mirrors SovereignWealthFund.sol's
+    // constructor(sovereign, kernel) split.
+    constructor(address _admin, address _kernel) {
+        require(_admin != address(0), "Treasury: invalid admin");
         require(_kernel != address(0), "Treasury: invalid kernel");
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(KERNEL_ROLE, _kernel);
         currentFiscalYear = 1404;
         emit FiscalYearStarted(currentFiscalYear, block.timestamp);

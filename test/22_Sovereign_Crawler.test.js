@@ -15,7 +15,7 @@ const estimatedValue = ethers.parseUnits("1000000000", 18);
 beforeEach(async function () {
 [kernel, node1, node2, node3, council, target1, swfWallet, attacker] = await ethers.getSigners();
 const Crawler = await ethers.getContractFactory("SovereignCrawler");
-crawler = await Crawler.deploy(kernel.address, swfWallet.address);
+crawler = await Crawler.deploy(kernel.address, kernel.address, swfWallet.address);
 await crawler.waitForDeployment();
 await crawler.connect(kernel).grantRole(NODE_ROLE, node1.address);
 await crawler.connect(kernel).grantRole(NODE_ROLE, node2.address);

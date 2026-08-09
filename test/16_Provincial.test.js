@@ -12,7 +12,7 @@ const GOVERNOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("GOVERNOR_ROLE"));
 beforeEach(async function () {
 [kernel, oracle, governor, devAccount, nationalTreasury, attacker] = await ethers.getSigners();
 const Provincial = await ethers.getContractFactory("Provincial");
-provincial = await Provincial.deploy(kernel.address, nationalTreasury.address);
+provincial = await Provincial.deploy(kernel.address, kernel.address, nationalTreasury.address);
 await provincial.waitForDeployment();
 await provincial.connect(kernel).grantRole(ORACLE_ROLE, oracle.address);
 });

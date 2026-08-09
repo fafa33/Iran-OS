@@ -12,7 +12,7 @@ const EMPLOYER_ROLE = ethers.keccak256(ethers.toUtf8Bytes("EMPLOYER_ROLE"));
 beforeEach(async function () {
 [kernel, court, employer, victimFund, convict, attacker] = await ethers.getSigners();
 const Penal = await ethers.getContractFactory("PenalLabor");
-penal = await Penal.deploy(kernel.address, victimFund.address);
+penal = await Penal.deploy(kernel.address, kernel.address, victimFund.address);
 await penal.waitForDeployment();
 await penal.connect(kernel).grantRole(COURT_ROLE, court.address);
 });

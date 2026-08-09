@@ -51,7 +51,7 @@ async function runDeployment(hre, config, sovereignSigner, persistStep = () => {
   addresses.KERNEL_ADDRESS = kernelAddress;
   persistStep(addresses);
 
-  const { address: treasuryAddress } = await deployTreasury(hre, addresses);
+  const { address: treasuryAddress } = await deployTreasury(hre, config, addresses);
   addresses.TREASURY_ADDRESS = treasuryAddress;
   persistStep(addresses);
 

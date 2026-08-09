@@ -78,7 +78,7 @@ describe("API3Oracle", function () {
 
       // TG-01: deploy real Treasury and grant KERNEL_ROLE to TriggerProtocol
       const TreasuryFactory = await ethers.getContractFactory("Treasury");
-      const tpTreasury = await TreasuryFactory.deploy(sovereign.address);
+      const tpTreasury = await TreasuryFactory.deploy(sovereign.address, await kernel.getAddress());
       await tpTreasury.waitForDeployment();
       const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
       const triggerProtocol = await TriggerProtocol.deploy(
@@ -159,7 +159,7 @@ describe("API3Oracle", function () {
 
       // TG-01: deploy real Treasury and grant KERNEL_ROLE to TriggerProtocol
       const TreasuryFactory2 = await ethers.getContractFactory("Treasury");
-      const tpTreasury2 = await TreasuryFactory2.deploy(sovereign.address);
+      const tpTreasury2 = await TreasuryFactory2.deploy(sovereign.address, await kernel.getAddress());
       await tpTreasury2.waitForDeployment();
       const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
       const triggerProtocol = await TriggerProtocol.deploy(

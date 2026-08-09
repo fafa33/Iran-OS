@@ -12,7 +12,7 @@ const SOVEREIGN_ROLE = ethers.keccak256(ethers.toUtf8Bytes("SOVEREIGN_ROLE"));
 beforeEach(async function () {
 [kernel, sovereign, mp1, mp2, mp3, attacker] = await ethers.getSigners();
 const Parliament = await ethers.getContractFactory("Parliament");
-parliament = await Parliament.deploy(kernel.address);
+parliament = await Parliament.deploy(kernel.address, kernel.address);
 await parliament.waitForDeployment();
 await parliament.connect(kernel).grantRole(SOVEREIGN_ROLE, sovereign.address);
 await parliament.connect(kernel).registerMP(mp1.address);

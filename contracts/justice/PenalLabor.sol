@@ -59,10 +59,16 @@ contract PenalLabor is AccessControl, ReentrancyGuard {
     event SentenceCompleted(address indexed convict, uint256 totalCompensationPaid);
     event ProjectRegistered(uint256 indexed projectId, string name, uint256 difficultyScore);
 
-    constructor(address _kernel, address _victimFund) {
+    // _admin receives DEFAULT_ADMIN_ROLE (real signer — e.g. the Sovereign —
+    // so post-deploy role wiring is reachable on mainnet); _kernel continues
+    // to receive only KERNEL_ROLE. Mirrors SovereignWealthFund.sol's
+    // constructor(sovereign, kernel) split — see CHANGELOG "P0 deployment-path
+    // parity" for the originating finding on Treasury/VictimFund/etc.
+    constructor(address _admin, address _kernel, address _victimFund) {
+        require(_admin != address(0), "PenalLabor: invalid admin");
         require(_kernel != address(0), "PenalLabor: invalid kernel");
         require(_victimFund != address(0), "PenalLabor: invalid victim fund");
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(KERNEL_ROLE, _kernel);
         victimFundAddress = _victimFund;
     }

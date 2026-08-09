@@ -76,7 +76,7 @@ describe("Recognized Backing Integration Boundary", function () {
     await swf.connect(sovereign).grantRole(await swf.COUNCIL_ROLE(), council1.address);
 
     const Treasury = await ethers.getContractFactory("Treasury");
-    treasury = await Treasury.deploy(sovereign.address);
+    treasury = await Treasury.deploy(sovereign.address, await kernel.getAddress());
     await treasury.waitForDeployment();
     await treasury.connect(sovereign).grantRole(await treasury.PARLIAMENT_ROLE(), parliament.address);
     await treasury.connect(sovereign).grantRole(await treasury.GOVERNMENT_ROLE(), government.address);

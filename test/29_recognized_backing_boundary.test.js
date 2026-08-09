@@ -123,7 +123,7 @@ describe("Recognized Reserve Backing Boundary Characterization", function () {
     await swf.connect(sovereign).grantRole(COUNCIL_ROLE, council3.address);
 
     const Treasury = await ethers.getContractFactory("Treasury");
-    treasury = await Treasury.deploy(sovereign.address);
+    treasury = await Treasury.deploy(sovereign.address, await kernel.getAddress());
     await treasury.waitForDeployment();
     await treasury.connect(sovereign).grantRole(await treasury.PARLIAMENT_ROLE(), parliament.address);
     await treasury.connect(sovereign).grantRole(await treasury.GOVERNMENT_ROLE(), government.address);
@@ -199,7 +199,11 @@ describe("Recognized Reserve Backing Boundary Characterization", function () {
       1,
       "recognized-backing rejected spend"
     );
-    await treasury.connect(sovereign).rejectTransaction(2n, "boundary rejection");
+    // rejectTransaction requires AUDITOR_ROLE or KERNEL_ROLE (Treasury.sol);
+    // sovereign holds neither post-fix (DEFAULT_ADMIN_ROLE only — KERNEL_ROLE
+    // now correctly belongs to the Kernel contract, not the admin signer),
+    // so use auditor1, which already holds AUDITOR_ROLE from setup above.
+    await treasury.connect(auditor1).rejectTransaction(2n, "boundary rejection");
     expect((await treasury.getTransaction(2n)).rejected).to.be.true;
 
     expect(await token.totalReserves()).to.equal(0n);
