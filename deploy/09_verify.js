@@ -18,11 +18,13 @@ async function verifyDeployment(hre, config, addresses) {
   const { requireAddress } = require("./lib/addressBook");
 
   const kernelAddress = requireAddress(addresses, "KERNEL_ADDRESS", "01_kernel.js");
-  // TREASURY_ADDRESS is required here only to confirm 05_treasury.js ran; the
-  // manifest's §9 checklist has no applicable Treasury check in this
-  // workflow's scope (its only documented check, Group 2, is the
-  // TriggerProtocol KERNEL_ROLE grant — not part of this deployment).
-  requireAddress(addresses, "TREASURY_ADDRESS", "05_treasury.js");
+  // The manifest's §9 checklist Group 2 (TriggerProtocol KERNEL_ROLE grant on
+  // Treasury) is still not applicable here — TriggerProtocol is not part of
+  // this deployment workflow. Treasury's own DEFAULT_ADMIN_ROLE/KERNEL_ROLE
+  // invariant (fixed alongside victimFund/jurySelection/justiceProtocol/
+  // citizenCard/priceOracle — see CHANGELOG "P0 deployment-path parity") is
+  // checked below in the same loop as those contracts.
+  const treasuryAddress = requireAddress(addresses, "TREASURY_ADDRESS", "05_treasury.js");
   const swfAddress = requireAddress(addresses, "SWF_ADDRESS", "06_swf.js");
   const tokenAddress = requireAddress(addresses, "PAHLAVI_TOKEN_ADDRESS", "02_token.js");
   const oracleAddress = requireAddress(addresses, "API3_ORACLE_ADDRESS", "04_oracle.js");
@@ -35,6 +37,7 @@ async function verifyDeployment(hre, config, addresses) {
   const priceOracleAddress = requireAddress(addresses, "PRICE_ORACLE_ADDRESS", "15_price_oracle.js");
 
   const kernel = await ethers.getContractAt("IranOS_Kernel", kernelAddress);
+  const treasury = await ethers.getContractAt("Treasury", treasuryAddress);
   const swf = await ethers.getContractAt("SovereignWealthFund", swfAddress);
   const token = await ethers.getContractAt("PahlaviToken", tokenAddress);
   const oracle = await ethers.getContractAt("API3Oracle", oracleAddress);
@@ -91,7 +94,9 @@ async function verifyDeployment(hre, config, addresses) {
   );
 
   // Batch 2/3 — Layer 1 contracts (VictimFund, ConstitutionGuard,
-  // JurySelection, JusticeProtocol, CitizenCard, PriceOracle). Not a named
+  // JurySelection, JusticeProtocol, CitizenCard, PriceOracle), plus Treasury
+  // (added alongside this loop's other members once its constructor received
+  // the same fix — see CHANGELOG "P0 deployment-path parity"). Not a named
   // group in §9 (that section predates these batches); these checks verify
   // the constructor-guaranteed invariant each contract's source documents:
   // DEFAULT_ADMIN_ROLE held by SOVEREIGN_ADDRESS (a real signer — the
@@ -101,6 +106,7 @@ async function verifyDeployment(hre, config, addresses) {
   // address getters. FEEDER_ROLE on PriceOracle is intentionally NOT checked
   // here — it is not granted by this workflow (see 15_price_oracle.js).
   for (const [name, contract] of [
+    ["treasury", treasury],
     ["victimFund", victimFund],
     ["jurySelection", jurySelection],
     ["justiceProtocol", justiceProtocol],
