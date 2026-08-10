@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Orchestrates the deploy/ scripts in dependency-correct order. The
-// filenames (01_kernel.js .. 15_price_oracle.js) are grouped by
+// filenames (01_kernel.js .. 16_trigger_protocol.js) are grouped by
 // contract/domain, not strict execution order: PahlaviToken (02_token.js)
 // requires SovereignWealthFund's address, so SWF (06_swf.js) must run
 // before it.
@@ -8,11 +8,12 @@
 // `npx hardhat run deploy/0N_name.js --network <network>`, reading and
 // writing the shared address book at deploy/deployments/<network>.json.
 //
-// Actual order: kernel -> treasury -> swf -> victim_fund ->
-// constitution_guard -> jury_selection -> justice_protocol -> citizen_card ->
-// price_oracle -> token -> oracle -> recognized_backing -> roles (Court,
-// Group A) -> finalize (Oracle activation, Group E — documented as the last
-// thing activated) -> verify.
+// Actual order: kernel -> treasury -> swf -> trigger_protocol (deploy only) ->
+// victim_fund -> constitution_guard -> jury_selection -> justice_protocol ->
+// citizen_card -> price_oracle -> token -> oracle -> recognized_backing ->
+// roles (Court, Group A) -> trigger_protocol wiring (Treasury role first,
+// Kernel pointer second) -> finalize (Oracle activation, Group E — documented
+// as the last thing activated) -> verify.
 //
 // victim_fund/constitution_guard/jury_selection/justice_protocol/
 // citizen_card/price_oracle (10-15) are Layer 1 (price_oracle: "مستقل از
@@ -38,6 +39,7 @@ const { deployJurySelection } = require("./12_jury_selection");
 const { deployJusticeProtocol } = require("./13_justice_protocol");
 const { deployCitizenCard } = require("./14_citizen_card");
 const { deployPriceOracle } = require("./15_price_oracle");
+const { deployTriggerProtocol, wireTriggerProtocol } = require("./16_trigger_protocol");
 
 // persistStep, if provided, is called with the addresses accumulated so far
 // immediately after each successful deployment/wiring step, so a mid-run
@@ -57,6 +59,12 @@ async function runDeployment(hre, config, sovereignSigner, persistStep = () => {
 
   const { address: swfAddress } = await deploySwf(hre, config, addresses);
   addresses.SWF_ADDRESS = swfAddress;
+  persistStep(addresses);
+
+  // Deploy early once all constructor dependencies exist, but do not grant
+  // authority or activate Kernel's pointer until Court completion below.
+  const { address: triggerProtocolAddress } = await deployTriggerProtocol(hre, config, addresses);
+  addresses.TRIGGER_PROTOCOL_ADDRESS = triggerProtocolAddress;
   persistStep(addresses);
 
   const { address: victimFundAddress } = await deployVictimFund(hre, config, addresses);
@@ -95,7 +103,14 @@ async function runDeployment(hre, config, sovereignSigner, persistStep = () => {
   addresses.RECOGNIZED_RESERVE_BACKING_ADDRESS = registryAddress;
   persistStep(addresses);
 
+  // Authority-bearing activation is deliberately last among governance wiring:
+  // 9/9 Court first, then Treasury KERNEL_ROLE, then Kernel trigger pointer.
   await wireCourtCompletion(hre, config, addresses, sovereignSigner);
+  await wireTriggerProtocol(hre, config, addresses, sovereignSigner);
+  persistStep(addresses);
+
+  // Oracle activation remains the final activation step after all Court and
+  // TriggerProtocol authority paths are reachable and verified.
   await finalizeOracleActivation(hre, config, addresses, sovereignSigner);
 
   const { checks } = await verifyDeployment(hre, config, addresses);
@@ -103,15 +118,15 @@ async function runDeployment(hre, config, sovereignSigner, persistStep = () => {
   return { addresses, checks };
 }
 
-// The 11 address keys produced by a full orchestrated run (see
-// runDeployment above): the 6 core-monetary-path contracts plus the 5
-// constructor-only-on-Kernel Layer 1 contracts added in this batch. Used by
-// assertNoExistingDeployment to detect a prior run's artifacts before
+// The 13 address keys produced by a full orchestrated run (see runDeployment
+// above): the prior 12 deployable workflow contracts plus TriggerProtocol.
+// Used by assertNoExistingDeployment to detect a prior run's artifacts before
 // starting a new one.
 const CORE_ADDRESS_KEYS = [
   "KERNEL_ADDRESS",
   "TREASURY_ADDRESS",
   "SWF_ADDRESS",
+  "TRIGGER_PROTOCOL_ADDRESS",
   "VICTIM_FUND_ADDRESS",
   "CONSTITUTION_GUARD_ADDRESS",
   "JURY_SELECTION_ADDRESS",
