@@ -2,6 +2,7 @@
   "name": "iran-os-app",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
+  "license": "SEE LICENSE IN ../LICENSE-SOURCE-AVAILABLE.md",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
