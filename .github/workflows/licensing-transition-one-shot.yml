@@ -1,0 +1,212 @@
+name: Iran-OS licensing transition (one-shot)
+
+on:
+  push:
+    branches:
+      - chore/licensing-protection
+    paths:
+      - '.github/workflows/licensing-transition-one-shot.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  transition:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chore/licensing-protection
+          fetch-depth: 0
+
+      - name: Apply licensing transition without functional changes
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import json
+
+          root = Path('.')
+          old_spdx = 'SPDX-License-Identifier: MIT'
+          new_spdx = 'SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0'
+
+          # Only project-owned source/test/deployment surfaces. Do not rewrite historical reports,
+          # dependency notices, generated material, or third-party code.
+          owned_roots = [Path('contracts'), Path('deploy'), Path('test'), Path('app')]
+          allowed_suffixes = {'.sol', '.js', '.ts', '.tsx'}
+          changed_spdx = []
+          for owned_root in owned_roots:
+              if not owned_root.exists():
+                  continue
+              for path in owned_root.rglob('*'):
+                  if path.is_file() and path.suffix in allowed_suffixes:
+                      text = path.read_text(encoding='utf-8')
+                      if old_spdx in text:
+                          path.write_text(text.replace(old_spdx, new_spdx), encoding='utf-8')
+                          changed_spdx.append(str(path))
+
+          # Fail rather than silently leave an operative MIT SPDX header on project source outside
+          # the declared owned surfaces. Historical/report quotations are intentionally excluded.
+          unexpected = []
+          for path in root.rglob('*'):
+              if not path.is_file() or '.git' in path.parts:
+                  continue
+              if path.suffix not in allowed_suffixes:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              if old_spdx in text:
+                  unexpected.append(str(path))
+          if unexpected:
+              raise SystemExit('Unmigrated operative MIT SPDX headers outside owned surfaces: ' + ', '.join(unexpected))
+
+          # Root license becomes the full operative custom license text.
+          source_license = Path('LICENSE-SOURCE-AVAILABLE.md').read_text(encoding='utf-8')
+          Path('LICENSE').write_text(source_license, encoding='utf-8')
+
+          # Canonical/public descriptions: preserve public participation while removing the legal
+          # claim that the project is OSI-style open source.
+          canonical_replacements = {
+              Path('README.md'): [
+                  ('IranOS** is an open-source blockchain governance operating system',
+                   'IranOS** is a publicly auditable, source-available, open-participation blockchain governance operating system'),
+                  ('[LICENSE](LICENSE) — MIT',
+                   '[LICENSE](LICENSE) — Iran-OS Source-Available License 1.0'),
+                  ('> پروژه‌ای متن‌باز برای طراحی و توسعه‌ی یک سیستم‌عامل حاکمیتی دیجیتال بر پایه بلاک‌چین،',
+                   '> پروژه‌ای با سورس عمومی، قابل ممیزی و مشارکت باز برای طراحی و توسعه‌ی یک سیستم‌عامل حاکمیتی دیجیتال بر پایه بلاک‌چین،'),
+              ],
+              Path('whitepaper/whitepaper-fa.md'): [
+                  ('متن‌باز', 'دارای سورس عمومی، قابل ممیزی و مشارکت باز'),
+                  ('open-source', 'source-available'),
+                  ('open source', 'source-available'),
+              ],
+              Path('whitepaper/README.md'): [
+                  ('open-source', 'source-available'),
+                  ('open source', 'source-available'),
+                  ('متن‌باز', 'دارای سورس عمومی و مشارکت باز'),
+              ],
+              Path('CONTRIBUTING.md'): [
+                  ('open-source', 'source-available'),
+                  ('open source', 'source-available'),
+              ],
+              Path('docs/contributing-fa.md'): [
+                  ('متن‌باز', 'دارای سورس عمومی و مشارکت باز'),
+                  ('open-source', 'source-available'),
+                  ('open source', 'source-available'),
+              ],
+              Path('docs/Faq-fa.md'): [
+                  ('متن‌باز', 'دارای سورس عمومی و مشارکت باز'),
+                  ('open-source', 'source-available'),
+                  ('open source', 'source-available'),
+              ],
+              Path('docs/Faq-architecture-en.md'): [
+                  ('open-source', 'source-available'),
+                  ('open source', 'source-available'),
+              ],
+          }
+          for path, replacements in canonical_replacements.items():
+              if not path.exists():
+                  continue
+              text = path.read_text(encoding='utf-8')
+              for old, new in replacements:
+                  text = text.replace(old, new)
+              path.write_text(text, encoding='utf-8')
+
+          # Add explicit licensing clarification to the whitepaper without altering its architecture.
+          wp = Path('whitepaper/whitepaper-fa.md')
+          if wp.exists():
+              text = wp.read_text(encoding='utf-8')
+              marker = '## وضعیت مجوز، ممیزی عمومی و مشارکت\n'
+              if marker not in text:
+                  insertion = (
+                      '\n## وضعیت مجوز، ممیزی عمومی و مشارکت\n\n'
+                      'ایران‌اواس یک پروژه با **سورس عمومی، قابلیت ممیزی همگانی و مشارکت باز** است. '
+                      'همگان می‌توانند در چارچوب مجوز پروژه کد و اسناد را مطالعه، بررسی، نقد، پژوهش و برای آن پیشنهاد یا Pull Request ارائه کنند. '
+                      'عمومی‌بودن سورس یا امکان مشارکت به معنای انتقال مالکیت فکری یا اعطای خودکار حق بهره‌برداری تجاری، نهادی، حکومتی یا استقرار عملیاتی نیست. '
+                      'این حقوق فقط مطابق `LICENSE` و، در موارد لازم، قرارداد کتبی جداگانه اعطا می‌شوند.\n\n'
+                  )
+                  # Put the clarification immediately after the principal whitepaper heading when possible.
+                  heading = '# سپیدنامه - ایران‌اواس (IranOS)\n'
+                  if heading in text:
+                      text = text.replace(heading, heading + insertion, 1)
+                  else:
+                      text = insertion + text
+                  wp.write_text(text, encoding='utf-8')
+
+          # Contribution terms must be visible from the canonical contribution guide.
+          contrib = Path('CONTRIBUTING.md')
+          if contrib.exists():
+              text = contrib.read_text(encoding='utf-8')
+              marker = '## Licensing of Contributions'
+              if marker not in text:
+                  text += (
+                      '\n\n## Licensing of Contributions\n\n'
+                      'By intentionally submitting a contribution for inclusion in Iran-OS, contributors agree to '
+                      '[CONTRIBUTION-LICENSE.md](CONTRIBUTION-LICENSE.md). Third-party material must be disclosed and '
+                      'must retain its original license and notices.\n'
+                  )
+                  contrib.write_text(text, encoding='utf-8')
+
+          # Keep npm metadata aligned, including root lockfile metadata if present.
+          lock = Path('package-lock.json')
+          if lock.exists():
+              data = json.loads(lock.read_text(encoding='utf-8'))
+              packages = data.get('packages')
+              if isinstance(packages, dict) and isinstance(packages.get(''), dict):
+                  packages['']['license'] = 'SEE LICENSE IN LICENSE-SOURCE-AVAILABLE.md'
+              lock.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
+
+          # Record the historical boundary accurately without pretending old MIT grants vanished.
+          Path('LICENSING-BOUNDARY.md').write_text(
+              '# Iran-OS Licensing Boundary\n\n'
+              'The last `main` baseline before the licensing-protection branch was '
+              '`3fd324cffb9f6096189cf3e8e1c4f2cd44838961`. Copies validly received under the MIT License '
+              'before the transition retain the permissions granted with those copies.\n\n'
+              'Project-owned material on the licensing-transition branch is being relicensed under the '
+              '`Iran-OS Source-Available License 1.0`. The canonical post-transition repository state is the '
+              'merge result of PR #130 and subsequent releases derived from it, subject to per-file third-party notices.\n',
+              encoding='utf-8'
+          )
+
+          print(f'Migrated SPDX headers: {len(changed_spdx)}')
+          for p in changed_spdx:
+              print('  ', p)
+          PY
+
+      - name: Verify transition consistency
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIn --include='*.sol' --include='*.js' --include='*.ts' --include='*.tsx' \
+            'SPDX-License-Identifier: MIT' contracts deploy test app 2>/dev/null; then
+            echo 'ERROR: operative MIT SPDX header remains in project-owned source surface.' >&2
+            exit 1
+          fi
+          grep -q 'Iran-OS Source-Available License 1.0' LICENSE
+          grep -q 'LicenseRef-IranOS-Source-Available-1.0' LICENSE
+          grep -q 'source-available' README.md
+          grep -q 'وضعیت مجوز، ممیزی عمومی و مشارکت' whitepaper/whitepaper-fa.md
+          git diff --check
+
+      - name: Verify no functional regression
+        shell: bash
+        run: |
+          npm ci
+          npm test
+
+      - name: Commit atomic licensing transition and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/licensing-transition-one-shot.yml
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No migration changes to commit.'
+            exit 1
+          fi
+          git commit -m 'chore(licensing): complete source-available transition'
+          git push origin HEAD:chore/licensing-protection
