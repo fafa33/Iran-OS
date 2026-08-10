@@ -166,7 +166,7 @@
 ```
 درود،
 
-Iran-OS یک پروژه متن‌باز است که تلاش می‌کند چارچوب حکمرانی مبتنی بر قرارداد هوشمند برای ایران پس از تغییر را طراحی کند.
+Iran-OS یک پروژه با سورس عمومی، قابلیت ممیزی همگانی و مشارکت باز است که تلاش می‌کند چارچوب حکمرانی مبتنی بر قرارداد هوشمند برای ایران پس از تغییر را طراحی کند. استفاده و مشارکت تابع مجوز پروژه است و عمومی‌بودن سورس به معنای اعطای خودکار حق بهره‌برداری تجاری، نهادی یا حکومتی نیست.
 
 پروژه در حال توسعه است، هیچ ادعای production-readiness ندارد، و هنوز حسابرسی مستقل دریافت نکرده است.
 
@@ -186,7 +186,7 @@ https://github.com/fafa33/Iran-OS/blob/main/docs/outreach/STEP12_REVIEWER_OUTREA
 ```
 Hi,
 
-Iran-OS is an open-source project designing a smart-contract-based governance framework for a post-Islamic-Republic Iran — a secular constitutional monarchy encoded in Solidity, with verifiable rules for treasury, welfare, justice, and asset reclamation.
+Iran-OS is a publicly auditable, source-available, open-participation project designing a smart-contract-based governance framework for a post-Islamic-Republic Iran — a secular constitutional monarchy encoded in Solidity, with verifiable rules for treasury, welfare, justice, and asset reclamation. Source availability and participation are subject to the repository license and do not automatically grant commercial, institutional, governmental, or production-deployment rights.
 
 The project is in active development. No production-readiness is claimed. No independent audit has been completed.
 
