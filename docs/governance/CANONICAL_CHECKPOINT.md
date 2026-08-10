@@ -19,7 +19,7 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 | Current baseline | `main` @ `af733091794dfe370ede4d163f093e2c4b0b554e` |
 | Current roadmap position | Roadmap Step-12 (Evidence execution & blocker disposition) — open; Roadmap Step-13 (Whitepaper-to-system mapping) — open |
 | Current deployment coverage | 12 contracts have executable `deploy/` scripts (unchanged by this PR — see below). Denominator flagged: commonly cited as "12/25" but a direct file count shows 26 deployable contracts, not 25 — see "Deployment Coverage" section below, unresolved |
-| Current test count | 761 passing (`npm test`) |
+| Current test count | 762 passing (`npm test`) |
 | Current production status | Not production-ready. Roadmap Step-9/Step-10 (production governance doctrine / readiness planning) are marked Complete as *planning* phases only — actual production blockers `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain open (`CHANGELOG.md`); no external audit, no formal verification, no release signoff |
 | Remaining deployment targets | 14 named contracts without executable `deploy/` scripts (`deploy/README.md`'s own list; its prose says "13," a miscount — see "Deployment Coverage" section below) |
 | Open residual work | `docs/governance/OPEN_RESIDUALS.md` Active Residuals: none currently active |
@@ -29,7 +29,7 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 | **Project Phase** | **Implementation** — Governance Hardening concluded 2026-07-07 (PR #121–#124); Governance in Maintenance Mode |
 | **Current Implementation Priority** | A P0 deployment-path parity gap (Treasury/TriggerProtocol `KERNEL_ROLE`) blocking `TriggerProtocol` deployment was fixed in this PR, across Treasury + 12 other remaining contracts — see "Implementation Priority" section below |
 | **Next Implementation Target** | `TriggerProtocol.sol` deployment itself (`deploy/16_trigger_protocol.js` + wiring) — the P0 constructor/admin-binding blocker is now fixed; see "Implementation Priority" section below |
-| Last updated (timestamp) | 2026-08-09T21:40:04Z (branch `claude/codex-adversarial-review-fyu0nb`) |
+| Last updated (timestamp) | 2026-08-10T05:12:17Z (branch `claude/codex-adversarial-review-fyu0nb`) |
 
 The table above is the fast-read summary. Detail and evidence for each field follow below — this file is the authoritative source for these fields; the sections below exist to substantiate the table, not to introduce separate competing values.
 
@@ -49,7 +49,7 @@ The table above is the fast-read summary. Detail and evidence for each field fol
 - **Note (Step 13 compliance for this update):** the checkpoint content prior to this update still showed PR #125 as "Pending" (its own pre-merge self-referential text), even though PR #125 had already merged — the post-merge sync step (the same step PR #123 performed for PR #122) had not yet been performed for PR #125. This update performs that sync now, as part of this PR's own Step 13 obligation, in addition to recording this PR's own pending state below.
 - **Pending:** this PR (P0 deployment-path parity fix — Treasury/TriggerProtocol `KERNEL_ROLE` gap, plus the same fix applied to 12 other remaining contracts) — will become the new Latest Merged PR once merged.
   - **Reviewed Head SHA:** `af733091794dfe370ede4d163f093e2c4b0b554e` — `origin/main`'s HEAD at the point this branch was reset from it and this PR's work began (confirmed via `git log origin/main -1` above). No other commits landed on `main` between that point and this update.
-  - **Review timestamp:** `2026-08-09T21:40:04Z` (this update's timestamp — see "Last updated" in the Summary table).
+  - **Review timestamp:** `2026-08-10T05:12:17Z` (this update's timestamp — see "Last updated" in the Summary table).
   - **Pending final merge SHA:** not yet known — GitHub assigns the squash-merge commit SHA at merge time; this is not fabricated here. Confirm via `git log origin/main -1` immediately after merging (Verification Method below), and record it under "Latest Merged PR" in the same or an immediate follow-up update, per Step 13's disclosed squash-merge-SHA limitation.
   - This same pattern (record the actual known reviewed head SHA, not just a pointer to a future check) was already followed for PR #122/#123/#124's post-merge syncs above; this entry applies it consistently to the pre-merge state as well, per the Codex finding that prompted this fix.
 
@@ -81,7 +81,7 @@ Note: roadmap "Step-N" is a different numbering scheme from `CLAUDE.md`'s PR Pre
 
 ## Test Count
 
-- 761 passing (`npm test`, run on this PR's branch — up from 759; 2 new negative-constructor tests added for `BaseIncome`/`HealthCoverage` "invalid admin" cases, matching the existing "invalid kernel" pattern).
+- 762 passing (`npm test`, run on this PR's branch — up from 759; 2 negative-constructor tests added for `BaseIncome`/`HealthCoverage` "invalid admin" cases; 1 deployment-path parity test added during Hostile Adversarial Review asserting Treasury's admin/kernel role split via the real `deploy/index.js` orchestration — see `CHANGELOG.md`).
 
 ## Current Production Status
 
@@ -176,4 +176,4 @@ This file must be refreshed whenever any recorded field changes materially — a
 
 *Registry created: 2026-07-07*
 *CLAUDE.md reference: `## Canonical Development Workflow (Mandatory)`, Stage 1; `#### Step 13 — Canonical Checkpoint Currency`; `#### Step 14 — Governance Synchronization Review`; `#### Step 15 — Governance Minimalism Review`*
-*Last updated: 2026-08-09T21:40:04Z*
+*Last updated: 2026-08-10T05:12:17Z*
