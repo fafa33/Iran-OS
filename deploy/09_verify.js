@@ -1,31 +1,16 @@
 // SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
-// Read-only post-deploy verification. Matches the applicable subset of
-// docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §9 for the contracts
-// deployed by this workflow: the six core-monetary-path contracts (Kernel,
-// Treasury, SovereignWealthFund, PahlaviToken, API3Oracle,
-// RecognizedReserveBacking) plus the six Layer 1 contracts added afterward
-// (VictimFund, ConstitutionGuard, JurySelection, JusticeProtocol,
-// CitizenCard, PriceOracle).
-//
-// §9 Group 2 (TriggerProtocol) and the AssetFreeze/CRAWLER_ROLE/COUNCIL_ROLE
-// checks in Group 4 are not applicable — those contracts are not part of
-// this deployment workflow (see deploy/README.md).
-//
-// Throws on the first failed check. No state is mutated.
+// Read-only post-deploy verification for the contracts and authority paths
+// deployed by this workflow. Throws on the first failed verification set.
+// No state is mutated.
 
 async function verifyDeployment(hre, config, addresses) {
   const { ethers } = hre;
   const { requireAddress } = require("./lib/addressBook");
 
   const kernelAddress = requireAddress(addresses, "KERNEL_ADDRESS", "01_kernel.js");
-  // The manifest's §9 checklist Group 2 (TriggerProtocol KERNEL_ROLE grant on
-  // Treasury) is still not applicable here — TriggerProtocol is not part of
-  // this deployment workflow. Treasury's own DEFAULT_ADMIN_ROLE/KERNEL_ROLE
-  // invariant (fixed alongside victimFund/jurySelection/justiceProtocol/
-  // citizenCard/priceOracle — see CHANGELOG "P0 deployment-path parity") is
-  // checked below in the same loop as those contracts.
   const treasuryAddress = requireAddress(addresses, "TREASURY_ADDRESS", "05_treasury.js");
   const swfAddress = requireAddress(addresses, "SWF_ADDRESS", "06_swf.js");
+  const triggerAddress = requireAddress(addresses, "TRIGGER_PROTOCOL_ADDRESS", "16_trigger_protocol.js");
   const tokenAddress = requireAddress(addresses, "PAHLAVI_TOKEN_ADDRESS", "02_token.js");
   const oracleAddress = requireAddress(addresses, "API3_ORACLE_ADDRESS", "04_oracle.js");
   const registryAddress = requireAddress(addresses, "RECOGNIZED_RESERVE_BACKING_ADDRESS", "03_recognized_backing.js");
@@ -39,6 +24,7 @@ async function verifyDeployment(hre, config, addresses) {
   const kernel = await ethers.getContractAt("IranOS_Kernel", kernelAddress);
   const treasury = await ethers.getContractAt("Treasury", treasuryAddress);
   const swf = await ethers.getContractAt("SovereignWealthFund", swfAddress);
+  const trigger = await ethers.getContractAt("TriggerProtocol", triggerAddress);
   const token = await ethers.getContractAt("PahlaviToken", tokenAddress);
   const oracle = await ethers.getContractAt("API3Oracle", oracleAddress);
   const registry = await ethers.getContractAt("RecognizedReserveBacking", registryAddress);
@@ -52,7 +38,7 @@ async function verifyDeployment(hre, config, addresses) {
   const checks = [];
   const check = (name, pass) => checks.push({ name, pass });
 
-  // Group 1 — Court (§9 گروه ۱)
+  // Group 1 — Court
   const COURT_ROLE = await kernel.COURT_ROLE();
   check("kernel.hasRole(COURT_ROLE, COURT_1)", await kernel.hasRole(COURT_ROLE, config.court1));
   for (const courtMember of config.courtMembers2to9) {
@@ -66,17 +52,33 @@ async function verifyDeployment(hre, config, addresses) {
   );
   check("kernel.emergencyLockActive() === false", (await kernel.emergencyLockActive()) === false);
 
-  // Group 3 — Oracle (§9 گروه ۳)
+  // Group 2 — TriggerProtocol. Constructor provenance, Treasury authority,
+  // and Kernel pointer must all agree before the deployment is accepted.
+  const TREASURY_KERNEL_ROLE = await treasury.KERNEL_ROLE();
+  check("trigger.kernel() === KERNEL_ADDRESS", (await trigger.kernel()) === kernelAddress);
+  check("trigger.treasury() === TREASURY_ADDRESS", (await trigger.treasury()) === treasuryAddress);
+  check("trigger.swf() === SWF_ADDRESS", (await trigger.swf()) === swfAddress);
+  check(
+    "treasury.hasRole(KERNEL_ROLE, TRIGGER_PROTOCOL_ADDRESS)",
+    await treasury.hasRole(TREASURY_KERNEL_ROLE, triggerAddress)
+  );
+  check("kernel.triggerProtocol() === TRIGGER_PROTOCOL_ADDRESS", (await kernel.triggerProtocol()) === triggerAddress);
+  check("trigger.executionCount() === 0", (await trigger.executionCount()) === 0n);
+
+  // Group 3 — Oracle
   const ORACLE_ROLE = await kernel.ORACLE_ROLE();
   const FEEDER_ROLE = await oracle.FEEDER_ROLE();
   check("kernel.hasRole(ORACLE_ROLE, API3_ORACLE_ADDRESS)", await kernel.hasRole(ORACLE_ROLE, oracleAddress));
-  check("kernel.hasRole(ORACLE_ROLE, ORACLE_INITIAL) === false", (await kernel.hasRole(ORACLE_ROLE, config.oracleInitial)) === false);
+  check(
+    "kernel.hasRole(ORACLE_ROLE, ORACLE_INITIAL) === false",
+    (await kernel.hasRole(ORACLE_ROLE, config.oracleInitial)) === false
+  );
   for (const feeder of config.feederAddresses) {
     check(`oracle.hasRole(FEEDER_ROLE, ${feeder})`, await oracle.hasRole(FEEDER_ROLE, feeder));
   }
   check("kernel.pahlaviToken() === PAHLAVI_TOKEN_ADDRESS", (await kernel.pahlaviToken()) === tokenAddress);
 
-  // Group 3.1 — RecognizedReserveBacking (§9 گروه ۳.۱)
+  // Group 3.1 — RecognizedReserveBacking
   const RECOGNIZER_ROLE = await registry.RECOGNIZER_ROLE();
   check(
     "registry.hasRole(RECOGNIZER_ROLE, RECOGNIZER_ADDRESS)",
@@ -86,25 +88,12 @@ async function verifyDeployment(hre, config, addresses) {
     "token.recognizedReserveBacking() === RECOGNIZED_RESERVE_BACKING_ADDRESS",
     (await token.recognizedReserveBacking()) === registryAddress
   );
-  const totalReserves = await token.totalReserves();
-  const recognizedBackingTotal = await registry.recognizedBackingTotal();
   check(
     "token.totalReserves() === registry.recognizedBackingTotal()",
-    totalReserves === recognizedBackingTotal
+    (await token.totalReserves()) === (await registry.recognizedBackingTotal())
   );
 
-  // Batch 2/3 — Layer 1 contracts (VictimFund, ConstitutionGuard,
-  // JurySelection, JusticeProtocol, CitizenCard, PriceOracle), plus Treasury
-  // (added alongside this loop's other members once its constructor received
-  // the same fix — see CHANGELOG "P0 deployment-path parity"). Not a named
-  // group in §9 (that section predates these batches); these checks verify
-  // the constructor-guaranteed invariant each contract's source documents:
-  // DEFAULT_ADMIN_ROLE held by SOVEREIGN_ADDRESS (a real signer — the
-  // Kernel contract cannot exercise DEFAULT_ADMIN_ROLE itself, having no
-  // call-forwarding mechanism to these contracts) and KERNEL_ROLE recorded
-  // against KERNEL_ADDRESS; for ConstitutionGuard, its plain `admin`/`kernel`
-  // address getters. FEEDER_ROLE on PriceOracle is intentionally NOT checked
-  // here — it is not granted by this workflow (see 15_price_oracle.js).
+  // Layer 1 constructor-role invariants plus Treasury.
   for (const [name, contract] of [
     ["treasury", treasury],
     ["victimFund", victimFund],
@@ -115,22 +104,19 @@ async function verifyDeployment(hre, config, addresses) {
   ]) {
     const DEFAULT_ADMIN_ROLE = await contract.DEFAULT_ADMIN_ROLE();
     const KERNEL_ROLE = await contract.KERNEL_ROLE();
-    check(`${name}.hasRole(DEFAULT_ADMIN_ROLE, SOVEREIGN_ADDRESS)`, await contract.hasRole(DEFAULT_ADMIN_ROLE, config.sovereignAddress));
+    check(
+      `${name}.hasRole(DEFAULT_ADMIN_ROLE, SOVEREIGN_ADDRESS)`,
+      await contract.hasRole(DEFAULT_ADMIN_ROLE, config.sovereignAddress)
+    );
     check(`${name}.hasRole(KERNEL_ROLE, KERNEL_ADDRESS)`, await contract.hasRole(KERNEL_ROLE, kernelAddress));
   }
-  // config.sovereignAddress is a raw, unchecksummed operator-supplied string
-  // (deploy/config.js does no normalization) while contract.admin() always
-  // returns ethers' checksummed form -- normalize both sides via
-  // ethers.getAddress() before comparing, or a valid, correctly-deployed
-  // lower-case SOVEREIGN_ADDRESS would fail this check with no on-chain
-  // problem at all (Codex review finding on PR #119).
   check(
     "constitutionGuard.admin() === SOVEREIGN_ADDRESS",
     (await constitutionGuard.admin()) === ethers.getAddress(config.sovereignAddress)
   );
   check("constitutionGuard.kernel() === KERNEL_ADDRESS", (await constitutionGuard.kernel()) === kernelAddress);
 
-  // Group 5 — System status (§9 گروه ۵, applicable subset)
+  // System status
   check("kernel.isSystemHealthy() === true", await kernel.isSystemHealthy());
   check("oracle.violationFlagCount() === 0", (await oracle.violationFlagCount()) === 0n);
   check("kernel.violationCount() === 0", (await kernel.violationCount()) === 0n);

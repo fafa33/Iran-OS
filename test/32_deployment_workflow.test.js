@@ -634,17 +634,17 @@ describe("Deployment Workflow (deploy/)", function () {
 
       await runDeployment(hre, config, sovereign, persistStep);
 
-      // 12 deploy steps (kernel, treasury, swf, victim_fund,
-      // constitution_guard, jury_selection, justice_protocol, citizen_card,
-      // price_oracle, token, oracle, recognized_backing) each call
-      // persistStep once, before the role-wiring/verify steps run.
-      expect(snapshots.length).to.equal(12);
+      // 13 deploy steps persist addresses individually, and TriggerProtocol
+      // wiring adds one additional persistence checkpoint after its Treasury
+      // role and Kernel pointer postconditions are satisfied.
+      expect(snapshots.length).to.equal(14);
       expect(Object.keys(snapshots[0])).to.deep.equal(["KERNEL_ADDRESS"]);
-      expect(Object.keys(snapshots[11]).sort()).to.deep.equal(
+      expect(Object.keys(snapshots[13]).sort()).to.deep.equal(
         [
           "KERNEL_ADDRESS",
           "TREASURY_ADDRESS",
           "SWF_ADDRESS",
+          "TRIGGER_PROTOCOL_ADDRESS",
           "VICTIM_FUND_ADDRESS",
           "CONSTITUTION_GUARD_ADDRESS",
           "JURY_SELECTION_ADDRESS",
@@ -670,8 +670,8 @@ describe("Deployment Workflow (deploy/)", function () {
       let error;
       try {
         // wireCourtCompletion/finalizeOracleActivation will fail on the
-        // duplicate court member, after all 12 deploy steps already
-        // succeeded and persisted.
+        // duplicate court member, after all 13 deploy steps already
+        // succeeded and persisted; TriggerProtocol authority wiring has not run.
         await runDeployment(hre, duplicated, sovereign, persistStep);
       } catch (e) {
         error = e;
@@ -684,6 +684,7 @@ describe("Deployment Workflow (deploy/)", function () {
           "KERNEL_ADDRESS",
           "TREASURY_ADDRESS",
           "SWF_ADDRESS",
+          "TRIGGER_PROTOCOL_ADDRESS",
           "VICTIM_FUND_ADDRESS",
           "CONSTITUTION_GUARD_ADDRESS",
           "JURY_SELECTION_ADDRESS",
@@ -695,7 +696,7 @@ describe("Deployment Workflow (deploy/)", function () {
           "RECOGNIZED_RESERVE_BACKING_ADDRESS",
         ].sort()
       );
-      // All 12 addresses are real, non-zero deployed contract addresses,
+      // All 13 addresses are real, non-zero deployed contract addresses,
       // even though the overall run() call above threw.
       for (const [name, address] of Object.entries(lastSnapshot)) {
         expect(ethers.isAddress(address), `${name} is not a valid address`).to.be.true;
