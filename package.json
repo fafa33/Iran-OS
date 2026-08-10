@@ -9,8 +9,8 @@
     "coverage": "hardhat coverage"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^6.1.2",
     "@openzeppelin/contracts": "^4.9.0",
-    "hardhat": "^2.22.0"
+    "hardhat": "^2.29.0"
   }
 }
