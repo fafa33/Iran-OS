@@ -66,10 +66,16 @@ contract SovereignCrawler is AccessControl, ReentrancyGuard {
     event AssetReleased(bytes32 indexed targetId, string reason);
     event GraphEdgeAdded(uint256 indexed edgeId, bytes32 from, bytes32 to, uint256 amount);
 
-    constructor(address _kernel, address _swfTempWallet) {
+    // _admin receives DEFAULT_ADMIN_ROLE (real signer — e.g. the Sovereign —
+    // so post-deploy role wiring is reachable on mainnet); _kernel continues
+    // to receive only KERNEL_ROLE. Mirrors SovereignWealthFund.sol's
+    // constructor(sovereign, kernel) split — see CHANGELOG "P0 deployment-path
+    // parity" for the originating finding on Treasury/VictimFund/etc.
+    constructor(address _admin, address _kernel, address _swfTempWallet) {
+        require(_admin != address(0), "SovereignCrawler: invalid admin");
         require(_kernel != address(0), "SovereignCrawler: invalid kernel");
         require(_swfTempWallet != address(0), "SovereignCrawler: invalid SWF");
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(KERNEL_ROLE, _kernel);
         swfTempWallet = _swfTempWallet;
     }

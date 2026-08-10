@@ -18,7 +18,7 @@ const MATERNITY_PAY = ethers.parseUnits("6000", 18);
 beforeEach(async function () {
 [kernel, healthAdmin, provider, pharmacy, swf, citizen1, citizen2, attacker] = await ethers.getSigners();
 const Health = await ethers.getContractFactory("HealthCoverage");
-health = await Health.deploy(kernel.address);
+health = await Health.deploy(kernel.address, kernel.address);
 await health.waitForDeployment();
 await health.connect(kernel).grantRole(HEALTH_ROLE, healthAdmin.address);
 await health.connect(kernel).grantRole(SWF_ROLE, swf.address);
@@ -37,10 +37,16 @@ expect(await health.MONTHLY_DRUG_QUOTA()).to.equal(DRUG_QUOTA);
 it("باید مرخصی زایمان ۶۰۰۰ پهلوی باشد (۶ ماه)", async function () {
 expect(await health.MATERNITY_LEAVE_PAY()).to.equal(MATERNITY_PAY);
 });
+it("نباید ادمین آدرس صفر باشد", async function () {
+const Health = await ethers.getContractFactory("HealthCoverage");
+await expect(
+Health.deploy(ethers.ZeroAddress, kernel.address)
+).to.be.revertedWith("HealthCoverage: invalid admin");
+});
 it("نباید کرنل آدرس صفر باشد", async function () {
 const Health = await ethers.getContractFactory("HealthCoverage");
 await expect(
-Health.deploy(ethers.ZeroAddress)
+Health.deploy(kernel.address, ethers.ZeroAddress)
 ).to.be.revertedWith("HealthCoverage: invalid kernel");
 });
 });

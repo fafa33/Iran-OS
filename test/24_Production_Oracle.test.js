@@ -12,7 +12,7 @@ const BANK_ROLE   = ethers.keccak256(ethers.toUtf8Bytes("BANK_ROLE"));
 beforeEach(async function () {
 [kernel, feeder, bank, unit1, unit2, attacker] = await ethers.getSigners();
 const Oracle = await ethers.getContractFactory("ProductionOracle");
-oracle = await Oracle.deploy(kernel.address);
+oracle = await Oracle.deploy(kernel.address, kernel.address);
 await oracle.waitForDeployment();
 await oracle.connect(kernel).grantRole(FEEDER_ROLE, feeder.address);
 await oracle.connect(kernel).grantRole(BANK_ROLE, bank.address);

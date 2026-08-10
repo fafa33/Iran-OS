@@ -104,11 +104,20 @@ contract Fargard7PolicyAdapter is AccessControl, ReentrancyGuard {
     event RecommendationRejected(uint256 indexed recommendationId, address indexed reviewer, string reason);
     event RecommendationExpired(uint256 indexed recommendationId, address indexed reviewer);
 
-    constructor(address _kernel, address _priceOracle) {
+    // _admin receives DEFAULT_ADMIN_ROLE (real signer — e.g. the Sovereign —
+    // so post-deploy role wiring, such as re-granting POLICY_ADMIN_ROLE/
+    // RECOMMENDER_ROLE/REVIEWER_ROLE to other operators, is reachable on
+    // mainnet). This contract has no KERNEL_ROLE constant — its three
+    // operational roles (POLICY_ADMIN_ROLE, RECOMMENDER_ROLE, REVIEWER_ROLE)
+    // remain granted to _kernel unchanged; only the DEFAULT_ADMIN_ROLE gap is
+    // fixed here, per CHANGELOG "P0 deployment-path parity" — this is not a
+    // redesign of the operational role model.
+    constructor(address _admin, address _kernel, address _priceOracle) {
+        require(_admin != address(0), "Fargard7PolicyAdapter: invalid admin");
         require(_kernel != address(0), "Fargard7PolicyAdapter: invalid kernel");
         require(_priceOracle != address(0), "Fargard7PolicyAdapter: invalid oracle");
 
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(POLICY_ADMIN_ROLE, _kernel);
         _grantRole(RECOMMENDER_ROLE, _kernel);
         _grantRole(REVIEWER_ROLE, _kernel);

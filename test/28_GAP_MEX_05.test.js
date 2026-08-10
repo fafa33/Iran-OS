@@ -38,7 +38,7 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
 
     // Deploy Treasury (required by TriggerProtocol)
     const Treasury = await ethers.getContractFactory("Treasury");
-    const treasury = await Treasury.deploy(sovereign.address);
+    const treasury = await Treasury.deploy(sovereign.address, await kernel.getAddress());
     await treasury.waitForDeployment();
 
     // Deploy TriggerProtocol for side-effect isolation tests
@@ -437,7 +437,7 @@ describe("GAP-MEX-05 — Kernel.syncReserves", function () {
 
       // Deploy Treasury + TriggerProtocol for side-effect isolation
       const Treasury = await ethers.getContractFactory("Treasury");
-      const treasury = await Treasury.deploy(sovereign.address);
+      const treasury = await Treasury.deploy(sovereign.address, await wiredKernel.getAddress());
       await treasury.waitForDeployment();
       const TriggerProtocol = await ethers.getContractFactory("TriggerProtocol");
       wiredTrigger = await TriggerProtocol.deploy(

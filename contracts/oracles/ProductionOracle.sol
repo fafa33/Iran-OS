@@ -65,9 +65,15 @@ contract ProductionOracle is AccessControl, ReentrancyGuard {
     event LoanEligibilityGranted(address indexed unit, uint256 maxAmount, uint256 interestRate);
     event SubsidyGranted(address indexed unit, uint256 months);
 
-    constructor(address _kernel) {
+    // _admin receives DEFAULT_ADMIN_ROLE (real signer — e.g. the Sovereign —
+    // so post-deploy role wiring is reachable on mainnet); _kernel continues
+    // to receive only KERNEL_ROLE. Mirrors SovereignWealthFund.sol's
+    // constructor(sovereign, kernel) split — see CHANGELOG "P0 deployment-path
+    // parity" for the originating finding on Treasury/VictimFund/etc.
+    constructor(address _admin, address _kernel) {
+        require(_admin != address(0), "ProductionOracle: invalid admin");
         require(_kernel != address(0), "ProductionOracle: invalid kernel");
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(KERNEL_ROLE, _kernel);
     }
 

@@ -61,9 +61,15 @@ contract BudgetAllocation is AccessControl, ReentrancyGuard {
     event ExpenditureFlagged(uint256 indexed expId, string reason);
     event SectorBudgetLocked(Sector sector, string reason);
 
-    constructor(address _kernel) {
+    // _admin receives DEFAULT_ADMIN_ROLE (real signer — e.g. the Sovereign —
+    // so post-deploy role wiring is reachable on mainnet); _kernel continues
+    // to receive only KERNEL_ROLE. Mirrors SovereignWealthFund.sol's
+    // constructor(sovereign, kernel) split — see CHANGELOG "P0 deployment-path
+    // parity" for the originating finding on Treasury/VictimFund/etc.
+    constructor(address _admin, address _kernel) {
+        require(_admin != address(0), "BudgetAllocation: invalid admin");
         require(_kernel != address(0), "BudgetAllocation: invalid kernel");
-        _grantRole(DEFAULT_ADMIN_ROLE, _kernel);
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
         _grantRole(KERNEL_ROLE, _kernel);
         currentFiscalYear = 1404;
     }

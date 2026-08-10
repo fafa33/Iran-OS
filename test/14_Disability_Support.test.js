@@ -20,7 +20,7 @@ const SEVERE   = 3;
 beforeEach(async function () {
 [kernel, healthAdmin, welfare, swf, citizen1, citizen2, attacker] = await ethers.getSigners();
 const Disability = await ethers.getContractFactory("DisabilitySupport");
-disability = await Disability.deploy(kernel.address);
+disability = await Disability.deploy(kernel.address, kernel.address);
 await disability.waitForDeployment();
 await disability.connect(kernel).grantRole(HEALTH_ROLE, healthAdmin.address);
 await disability.connect(kernel).grantRole(WELFARE_ROLE, welfare.address);

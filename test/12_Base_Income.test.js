@@ -15,7 +15,7 @@ const MIN_WAGE = ethers.parseUnits("1000", 18);
 beforeEach(async function () {
 [kernel, oracle, employer, swf, employee1, employee2, attacker] = await ethers.getSigners();
 const BaseIncome = await ethers.getContractFactory("BaseIncome");
-baseIncome = await BaseIncome.deploy(kernel.address);
+baseIncome = await BaseIncome.deploy(kernel.address, kernel.address);
 await baseIncome.waitForDeployment();
 await baseIncome.connect(kernel).grantRole(ORACLE_ROLE, oracle.address);
 await baseIncome.connect(kernel).grantRole(SWF_ROLE, swf.address);
@@ -28,10 +28,16 @@ expect(await baseIncome.MIN_WAGE()).to.equal(MIN_WAGE);
 it("باید معافیت مالیاتی ۱۰۰۰ پهلوی باشد", async function () {
 expect(await baseIncome.TAX_EXEMPT_CAP()).to.equal(MIN_WAGE);
 });
+it("نباید ادمین آدرس صفر باشد", async function () {
+const BaseIncome = await ethers.getContractFactory("BaseIncome");
+await expect(
+BaseIncome.deploy(ethers.ZeroAddress, kernel.address)
+).to.be.revertedWith("BaseIncome: invalid admin");
+});
 it("نباید کرنل آدرس صفر باشد", async function () {
 const BaseIncome = await ethers.getContractFactory("BaseIncome");
 await expect(
-BaseIncome.deploy(ethers.ZeroAddress)
+BaseIncome.deploy(kernel.address, ethers.ZeroAddress)
 ).to.be.revertedWith("BaseIncome: invalid kernel");
 });
 });

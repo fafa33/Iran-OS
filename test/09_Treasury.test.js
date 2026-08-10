@@ -15,7 +15,7 @@ const ANNUAL_CAP = ethers.parseUnits("150000000000", 18);
 beforeEach(async function () {
 [kernel, parliament, government, auditor, swf, recipient, attacker] = await ethers.getSigners();
 const Treasury = await ethers.getContractFactory("Treasury");
-treasury = await Treasury.deploy(kernel.address);
+treasury = await Treasury.deploy(kernel.address, kernel.address);
 await treasury.waitForDeployment();
 await treasury.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
 await treasury.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);

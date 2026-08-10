@@ -2,8 +2,9 @@
 
 # مانیفست استقرار IranOS — پروتکل مستندسازی
 
-**نسخه:** ۱.۳.۳  
+**نسخه:** ۱.۳.۴  
 **تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
+**رفع P0 هم‌ترازی مسیر استقرار — Treasury و ۱۲ قرارداد باقی‌مانده:** ۱۹ مرداد ۲۵۸۵ شاهنشاهی / ۹ اوت ۲۰۲۶ میلادی  
 **توسعه به پوشش ۲۵/۲۵:** ۲۴ خرداد ۲۵۸۵ شاهنشاهی / ۱۴ ژوئن ۲۰۲۶ میلادی  
 **افزودن RecognizedReserveBacking و رفع شکاف setPahlaviToken:** ۱۴ تیر ۲۵۸۵ شاهنشاهی / ۵ ژوئیه ۲۰۲۶ میلادی  
 **افزودن اسکریپت‌های اجرایی deploy/ برای مسیر اصلی پولی (۶ قرارداد):** ۱۴ تیر ۲۵۸۵ شاهنشاهی / ۵ ژوئیه ۲۰۲۶ میلادی  
@@ -40,6 +41,8 @@
 > **⚠️ به‌روزرسانی (نسخه ۱.۳.۲) — رفع P0:** یک بازبینی خصمانه معماری تأیید کرد که ۵ قرارداد افزوده‌شده در نسخه ۱.۳.۱ (`VictimFund`، `ConstitutionGuard`، `JurySelection`، `JusticeProtocol`، `CitizenCard`) با `KERNEL_ADDRESS` به‌عنوان تنها دارنده `DEFAULT_ADMIN_ROLE`/`admin` deploy می‌شدند، اما قرارداد `Kernel` (`contracts/kernel.sol`) هیچ مکانیزم forwarding، `call`/`delegatecall`، یا ارجاعی به این ۵ قرارداد ندارد — بنابراین Kernel هرگز نمی‌توانست `grantRole()`/`approveLaw()`/`registerEmployer()` و توابع مشابه را روی آن‌ها فراخوانی کند و این قراردادها پس از استقرار برای همیشه از نظر عملیاتی غیرقابل‌استفاده می‌ماندند (تأیید‌شده با grep کامل `contracts/kernel.sol` و مقایسه با تست‌های واحد موجود که به‌جای قرارداد واقعی Kernel از یک EOA آزمایشی استفاده می‌کردند). سازنده هر ۵ قرارداد اکنون یک آرگومان `_admin` جداگانه می‌پذیرد (`sovereign`) که `DEFAULT_ADMIN_ROLE` را دریافت می‌کند، دقیقاً مطابق الگوی already-established در `SovereignWealthFund.sol` (`constructor(sovereign, kernel)`)؛ `KERNEL_ROLE`/`kernel` همچنان صرفاً به‌عنوان هویت ثبت‌شده باقی می‌ماند. هیچ backdoor عمومی، هیچ تابع execute/delegatecall جدید در Kernel، و هیچ تغییر در سایر قراردادها یا حاکمیت اعمال نشده. تست‌های هم‌ترازی مسیر استقرار جدید (`test/32_deployment_workflow.test.js`) با آدرس واقعی قرارداد Kernel deploy‌شده (نه یک EOA جایگزین) این رفع را تأیید می‌کنند.
 >
 > **⚠️ به‌روزرسانی (نسخه ۱.۳.۳):** اسکریپت `deploy/15_price_oracle.js` اکنون `PriceOracle` را deploy می‌کند — مجموعاً **۱۲ از ۲۵ قرارداد**. سازنده از ابتدا با الگوی `constructor(_admin, _kernel)` نوشته شده (بدون نیاز به رفع بعدی): `SOVEREIGN_ADDRESS` (`admin`) `DEFAULT_ADMIN_ROLE` را دریافت می‌کند، `KERNEL_ADDRESS` (`kernel`) صرفاً `KERNEL_ROLE` را — دقیقاً مطابق رفع P0 نسخه ۱.۳.۲ برای ۵ قرارداد قبلی؛ بدون این الگو، `invalidatePrice()` (`onlyRole(KERNEL_ROLE)`) و `submitPrice()` (`onlyRole(FEEDER_ROLE)`, هرگز در سازنده اعطا نشده) برای همیشه غیرقابل‌فراخوانی می‌ماندند. `FEEDER_ROLE` توسط این اسکریپت اعطا **نمی‌شود**: چک §۹ گروه ۳ (`priceOracle.hasRole(FEEDER_ROLE, PRICE_FEEDER)`) به متغیر کتاب آدرس `PRICE_FEEDER` نیاز دارد که در جدول بخش ۱ فهرست نشده — این همان دلیلی است که `ProductionOracle` همچنان خارج از دامنه این workflow باقی می‌ماند. هیچ تغییر قراردادی، پروتکلی، حاکمیتی، یا پولی در این نسخه اعمال نشده. `STEP9-BLOCK-005` همچنان **OPEN/PENDING** است.
+>
+> **⚠️ به‌روزرسانی (نسخه ۱.۳.۴) — رفع P0 هم‌ترازی مسیر استقرار (Treasury/TriggerProtocol):** یک Pre-Implementation Red-Team Pass پیش از کار روی استقرار `TriggerProtocol` تأیید کرد که `Treasury.blockAddressByTrigger()` (`onlyRole(KERNEL_ROLE)`) — که `TriggerProtocol.executeTrigger()` آن را فراخوانی می‌کند — برای همیشه غیرقابل‌فراخوانی می‌ماند، زیرا سازندهٔ قدیمی `Treasury(kernel)` تنها `KERNEL_ADDRESS` را `DEFAULT_ADMIN_ROLE` می‌داد و `contracts/kernel.sol` هیچ مکانیزم forwarding به `Treasury` ندارد (تأیید‌شده با `grep -n "Treasury" contracts/kernel.sol` → صفر نتیجه) — بنابراین هیچ آدرسی نمی‌توانست پس از استقرار `KERNEL_ROLE` را روی `Treasury` به `TriggerProtocol` اعطا کند. همین الگوی نقص، در بازبینی، در تمام ۱۲ قرارداد باقی‌ماندهٔ دیگر (`BudgetAllocation`، `VotingSystem`، `Parliament`، `Provincial`، `Fargard7PolicyAdapter`، `VelocityFee`، `BaseIncome`، `HealthCoverage`، `DisabilitySupport`، `PenalLabor`، `AssetFreeze`، `SovereignCrawler`، `ProductionOracle`) نیز تأیید شد. سازندهٔ هر ۱۳ قرارداد اکنون الگوی `constructor(_admin, _kernel, ...)` را می‌پذیرد — دقیقاً همان الگوی رفع P0 نسخهٔ ۱.۳.۲/۱.۳.۳: `_admin` (`SOVEREIGN_ADDRESS`) `DEFAULT_ADMIN_ROLE` را دریافت می‌کند، `_kernel` صرفاً `KERNEL_ROLE` را (یا برای `Fargard7PolicyAdapter`، سه نقش عملیاتی موجودش را — بدون تغییر در مدل نقش عملیاتی این قرارداد). این نسخه صرفاً سازنده‌ها را اصلاح می‌کند و مستندات را هم‌زمان به‌روز می‌کند؛ خود `TriggerProtocol` هنوز deploy نشده و هیچ‌کدام از ۱۳ قرارداد اصلاح‌شده در این نسخه اسکریپت `deploy/` جدید دریافت نکرده‌اند (تنها `Treasury` که پیش‌تر deploy می‌شد، اسکریپتش —`deploy/05_treasury.js`— به‌روزرسانی شد) — پوشش استقرار همچنان **۱۲ از ۲۵** باقی می‌ماند. هیچ تغییر پروتکلی، حاکمیتی، یا پولی اعمال نشده. `STEP9-BLOCK-005` همچنان **OPEN/PENDING** است.
 
 ---
 
@@ -93,7 +96,11 @@ Kernel(sovereign, court_1, oracle_initial, swf_multisig)
 
 Layer 1 — وابسته به Kernel
 ───────────────────────────
-Treasury(kernel)
+Treasury(sovereign, kernel)
+  ← سازنده در نسخه ۱.۳.۴ اصلاح شد: sovereign تنها امضاکننده واقعی است که
+    DEFAULT_ADMIN_ROLE را دریافت می‌کند و می‌تواند KERNEL_ROLE را روی این
+    قرارداد اعطا کند (نیاز TG-01 برای TriggerProtocol)؛ kernel صرفاً
+    KERNEL_ROLE/هویت را ثبت می‌کند — همان الگوی نسخه ۱.۳.۲
 SovereignWealthFund(sovereign, kernel)
 API3Oracle(kernel, [feeder1, feeder2, ...])   ← FEEDER_ROLE در constructor اعطا می‌شود (Codex P1 fix)
 ConstitutionGuard(sovereign, kernel)
@@ -111,15 +118,16 @@ Layer 2 — وابسته به Kernel + Layer 1
 ──────────────────────────────────────
 TriggerProtocol(kernel, treasury, swf)
 PahlaviToken(swf, kernel, initialReserves)
-PenalLabor(kernel, victimFund)
-Provincial(kernel, treasury)
-AssetFreeze(kernel, swfTempWallet, swfContract)
+PenalLabor(sovereign, kernel, victimFund)
+Provincial(sovereign, kernel, treasury)
+AssetFreeze(sovereign, kernel, swfTempWallet, swfContract)
+  ← سازنده این ۳ قرارداد در نسخه ۱.۳.۴ اصلاح شد: همان الگوی sovereign/kernel بالا
 
 Layer 3 — وابسته به چند قرارداد Layer 1/2
 ───────────────────────────────────────────
 PriceOracle(sovereign, kernel)   ← مستقل از Layer 2؛ سازنده در نسخه ۱.۳.۳ اصلاح شد:
                                     sovereign = DEFAULT_ADMIN_ROLE واقعی، kernel = صرفاً KERNEL_ROLE
-ProductionOracle(kernel)   ← مستقل از Layer 2
+ProductionOracle(sovereign, kernel)   ← مستقل از Layer 2؛ سازنده در نسخه ۱.۳.۴ اصلاح شد
 
 Layer 2.5 — مستقل در deploy، اما سیم‌کشی‌اش به Layer 2 (PahlaviToken) نیاز دارد
 ──────────────────────────────────────────────────────────────────────────────
@@ -134,30 +142,30 @@ RecognizedReserveBacking(sovereign, recognizer)
 | قرارداد | آرگومان‌های constructor | وابسته به |
 |---------|----------------------|----------|
 | `Kernel` | `sovereign, court_1, oracle_initial, swf` | هیچ |
-| `Treasury` | `kernel` | Kernel |
+| `Treasury` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
 | `SovereignWealthFund` | `sovereign, kernel` | Kernel |
 | `PahlaviToken` | `swf, kernel, initialReserves` | Kernel، SWF |
 | `TriggerProtocol` | `kernel, treasury, swf` | Kernel، Treasury، SWF |
 | `API3Oracle` | `kernel, [feeder_1..N]` | Kernel (FEEDER_ROLE در constructor اعطا می‌شود) |
 | `ConstitutionGuard` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE/admin واقعی؛ kernel صرفاً هویت ثبت‌شده — نسخه ۱.۳.۲) |
-| `AssetFreeze` | `kernel, swfTempWallet, swfContract` | Kernel، SWF |
+| `AssetFreeze` | `sovereign, kernel, swfTempWallet, swfContract` | Kernel، SWF (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
 | `JurySelection` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۲) |
 | `JusticeProtocol` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۲) |
-| `PenalLabor` | `kernel, victimFund` | Kernel، VictimFund |
+| `PenalLabor` | `sovereign, kernel, victimFund` | Kernel، VictimFund (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
 | `VictimFund` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۲) |
 | `CitizenCard` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۲) |
-| `Provincial` | `kernel, treasury` | Kernel، Treasury |
+| `Provincial` | `sovereign, kernel, treasury` | Kernel، Treasury (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
 | `PriceOracle` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۳) |
-| `ProductionOracle` | `kernel` | Kernel |
-| `VotingSystem` | `kernel` | Kernel |
-| `Parliament` | `kernel` | Kernel |
-| `BudgetAllocation` | `kernel` | Kernel |
-| `BaseIncome` | `kernel` | Kernel |
-| `HealthCoverage` | `kernel` | Kernel |
-| `DisabilitySupport` | `kernel` | Kernel |
-| `SovereignCrawler` | `kernel, swfTempWallet` | Kernel (+ آدرس کیف‌پول موقت SWF از کتاب آدرس) |
-| `Fargard7PolicyAdapter` | `kernel, priceOracle` | Kernel، PriceOracle |
-| `VelocityFee` | `kernel, developmentBank, pahlaviToken` | Kernel، PahlaviToken (+ آدرس بانک توسعه از کتاب آدرس) |
+| `ProductionOracle` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
+| `VotingSystem` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
+| `Parliament` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
+| `BudgetAllocation` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
+| `BaseIncome` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
+| `HealthCoverage` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
+| `DisabilitySupport` | `sovereign, kernel` | Kernel (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel صرفاً KERNEL_ROLE — نسخه ۱.۳.۴) |
+| `SovereignCrawler` | `sovereign, kernel, swfTempWallet` | Kernel (+ آدرس کیف‌پول موقت SWF از کتاب آدرس؛ sovereign = DEFAULT_ADMIN_ROLE واقعی — نسخه ۱.۳.۴) |
+| `Fargard7PolicyAdapter` | `sovereign, kernel, priceOracle` | Kernel، PriceOracle (sovereign = DEFAULT_ADMIN_ROLE واقعی؛ kernel همچنان POLICY_ADMIN_ROLE/RECOMMENDER_ROLE/REVIEWER_ROLE را دارد — نسخه ۱.۳.۴؛ مدل نقش عملیاتی تغییر نکرده) |
+| `VelocityFee` | `sovereign, kernel, developmentBank, pahlaviToken` | Kernel، PahlaviToken (+ آدرس بانک توسعه از کتاب آدرس؛ sovereign = DEFAULT_ADMIN_ROLE واقعی — نسخه ۱.۳.۴) |
 | `RecognizedReserveBacking` | `admin, recognizer` | هیچ در constructor؛ سیم‌کشی (`setPahlaviRecognizedReserveBacking`) به PahlaviToken deploy‌شده نیاز دارد |
 
 ### ۲.۱. جایگاه لایه قراردادهای افزوده‌شده (استخراج‌شده از امضای سازنده)
@@ -165,22 +173,29 @@ RecognizedReserveBacking(sovereign, recognizer)
 ```
 Layer 1 — تنها وابسته به Kernel
 ────────────────────────────────
-VotingSystem(kernel)
-Parliament(kernel)
-BudgetAllocation(kernel)
-BaseIncome(kernel)
-HealthCoverage(kernel)
-DisabilitySupport(kernel)
-SovereignCrawler(kernel, swfTempWallet)   ← swfTempWallet یک آدرس از کتاب آدرس است، نه قرارداد
+VotingSystem(sovereign, kernel)
+Parliament(sovereign, kernel)
+BudgetAllocation(sovereign, kernel)
+BaseIncome(sovereign, kernel)
+HealthCoverage(sovereign, kernel)
+DisabilitySupport(sovereign, kernel)
+SovereignCrawler(sovereign, kernel, swfTempWallet)   ← swfTempWallet یک آدرس از کتاب آدرس است، نه قرارداد
 
 Layer 2 — وابسته به یک قرارداد Layer 1
 ──────────────────────────────────────
-Fargard7PolicyAdapter(kernel, priceOracle)   ← پس از PriceOracle
+Fargard7PolicyAdapter(sovereign, kernel, priceOracle)   ← پس از PriceOracle
 
 Layer 3 — وابسته به قرارداد Layer 2
 ────────────────────────────────────
-VelocityFee(kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken؛ developmentBank آدرس کتاب آدرس است
+VelocityFee(sovereign, kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken؛ developmentBank آدرس کتاب آدرس است
 ```
+
+> سازندهٔ هر ۷ قرارداد بالا در نسخهٔ ۱.۳.۴ اصلاح شد: `sovereign` تنها امضاکنندهٔ
+> واقعی است که `DEFAULT_ADMIN_ROLE` را دریافت می‌کند؛ `kernel` صرفاً
+> `KERNEL_ROLE`/هویت را ثبت می‌کند — همان الگوی نسخهٔ ۱.۳.۲. برای
+> `Fargard7PolicyAdapter`، سه نقش عملیاتی موجود (`POLICY_ADMIN_ROLE`،
+> `RECOMMENDER_ROLE`، `REVIEWER_ROLE`) همچنان به `kernel` اعطا می‌شوند —
+> بدون تغییر در مدل نقش عملیاتی این قرارداد.
 
 ---
 
@@ -206,7 +221,8 @@ VelocityFee(kernel, developmentBank, pahlaviToken)   ← پس از PahlaviToken�
 **مرحله ۲ — Layer 1 (ترتیب اهمیت ندارد)**
 
 ```
-2.  deploy Treasury(KERNEL_ADDRESS)
+2.  deploy Treasury(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)
+    → DEFAULT_ADMIN_ROLE به SOVEREIGN_ADDRESS، KERNEL_ROLE به KERNEL_ADDRESS (نسخه ۱.۳.۴)
     → ثبت آدرس: TREASURY_ADDRESS
 
 3.  deploy SovereignWealthFund(SOVEREIGN, KERNEL_ADDRESS)
@@ -405,7 +421,11 @@ kernel.setTriggerProtocol(TRIGGER_PROTOCOL_ADDRESS)
 
 # گام ۲: TriggerProtocol باید KERNEL_ROLE روی Treasury داشته باشد
 # تا بتواند blockAddressByTrigger() را فراخوانی کند (TG-01)
-treasury.grantRole(treasury.KERNEL_ROLE(), TRIGGER_PROTOCOL_ADDRESS)
+# Treasury سازنده‌اش در نسخهٔ ۱.۳.۴ اصلاح شد (sovereign = DEFAULT_ADMIN_ROLE واقعی)،
+# پس این گام باید توسط sovereign اجرا شود — kernel هیچ مکانیزم forwarding
+# به Treasury ندارد (تأیید‌شده با grep کامل contracts/kernel.sol؛ نگاه کنید به
+# یادداشت نسخه ۱.۳.۴ بالای این سند).
+treasury.connect(sovereign).grantRole(treasury.KERNEL_ROLE(), TRIGGER_PROTOCOL_ADDRESS)
 ```
 
 بدون گام ۲، `executeTrigger()` با خطای AccessControl revert می‌کند.

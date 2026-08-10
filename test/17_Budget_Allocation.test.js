@@ -16,7 +16,7 @@ const TOTAL = ethers.parseUnits("150000000000", 18);
 beforeEach(async function () {
 [kernel, parliament, government, auditor, oracle, attacker] = await ethers.getSigners();
 const Budget = await ethers.getContractFactory("BudgetAllocation");
-budget = await Budget.deploy(kernel.address);
+budget = await Budget.deploy(kernel.address, kernel.address);
 await budget.waitForDeployment();
 await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
 await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
@@ -90,7 +90,7 @@ budget.connect(government).recordExpenditure(0, overAmount, "تست")
 ).to.be.revertedWith("BudgetAllocation: exceeds budget");
 });
 it("نباید بدون تصویب بودجه هزینه ثبت شود", async function () {
-const newBudget = await (await ethers.getContractFactory("BudgetAllocation")).deploy(kernel.address);
+const newBudget = await (await ethers.getContractFactory("BudgetAllocation")).deploy(kernel.address, kernel.address);
 await newBudget.waitForDeployment();
 await newBudget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
 await expect(

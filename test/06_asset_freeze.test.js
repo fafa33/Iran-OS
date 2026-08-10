@@ -21,6 +21,7 @@ describe("AssetFreeze", function () {
     const AssetFreeze = await ethers.getContractFactory("AssetFreeze");
     freeze = await AssetFreeze.deploy(
       kernel.address,
+      kernel.address,
       swfWallet.address,        // کیف‌پول موقت مرحله ۲
       await swf.getAddress()    // قرارداد SWF برای انتقال دائم مرحله ۴
     );
@@ -262,6 +263,7 @@ describe("AssetFreeze", function () {
       // استقرار AssetFreeze جدید که به SWF بدون نقش اشاره می‌کند
       const AssetFreeze = await ethers.getContractFactory("AssetFreeze");
       const freezeNoRole = await AssetFreeze.deploy(
+        kernel.address,
         kernel.address,
         swfWallet.address,
         await freshSwf.getAddress()

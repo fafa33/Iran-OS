@@ -37,13 +37,13 @@ describe("Step7 Policy Layer", function () {
     }
 
     const BaseIncome = await ethers.getContractFactory("BaseIncome");
-    const baseIncome = await BaseIncome.deploy(kernel.address);
+    const baseIncome = await BaseIncome.deploy(kernel.address, kernel.address);
     await baseIncome.waitForDeployment();
     await baseIncome.connect(kernel).grantRole(ORACLE_ROLE, policyOracle.address);
     await baseIncome.connect(kernel).grantRole(SWF_ROLE, swf.address);
 
     const BudgetAllocation = await ethers.getContractFactory("BudgetAllocation");
-    const budget = await BudgetAllocation.deploy(kernel.address);
+    const budget = await BudgetAllocation.deploy(kernel.address, kernel.address);
     await budget.waitForDeployment();
     await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
     await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
@@ -53,7 +53,7 @@ describe("Step7 Policy Layer", function () {
     await pah.waitForDeployment();
 
     const VelocityFee = await ethers.getContractFactory("VelocityFee");
-    const velocityFee = await VelocityFee.deploy(kernel.address, devBank.address, await pah.getAddress());
+    const velocityFee = await VelocityFee.deploy(kernel.address, kernel.address, devBank.address, await pah.getAddress());
     await velocityFee.waitForDeployment();
     await velocityFee.connect(kernel).grantRole(ORACLE_ROLE, policyOracle.address);
 
@@ -171,7 +171,7 @@ describe("Step7 Policy Layer", function () {
     await pah.waitForDeployment();
 
     const VelocityFee = await ethers.getContractFactory("VelocityFee");
-    const velocityFee = await VelocityFee.deploy(kernel.address, devBank.address, await pah.getAddress());
+    const velocityFee = await VelocityFee.deploy(kernel.address, kernel.address, devBank.address, await pah.getAddress());
     await velocityFee.waitForDeployment();
     await velocityFee.connect(kernel).grantRole(ORACLE_ROLE, policyOracle.address);
     await velocityFee.connect(kernel).grantRole(STAKING_ROLE, staking.address);
@@ -231,7 +231,7 @@ describe("Step7 Policy Layer", function () {
     const BANK_ROLE = ethers.keccak256(ethers.toUtf8Bytes("BANK_ROLE"));
 
     const ProductionOracle = await ethers.getContractFactory("ProductionOracle");
-    const productionOracle = await ProductionOracle.deploy(kernel.address);
+    const productionOracle = await ProductionOracle.deploy(kernel.address, kernel.address);
     await productionOracle.waitForDeployment();
     await productionOracle.connect(kernel).grantRole(FEEDER_ROLE, feeder.address);
     await productionOracle.connect(kernel).grantRole(BANK_ROLE, bank.address);
@@ -338,7 +338,7 @@ describe("Step7 Policy Layer", function () {
     const AUDITOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("AUDITOR_ROLE"));
 
     const BudgetAllocation = await ethers.getContractFactory("BudgetAllocation");
-    const budget = await BudgetAllocation.deploy(kernel.address);
+    const budget = await BudgetAllocation.deploy(kernel.address, kernel.address);
     await budget.waitForDeployment();
     await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
     await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
@@ -394,7 +394,7 @@ describe("Step7 Policy Layer", function () {
     const GOVERNOR_ROLE = ethers.keccak256(ethers.toUtf8Bytes("GOVERNOR_ROLE"));
 
     const Provincial = await ethers.getContractFactory("Provincial");
-    const provincial = await Provincial.deploy(kernel.address, nationalTreasury.address);
+    const provincial = await Provincial.deploy(kernel.address, kernel.address, nationalTreasury.address);
     await provincial.waitForDeployment();
     await provincial.connect(kernel).grantRole(ORACLE_ROLE, oracle.address);
 
@@ -510,11 +510,11 @@ describe("Step7 Policy Layer", function () {
     }
 
     const BaseIncome = await ethers.getContractFactory("BaseIncome");
-    const baseIncome = await BaseIncome.deploy(kernel.address);
+    const baseIncome = await BaseIncome.deploy(kernel.address, kernel.address);
     await baseIncome.waitForDeployment();
 
     const BudgetAllocation = await ethers.getContractFactory("BudgetAllocation");
-    const budget = await BudgetAllocation.deploy(kernel.address);
+    const budget = await BudgetAllocation.deploy(kernel.address, kernel.address);
     await budget.waitForDeployment();
     await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
     await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
@@ -525,25 +525,25 @@ describe("Step7 Policy Layer", function () {
     await pah.waitForDeployment();
 
     const VelocityFee = await ethers.getContractFactory("VelocityFee");
-    const velocityFee = await VelocityFee.deploy(kernel.address, devBank.address, await pah.getAddress());
+    const velocityFee = await VelocityFee.deploy(kernel.address, kernel.address, devBank.address, await pah.getAddress());
     await velocityFee.waitForDeployment();
     await velocityFee.connect(kernel).grantRole(ORACLE_ROLE, policyOracle.address);
     await velocityFee.connect(policyOracle).registerAccount(monitoredAccount.address);
 
     const ProductionOracle = await ethers.getContractFactory("ProductionOracle");
-    const productionOracle = await ProductionOracle.deploy(kernel.address);
+    const productionOracle = await ProductionOracle.deploy(kernel.address, kernel.address);
     await productionOracle.waitForDeployment();
     await productionOracle.connect(kernel).grantRole(FEEDER_ROLE, productionFeeder.address);
     await productionOracle.connect(kernel).grantRole(BANK_ROLE, productionBank.address);
 
     const Provincial = await ethers.getContractFactory("Provincial");
-    const provincial = await Provincial.deploy(kernel.address, nationalTreasury.address);
+    const provincial = await Provincial.deploy(kernel.address, kernel.address, nationalTreasury.address);
     await provincial.waitForDeployment();
     await provincial.connect(kernel).grantRole(ORACLE_ROLE, provincialOracle.address);
     await provincial.connect(kernel).registerProvince("adapter boundary province", governor.address, developmentAccount.address);
 
     const Fargard7PolicyAdapter = await ethers.getContractFactory("Fargard7PolicyAdapter");
-    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, await priceOracle.getAddress());
+    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, kernel.address, await priceOracle.getAddress());
     await adapter.waitForDeployment();
 
     expect(await adapter.hasRole(POLICY_ADMIN_ROLE, kernel.address)).to.equal(true);
@@ -688,15 +688,15 @@ describe("Step7 Policy Layer", function () {
     }
 
     const Fargard7PolicyAdapter = await ethers.getContractFactory("Fargard7PolicyAdapter");
-    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, await priceOracle.getAddress());
+    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, kernel.address, await priceOracle.getAddress());
     await adapter.waitForDeployment();
 
     const BaseIncome = await ethers.getContractFactory("BaseIncome");
-    const baseIncome = await BaseIncome.deploy(kernel.address);
+    const baseIncome = await BaseIncome.deploy(kernel.address, kernel.address);
     await baseIncome.waitForDeployment();
 
     const BudgetAllocation = await ethers.getContractFactory("BudgetAllocation");
-    const budget = await BudgetAllocation.deploy(kernel.address);
+    const budget = await BudgetAllocation.deploy(kernel.address, kernel.address);
     await budget.waitForDeployment();
     await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
     await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
@@ -707,19 +707,19 @@ describe("Step7 Policy Layer", function () {
     await pah.waitForDeployment();
 
     const VelocityFee = await ethers.getContractFactory("VelocityFee");
-    const velocityFee = await VelocityFee.deploy(kernel.address, devBank.address, await pah.getAddress());
+    const velocityFee = await VelocityFee.deploy(kernel.address, kernel.address, devBank.address, await pah.getAddress());
     await velocityFee.waitForDeployment();
     await velocityFee.connect(kernel).grantRole(ORACLE_ROLE, policyOracle.address);
     await velocityFee.connect(policyOracle).registerAccount(monitoredAccount.address);
 
     const ProductionOracle = await ethers.getContractFactory("ProductionOracle");
-    const productionOracle = await ProductionOracle.deploy(kernel.address);
+    const productionOracle = await ProductionOracle.deploy(kernel.address, kernel.address);
     await productionOracle.waitForDeployment();
     await productionOracle.connect(kernel).grantRole(FEEDER_ROLE, productionFeeder.address);
     await productionOracle.connect(kernel).grantRole(BANK_ROLE, productionBank.address);
 
     const Provincial = await ethers.getContractFactory("Provincial");
-    const provincial = await Provincial.deploy(kernel.address, nationalTreasury.address);
+    const provincial = await Provincial.deploy(kernel.address, kernel.address, nationalTreasury.address);
     await provincial.waitForDeployment();
     await provincial.connect(kernel).grantRole(ORACLE_ROLE, provincialOracle.address);
     await provincial.connect(kernel).registerProvince("review boundary province", governor.address, developmentAccount.address);
@@ -841,17 +841,17 @@ describe("Step7 Policy Layer", function () {
     }
 
     const Fargard7PolicyAdapter = await ethers.getContractFactory("Fargard7PolicyAdapter");
-    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, await priceOracle.getAddress());
+    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, kernel.address, await priceOracle.getAddress());
     await adapter.waitForDeployment();
     await adapter.connect(kernel).grantRole(REVIEWER_ROLE, reviewer.address);
     await adapter.connect(kernel).setReviewWindow(60);
 
     const BaseIncome = await ethers.getContractFactory("BaseIncome");
-    const baseIncome = await BaseIncome.deploy(kernel.address);
+    const baseIncome = await BaseIncome.deploy(kernel.address, kernel.address);
     await baseIncome.waitForDeployment();
 
     const BudgetAllocation = await ethers.getContractFactory("BudgetAllocation");
-    const budget = await BudgetAllocation.deploy(kernel.address);
+    const budget = await BudgetAllocation.deploy(kernel.address, kernel.address);
     await budget.waitForDeployment();
     await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
     await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
@@ -970,17 +970,17 @@ describe("Step7 Policy Layer", function () {
     }
 
     const Fargard7PolicyAdapter = await ethers.getContractFactory("Fargard7PolicyAdapter");
-    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, await priceOracle.getAddress());
+    const adapter = await Fargard7PolicyAdapter.deploy(kernel.address, kernel.address, await priceOracle.getAddress());
     await adapter.waitForDeployment();
     await adapter.connect(kernel).grantRole(REVIEWER_ROLE, reviewer.address);
     await adapter.connect(kernel).setReviewWindow(60);
 
     const BaseIncome = await ethers.getContractFactory("BaseIncome");
-    const baseIncome = await BaseIncome.deploy(kernel.address);
+    const baseIncome = await BaseIncome.deploy(kernel.address, kernel.address);
     await baseIncome.waitForDeployment();
 
     const BudgetAllocation = await ethers.getContractFactory("BudgetAllocation");
-    const budget = await BudgetAllocation.deploy(kernel.address);
+    const budget = await BudgetAllocation.deploy(kernel.address, kernel.address);
     await budget.waitForDeployment();
     await budget.connect(kernel).grantRole(PARLIAMENT_ROLE, parliament.address);
     await budget.connect(kernel).grantRole(GOVERNMENT_ROLE, government.address);
@@ -991,19 +991,19 @@ describe("Step7 Policy Layer", function () {
     await pah.waitForDeployment();
 
     const VelocityFee = await ethers.getContractFactory("VelocityFee");
-    const velocityFee = await VelocityFee.deploy(kernel.address, devBank.address, await pah.getAddress());
+    const velocityFee = await VelocityFee.deploy(kernel.address, kernel.address, devBank.address, await pah.getAddress());
     await velocityFee.waitForDeployment();
     await velocityFee.connect(kernel).grantRole(ORACLE_ROLE, policyOracle.address);
     await velocityFee.connect(policyOracle).registerAccount(monitoredAccount.address);
 
     const ProductionOracle = await ethers.getContractFactory("ProductionOracle");
-    const productionOracle = await ProductionOracle.deploy(kernel.address);
+    const productionOracle = await ProductionOracle.deploy(kernel.address, kernel.address);
     await productionOracle.waitForDeployment();
     await productionOracle.connect(kernel).grantRole(FEEDER_ROLE, productionFeeder.address);
     await productionOracle.connect(kernel).grantRole(BANK_ROLE, productionBank.address);
 
     const Provincial = await ethers.getContractFactory("Provincial");
-    const provincial = await Provincial.deploy(kernel.address, nationalTreasury.address);
+    const provincial = await Provincial.deploy(kernel.address, kernel.address, nationalTreasury.address);
     await provincial.waitForDeployment();
     await provincial.connect(kernel).grantRole(ORACLE_ROLE, provincialOracle.address);
     await provincial.connect(kernel).registerProvince("step8 adapter boundary province", governor.address, developmentAccount.address);

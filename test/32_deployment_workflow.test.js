@@ -136,6 +136,42 @@ describe("Deployment Workflow (deploy/)", function () {
     expect(await constitutionGuard.kernel()).to.equal(addresses.KERNEL_ADDRESS);
   });
 
+  it("deploys Treasury via the real orchestrated path with sovereign as DEFAULT_ADMIN_ROLE, and TriggerProtocol's KERNEL_ROLE grant is reachable from that admin", async function () {
+    const config = loadConfig();
+    const { addresses } = await runDeployment(hre, config, sovereign);
+
+    const treasury = await ethers.getContractAt("Treasury", addresses.TREASURY_ADDRESS);
+    const DEFAULT_ADMIN_ROLE = await treasury.DEFAULT_ADMIN_ROLE();
+    const KERNEL_ROLE = await treasury.KERNEL_ROLE();
+
+    // DEFAULT_ADMIN_ROLE is held by SOVEREIGN_ADDRESS (a real signer), not
+    // KERNEL_ADDRESS: the Kernel contract has no call-forwarding mechanism to
+    // Treasury and could never exercise DEFAULT_ADMIN_ROLE itself (TG-01).
+    expect(await treasury.hasRole(DEFAULT_ADMIN_ROLE, config.sovereignAddress)).to.be.true;
+    expect(await treasury.hasRole(DEFAULT_ADMIN_ROLE, addresses.KERNEL_ADDRESS)).to.be.false;
+    expect(await treasury.hasRole(KERNEL_ROLE, addresses.KERNEL_ADDRESS)).to.be.true;
+
+    // Reachability proof, against the Treasury instance this orchestration
+    // actually produced (not a hand-rolled duplicate): sovereign grants
+    // KERNEL_ROLE to a real TriggerProtocol wired to the same real Kernel and
+    // this Treasury, using only the DEFAULT_ADMIN_ROLE it was just shown to
+    // hold above — proving docs/deployment/ROLE_WIRING_CHECKLIST.md §ب row 1
+    // ("sovereign" as the documented caller) is not just documentation but
+    // reachable on the exact production caller path. (executeTrigger() itself
+    // is gated onlyKernel — msg.sender == the Kernel contract, not sovereign —
+    // and is already exercised end-to-end via test/08_Trigger_Protocol.test.js;
+    // this test's scope is the role-grant reachability this PR fixes, not a
+    // duplicate of that coverage.)
+    const swf = await ethers.getContractAt("SovereignWealthFund", addresses.SWF_ADDRESS);
+    const Trigger = await ethers.getContractFactory("TriggerProtocol");
+    const trigger = await Trigger.deploy(addresses.KERNEL_ADDRESS, addresses.TREASURY_ADDRESS, await swf.getAddress());
+    await trigger.waitForDeployment();
+
+    expect(await treasury.hasRole(KERNEL_ROLE, await trigger.getAddress())).to.be.false;
+    await treasury.connect(sovereign).grantRole(KERNEL_ROLE, await trigger.getAddress());
+    expect(await treasury.hasRole(KERNEL_ROLE, await trigger.getAddress())).to.be.true;
+  });
+
   it("deploys PriceOracle successfully, with a non-zero address, without altering monetary runtime state, and preserving all other deployment invariants", async function () {
     const config = loadConfig();
     const { addresses, checks } = await runDeployment(hre, config, sovereign);
@@ -455,7 +491,7 @@ describe("Deployment Workflow (deploy/)", function () {
 
       const addresses = {};
       addresses.KERNEL_ADDRESS = (await deployKernel(hre, nonzeroConfig)).address;
-      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, nonzeroConfig, addresses)).address;
       addresses.SWF_ADDRESS = (await deploySwf(hre, nonzeroConfig, addresses)).address;
       addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, nonzeroConfig, addresses, sovereign)).address;
 
@@ -486,7 +522,7 @@ describe("Deployment Workflow (deploy/)", function () {
 
       const addresses = {};
       addresses.KERNEL_ADDRESS = (await deployKernel(hre, nonzeroConfig)).address;
-      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, nonzeroConfig, addresses)).address;
       addresses.SWF_ADDRESS = (await deploySwf(hre, nonzeroConfig, addresses)).address;
       addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, nonzeroConfig, addresses, sovereign)).address;
 
@@ -527,7 +563,7 @@ describe("Deployment Workflow (deploy/)", function () {
 
       const addresses = {};
       addresses.KERNEL_ADDRESS = (await deployKernel(hre, nonzeroConfig)).address;
-      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, addresses)).address;
+      addresses.TREASURY_ADDRESS = (await deployTreasury(hre, nonzeroConfig, addresses)).address;
       addresses.SWF_ADDRESS = (await deploySwf(hre, nonzeroConfig, addresses)).address;
       addresses.PAHLAVI_TOKEN_ADDRESS = (await deployToken(hre, nonzeroConfig, addresses, sovereign)).address;
 

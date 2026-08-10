@@ -2,8 +2,9 @@
 
 # چک‌لیست سیم‌کشی نقش‌های بین قراردادی — استقرار IranOS
 
-**نسخه:** 1.7  
+**نسخه:** 1.8  
 **تاریخ:** ۱۳ خرداد ۲۵۸۵ شاهنشاهی / ۳ ژوئن ۲۰۲۶ میلادی  
+**رفع P0 هم‌ترازی مسیر استقرار — Treasury/TriggerProtocol و ۱۲ قرارداد باقی‌مانده (constructor(sovereign, kernel)):** ۱۹ مرداد ۲۵۸۵ شاهنشاهی / ۹ اوت ۲۰۲۶ میلادی  
 **افزودن بخش‌های ح/ط (setPahlaviToken و RecognizedReserveBacking):** ۱۴ تیر ۲۵۸۵ شاهنشاهی / ۵ ژوئیه ۲۰۲۶ میلادی  
 **به‌روزرسانی وضعیت اسکریپت‌های deploy/ (۶/۲۵ قرارداد پیاده‌سازی شد):** ۱۴ تیر ۲۵۸۵ شاهنشاهی / ۵ ژوئیه ۲۰۲۶ میلادی  
 **به‌روزرسانی وضعیت اسکریپت‌های deploy/ (۱۱/۲۵ قرارداد پیاده‌سازی شد — ۵ قرارداد Layer 1 اضافی):** ۱۵ تیر ۲۵۸۵ شاهنشاهی / ۶ ژوئیه ۲۰۲۶ میلادی  
@@ -125,9 +126,16 @@ kernel.grantOfficialAccess(court_9, kernel.COURT_ROLE())
 | # | فراخوان | قرارداد هدف | متد | آرگومان | بدون این پیکربندی |
 |---|---------|------------|-----|---------|-----------------|
 | 0 | `sovereign` | `Kernel` | `setTriggerProtocol(address)` | آدرس `TriggerProtocol` | ماشه بدون مسدودسازی خزانه و رویداد `TriggerExecuted` اجرا می‌شود |
+| 1 | `sovereign` | `Treasury` | `grantRole(KERNEL_ROLE, address)` | آدرس `TriggerProtocol` | `executeTrigger()` با خطای AccessControl روی `blockAddressByTrigger()` revert می‌کند (TG-01) |
 
 ```
 kernel.setTriggerProtocol(triggerProtocolAddress)
+```
+
+⚠️ **ردیف ۱ پیش از نسخهٔ ۱.۳.۴ این چک‌لیست مستند نبود.** `Treasury` سازنده‌اش تا نسخهٔ ۱.۳.۳ تنها `constructor(kernel)` بود و `DEFAULT_ADMIN_ROLE` را به `KERNEL_ADDRESS` می‌داد؛ چون `contracts/kernel.sol` هیچ مکانیزم forwarding به `Treasury` ندارد (`grep -n "Treasury" contracts/kernel.sol` → صفر نتیجه)، هیچ آدرسی نمی‌توانست این اعطا را روی مسیر تولیدی واقعی انجام دهد. سازندهٔ `Treasury` در نسخهٔ ۱.۳.۴ به `constructor(sovereign, kernel)` اصلاح شد؛ ردیف ۱ اکنون `sovereign` را به‌عنوان فراخوان صحیح مستند می‌کند:
+
+```
+treasury.connect(sovereign).grantRole(treasury.KERNEL_ROLE(), triggerProtocolAddress)
 ```
 
 ---
@@ -168,26 +176,28 @@ new API3Oracle(kernelAddress, [feeder1, feeder2, ...])
 
 ### و — اجباری: AssetFreeze داخلی
 
+⚠️ **`AssetFreeze` سازنده‌اش در نسخه ۱.۳.۴ اصلاح شد (`constructor(sovereign, kernel, swfTempWallet, swfContract)`): `DEFAULT_ADMIN_ROLE` به `SOVEREIGN_ADDRESS` تعلق دارد، نه به `kernel`.** فراخوان هر دو ردیف زیر بر همین اساس اصلاح شده — `kernel` دیگر هیچ نقش ادمینی روی `AssetFreeze` ندارد و فراخوانی `kernel.grantRole(...)` روی آن revert می‌کند (تأیید‌شده با `grep -n "constructor\|DEFAULT_ADMIN_ROLE" contracts/reclaim/AssetFreeze.sol`).
+
 | # | فراخوان | قرارداد هدف | نقش | دریافت‌کننده | بدون این اعطا |
 |---|---------|------------|-----|-------------|--------------|
-| 4 | `kernel` | `AssetFreeze` | `CRAWLER_ROLE` | آدرس Crawler | `freezeAsset()` revert |
-| 5 | `kernel` | `AssetFreeze` | `COUNCIL_ROLE` | هر عضو شورا (حداقل ۳) | `signConfirmation()` و `transferToSWF()` revert |
+| 4 | `sovereign` | `AssetFreeze` | `CRAWLER_ROLE` | آدرس Crawler | `freezeAsset()` revert |
+| 5 | `sovereign` | `AssetFreeze` | `COUNCIL_ROLE` | هر عضو شورا (حداقل ۳) | `signConfirmation()` و `transferToSWF()` revert |
 
 ```
-freeze.grantRole(freeze.CRAWLER_ROLE(), crawlerAddress)
-freeze.grantRole(freeze.COUNCIL_ROLE(), council1)
-freeze.grantRole(freeze.COUNCIL_ROLE(), council2)
-freeze.grantRole(freeze.COUNCIL_ROLE(), council3)
+freeze.connect(sovereign).grantRole(freeze.CRAWLER_ROLE(), crawlerAddress)
+freeze.connect(sovereign).grantRole(freeze.COUNCIL_ROLE(), council1)
+freeze.connect(sovereign).grantRole(freeze.COUNCIL_ROLE(), council2)
+freeze.connect(sovereign).grantRole(freeze.COUNCIL_ROLE(), council3)
 ```
 
 ### ز — اجباری: Feeder‌های PriceOracle و ProductionOracle
 
-⚠️ **`PriceOracle` سازنده‌اش در نسخه ۱.۳.۳ (به `constructor(admin, kernel)` — `deploy/15_price_oracle.js`) اصلاح شد: `DEFAULT_ADMIN_ROLE` به `SOVEREIGN_ADDRESS` تعلق دارد، نه به `kernel`.** فراخوان ردیف زیر برای `PriceOracle` بر همین اساس اصلاح شده — `kernel` دیگر هیچ نقش ادمینی روی `PriceOracle` ندارد و فراخوانی `kernel.grantRole(...)` روی آن revert می‌کند. `ProductionOracle` هنوز deploy نشده و سازنده‌اش (`constructor(kernel)`) تغییر نکرده؛ ردیف آن همچنان `kernel` را به‌عنوان فراخوان صحیح مستند می‌کند تا زمانی که deploy شود و همین اصلاح روی آن هم اعمال گردد.
+⚠️ **`PriceOracle` سازنده‌اش در نسخه ۱.۳.۳ (به `constructor(admin, kernel)` — `deploy/15_price_oracle.js`) اصلاح شد: `DEFAULT_ADMIN_ROLE` به `SOVEREIGN_ADDRESS` تعلق دارد، نه به `kernel`.** `ProductionOracle` نیز در نسخه ۱.۳.۴ همان الگو را دریافت کرد (`constructor(sovereign, kernel)`) — `kernel` دیگر هیچ نقش ادمینی روی هیچ‌کدام از این دو قرارداد ندارد.
 
 | # | فراخوان | قرارداد هدف | نقش | دریافت‌کننده |
 |---|---------|------------|-----|-------------|
 | 6 | `sovereign` (SOVEREIGN_ADDRESS) | `PriceOracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز |
-| 7 | `kernel` | `ProductionOracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز (هنوز deploy نشده — نسخه ۱.۳.۳ constructor(admin, kernel) روی این قرارداد اعمال نشده) |
+| 7 | `sovereign` (SOVEREIGN_ADDRESS) | `ProductionOracle` | `FEEDER_ROLE` | آدرس‌های feeder مجاز (هنوز deploy نشده — نسخه ۱.۳.۴ constructor(sovereign, kernel) روی این قرارداد اعمال شد، اما اسکریپت `deploy/` هنوز ایجاد نشده) |
 
 ### ح — بحرانی: پیوند آدرس PahlaviToken به Kernel (GAP-MEX-05)
 

@@ -22,7 +22,7 @@ pah = await PAH.deploy(swf.address, kernel.address, ethers.parseUnits("1", 30));
 await pah.waitForDeployment();
 
 const Fee = await ethers.getContractFactory("VelocityFee");
-fee = await Fee.deploy(kernel.address, devBank.address, await pah.getAddress());
+fee = await Fee.deploy(kernel.address, kernel.address, devBank.address, await pah.getAddress());
 await fee.waitForDeployment();
 await fee.connect(kernel).grantRole(ORACLE_ROLE, oracle.address);
 await fee.connect(kernel).grantRole(STAKING_ROLE, staking.address);
