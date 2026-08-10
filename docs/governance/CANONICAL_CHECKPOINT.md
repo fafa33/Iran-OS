@@ -14,22 +14,22 @@ Every new task begins by loading this file, then the applicable Lesson Learned r
 
 | Field | Value |
 |---|---|
-| Latest merged PR | #125 — see "Latest Merged PR" below; this PR is pending |
-| Latest merged commit | `af733091794dfe370ede4d163f093e2c4b0b554e` (squash-merge of PR #125 into `main`) |
-| Current baseline | `main` @ `af733091794dfe370ede4d163f093e2c4b0b554e` |
+| Latest merged PR | #127 — see "Latest Merged PR" below |
+| Latest merged commit | `3fd324cffb9f6096189cf3e8e1c4f2cd44838961` (squash-merge of PR #127 into `main`) |
+| Current baseline | `main` @ `3fd324cffb9f6096189cf3e8e1c4f2cd44838961` |
 | Current roadmap position | Roadmap Step-12 (Evidence execution & blocker disposition) — open; Roadmap Step-13 (Whitepaper-to-system mapping) — open |
-| Current deployment coverage | 12 contracts have executable `deploy/` scripts (unchanged by this PR — see below). Denominator flagged: commonly cited as "12/25" but a direct file count shows 26 deployable contracts, not 25 — see "Deployment Coverage" section below, unresolved |
+| Current deployment coverage | 12 contracts have executable `deploy/` scripts (unchanged by PR #127 — see below). Denominator flagged: commonly cited as "12/25" but a direct file count shows 26 deployable contracts, not 25 — see "Deployment Coverage" section below, unresolved |
 | Current test count | 762 passing (`npm test`) |
 | Current production status | Not production-ready. Roadmap Step-9/Step-10 (production governance doctrine / readiness planning) are marked Complete as *planning* phases only — actual production blockers `STEP9-BLOCK-001` through `STEP9-BLOCK-008` remain open (`CHANGELOG.md`); no external audit, no formal verification, no release signoff |
 | Remaining deployment targets | 14 named contracts without executable `deploy/` scripts (`deploy/README.md`'s own list; its prose says "13," a miscount — see "Deployment Coverage" section below) |
 | Open residual work | `docs/governance/OPEN_RESIDUALS.md` Active Residuals: none currently active |
 | Applicable governance version | PR Preflight Standard: Steps 1–15; Canonical Development Workflow: 11 stages (established PR #122); Reviewer Lessons Learned Registry: governance standard formalized 2026-06-17 |
-| Latest Lesson Learned ID | LL-031 (unchanged by this PR — see Step 12/Step 14 evidence in this PR's description) |
+| Latest Lesson Learned ID | LL-031 (unchanged by PR #127 — see Step 12/Step 14 evidence in that PR's description) |
 | **Governance Framework Status** | **STABLE (v1.0)** — see "Governance Status" section below |
 | **Project Phase** | **Implementation** — Governance Hardening concluded 2026-07-07 (PR #121–#124); Governance in Maintenance Mode |
-| **Current Implementation Priority** | A P0 deployment-path parity gap (Treasury/TriggerProtocol `KERNEL_ROLE`) blocking `TriggerProtocol` deployment was fixed in this PR, across Treasury + 12 other remaining contracts — see "Implementation Priority" section below |
-| **Next Implementation Target** | `TriggerProtocol.sol` deployment itself (`deploy/16_trigger_protocol.js` + wiring) — the P0 constructor/admin-binding blocker is now fixed; see "Implementation Priority" section below |
-| Last updated (timestamp) | 2026-08-10T05:12:17Z (branch `claude/codex-adversarial-review-fyu0nb`) |
+| **Current Implementation Priority** | The P0 deployment-path parity gap (Treasury/TriggerProtocol `KERNEL_ROLE`) blocking `TriggerProtocol` deployment was fixed and merged in PR #127, across Treasury + 12 other remaining contracts — see "Implementation Priority" section below |
+| **Next Implementation Target** | `TriggerProtocol.sol` deployment itself (`deploy/16_trigger_protocol.js` + wiring) — the P0 constructor/admin-binding blocker is now fixed and merged; see "Implementation Priority" section below |
+| Last updated (timestamp) | 2026-08-10T09:23:39Z (branch `claude/codex-adversarial-review-fyu0nb`) |
 
 The table above is the fast-read summary. Detail and evidence for each field follow below — this file is the authoritative source for these fields; the sections below exist to substantiate the table, not to introduce separate competing values.
 
@@ -38,24 +38,20 @@ The table above is the fast-read summary. Detail and evidence for each field fol
 ## Current Merged Baseline
 
 - Branch: `main`
-- Head commit: `af733091794dfe370ede4d163f093e2c4b0b554e`
-- Merge date: 2026-08-09
+- Head commit: `3fd324cffb9f6096189cf3e8e1c4f2cd44838961`
+- Merge date: 2026-08-10
 
 ## Latest Merged PR
 
-- PR #125 — "docs(governance): Implementation Phase entry + Codex fixes (extension-rule contradiction, Step 13 traceability)"
-- Merged: 2026-08-09
-- Confirmed via `git log origin/main -1 --format="%H %ad %s" --date=short` → `af733091794dfe370ede4d163f093e2c4b0b554e 2026-08-09 ...(#125)`.
-- **Note (Step 13 compliance for this update):** the checkpoint content prior to this update still showed PR #125 as "Pending" (its own pre-merge self-referential text), even though PR #125 had already merged — the post-merge sync step (the same step PR #123 performed for PR #122) had not yet been performed for PR #125. This update performs that sync now, as part of this PR's own Step 13 obligation, in addition to recording this PR's own pending state below.
-- **Pending:** this PR (P0 deployment-path parity fix — Treasury/TriggerProtocol `KERNEL_ROLE` gap, plus the same fix applied to 12 other remaining contracts) — will become the new Latest Merged PR once merged.
-  - **Reviewed Head SHA:** `af733091794dfe370ede4d163f093e2c4b0b554e` — `origin/main`'s HEAD at the point this branch was reset from it and this PR's work began (confirmed via `git log origin/main -1` above). No other commits landed on `main` between that point and this update.
-  - **Review timestamp:** `2026-08-10T05:12:17Z` (this update's timestamp — see "Last updated" in the Summary table).
-  - **Pending final merge SHA:** not yet known — GitHub assigns the squash-merge commit SHA at merge time; this is not fabricated here. Confirm via `git log origin/main -1` immediately after merging (Verification Method below), and record it under "Latest Merged PR" in the same or an immediate follow-up update, per Step 13's disclosed squash-merge-SHA limitation.
-  - This same pattern (record the actual known reviewed head SHA, not just a pointer to a future check) was already followed for PR #122/#123/#124's post-merge syncs above; this entry applies it consistently to the pre-merge state as well, per the Codex finding that prompted this fix.
+- PR #127 — "fix(deployment): P0 deployment-path parity — Treasury/TriggerProtocol KERNEL_ROLE + 12 remaining contracts"
+- Merged: 2026-08-10
+- Confirmed via `git log origin/main -1 --format="%H %ad %s" --date=short` → `3fd324cffb9f6096189cf3e8e1c4f2cd44838961 2026-08-10 ...(#127)`.
+- **Note (Step 13 compliance for this update):** as with PR #125 before it, PR #127's own pre-merge content recorded itself as "Pending" and could not know its final squash-merge SHA in advance (per the disclosed squash-merge-SHA limitation). This update performs the post-merge sync — the same pattern PR #123 performed for PR #122, and PR #127 itself performed for PR #125 — correcting the "Pending" self-reference to the confirmed merged state.
+- No PR is currently pending on this checkpoint's own branch as of this update.
 
 ## Latest Commit
 
-- `af733091794dfe370ede4d163f093e2c4b0b554e` — squash-merge commit of PR #125 into `main` (latest **merged** commit as of this update)
+- `3fd324cffb9f6096189cf3e8e1c4f2cd44838961` — squash-merge commit of PR #127 into `main` (latest **merged** commit as of this update)
 
 ## Roadmap Position
 
@@ -81,7 +77,7 @@ Note: roadmap "Step-N" is a different numbering scheme from `CLAUDE.md`'s PR Pre
 
 ## Test Count
 
-- 762 passing (`npm test`, run on this PR's branch — up from 759; 2 negative-constructor tests added for `BaseIncome`/`HealthCoverage` "invalid admin" cases; 1 deployment-path parity test added during Hostile Adversarial Review asserting Treasury's admin/kernel role split via the real `deploy/index.js` orchestration — see `CHANGELOG.md`).
+- 762 passing (`npm test`, run on `main` @ `3fd324c`, PR #127 merged — up from 759; 2 negative-constructor tests added for `BaseIncome`/`HealthCoverage` "invalid admin" cases; 1 deployment-path parity test added during PR #127's Hostile Adversarial Review asserting Treasury's admin/kernel role split via the real `deploy/index.js` orchestration — see `CHANGELOG.md`).
 
 ## Current Production Status
 
@@ -105,9 +101,9 @@ Note: roadmap "Step-N" is a different numbering scheme from `CLAUDE.md`'s PR Pre
 2. Complete the remaining production contracts.
 3. Continue using the established workflow: Canonical Checkpoint → Lesson Learned → Implementation → CI → Codex Review → Findings Resolution → Merge.
 
-**P0 blocker fixed (this PR):** the Pre-Implementation Red-Team Pass performed before starting `TriggerProtocol` deployment work found that no reachable path was identified, under the current codebase and evidence set, for any address to grant `KERNEL_ROLE` to a deployed `TriggerProtocol` on `Treasury` — meaning `Treasury.blockAddressByTrigger()` (`onlyRole(KERNEL_ROLE)`), called by `TriggerProtocol.executeTrigger()`, had no reachable production caller path: `Treasury`'s constructor gave `DEFAULT_ADMIN_ROLE` solely to the Kernel contract, which has no call-forwarding mechanism to `Treasury` (`grep -n "Treasury" contracts/kernel.sol` → zero matches). The same defect was confirmed in the 12 other remaining un-deployed contracts. This PR fixes all 13 constructors using the already-established `constructor(_admin, _kernel, ...)` split — see `CHANGELOG.md` for full detail. This is a prerequisite fix, not the `TriggerProtocol` deployment itself; no `deploy/` script exists for `TriggerProtocol` yet and deployment coverage is unchanged by this PR.
+**P0 blocker fixed and merged (PR #127):** the Pre-Implementation Red-Team Pass performed before starting `TriggerProtocol` deployment work found that no reachable path was identified, under the current codebase and evidence set, for any address to grant `KERNEL_ROLE` to a deployed `TriggerProtocol` on `Treasury` — meaning `Treasury.blockAddressByTrigger()` (`onlyRole(KERNEL_ROLE)`), called by `TriggerProtocol.executeTrigger()`, had no reachable production caller path: `Treasury`'s constructor gave `DEFAULT_ADMIN_ROLE` solely to the Kernel contract, which has no call-forwarding mechanism to `Treasury` (`grep -n "Treasury" contracts/kernel.sol` → zero matches). The same defect was confirmed in the 12 other remaining un-deployed contracts. PR #127 fixed all 13 constructors using the already-established `constructor(_admin, _kernel, ...)` split, plus two additional gaps found during its Hostile Adversarial Review (a missing deployment-path parity test and a missing production `deploy/09_verify.js` check, both for `Treasury` specifically) — see `CHANGELOG.md` for full detail. This was a prerequisite fix, not the `TriggerProtocol` deployment itself; no `deploy/` script exists for `TriggerProtocol` yet and deployment coverage remains unchanged.
 
-**Next implementation target:** `contracts/core/TriggerProtocol.sol` deployment itself (`deploy/16_trigger_protocol.js` + `kernel.setTriggerProtocol()` + `treasury.grantRole(KERNEL_ROLE, triggerProtocolAddress)` wiring) — the Layer 0 enforcement contract called by `Kernel` after multi-sig trigger confirmation. Rationale unchanged from the prior recommendation: it is one of the two `core/` contracts (alongside the already-deployed `ConstitutionGuard.sol`) and is explicitly named throughout `CLAUDE.md` as central to the trigger/enforcement mechanism; it is a "sensitive" component under `CLAUDE.md`, so its deployment work requires its own Pre-Implementation Red-Team Pass (distinct from the one that produced this PR, which addressed the Treasury/13-contract constructor prerequisite) before any deploy script is written.
+**Next implementation target:** `contracts/core/TriggerProtocol.sol` deployment itself (`deploy/16_trigger_protocol.js` + `kernel.setTriggerProtocol()` + `treasury.grantRole(KERNEL_ROLE, triggerProtocolAddress)` wiring) — the Layer 0 enforcement contract called by `Kernel` after multi-sig trigger confirmation. Rationale unchanged from the prior recommendation: it is one of the two `core/` contracts (alongside the already-deployed `ConstitutionGuard.sol`) and is explicitly named throughout `CLAUDE.md` as central to the trigger/enforcement mechanism; it is a "sensitive" component under `CLAUDE.md`, so its deployment work requires its own Pre-Implementation Red-Team Pass (distinct from the one that produced PR #127, which addressed the Treasury/13-contract constructor prerequisite) before any deploy script is written.
 
 ## Open Residuals
 
@@ -176,4 +172,4 @@ This file must be refreshed whenever any recorded field changes materially — a
 
 *Registry created: 2026-07-07*
 *CLAUDE.md reference: `## Canonical Development Workflow (Mandatory)`, Stage 1; `#### Step 13 — Canonical Checkpoint Currency`; `#### Step 14 — Governance Synchronization Review`; `#### Step 15 — Governance Minimalism Review`*
-*Last updated: 2026-08-10T05:12:17Z*
+*Last updated: 2026-08-10T09:23:39Z*
