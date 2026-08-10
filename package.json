@@ -12,5 +12,11 @@
     "@nomicfoundation/hardhat-toolbox": "^6.1.2",
     "@openzeppelin/contracts": "^4.9.0",
     "hardhat": "^2.29.0"
+  },
+  "overrides": {
+    "hardhat": {
+      "undici": "6.28.0",
+      "ws": "7.5.13"
+    }
   }
 }
