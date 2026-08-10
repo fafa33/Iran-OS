@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Orchestrates the deploy/ scripts in dependency-correct order. The
 // filenames (01_kernel.js .. 15_price_oracle.js) are grouped by
 // contract/domain, not strict execution order: PahlaviToken (02_token.js)

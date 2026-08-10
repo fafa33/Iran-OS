@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // INV-10: SWF Withdrawal Multisig Gate — Invariant Test Suite
 // IranOS Step-12 Security Analysis
 //

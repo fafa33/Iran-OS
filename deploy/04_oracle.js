@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Deploys API3Oracle (Layer 1). Matches
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3, Stage 2, step 5:
 //   deploy API3Oracle(KERNEL_ADDRESS, [FEEDER_1, FEEDER_2, ...])

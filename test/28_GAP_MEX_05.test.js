@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // GAP-MEX-05 — Kernel→PahlaviToken Reserve Sync Path
 // تست‌های مسیر همگام‌سازی ذخایر: Kernel.syncReserves → PahlaviToken.updateReserves
 //

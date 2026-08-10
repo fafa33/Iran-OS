@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Deploys PahlaviToken (Layer 2) and wires it to Kernel. Matches
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3, Stage 3, step 13:
 //   deploy PahlaviToken(SWF_ADDRESS, KERNEL_ADDRESS, INITIAL_RESERVES)

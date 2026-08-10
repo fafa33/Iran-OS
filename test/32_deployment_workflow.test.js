@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Deployment workflow characterization — exercises deploy/index.js against
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md and
 // docs/deployment/ROLE_WIRING_CHECKLIST.md for the six core contracts

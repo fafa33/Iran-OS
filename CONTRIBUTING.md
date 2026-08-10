@@ -2,7 +2,7 @@
 
 ## Repository Philosophy
 
-IranOS is an open-source blockchain governance operating system — a technical blueprint for a post-Islamic-Republic Iran. It encodes a secular constitutional monarchy (*Charter of Welfare and Justice*) into auditable Solidity smart contracts, governance protocols, and deployment documentation.
+IranOS is an source-available blockchain governance operating system — a technical blueprint for a post-Islamic-Republic Iran. It encodes a secular constitutional monarchy (*Charter of Welfare and Justice*) into auditable Solidity smart contracts, governance protocols, and deployment documentation.
 
 **This project is not production-ready.** No external audit, formal verification, or mainnet deployment has occurred. All contributions are evaluated against the constitution and the technical whitepaper. Changes that conflict with constitutional red lines (TR-01 to TR-06) will not be accepted.
 
@@ -181,3 +181,8 @@ If you are reviewing IranOS independently:
 4. Reference [Issue #35](https://github.com/fafa33/Iran-OS/issues/35)
 
 Your review does not close Step 13 or Step 12. It is recorded as external evidence.
+
+
+## Licensing of Contributions
+
+By intentionally submitting a contribution for inclusion in Iran-OS, contributors agree to [CONTRIBUTION-LICENSE.md](CONTRIBUTION-LICENSE.md). Third-party material must be disclosed and must retain its original license and notices.

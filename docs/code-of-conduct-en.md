@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Iran-OS is a public, open-source governance infrastructure project.
+Iran-OS is a public, source-available, open-participation governance infrastructure project.
 
 This project welcomes technical, legal, economic, security, documentation, audit, formal verification, and governance review contributions.
 
@@ -17,6 +17,7 @@ Participants are expected to:
 - provide clear reasoning, sources, tests, evidence, or review notes when possible
 - keep political, technical, legal, and governance discussions structured and relevant to the project
 - respect the project’s non-claim rules around production readiness, audit completion, formal verification, release approval, and blocker closure
+- respect the repository `LICENSE`; public source availability and participation do not grant commercial, institutional, governmental, or production-deployment rights beyond those terms
 
 ## Unacceptable Behavior
 

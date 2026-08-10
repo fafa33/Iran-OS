@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Deploys ConstitutionGuard (Layer 1). Matches
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3, Stage 2, step 6:
 //   deploy ConstitutionGuard(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)

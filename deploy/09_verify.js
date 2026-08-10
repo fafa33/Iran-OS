@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Read-only post-deploy verification. Matches the applicable subset of
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §9 for the contracts
 // deployed by this workflow: the six core-monetary-path contracts (Kernel,

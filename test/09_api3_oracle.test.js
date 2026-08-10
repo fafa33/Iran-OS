@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // تست پل گزارش تخلف API3Oracle به Kernel
 const { expect } = require("chai");
 const { ethers, network } = require("hardhat");

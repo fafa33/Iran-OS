@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Shared deployed-address persistence for the deploy/ scripts. Each script
 // reads the addresses produced by earlier steps and writes its own output
 // here, so scripts can be run standalone (one at a time, per the manifest's

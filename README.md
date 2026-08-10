@@ -23,7 +23,7 @@ Many design decisions that may appear unusual from a conventional blockchain per
 
 ## For External Reviewers (English)
 
-**IranOS** is an open-source blockchain governance operating system — a technical blueprint for a post-Islamic-Republic Iran. It encodes a secular constitutional monarchy (*Charter of Welfare and Justice*) into auditable Solidity smart contracts, governance protocols, and deployment documentation.
+**IranOS** is a publicly auditable, source-available, open-participation blockchain governance operating system — a technical blueprint for a post-Islamic-Republic Iran. It encodes a secular constitutional monarchy (*Charter of Welfare and Justice*) into auditable Solidity smart contracts, governance protocols, and deployment documentation.
 
 **Current status:**
 - Current repository inventory and test baseline are tracked in the [latest Step 13 checkpoint](docs/step13/WHITEPAPER_STEP13_CURRENT_STATUS_CHECKPOINT_V4_FA.md)
@@ -36,7 +36,7 @@ Many design decisions that may appear unusual from a conventional blockchain per
 - [راهنمای بازبین — فارسی](docs/REVIEWER_PRIMER_FA.md) — برای بازبین‌های فارسی‌زبان
 - [Step 13 Reviewer Index (English)](docs/step13/STEP13_REVIEWER_INDEX_EN.md) — start here after reading the primer
 - [SECURITY.md](SECURITY.md) — security status and non-claim policy
-- [LICENSE](LICENSE) — MIT
+- [LICENSE](LICENSE) — Iran-OS Source-Available License 1.0
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — contributor conduct
 
 ---
@@ -58,7 +58,7 @@ IranOS یک زیرساخت تاب‌آوری حاکمیتی است؛ نه پرو
 
 **سیستم‌عامل حکمرانی بلاک‌چین‌محور برای ایران**
 
-> پروژه‌ای متن‌باز برای طراحی و توسعه‌ی یک سیستم‌عامل حاکمیتی دیجیتال بر پایه بلاک‌چین، با تمرکز بر منشور رفاه و عدالت، معماری قابل‌ردیابی، تست، شواهد، بازبینی بیرونی و اجرای مرحله‌ای.
+> پروژه‌ای با سورس عمومی، قابل ممیزی و مشارکت باز برای طراحی و توسعه‌ی یک سیستم‌عامل حاکمیتی دیجیتال بر پایه بلاک‌چین، با تمرکز بر منشور رفاه و عدالت، معماری قابل‌ردیابی، تست، شواهد، بازبینی بیرونی و اجرای مرحله‌ای.
 ---
 
 ## دموی اپلیکیشن زنده
