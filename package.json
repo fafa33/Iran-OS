@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "IranOS — Blockchain Governance Operating System",
   "license": "SEE LICENSE IN LICENSE-SOURCE-AVAILABLE.md",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "hardhat test",
     "compile": "hardhat compile",
