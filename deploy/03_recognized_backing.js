@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Deploys RecognizedReserveBacking and atomically links it to PahlaviToken.
 // Matches docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3, Stage 5,
 // steps 26-27:

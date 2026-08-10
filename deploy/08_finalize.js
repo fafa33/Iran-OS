@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Activates the Oracle role — Group E of
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §4, explicitly documented
 // as the last wiring step ("ORACLE_ROLE آخرین چیزی است که فعال می‌شود"):

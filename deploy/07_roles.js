@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Completes the Constitutional Court (COURT_ROLE) — Group A of
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §4:
 //   kernel.grantOfficialAccess(COURT_2..COURT_9, COURT_ROLE)

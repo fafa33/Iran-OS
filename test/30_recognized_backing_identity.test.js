@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Recognized Reserve Backing Runtime Model — minimal identity storage tests.
 
 const { expect } = require("chai");

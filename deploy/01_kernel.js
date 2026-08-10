@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Deploys IranOS_Kernel (Layer 0). Matches
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3, Stage 1, step 1:
 //   deploy Kernel(SOVEREIGN, COURT_1, ORACLE_INITIAL, SWF_MULTISIG)

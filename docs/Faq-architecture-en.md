@@ -46,7 +46,7 @@ No single person controls it. That is the point of the design.
 
 No-admin means there is no hidden administrator, not that there is hidden power.
 
-The foundational rules must be public, transparent, open-source, auditable, and approved through a legitimate founding process before deployment. After approval, no individual officeholder or technical operator may change those rules at will.
+The foundational rules must be public, transparent, source-available, auditable, and approved through a legitimate founding process before deployment. After approval, no individual officeholder or technical operator may change those rules at will.
 
 Control is exercised through transparency, public code, collective oversight, constitutional adjudication, and predefined procedures — not through a centralized administrator.
 

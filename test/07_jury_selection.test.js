@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // تست‌های انتخاب هیئت منصفه (JurySelection)
 const { expect } = require("chai");
 const { ethers }  = require("hardhat");

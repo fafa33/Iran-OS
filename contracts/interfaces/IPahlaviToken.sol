@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 pragma solidity ^0.8.20;
 
 /// @notice Minimal interface used by IranOS_Kernel for token reserve integration.

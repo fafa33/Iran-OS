@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Deploys PriceOracle (Layer 1/3 per the manifest — independent of Layer 2).
 // Matches docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3, step 10:
 //   deploy PriceOracle(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)

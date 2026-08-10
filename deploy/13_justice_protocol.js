@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Deploys JusticeProtocol (Layer 1). Matches
 // docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §3, Stage 2, step 8:
 //   deploy JusticeProtocol(SOVEREIGN_ADDRESS, KERNEL_ADDRESS)

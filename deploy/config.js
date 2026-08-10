@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: LicenseRef-IranOS-Source-Available-1.0
 // Deployment configuration loader — reads the address book variables documented
 // in docs/deployment/DEPLOYMENT_MANIFEST_PROTOCOL.md §1 from environment
 // variables. No addresses are hardcoded or invented here.
